@@ -126,7 +126,6 @@ module LibertyBuildpack::Jre
 
         java_memory_opts.push '-Xtune:virtualized'
         java_memory_opts.push "-Xmx#{new_heap_size}"
-        java_memory_opts.push "-Xms#{new_heap_size}"
 
         java_memory_opts
       end

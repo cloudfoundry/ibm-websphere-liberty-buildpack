@@ -129,7 +129,6 @@ module LibertyBuildpack::Jre
 
         expect(java_opts).to include('-Xtune:virtualized')
         expect(java_opts).to include('-Xmx384M')
-        expect(java_opts).to include('-Xms384M')
       end
     end
 
@@ -148,7 +147,6 @@ module LibertyBuildpack::Jre
 
         expect(java_opts).to include('-Xtune:virtualized')
         expect(java_opts).to include('-Xmx48M')
-        expect(java_opts).to include('-Xms48M')
         expect(java_opts).to include('-Xnocompressedrefs')
       end
     end
