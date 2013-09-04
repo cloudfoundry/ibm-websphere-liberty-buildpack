@@ -1,6 +1,7 @@
 .DS_Store
-.idea/tasks.xml
-.idea/workspace.xml
+.idea
 .yardoc
+.buildpath
+.project
 coverage
 doc

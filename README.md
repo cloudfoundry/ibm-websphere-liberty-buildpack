@@ -1,11 +1,11 @@
-# IBM Liberty Buildpack
+# IBM WebSphere Application Server Liberty Buildpack
 
 The `liberty-buildpack` is a [Cloud Foundry][] buildpack for running applications on IBM's WebSphere Application Server Liberty Profile.  It is designed to run most "packaged" servers.
 
 ## Usage
 To use this buildpack specify the URI of the repository when pushing an application to Cloud Foundry:
 
-    cf push --buildpack https://github.com/cloudfoundry/liberty-buildpack
+    cf push --buildpack https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack
 
 ## Running Tests
 To run the tests, do the following:
