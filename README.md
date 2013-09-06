@@ -3,9 +3,7 @@
 The `liberty-buildpack` is a [Cloud Foundry][] buildpack for running applications on IBM's WebSphere Application Server Liberty Profile.  It is designed to run most "packaged" servers.
 
 ## Usage
-To use this buildpack specify the URI of the repository when pushing an application to Cloud Foundry:
-
-    cf push --buildpack https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack
+To use this buildpack refer to [Configuration and Extension][Configuration_and_Extension]
 
 ## Running Tests
 To run the tests, do the following:
@@ -26,3 +24,4 @@ If you want to use the RubyMine debugger, you may need to [install additional ge
 [GitHub's forking functionality]: https://help.github.com/articles/fork-a-repo
 [pull request]: https://help.github.com/articles/using-pull-requests
 [Pull requests]: http://help.github.com/send-pull-requests
+[Configuration_and_Extension]: docs/container-liberty.md#Configuration

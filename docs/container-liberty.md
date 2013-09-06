@@ -14,9 +14,15 @@ Tags are printed to standard output by the buildpack detect script
 In order to specify [Spring profiles][], set the [`SPRING_PROFILES_ACTIVE`][SPRING_PROFILES_ACTIVE] environment variable.  This is automatically detected and used by Spring.
 
 ## Configuration
-For general information on configuring the buildpack, refer to [Configuration and Extension][Configuration_and_Extension].
+In order to use the buildpack you will need to fork the code on GitHub.
+Download the wlp-developers-runtime-8.5.5.0.jar from wasdev.net
+Download the an IBM JRE from developerWorks
+Place the binaries at a location where they are available via an HTTP URL to the buildpack
+Modify the code in [`config/ibmjdk.yml`][ibmjdk.yml] to point to the JRE
+Modify the code in [`config/liberty.yml`][liberty.yml] to point to Liberty
+You should now be able to deploy your application using 'cf push --buildpack="<URL to forked repo>"'
 
-The container can be configured by modifying the [`config/liberty.yml`][liberty.yml] file.  The container uses the [`Repository` utility support][repositories] and so it supports the [version syntax][version_syntax] defined there.
+The container uses the [`Repository` utility support][repositories] and so it supports the [version syntax][version_syntax] defined there.
 
 
 | Name | Description
@@ -25,6 +31,7 @@ The container can be configured by modifying the [`config/liberty.yml`][liberty.
 |`version`| The version of Liberty to use. Candidate versions can be found in [this listing][liberty.yml].  
 
 [Configuration_and_Extension]: ../README.md#Configuration-and-Extension
+[ibmjdk.yml]: ../config/ibmjdk.yml
 [liberty.yml]: ../config/liberty.yml
 [repositories]: util-repositories.md
 [Spring profiles]:http://blog.springsource.com/2011/02/14/spring-3-1-m1-introducing-profile/
