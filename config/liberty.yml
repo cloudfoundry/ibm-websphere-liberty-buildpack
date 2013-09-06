@@ -15,5 +15,5 @@
 
 # Configuration for the Liberty container
 ---
-version: 8.5.+
 repository_root: "http://example.com/buildpack/wlp/"
+version: 8.5.+

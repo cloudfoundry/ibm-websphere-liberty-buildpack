@@ -195,7 +195,7 @@ module LibertyBuildpack::Container
 
       it 'should produce the correct server.xml for the WEB-INF case' do
         Dir.mktmpdir do |root|
-          Dir.mkdir File.join(root, 'WEB-INF')          
+          Dir.mkdir File.join(root, 'WEB-INF')
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
@@ -450,7 +450,7 @@ module LibertyBuildpack::Container
 
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
-          
+
           liberty = Liberty.new(
           app_dir: root,
           lib_directory: lib_directory,

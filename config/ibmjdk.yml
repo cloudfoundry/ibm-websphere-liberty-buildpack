@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for JRE repositories keyed by vendor
+# Configuration for JRE repository
 ---
 repository_root: "http://example.com/buildpack/jre/"
 version: 1.7.0_+
