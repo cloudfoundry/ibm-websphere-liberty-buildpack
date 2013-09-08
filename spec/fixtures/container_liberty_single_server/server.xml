@@ -1,0 +1,17 @@
+<server description="new server">
+
+    <!-- Enable features -->
+    <featureManager>
+        <feature>jsp-2.2</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="${http.port}"
+                   />
+
+     <application id="myappp" 
+		name="myapp" location="tradelite.war"
+		context-root="/">
+     </application>
+</server>

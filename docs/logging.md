@@ -15,10 +15,10 @@ credentials.
 
 _You should be careful not to expose this information
 inadvertently_, for example by posting standard error stream contents or the contents of
-`<app dir>/.buildpack-diagnostics/buildpack.log` to a public discussion list.  
+`<app dir>/.buildpack-diagnostics/buildpack.log` to a public discussion list.
 
 ## Logger Usage
-The `LoggerFactory` class in the `JavaBuildpack::Diagnostics` module
+The `LoggerFactory` class in the `LibertyBuildpack::Diagnostics` module
 manages a single instance of a subclass of the standard Ruby `Logger`.
 In normal usage, the `Buildpack` class creates a logger which is shared
 by all other classes and which is retrieved from the `LoggerFactory` as necessary:

@@ -1,5 +1,5 @@
 # Encoding: utf-8
-# Cloud Foundry Java Buildpack
+# IBM Liberty Buildpack
 # Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,22 @@ require 'open3'
 
 describe 'release script', :integration do
 
-  it 'should return zero if success' do
+  it 'should work with the liberty WEB-INF case' do
     Dir.mktmpdir do |root|
-      FileUtils.cp_r 'spec/fixtures/integration_valid/.', root
+      FileUtils.cp_r 'spec/fixtures/container_liberty/.', root
+
+      with_memory_limit('1G') do
+        Open3.popen3("bin/release #{root}") do |stdin, stdout, stderr, wait_thr|
+          expect(wait_thr.value).to be_success
+        end
+      end
+
+    end
+  end
+
+  it 'should work with the liberty zipped-up server case' do
+    Dir.mktmpdir do |root|
+      FileUtils.cp_r 'spec/fixtures/container_liberty_server/.', root
 
       with_memory_limit('1G') do
         Open3.popen3("bin/release #{root}") do |stdin, stdout, stderr, wait_thr|

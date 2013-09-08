@@ -12,7 +12,3 @@ group :development, :test do
   gem 'rspec'
   gem 'simplecov'
 end
-
-group :test do
-  gem 'codeclimate-test-reporter'
-end

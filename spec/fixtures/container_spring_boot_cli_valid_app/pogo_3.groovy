@@ -1,1 +1,0 @@
-class Runner implements CommandLineRunner {

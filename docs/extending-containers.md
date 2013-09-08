@@ -1,5 +1,5 @@
 # Extending Containers
-To add a container, the class file must be located in [`lib/java_buildpack/container`][] and the class name added to [`config/components.yml`][].  The class must have the following methods
+To add a container, the class file must be located in [`lib/liberty_buildpack/container`][] and the class name added to [`config/components.yml`][].  The class must have the following methods
 
 ```ruby
 # An initializer for the instance.
@@ -38,4 +38,4 @@ def release
 ```
 
 [`config/components.yml`]: ../config/components.yml
-[`lib/java_buildpack/container`]: ../lib/java_buildpack/container
+[`lib/liberty_buildpack/container`]: ../lib/liberty_buildpack/container

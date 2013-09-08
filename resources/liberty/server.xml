@@ -1,0 +1,19 @@
+<server description="new server">
+
+    <!-- Enable features -->
+    <featureManager>
+        <feature>webProfile-6.0</feature>
+        <feature>jaxrs-1.1</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="${port}"
+                   />
+
+        <application name="myapp" context-root="/" location="../../../../../"
+        type="war" />
+        
+    <include location="runtime-vars.xml" />
+	
+</server>

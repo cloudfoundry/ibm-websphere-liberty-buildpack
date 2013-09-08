@@ -1,3 +1,6 @@
+.DS_Store
+.idea/tasks.xml
+.idea/workspace.xml
 .yardoc
 coverage
 doc

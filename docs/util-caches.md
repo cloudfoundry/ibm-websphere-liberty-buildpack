@@ -33,12 +33,12 @@ def evict(uri)
 Usage of a cache might look like the following:
 
 ```ruby
-JavaBuildpack::Util::DownloadCache.new().get(uri) do |file|
+LibertyBuildpack::Util::DownloadCache.new().get(uri) do |file|
   YAML.load_file(file)
 end
 ```
 
-## `JavaBuildpack::Util::DownloadCache`
+## `LibertyBuildpack::Util::DownloadCache`
 The [`DownloadCache`][] is the most generic of the three caches.  It allows you to create a cache that persists files any that write access is available.  The constructor signature looks the following:
 
 ```ruby
@@ -48,7 +48,7 @@ The [`DownloadCache`][] is the most generic of the three caches.  It allows you 
 def initialize(cache_root = Dir.tmpdir)
 ```
 
-## `JavaBuildpack::Util::ApplicationCache`
+## `LibertyBuildpack::Util::ApplicationCache`
 The [`ApplicationCache`][] is a cache that persists files into the application cache passed to the `compile` script.  It examines `ARGV[1]` for the cache location and configures itself accordingly.
 
 ```ruby
@@ -59,7 +59,7 @@ The [`ApplicationCache`][] is a cache that persists files into the application c
 def initialize
 ```
 
-## `JavaBuildpack::Util::GlobalCache`
+## `LibertyBuildpack::Util::GlobalCache`
 The [`GlobalCache`][] is a cache that persists files into the global cache passed to all scripts.  It examines `ENV['BUILDPACK_CACHE']` for the cache location and configures itself accordingly.
 
 ```ruby
@@ -70,6 +70,6 @@ The [`GlobalCache`][] is a cache that persists files into the global cache passe
 def initialize
 ```
 
-[`ApplicationCache`]: ../lib/java_buildpack/util/application_cache.rb
-[`DownloadCache`]: ../lib/java_buildpack/util/download_cache.rb
-[`GlobalCache`]: ../lib/java_buildpack/util/global_cache.rb
+[`ApplicationCache`]: ../lib/liberty_buildpack/util/application_cache.rb
+[`DownloadCache`]: ../lib/liberty_buildpack/util/download_cache.rb
+[`GlobalCache`]: ../lib/liberty_buildpack/util/global_cache.rb

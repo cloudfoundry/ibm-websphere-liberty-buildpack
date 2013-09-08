@@ -1,5 +1,5 @@
 # Encoding: utf-8
-# Cloud Foundry Java Buildpack
+# IBM Liberty Buildpack
 # Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,15 @@ require 'tmpdir'
 
 describe 'compile script', :integration do
 
+  before(:all) do
+    @cache = File.join(Dir.tmpdir, 'compile_cache')
+    FileUtils.rm_rf(@cache)
+  end
+
+  after(:all) do
+    FileUtils.rm_rf(@cache)
+  end
+
   it 'should fail to compile when no containers detect' do
     Dir.mktmpdir do |root|
       error = Open3.capture3("bin/compile #{root} #{root}")[1]
@@ -27,4 +36,37 @@ describe 'compile script', :integration do
     end
   end
 
-end
+  it 'should work with the liberty WEB-INF case' do
+    Dir.mktmpdir do |root|
+      FileUtils.cp_r'spec/fixtures/container_liberty/.', root
+
+      with_memory_limit('1G') do
+        Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
+          expect(wait_thr.value).to be_success
+        end # popen3
+      end # with
+    end # dir
+  end # it
+
+  it 'should also work with the zipped up server case' do
+    Dir.mktmpdir do |root|
+      FileUtils.cp_r 'spec/fixtures/container_liberty_server/.', root
+
+      with_memory_limit('1G') do
+        Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
+          expect(wait_thr.value).to be_success
+        end # popen3
+      end # with
+    end # dir
+  end # it
+
+  def with_memory_limit(memory_limit)
+    previous_value = ENV['MEMORY_LIMIT']
+    begin
+      ENV['MEMORY_LIMIT'] = memory_limit
+      yield
+    ensure
+      ENV['MEMORY_LIMIT'] = previous_value
+    end
+  end
+end # describe

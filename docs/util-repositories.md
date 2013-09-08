@@ -20,7 +20,7 @@ An example filesystem might look like:
 
 ## Usage
 
-The main class used when dealing with a repository is [`JavaBuildpack::Repository::ConfiguredItem`][].  It provides a single method that is used to resolve a specific version and its URI.
+The main class used when dealing with a repository is [`LibertyBuildpack::Repository::ConfiguredItem`][].  It provides a single method that is used to resolve a specific version and its URI.
 
 ```ruby
 # Finds an instance of the file based on the configuration.
@@ -29,7 +29,7 @@ The main class used when dealing with a repository is [`JavaBuildpack::Repositor
 # @option configuration [String] :repository_root the root directory of the repository
 # @option configuration [String] :version the version of the file to resolve
 # @param [Block, nil] version_validator an optional version validation block
-# @return [JavaBuildpack::Util::TokenizedVersion] the chosen version of the file
+# @return [LibertyBuildpack::Util::TokenizedVersion] the chosen version of the file
 # @return [String] the URI of the chosen version of the file
 def self.find_item(configuration, &version_validator)
 ```
@@ -37,13 +37,13 @@ def self.find_item(configuration, &version_validator)
 Usage of the class might look like the following:
 
 ```ruby
-version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration)
+version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
 ```
 
 or with version validation:
 
 ```ruby
-version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration) do |version|
+version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |version|
   validate_version version
 end
 ```
@@ -67,4 +67,4 @@ In addition to declaring a specific versions to use, you can also specify a boun
 
 
 [example]: http://download.pivotal.io.s3.amazonaws.com/openjdk/lucid/x86_64/index.yml
-[`JavaBuildpack::Repository::ConfiguredItem`]: ../lib/java_buildpack/repository/configured_item.rb
+[`LibertyBuildpack::Repository::ConfiguredItem`]: ../lib/liberty_buildpack/repository/configured_item.rb
