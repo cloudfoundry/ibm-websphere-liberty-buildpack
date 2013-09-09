@@ -12,7 +12,7 @@ The IBM JRE that is available on the [developerWorks Java download site][] is av
 sudo chmod +x ibm-java-jre-7.0-5.0-x86_64-archive.bin
 ```
 
-* Execute the install
+* Start the install
 
 ```bash
 ./ibm-java-jre-7.0-5.0-x86_64-archive.bin
@@ -24,7 +24,7 @@ sudo chmod +x ibm-java-jre-7.0-5.0-x86_64-archive.bin
 
 * Accept the default installation location
 
-* Execute the following command to build the .tgz archive
+* Once the installation is complete, execute the following command to build the .tgz archive
 
 ```bash
 tar cvfz ibm-java-jre-7.0-5.0-linux-x86_64.tgz ibm-java-x86_64-70

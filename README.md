@@ -57,7 +57,10 @@ bundle install --gemfile Gemfile.rubymine-debug
 [install additional gems]: http://stackoverflow.com/questions/11732715/how-do-i-install-ruby-debug-base19x-on-mountain-lion-for-intellij
 [pull request]: https://help.github.com/articles/using-pull-requests
 [Pull requests]: http://help.github.com/send-pull-requests
-[example]: installation.md#setting-up-your-web-server
+[example]: docs/installation.md#setting-up-your-web-server
 [JRE repackaging]: docs/ibmjre.md
 [options]: docs/server-xml-options.md
+[repositories]: docs/util-repositories.md
+[ibmjdk.yml]: config/ibmjdk.yml
+[liberty.yml]: config/liberty.yml
 [developerWorks Java download site]: https://www.ibm.com/developerworks/java/jdk/
