@@ -1,6 +1,6 @@
 #Repackage the IBM JRE
 
-The IBM JRE that is available on the [developerWorks Java download site][] is available in a
+The IBM JRE that is available on the [developerWorks Java site][] is available in a
 .bin format. The buildpack, however, requires a .tgz archive. Follow these instructions to build a
 .tgz archive from the .bin file.
 
@@ -30,4 +30,4 @@ sudo chmod +x ibm-java-jre-7.0-5.0-x86_64-archive.bin
 tar cvfz ibm-java-jre-7.0-5.0-linux-x86_64.tgz ibm-java-x86_64-70
 ```
 
-[developerWorks Java download site]: https://www.ibm.com/developerworks/java/jdk/
+[developerWorks Java site]: https://www.ibm.com/developerworks/java/jdk/
