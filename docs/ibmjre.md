@@ -8,11 +8,15 @@ The IBM JRE that is available on the [developerWorks Java download site][] is av
 
 * Ensure that the executable bit is set on the file
 
-    sudo chmod +x ibm-java-jre-7.0-5.0-x86_64-archive.bin
+```bash
+sudo chmod +x ibm-java-jre-7.0-5.0-x86_64-archive.bin
+```
 
 * Execute the install
 
-    ./ibm-java-jre-7.0-5.0-x86_64-archive.bin
+```bash
+./ibm-java-jre-7.0-5.0-x86_64-archive.bin
+```
 
 * Select the language
 
@@ -22,6 +26,8 @@ The IBM JRE that is available on the [developerWorks Java download site][] is av
 
 * Execute the following command to build the .tgz archive
 
-    tar cvfz ibm-java-jre-7.0-5.0-linux-x86_64.tgz ibm-java-x86_64-70
+```bash
+tar cvfz ibm-java-jre-7.0-5.0-linux-x86_64.tgz ibm-java-x86_64-70
+```
 
 [developerWorks Java download site]: https://www.ibm.com/developerworks/java/jdk/

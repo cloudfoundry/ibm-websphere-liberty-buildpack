@@ -26,9 +26,11 @@ In order to use the buildpack you will first need to complete the following:
 
 * You should now be able to deploy your applications using the following command:
 
-    cf push --buildpack="URL to forked repository"
+```bash
+cf push --buildpack="URL to forked repository"
+```
     
-  For further details on the options available for deploying your applications see [options][]
+For further details on the options available for deploying your applications see [options][]
     
 
 ## Running Tests
@@ -40,6 +42,10 @@ bundle exec rake
 ```
 
 If you want to use the RubyMine debugger, you may need to [install additional gems][].
+
+```bash
+bundle install --gemfile Gemfile.rubymine-debug
+```
 
 ## Contributing
 [Pull requests][] are welcome; see the [contributor guidelines][] for details.
