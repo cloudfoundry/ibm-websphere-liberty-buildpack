@@ -74,7 +74,7 @@ Following these steps will add the Liberty buildpack (or any buildpack) as one o
 	
 	`# version: uri`  
 	`---`  
-	`8.5.5.0: http://myhost/buildpack/wlp/wlp-developers-runtime-8.5.5.0.jar`  
+	`8.5.5_0: http://myhost/buildpack/wlp/wlp-developers-runtime-8.5.5.0.jar`  
 	
 - Copy the the ibm-java-jre-7.0-5.0-linux-x86_64.tgz into the `<docroot>/buildpack/jre` directory.
 - Create `<docroot>/buildpack/jre/index.yml` which contains  
