@@ -30,4 +30,7 @@ sudo chmod +x ibm-java-jre-7.0-5.0-x86_64-archive.bin
 tar cvfz ibm-java-jre-7.0-5.0-linux-x86_64.tgz ibm-java-x86_64-70
 ```
 
+  where ibm-java-jre-7.0-5.0-linux-x86_64.tgz is the name of the package that you want to build, and
+  ibm-java-x86_64-70 is the name of the directory into which the JRE was installed.
+
 [developerWorks Java site]: https://www.ibm.com/developerworks/java/jdk/
