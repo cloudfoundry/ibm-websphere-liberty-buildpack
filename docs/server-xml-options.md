@@ -50,7 +50,7 @@ If you execute `cf push` from the server directory of your application
 (e.g. `/usr/servers/myServer`) then the buildpack will detect the server.xml
 in this directory and proceed to modify it.  
 
-## Invoking the application
+## Invoking the Application
 
 If your push is successful you will be able to invoke your application at the
 following URL:
@@ -64,7 +64,7 @@ The following modifications happen to your server.xml:
 * The buildpack ensures there is exactly one `httpEndpoint` element in your
 configuration.
 * The buildpack ensures that the `httpPort` attribute in this element
-points to a system variable called `${port}. This will replace any existing
+points to a system variable called `${port}`. This will replace any existing
 settings for the `httpPort`.
 * The buildpack ensures that the `runtime-vars.xml` file is logically merged
 with your server.xml.  Specifically, the buildpack accomplishes this by
