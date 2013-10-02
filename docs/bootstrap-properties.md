@@ -14,4 +14,4 @@ in [modifications][]. The default https port is currently not available.
 The console output is redirected to the stdout.log file and is available
 via `cf logs`
 
-[modifications]: server-xml-options.md#server.xml-modifications
+[modifications]: server-xml-options.md#serverxml-modifications
