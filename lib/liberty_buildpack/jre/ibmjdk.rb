@@ -94,10 +94,18 @@ module LibertyBuildpack::Jre
     def expand(file)
       expand_start_time = Time.now
       print "       Expanding JRE to #{JAVA_HOME} "
-
+      
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
-      system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
+      
+      response_file = File.new("response.properties", "w")
+      response_file.puts("INSTALLER_UI=silent")
+      response_file.puts("USER_INSTALL_DIR=#{java_home}")
+      response_file.close()
+      
+      system "./#{file.path} -r #{response_file.path()}"
+      
+     # system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
 
       puts "(#{(Time.now - expand_start_time).duration})"
     end
