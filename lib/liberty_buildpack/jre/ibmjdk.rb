@@ -101,6 +101,7 @@ module LibertyBuildpack::Jre
       response_file = File.new("response.properties", "w")
       response_file.puts("INSTALLER_UI=silent")
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
+      response_file.puts("FilePath=#{file.path}")
       response_file.close()
       
       system "./#{file.path} -r #{response_file.path()}"
