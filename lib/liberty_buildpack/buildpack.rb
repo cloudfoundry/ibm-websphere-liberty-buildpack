@@ -121,7 +121,7 @@ module LibertyBuildpack
       components = Buildpack.components @logger
       
       if File.exists?(LICENSE_CONFIG)
-        logger.debug { "License file found" }
+        print "License file found" 
       end
 
       java_home = ''
