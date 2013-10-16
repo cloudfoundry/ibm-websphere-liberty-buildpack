@@ -65,10 +65,6 @@ module LibertyBuildpack::Jre
     def compile
       download_start_time = Time.now
       
-      license_file = '../../../config/*'
-      
-      print "Files in config: #{Dir.glob(license_file)}"
-      
       print "-----> Downloading IBM #{@version} JRE from #{@uri} "
 
       LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache

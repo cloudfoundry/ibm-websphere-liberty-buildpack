@@ -74,6 +74,8 @@ module LibertyBuildpack
     def compile
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
+      
+      print 'Compiling...'
 
       jre.compile
       frameworks.each { |framework| framework.compile }
