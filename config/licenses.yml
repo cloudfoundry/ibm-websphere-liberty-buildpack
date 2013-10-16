@@ -15,4 +15,5 @@
 
 # Place holder file for licenses.yml
 ---
-
+jre: "true"
+liberty: "true"

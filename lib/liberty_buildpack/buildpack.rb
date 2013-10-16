@@ -78,14 +78,17 @@ module LibertyBuildpack
       license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
       
       if File.exists? license_file
-        print 'File found'
+        licenses = YAML.load_file(license_file)
+        if licenses['jre'] = 'true'
+          jre.compile
+          frameworks.each { |framework| framework.compile }
+          the_container.compile
+        else
+          print 'The IBM JRE License has not been accepted.\nExiting buildpack...'
+        end
       else
-        print 'File not found'
-      end
-
-      jre.compile
-      frameworks.each { |framework| framework.compile }
-      the_container.compile
+        print 'License.yml file does not exist.\nExiting buildpack...'
+      end     
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
