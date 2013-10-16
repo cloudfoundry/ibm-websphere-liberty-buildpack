@@ -65,7 +65,7 @@ module LibertyBuildpack::Jre
     def compile
       download_start_time = Time.now
       
-      if File.exists? '/../../../config/licenses.yml'
+      if File.exists? '../../../config/licenses.yml'
         print "file found"
       else
         print "file not found"
