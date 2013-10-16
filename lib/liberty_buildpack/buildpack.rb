@@ -75,7 +75,13 @@ module LibertyBuildpack
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
       
-      print 'Compiling...'
+      license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
+      
+      if File.exists? license_file
+        print 'File found'
+      else
+        print 'File not found'
+      end
 
       jre.compile
       frameworks.each { |framework| framework.compile }
