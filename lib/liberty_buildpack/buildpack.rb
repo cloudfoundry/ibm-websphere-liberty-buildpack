@@ -108,6 +108,7 @@ module LibertyBuildpack
     private
 
     COMPONENTS_CONFIG = '../../config/components.yml'.freeze
+    LICENSE_CONFIG = '../../config/licenses.yml'.freeze
 
     LIB_DIRECTORY = '.lib'
 
@@ -118,6 +119,10 @@ module LibertyBuildpack
       Buildpack.dump_environment_variables @logger
       Buildpack.require_component_files
       components = Buildpack.components @logger
+      
+      if File.exists?(LICENSE_CONFIG)
+        logger.debug { "License file found" }
+      end
 
       java_home = ''
       java_opts = []

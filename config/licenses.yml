@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for JRE repository
+# Place holder file for licenses.yml
 ---
-repository_root: "http://file.w3.bluemix.net/buildpack/jre/"
-version: 1.7.0_+
+
