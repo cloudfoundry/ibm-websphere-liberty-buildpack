@@ -120,10 +120,11 @@ module LibertyBuildpack
       Buildpack.require_component_files
       components = Buildpack.components @logger
       
-      if File.exists?(LICENSE_CONFIG)
-        p "License file found"
+      license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
+      if File.exists? license_file
+        print "exists"
       else
-        p "License file not found"
+        print "not exists"
       end
 
       java_home = ''
