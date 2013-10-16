@@ -65,11 +65,9 @@ module LibertyBuildpack::Jre
     def compile
       download_start_time = Time.now
       
-      if File.exists? '../../../config/licenses.yml'
-        print "file found"
-      else
-        print "file not found"
-      end
+      license_file = '../../../config/*'
+      
+      print "Files in config: #{Dir.glob(license_file)}"
       
       print "-----> Downloading IBM #{@version} JRE from #{@uri} "
 
