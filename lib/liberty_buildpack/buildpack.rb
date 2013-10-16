@@ -119,13 +119,6 @@ module LibertyBuildpack
       Buildpack.dump_environment_variables @logger
       Buildpack.require_component_files
       components = Buildpack.components @logger
-      
-      license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
-      if File.exists? license_file
-        print "exists"
-      else
-        print "not exists"
-      end
 
       java_home = ''
       java_opts = []
