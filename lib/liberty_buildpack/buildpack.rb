@@ -108,7 +108,6 @@ module LibertyBuildpack
     private
 
     COMPONENTS_CONFIG = '../../config/components.yml'.freeze
-    LICENSE_CONFIG = '../../config/licenses.yml'.freeze
 
     LIB_DIRECTORY = '.lib'
 
