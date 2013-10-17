@@ -78,7 +78,7 @@ module LibertyBuildpack
       
       license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
         
-      if ENV['LICENSE'] = 'accept'
+      if ENV['LICENSE'] == 'accept'
         print "License accepted"
       else
         print "License not accepted"
@@ -86,7 +86,7 @@ module LibertyBuildpack
       
       if File.exists? license_file
         licenses = YAML.load_file(license_file)
-        if licenses['jre'] = 'true'
+        if licenses['jre'] == 'true'
           jre.compile
           frameworks.each { |framework| framework.compile }
           the_container.compile
