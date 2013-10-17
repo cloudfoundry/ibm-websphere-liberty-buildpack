@@ -76,6 +76,10 @@ module LibertyBuildpack
       FileUtils.mkdir_p @lib_directory
       
       license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
+        
+      Dir.glob("#{app_dir}/*").each do |file_name|
+        print "File name: #{file_name}"
+      end
       
       if File.exists? license_file
         licenses = YAML.load_file(license_file)
