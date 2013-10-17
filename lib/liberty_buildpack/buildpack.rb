@@ -80,11 +80,11 @@ module LibertyBuildpack
       license_acceptance = true
       if File.exists? license_file
         licenses = YAML.load_file(license_file)
-        unless licenses[0]['IBM_JVM_LICENSE'] == 'accept'
+        unless licenses['IBM_JVM_LICENSE'] == 'accept'
           license_acceptance = false
           license_name = "jvm"
         end
-        unless licenses[0]['IBM_LIBERTY_LICENSE'] == 'accept'
+        unless licenses['IBM_LIBERTY_LICENSE'] == 'accept'
           license_acceptance = false
           license_name = "liberty"
         end
