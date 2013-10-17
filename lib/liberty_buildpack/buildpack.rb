@@ -101,6 +101,7 @@ module LibertyBuildpack
           the_container.compile
         else
           print "The IBM #{license_name} has not been accepted."
+          exit
         end
       end  
     end
