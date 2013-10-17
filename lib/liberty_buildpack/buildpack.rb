@@ -100,8 +100,7 @@ module LibertyBuildpack
           frameworks.each { |framework| framework.compile }
           the_container.compile
         else
-          print "The IBM #{license_name} has not been accepted."
-          exit
+          raise "The IBM #{license_name} license has not been accepted."
         end
       end  
     end
