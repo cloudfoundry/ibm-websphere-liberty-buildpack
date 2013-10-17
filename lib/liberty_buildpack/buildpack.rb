@@ -76,10 +76,6 @@ module LibertyBuildpack
       FileUtils.mkdir_p @lib_directory
       
       license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
-        
-      Dir.glob("#{app_dir}/*").each do |file_name|
-        print "File name: #{file_name}"
-      end
       
       if File.exists? license_file
         licenses = YAML.load_file(license_file)
@@ -140,6 +136,10 @@ module LibertyBuildpack
       environment = ENV.to_hash
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
+      
+      Dir.glob("#{app_dir}/*").each do |file_name|
+        print "File name: #{file_name}"
+      end
 
       basic_context = {
           app_dir: app_dir,
