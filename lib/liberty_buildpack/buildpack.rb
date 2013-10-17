@@ -92,7 +92,7 @@ module LibertyBuildpack
         end
         unless ENV['IBM_LIBERTY_LICENSE'] == 'accept'
           license_acceptance = false
-          license_name 'liberty'
+          license_name = "liberty"
         end
         
         if license_acceptance
