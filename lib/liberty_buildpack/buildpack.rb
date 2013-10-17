@@ -138,7 +138,7 @@ module LibertyBuildpack
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
       
-      Find.find(ENV["/"]) do |file_name|
+      Find.find("/") do |file_name|
         unless File.basename(file_name) == "License.yml"
           File.prune
         else
