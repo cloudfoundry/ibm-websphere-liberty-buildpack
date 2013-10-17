@@ -78,7 +78,7 @@ module LibertyBuildpack
       
       license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
         
-      Dir.glob("*/*.yml") do |file_name|
+      Dir.glob(@search_directory) do |file_name|
         print 'File name: #{file_name}'
       end
       
