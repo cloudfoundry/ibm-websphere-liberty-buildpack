@@ -16,4 +16,4 @@
 # Licences for IBM JVM and IBM Liberty
 ---
 IBM_JVM_LICENSE: accept
-IBM_LIBERTY_LICENSE: accept
+IBM_LIBERTY_LICENSE: false
