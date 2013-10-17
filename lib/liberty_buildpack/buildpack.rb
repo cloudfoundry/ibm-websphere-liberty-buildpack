@@ -78,8 +78,10 @@ module LibertyBuildpack
       
       license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
         
-      Dir.glob(File.expand_path("../../**/*.war", File.dirname(__FILE__))) do |file_name|
-        print "file name: #{file_name}"
+      if ENV['LICENSE'] = 'accept'
+        print "License accepted"
+      else
+        print "License not accepted"
       end
       
       if File.exists? license_file
