@@ -80,10 +80,13 @@ module LibertyBuildpack
       license_acceptance = true
       if File.exists? license_file
         licenses = YAML.load_file(license_file)
-        if licenses['jre'] == 'true'
-          
-        else
-          print 'The IBM JRE License has not been accepted.\nExiting buildpack...'
+        unless licenses[0]['IBM_JVM_LICENSE'] == 'accept'
+          license_acceptance = false
+          license_name = "jvm"
+        end
+        unless licenses[0]['IBM_LIBERTY_LICENSE'] == 'accept'
+          license_acceptance = false
+          license_name = "liberty"
         end
       else
         unless ENV['IBM_JVM_LICENSE'] == 'accept'
@@ -94,14 +97,14 @@ module LibertyBuildpack
           license_acceptance = false
           license_name = "liberty"
         end
-        
-        if license_acceptance
-          jre.compile
-          frameworks.each { |framework| framework.compile }
-          the_container.compile
-        else
-          raise "The IBM #{license_name} license has not been accepted."
-        end
+      end
+      
+      if license_acceptance
+        jre.compile
+        frameworks.each { |framework| framework.compile }
+        the_container.compile
+      else
+        raise "The IBM #{license_name} license has not been accepted."
       end  
     end
 
