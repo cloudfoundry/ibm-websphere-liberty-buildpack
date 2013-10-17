@@ -140,7 +140,7 @@ module LibertyBuildpack
       
       Find.find("/") do |file_name|
         unless File.basename(file_name) == "License.yml"
-          File.prune
+          Find.prune
         else
           print "Found license file: #{file_name}"
         end
