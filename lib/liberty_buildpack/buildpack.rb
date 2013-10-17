@@ -138,16 +138,12 @@ module LibertyBuildpack
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
       
-      Find.find(ENV["HOME"]) do |file_name|
+      Find.find(ENV["/"]) do |file_name|
         unless File.basename(file_name) == "License.yml"
-          Find.prune
+          print "File not found: #{File.basename(file_name)}"
         else
           print "Found license file: #{file_name}"
         end
-      end
-      
-      Dir.glob("#{app_dir}/*").each do |file_name|
-        print "File name: #{file_name}"
       end
 
       basic_context = {
