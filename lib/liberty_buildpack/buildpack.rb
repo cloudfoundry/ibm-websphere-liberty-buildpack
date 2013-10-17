@@ -77,6 +77,10 @@ module LibertyBuildpack
       FileUtils.mkdir_p @lib_directory
       
       license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
+        
+      Dir.glob("*/*.yml") do |file_name|
+        print 'File name: #{file_name}'
+      end
       
       if File.exists? license_file
         licenses = YAML.load_file(license_file)
@@ -134,17 +138,10 @@ module LibertyBuildpack
       java_home = ''
       java_opts = []
       @lib_directory = Buildpack.lib_directory app_dir
+      @search_directory = app_dir
       environment = ENV.to_hash
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
-      
-      Find.find("/") do |file_name|
-        unless File.basename(file_name) == "License.yml"
-          Find.prune
-        else
-          print "Found license file: #{file_name}"
-        end
-      end
 
       basic_context = {
           app_dir: app_dir,
