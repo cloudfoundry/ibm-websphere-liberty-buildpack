@@ -77,25 +77,32 @@ module LibertyBuildpack
       FileUtils.mkdir_p @lib_directory
       
       license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
-        
-      if ENV['LICENSE'] == 'accept'
-        print "License accepted"
-      else
-        print "License not accepted"
-      end
-      
+      license_acceptance = true
       if File.exists? license_file
         licenses = YAML.load_file(license_file)
         if licenses['jre'] == 'true'
-          jre.compile
-          frameworks.each { |framework| framework.compile }
-          the_container.compile
+          
         else
           print 'The IBM JRE License has not been accepted.\nExiting buildpack...'
         end
       else
-        print 'License.yml file does not exist.\nExiting buildpack...'
-      end     
+        unless ENV['IBM_JVM_LICENSE'] == 'accept'
+          license_acceptance = false
+          license_name = "jvm"
+        end
+        unless ENV['IBM_LIBERTY_LICENSE'] == 'accept'
+          license_acceptance = false
+          license_name 'liberty'
+        end
+        
+        if license_acceptance
+          jre.compile
+          frameworks.each { |framework| framework.compile }
+          the_container.compile
+        else
+          print "The IBM #{license_name} has not been accepted."
+        end
+      end  
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
