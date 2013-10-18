@@ -76,11 +76,8 @@ module LibertyBuildpack::Container
       else
         raise "The http version of the Liberty license has not been found"
       end
-      if license_ids['IBM_LIBERTY_LICENSE'] == liberty_license
-        print "The license number found is: #{liberty_license}"
-      else
-        print "they do not match"
-      end
+      print "license inside default file: #{license_ids['IBM_LIBERTY_LICENSE']}"
+      print "license in the html file is: #{liberty_license[/\[.*?\]/]}"
       download_liberty
       update_server_xml
       link_application
