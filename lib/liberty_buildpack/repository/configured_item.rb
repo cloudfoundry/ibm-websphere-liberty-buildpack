@@ -59,10 +59,6 @@ module LibertyBuildpack::Repository
       def self.version(configuration)
         LibertyBuildpack::Util::TokenizedVersion.new(configuration[KEY_VERSION])
       end
-      
-      def self.license_root(configuration)
-        LibertyBuildpack::Util::TokenizedVersion.new(configuration[LICENSE_ID])
-      end
 
   end
 
