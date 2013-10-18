@@ -80,23 +80,19 @@ module LibertyBuildpack
       license_acceptance = true
       if File.exists? license_file
         licenses = YAML.load_file(license_file)
+      else
+        licenses = ENV
+      end
+      
+      unless licenses.nil?
         unless licenses['IBM_JVM_LICENSE'] == 'accept'
           license_acceptance = false
-          license_name = "jvm"
         end
         unless licenses['IBM_LIBERTY_LICENSE'] == 'accept'
           license_acceptance = false
-          license_name = "liberty"
         end
       else
-        unless ENV['IBM_JVM_LICENSE'] == 'accept'
-          license_acceptance = false
-          license_name = "jvm"
-        end
-        unless ENV['IBM_LIBERTY_LICENSE'] == 'accept'
-          license_acceptance = false
-          license_name = "liberty"
-        end
+        license_acceptance = false
       end
       
       if license_acceptance
@@ -106,6 +102,29 @@ module LibertyBuildpack
       else
         raise "The IBM #{license_name} license has not been accepted."
       end  
+    end
+    
+    def self.confirm_license_acceptance(jvm_license, liberty_license)
+      license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
+      license_acceptance = true
+      if File.exists? license_file
+        licenses = YAML.load_file(license_file)
+      else
+        licenses = ENV
+      end
+      
+      unless licenses.nil?
+        unless licenses[jvm_license] == 'accept'
+          license_acceptance = false
+        end
+        unless licenses[liberty_license] == 'accept'
+          license_acceptance = false
+        end
+      else
+        license_acceptance = false
+      end
+      
+      return license_acceptance
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
