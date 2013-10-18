@@ -72,12 +72,13 @@ module LibertyBuildpack::Container
     # @return [void]
     def compile(license_ids)
       unless @liberty_license.nil?
-        liberty_license = open(@liberty_license).read.scan(/L\/N:\s*(.*?)<br>/m)
+        liberty_license = open(@liberty_license).read
+        liberty_license = liberty_license.scan(/L\/N:\s*(.*?)<br>/m)
       else
         raise "The http version of the Liberty license has not been found"
       end
       print "license inside default file: #{license_ids['IBM_LIBERTY_LICENSE']}"
-      print "license in the html file is: #{liberty_license.scan([/\[.*?\]/])}"
+      print "license in the html file is: #{liberty_license}"
       download_liberty
       update_server_xml
       link_application
