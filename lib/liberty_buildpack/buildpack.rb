@@ -77,33 +77,15 @@ module LibertyBuildpack
       FileUtils.mkdir_p @lib_directory
       
       license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
-      license_acceptance = true
       if File.exists? license_file
-        licenses = YAML.load_file(license_file)
+        license_ids = YAML.load_file(license_file)
       else
-        licenses = ENV
+        license_ids = ENV
       end
-      
-      unless licenses.nil?
-        unless licenses["IBM_JVM_LICENSE"] == "accept"
-          license_acceptance = false
-          license_name = "jvm"
-        end
-        unless licenses["IBM_LIBERTY_LICENSE"] == "accept"
-          license_acceptance = false
-          license_name = "liberty"
-        end
-      else
-        license_acceptance = false
-      end
-      
-      if license_acceptance
-        jre.compile
-        frameworks.each { |framework| framework.compile }
-        the_container.compile
-      else
-        raise "The IBM #{license_name} license has not been accepted."
-      end  
+
+      jre.compile license_ids
+      frameworks.each { |framework| framework.compile }
+      the_container.compile license_ids
     end
     
     def self.confirm_license_acceptance(jvm_license, liberty_license)

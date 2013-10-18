@@ -47,7 +47,6 @@ module LibertyBuildpack::Jre
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
       @version, @uri, @license = IBMJdk.find_ibmjdk(@configuration)
-      print "JVM License: #{@license} \n"
       context[:java_home].concat JAVA_HOME
     end
 
@@ -62,7 +61,7 @@ module LibertyBuildpack::Jre
     # Downloads and unpacks a JRE
     #
     # @return [void]
-    def compile
+    def compile(licenses)
       download_start_time = Time.now
       
       print "-----> Downloading IBM #{@version} JRE from #{@uri} "

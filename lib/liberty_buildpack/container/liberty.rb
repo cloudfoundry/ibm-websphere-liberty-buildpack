@@ -20,6 +20,7 @@ require 'liberty_buildpack/container/container_utils'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
+require 'open_uri'
 
 module LibertyBuildpack::Container
   # Encapsulates the detect, compile, and release functionality for Liberty applications.
@@ -39,7 +40,6 @@ module LibertyBuildpack::Container
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
       @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
-      print "Liberty License: #{@liberty_license} \n"
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
     end
@@ -70,7 +70,8 @@ module LibertyBuildpack::Container
     # Downloads and unpacks a Liberty instance
     #
     # @return [void]
-    def compile
+    def compile(license_ids)
+      liberty_license = open(@liberty_license).read
       download_liberty
       update_server_xml
       link_application
