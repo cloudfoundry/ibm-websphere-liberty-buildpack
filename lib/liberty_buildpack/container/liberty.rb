@@ -20,7 +20,7 @@ require 'liberty_buildpack/container/container_utils'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
-require 'open_uri'
+require 'open-uri'
 
 module LibertyBuildpack::Container
   # Encapsulates the detect, compile, and release functionality for Liberty applications.
