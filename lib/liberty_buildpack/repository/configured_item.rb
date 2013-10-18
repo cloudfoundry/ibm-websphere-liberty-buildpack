@@ -32,7 +32,6 @@ module LibertyBuildpack::Repository
     # @return [String] the URI of the chosen version of the file
     # @return [LibertyBuildpack::Util::TokenizedVersion] the chosen version of the file
     def self.find_item(configuration, &version_validator)
-      print "configured find_item \n"
       repository_root = ConfiguredItem.repository_root(configuration)
       version = ConfiguredItem.version(configuration)
       version_validator.call(version) if version_validator

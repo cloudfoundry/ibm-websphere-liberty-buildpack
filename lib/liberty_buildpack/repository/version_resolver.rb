@@ -33,7 +33,11 @@ module LibertyBuildpack::Repository
     # @return [TokenizedVersion] the resolved version
     # @raise if no version can be resolved
     def self.resolve(candidate_version, versions)
-      print "resolve \n"
+      versions.each do |version| 
+        if version.include?("License")
+          print "bad version #{version.to_s}"
+          end
+      end
       tokenized_candidate_version = safe_candidate_version candidate_version
       tokenized_versions = versions.map { |version| LibertyBuildpack::Util::TokenizedVersion.new(version, false) }
 
