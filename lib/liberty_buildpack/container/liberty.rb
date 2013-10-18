@@ -71,7 +71,12 @@ module LibertyBuildpack::Container
     #
     # @return [void]
     def compile(license_ids)
-      liberty_license = open(@liberty_license).read
+      unless @liberty_license.nil?
+        liberty_license = open(@liberty_license).read.scan(/L\/N:\s*(.*?)<br>/m)
+      else
+        raise "The http version of the license has not been found"
+      end
+      print "The license number found is: #{liberty_license}"
       download_liberty
       update_server_xml
       link_application
