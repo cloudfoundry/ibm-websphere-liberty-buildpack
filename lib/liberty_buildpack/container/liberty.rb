@@ -38,7 +38,8 @@ module LibertyBuildpack::Container
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
-      @liberty_version, @liberty_uri = Liberty.find_liberty(@app_dir, @configuration)
+      @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
+      print "Liberty License: #{@liberty_license}"
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
     end
@@ -193,16 +194,17 @@ module LibertyBuildpack::Container
 
     def self.find_liberty(app_dir, configuration)
       if server_xml(app_dir)
-        version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+        version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
       elsif web_inf(app_dir)
-        version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+        version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
       else
         version = nil
         uri = nil
+        license = nil
       end
 
       return version, uri

@@ -22,7 +22,7 @@ require 'liberty_buildpack/diagnostics/common'
 require 'pathname'
 require 'time'
 require 'yaml'
-require 'find'
+require 'open-uri'
 
 module LibertyBuildpack
 

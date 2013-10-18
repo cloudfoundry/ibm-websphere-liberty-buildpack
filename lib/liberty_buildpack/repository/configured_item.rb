@@ -44,6 +44,8 @@ module LibertyBuildpack::Repository
       KEY_REPOSITORY_ROOT = 'repository_root'.freeze
 
       KEY_VERSION = 'version'.freeze
+      
+      LICENSE_ID = 'license'.freeze
 
       def self.index(repository_root)
         RepositoryIndex.new(repository_root)
@@ -56,6 +58,10 @@ module LibertyBuildpack::Repository
 
       def self.version(configuration)
         LibertyBuildpack::Util::TokenizedVersion.new(configuration[KEY_VERSION])
+      end
+      
+      def self.license_root(configuration)
+        LibertyBuildpack::Util::TokenizedVersion.new(configuration[LICENSE_ID])
       end
 
   end
