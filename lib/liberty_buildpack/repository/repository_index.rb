@@ -42,7 +42,7 @@ module LibertyBuildpack::Repository
     def find_item(version)
       version = VersionResolver.resolve(version, @index.keys)
       uri = @index[version.to_s]
-      license = @index["License-#{version.to_s}"]
+      license = @index["#{version.to_s}-License"]
       print "Inside respository_index.rb, version=#{version.to_s}, uri=#{uri}, license=#{license}"
       return version, uri # rubocop:disable RedundantReturn
     end
