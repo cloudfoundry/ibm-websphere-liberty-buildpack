@@ -44,7 +44,7 @@ module LibertyBuildpack::Repository
       uri = @index[version.to_s]
       license = @index["#{version.to_s}-License"]
       print "Inside respository_index.rb, version=#{version.to_s}, uri=#{uri}, license=#{license}"
-      return version, uri, license # rubocop:disable RedundantReturn
+      return version, uri # rubocop:disable RedundantReturn
     end
 
     private
