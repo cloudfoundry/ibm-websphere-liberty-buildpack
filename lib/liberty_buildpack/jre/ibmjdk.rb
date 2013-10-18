@@ -46,7 +46,7 @@ module LibertyBuildpack::Jre
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
-      @version, @uri, @license = IBMJdk.find_ibmjdk(@configuration)
+      @version, @uri = IBMJdk.find_ibmjdk(@configuration)
 
       context[:java_home].concat JAVA_HOME
     end
