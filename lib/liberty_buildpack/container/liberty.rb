@@ -77,7 +77,7 @@ module LibertyBuildpack::Container
         raise "The http version of the Liberty license has not been found"
       end
       print "license inside default file: #{license_ids['IBM_LIBERTY_LICENSE']}"
-      print "license in the html file is: #{liberty_license[/\[.*?\]/]}"
+      print "license in the html file is: #{liberty_license.scan([/\[.*?\]/])}"
       download_liberty
       update_server_xml
       link_application
