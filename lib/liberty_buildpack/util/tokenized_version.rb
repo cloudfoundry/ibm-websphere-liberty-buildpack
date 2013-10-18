@@ -31,7 +31,7 @@ module LibertyBuildpack::Util
     # @param [Boolean] allow_wildcards whether or not to allow '+' as the last component to represent a wildcard
     def initialize(version, allow_wildcards = true)
       @version = version
-      @version = WILDCARD if !@version && allow_wildcards
+      @version = WILDCARD if !@version && allow_wildcards && !@version.include?("License")
 
       major, tail = major_or_minor_and_tail @version
       minor, tail = major_or_minor_and_tail tail
