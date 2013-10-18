@@ -85,11 +85,13 @@ module LibertyBuildpack
       end
       
       unless licenses.nil?
-        unless licenses['IBM_JVM_LICENSE'] == 'accept'
+        unless licenses["IBM_JVM_LICENSE"] == "accept"
           license_acceptance = false
+          license_name = "jvm"
         end
-        unless licenses['IBM_LIBERTY_LICENSE'] == 'accept'
+        unless licenses["IBM_LIBERTY_LICENSE"] == "accept"
           license_acceptance = false
+          license_name = "liberty"
         end
       else
         license_acceptance = false
