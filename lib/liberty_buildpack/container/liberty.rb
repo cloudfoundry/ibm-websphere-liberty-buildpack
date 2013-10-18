@@ -51,8 +51,16 @@ module LibertyBuildpack::Container
       server_xml = Liberty.server_xml(@app_dir)
       if Liberty.web_inf(@app_dir)
         apps_found = [@app_dir]
+        
+      elsif apps_found = Dir.glob('*.ear') #Liberty.meta_inf(@app_dir) #this is never going to be the case since .ears are not expanded by cf
+        Liberty.expand_apps(apps_found)
+        
       elsif server_xml
-        apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', '*.war')))
+        #apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', '*.war')))
+        wars_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', '*.war')))
+        # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
+        ears_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', '*.ear'))) 
+        apps_found = wars_found << ears_found
         Liberty.expand_apps(apps_found)
       end
       apps_found
