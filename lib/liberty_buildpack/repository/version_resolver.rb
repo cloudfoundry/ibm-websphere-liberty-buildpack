@@ -33,6 +33,7 @@ module LibertyBuildpack::Repository
     # @return [TokenizedVersion] the resolved version
     # @raise if no version can be resolved
     def self.resolve(candidate_version, versions)
+      print "resolve \n"
       tokenized_candidate_version = safe_candidate_version candidate_version
       tokenized_versions = versions.map { |version| LibertyBuildpack::Util::TokenizedVersion.new(version, false) }
 
@@ -41,12 +42,6 @@ module LibertyBuildpack::Repository
         max { |a, b| a <=> b }
 
       raise "No version resolvable for '#{candidate_version}' in #{versions.join(', ')}" if version.nil?
-      
-      version.each do |v| 
-        if v.include?("License")
-          print "bad version #{v.to_s}"
-        end
-      end
       version
     end
 
