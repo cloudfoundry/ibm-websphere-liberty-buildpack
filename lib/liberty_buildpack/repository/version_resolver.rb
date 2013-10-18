@@ -35,8 +35,8 @@ module LibertyBuildpack::Repository
     def self.resolve(candidate_version, versions)
       versions.each do |version| 
         if version.include?("License")
-          print "bad version #{version.to_s}"
-          end
+          versions.delete(version)
+        end
       end
       tokenized_candidate_version = safe_candidate_version candidate_version
       tokenized_versions = versions.map { |version| LibertyBuildpack::Util::TokenizedVersion.new(version, false) }
