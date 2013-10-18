@@ -72,7 +72,7 @@ module LibertyBuildpack::Container
     # @return [void]
     def compile(license_ids)
       unless @liberty_license.nil?
-        liberty_license = open(@liberty_license).read.match(/L\/N:\s*(.*?)\</m)
+        liberty_license = open(@liberty_license).read.scan(/L\/N:\s*(.*?)\</m).last.first
       else
         raise "The http version of the Liberty license has not been found"
       end
