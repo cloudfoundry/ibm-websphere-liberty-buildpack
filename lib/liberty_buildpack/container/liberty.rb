@@ -207,7 +207,7 @@ module LibertyBuildpack::Container
         license = nil
       end
 
-      return version, uri
+      return version, uri, license
     rescue => e
       raise RuntimeError, "Liberty container error: #{e.message}", e.backtrace
     end
