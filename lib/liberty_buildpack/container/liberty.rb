@@ -76,14 +76,16 @@ module LibertyBuildpack::Container
       else
         raise "The http version of the Liberty license has not been found"
       end
-      print "license inside default file: #{license_ids['IBM_LIBERTY_LICENSE']} \n"
-      print "license in the html file is: #{liberty_license} \n"
-      download_liberty
-      update_server_xml
-      link_application
-      link_libs
-      make_server_script_runnable
-      set_liberty_system_properties
+      if license_ids['IBM_LIBERTY_LICENSE'] == liberty_license
+        download_liberty
+        update_server_xml
+        link_application
+        link_libs
+        make_server_script_runnable
+        set_liberty_system_properties
+      else
+        raise "You have not accepted the IBM Liberty License.@app_dir \n visit #{@liberty_license} and extract the license number (L/N:) and place it inside your manifest file."
+      end
     end
 
     # Creates the command to run the Liberty application.
