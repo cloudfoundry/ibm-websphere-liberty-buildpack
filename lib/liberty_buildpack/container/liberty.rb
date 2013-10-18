@@ -76,7 +76,7 @@ module LibertyBuildpack::Container
       else
         raise "The http version of the license has not been found"
       end
-      print "The license number found is: #{liberty_license}"
+      print "The license number found is: #{liberty_license.to_s}"
       download_liberty
       update_server_xml
       link_application
