@@ -34,7 +34,7 @@ module LibertyBuildpack::Repository
     # @raise if no version can be resolved
     def self.resolve(candidate_version, versions)
       tokenized_candidate_version = safe_candidate_version candidate_version
-      tokenized_versions = versions.map { |version| version.include?("License") ? next : LibertyBuildpack::Util::TokenizedVersion.new(version, false) }
+      tokenized_versions = versions.map { |version| LibertyBuildpack::Util::TokenizedVersion.new(version, false) unless version.include?("License") }
 
       version = tokenized_versions.
       select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }.
