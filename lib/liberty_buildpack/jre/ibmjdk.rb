@@ -23,7 +23,7 @@ require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/tokenized_version'
 require 'liberty_buildpack/jre/memory/memory_limit'
 require 'liberty_buildpack/jre/memory/memory_size'
-requite 'pathname'
+require 'pathname'
 
 module LibertyBuildpack::Jre
 
