@@ -117,9 +117,11 @@ module LibertyBuildpack::Jre
       
       print "list of items: #{Dir.entries("/tmp/cache").join(' ')}"
       
-      system "chmod 755 #{file.path}"
+      if File.executable?( file.path )
+        print "the file is executable\n"
+      end
       
-      system ".#{file.path} -i silent -f #{response_file.path()} --strip 1 2>&1" 
+      system ".#{file.path} -i silent -r #{response_file.path()} --strip 1 2>&1" 
       
       temp_dir = "/tmp/cache/temp"
       system "mkdir -p #{temp_dir}"
