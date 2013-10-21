@@ -23,6 +23,7 @@ require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/tokenized_version'
 require 'liberty_buildpack/jre/memory/memory_limit'
 require 'liberty_buildpack/jre/memory/memory_size'
+requite 'pathname'
 
 module LibertyBuildpack::Jre
 
@@ -95,6 +96,8 @@ module LibertyBuildpack::Jre
     RESOURCES = '../../../resources/openjdk/diagnostics'.freeze
 
     JAVA_HOME = '.java'.freeze
+    
+    TMP_DIR = '.tmp'.freeze
 
     KEY_MEMORY_HEURISTICS = 'memory_heuristics'
 
@@ -112,7 +115,12 @@ module LibertyBuildpack::Jre
       #response_file.puts("USER_INSTALL_DIR=#{java_home}")
       #response_file.close()
       
-      #system "./#{file.path} -i silent -f #{response_file.path()}"
+      #system "./#{file.path} -i silent -f #{response_file.path()}" 
+      
+      system "rm -rf #{TMP_DIR}"
+      system "mkdir -p #{TMP_DIR}"
+      
+      FileUtils.cp(File, TMP_DIR)
       
       system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
 
