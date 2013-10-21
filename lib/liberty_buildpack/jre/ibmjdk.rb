@@ -110,20 +110,16 @@ module LibertyBuildpack::Jre
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
       
-      #response_file = File.new("response.properties", "w")
-      #response_file.puts("INSTALLER_UI=silent")
-      #response_file.puts("USER_INSTALL_DIR=#{java_home}")
-      #response_file.close()
+      response_file = File.new("response.properties", "w")
+      response_file.puts("INSTALLER_UI=silent")
+      response_file.puts("USER_INSTALL_DIR=#{java_home}")
+      response_file.close()
       
-      #system "./#{file.path} -i silent -f #{response_file.path()}" 
+      system "./#{file.path} -i silent -f #{response_file.path()}" 
       
-      temp_dir = "/tmp/cache/temp"
+      Pathname.new("/tmp/cache/").children.select{ |child| child.directory? }.collect{ |path| system "cp #{path.to_s}/* #{java_home}"}
       
-      system "mkdir -p #{temp_dir}"
-      
-      Pathname.new("/tmp/cache/").children.select{ |child| child.directory? }.collect{ |path| print "path: #{path.to_s}"}
-      
-      system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
+      #system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
 
       puts "(#{(Time.now - expand_start_time).duration})"
     end
