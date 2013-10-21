@@ -117,10 +117,9 @@ module LibertyBuildpack::Jre
       
       #system "./#{file.path} -i silent -f #{response_file.path()}" 
       
-      system "rm -rf #{TMP_DIR}"
-      system "mkdir -p #{TMP_DIR}"
-      
-      FileUtils.cp(File, TMP_DIR)
+      system "rm -rf #{tmp_dir}"
+      system "mkdir -p #{tmp_dir}"
+      system "cp #{file.path} #{tmp_dir}"
       
       system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
 
