@@ -115,15 +115,7 @@ module LibertyBuildpack::Jre
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
       response_file.close()
       
-      print "list of items: #{Dir.entries("/tmp/cache").join(' ')}"
-      
-      if File.executable?( file.path )
-        print "the file is executable\n"
-      else
-        print "the file is not an executable"
-      end
-      
-      system ".#{file.path} -i silent -r #{response_file.path()} --strip 1 2>&1" 
+      system ".#{file.path} -i silent -f #{response_file.path()} --strip 1 2>&1" 
       
       temp_dir = "/tmp/cache/temp"
       system "mkdir -p #{temp_dir}"
