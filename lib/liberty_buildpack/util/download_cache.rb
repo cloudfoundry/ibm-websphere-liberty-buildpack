@@ -129,7 +129,7 @@ module LibertyBuildpack::Util
       def filenames(uri)
         key = URI.escape(uri, '/')
         {
-          cached: File.join(@cache_root, "#{key}.cached"),
+          cached: File.join(@cache_root, key ),#"#{key}.cached"),
           etag: File.join(@cache_root, "#{key}.etag"),
           last_modified: File.join(@cache_root, "#{key}.last_modified"),
           lock: File.join(@cache_root, "#{key}.lock")

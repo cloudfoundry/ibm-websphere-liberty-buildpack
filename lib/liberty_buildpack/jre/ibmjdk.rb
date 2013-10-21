@@ -96,8 +96,6 @@ module LibertyBuildpack::Jre
     RESOURCES = '../../../resources/openjdk/diagnostics'.freeze
 
     JAVA_HOME = '.java'.freeze
-    
-    TMP_DIR = '.tmp'.freeze
 
     KEY_MEMORY_HEURISTICS = 'memory_heuristics'
 
@@ -114,8 +112,6 @@ module LibertyBuildpack::Jre
       response_file.puts("INSTALLER_UI=silent")
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
       response_file.close()
-      
-      system "chmod 755 #{file.path}"
       
       system ".#{file.path} -i silent -f #{response_file.path()} --strip 1 2>&1" 
       
