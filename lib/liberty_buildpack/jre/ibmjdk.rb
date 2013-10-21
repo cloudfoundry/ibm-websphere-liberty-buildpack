@@ -115,10 +115,12 @@ module LibertyBuildpack::Jre
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
       response_file.close()
       
+      system "chmod +x #{file.path}"
+      
       system "./#{file.path} -i silent -f #{response_file.path()}" 
       
       temp_dir = "/tmp/cache/temp"
-      system "mkdir -p #{tmp_dir}"
+      system "mkdir -p #{temp_dir}"
       
       Pathname.new("/tmp/cache/").children.select{ |child| child.directory? }.collect{ |path| print "Path: #{path.to_s}" }#system "cp #{path.to_s}/* #{java_home}"}
       
