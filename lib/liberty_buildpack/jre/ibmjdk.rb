@@ -121,6 +121,8 @@ module LibertyBuildpack::Jre
       system "mkdir -p #{tmp_dir}"
       system "cp #{file.path} #{tmp_dir}"
       
+      print "File location: #{file.path}"
+      
       system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
 
       puts "(#{(Time.now - expand_start_time).duration})"
