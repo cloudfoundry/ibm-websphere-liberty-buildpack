@@ -113,6 +113,12 @@ module LibertyBuildpack::Jre
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
       response_file.close()
       
+      system "ls -al #{file.path} --strip 1 2>&1"
+      
+      system "java -version --strip 1 2>&1"
+      
+      system "which java --strip 1 2>&1"
+      
       system ".#{file.path} -i silent -f #{response_file.path()} --strip 1 2>&1" 
       
       temp_dir = "/tmp/cache/temp"
