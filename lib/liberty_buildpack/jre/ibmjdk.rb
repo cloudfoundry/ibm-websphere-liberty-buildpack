@@ -117,9 +117,9 @@ module LibertyBuildpack::Jre
       
       print "result of ls #{system "ls -al /tmp/cache/"}"
       
-      %x{ #{file.path} -i silent -f #{response_file.path()} 2>&1}
+      #%x{ #{file.path} -i silent -f #{response_file.path()} 2>&1}
       
-      #system ".#{file.path} -i silent -f #{response_file.path()} --strip 1 2>&1" 
+      system ".#{file.path} -i silent -f #{response_file.path()} 2>&1" 
       
       temp_dir = "/tmp/cache/temp"
       system "mkdir -p #{temp_dir}"
