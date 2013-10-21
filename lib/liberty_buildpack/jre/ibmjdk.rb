@@ -62,15 +62,24 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def compile(licenses)
-      download_start_time = Time.now
-      
-      print "-----> Downloading IBM #{@version} JRE from #{@uri} "
-
-      LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
-        puts "(#{(Time.now - download_start_time).duration})"
-        expand file
+      unless @license.nil?
+        license = open(@license).read.scan(/L\/N:\s*(.*?)\</m).last.first
+      else
+        raise "The http version of the Liberty license has not been found"
       end
-      copy_killjava_script
+      if license_ids['IBM_JVM_LICENSE'] == license
+        download_start_time = Time.now
+      
+        print "-----> Downloading IBM #{@version} JRE from #{@uri} "
+
+        LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
+          puts "(#{(Time.now - download_start_time).duration})"
+          expand file
+          end
+        copy_killjava_script
+      else
+        raise "You have not accepted the IBM Liberty License. \n visit #{@license} and extract the license number (L/N:) and place it inside your manifest file."
+      end
     end
 
     # Build Java memory options and places then in +context[:java_opts]+

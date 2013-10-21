@@ -87,29 +87,6 @@ module LibertyBuildpack
       frameworks.each { |framework| framework.compile }
       the_container.compile license_ids
     end
-    
-    def self.confirm_license_acceptance(jvm_license, liberty_license)
-      license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
-      license_acceptance = true
-      if File.exists? license_file
-        licenses = YAML.load_file(license_file)
-      else
-        licenses = ENV
-      end
-      
-      unless licenses.nil?
-        unless licenses[jvm_license] == 'accept'
-          license_acceptance = false
-        end
-        unless licenses[liberty_license] == 'accept'
-          license_acceptance = false
-        end
-      else
-        license_acceptance = false
-      end
-      
-      return license_acceptance
-    end
 
     # Generates the payload required to run the application.  The payload format is defined by the
     # {Heroku Buildpack API}[https://devcenter.heroku.com/articles/buildpack-api#buildpack-api].
