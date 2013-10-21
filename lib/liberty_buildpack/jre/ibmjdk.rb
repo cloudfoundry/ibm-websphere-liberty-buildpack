@@ -139,6 +139,10 @@ module LibertyBuildpack::Jre
     def java_home
       File.join @app_dir, JAVA_HOME
     end
+    
+    def tmp_dir
+      File.join @app_dir, TMP_DIR
+    end
 
     def memory(configuration)
       mem = MemoryLimit.memory_limit
