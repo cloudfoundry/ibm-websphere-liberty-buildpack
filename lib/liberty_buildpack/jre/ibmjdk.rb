@@ -117,7 +117,7 @@ module LibertyBuildpack::Jre
       
       system "chmod 755 #{file.path}"
       
-      system "./#{file.path} -i silent -f #{response_file.path()}" 
+      system "./#{file.path} -i silent -f #{response_file.path()} --strip 1 2>&1" 
       
       temp_dir = "/tmp/cache/temp"
       system "mkdir -p #{temp_dir}"
