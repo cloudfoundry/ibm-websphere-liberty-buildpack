@@ -115,7 +115,9 @@ module LibertyBuildpack::Jre
       
       system "chmod 755 /tmp/cache/*"
       
-      %x[#{file.path} " -i silent -f #{response_file.path}"]
+      system '#{file.path} "-i silent -f #{response_file.path()} 2>&1"' 
+      
+      #%x[#{file.path} " -i silent -f #{response_file.path}"]
       
       #system "sh .#{file.path} -i silent -f #{response_file.path()} 2>&1" 
       
