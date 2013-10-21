@@ -61,7 +61,7 @@ module LibertyBuildpack::Jre
     # Downloads and unpacks a JRE
     #
     # @return [void]
-    def compile(licenses)
+    def compile(license_ids)
       unless @license.nil?
         license = open(@license).read.scan(/L\/N:\s*(.*?)\</m).last.first
       else
