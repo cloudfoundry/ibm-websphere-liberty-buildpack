@@ -204,7 +204,11 @@ module LibertyBuildpack::Container
     end
 
     def self.find_liberty(app_dir, configuration)
-      if server_xml(app_dir)
+      if Dir.glob('*.ear')
+        version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+          fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
+        end
+      elsif server_xml(app_dir)
         version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
