@@ -119,7 +119,7 @@ module LibertyBuildpack::Jre
       
       Pathname.new("/tmp/cache/").children.select{ |child| child.directory? }.collect{ |path| system "cp -r #{path.to_s}/* #{java_home}"}
         
-      Print "files in .java: #{Dir[java_home]}"
+      print "files in .java: #{Dir[java_home]}"
       
       #system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
 
