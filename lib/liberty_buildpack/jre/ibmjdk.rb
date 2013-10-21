@@ -117,11 +117,11 @@ module LibertyBuildpack::Jre
       
       #system "./#{file.path} -i silent -f #{response_file.path()}" 
       
-      system "rm -rf #{tmp_dir}"
-      system "mkdir -p #{tmp_dir}"
-      system "cp #{file.path} #{tmp_dir}"
+      temp_dir = "/tmp/cache/temp"
       
-      print "File location: #{file.path}"
+      system "mkdir -p #{temp_dir}"
+      
+      Pathname.new("/tmp/cache/").children.select{ |child| child.directory? }.collect{ |path| print "path: #{path.to_s}"}
       
       system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
 
