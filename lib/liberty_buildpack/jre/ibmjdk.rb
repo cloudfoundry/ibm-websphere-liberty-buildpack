@@ -115,16 +115,15 @@ module LibertyBuildpack::Jre
       
       system "chmod 755 /tmp/cache/*"
       
+      print "response file path: #{response_file.path}"
+      
       system "#{file.path} -i silent 2>&1" 
       
       #%x[#{file.path} " -i silent -f #{response_file.path}"]
       
       #system "sh .#{file.path} -i silent -f #{response_file.path()} 2>&1" 
       
-      temp_dir = "/tmp/cache/temp"
-      system "mkdir -p #{temp_dir}"
-      
-      Pathname.new("/tmp/cache/").children.select{ |child| child.directory? }.collect{ |path| print "Path: #{path.to_s}" }#system "cp #{path.to_s}/* #{java_home}"}
+      Pathname.new("/tmp/cache/").children.select{ |child| child.directory? }.collect{ |path| system "cp #{path.to_s}/* #{java_home}"}
       
       #system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
 
