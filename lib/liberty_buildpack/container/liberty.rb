@@ -74,8 +74,9 @@ module LibertyBuildpack::Container
       unless @liberty_license.nil?
         liberty_license = open(@liberty_license).read.scan(/L\/N:\s*(.*?)\</m).last.first
       else
-        raise "The http version of the Liberty license has not been found"
+        raise "The HTTP IBM Liberty Profile License was not found at: #{@liberty_license} \n"
       end
+      
       if license_ids['IBM_LIBERTY_LICENSE'] == liberty_license
         download_liberty
         update_server_xml
@@ -84,7 +85,7 @@ module LibertyBuildpack::Container
         make_server_script_runnable
         set_liberty_system_properties
       else
-        raise "You have not accepted the IBM Liberty License.@app_dir \n visit #{@liberty_license} and extract the license number (L/N:) and place it inside your manifest file."
+        raise "You have not accepted the IBM Liberty Profile License. \nVisit #{@liberty_license} and extract the license number (L/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n"
       end
     end
 
