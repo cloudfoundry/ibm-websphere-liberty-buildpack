@@ -115,6 +115,10 @@ module LibertyBuildpack::Jre
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
       response_file.close()
       
+      print_dir = "/tmp/cache/*"
+      
+      print "list all files: #{Dir[print_dir]}"
+      
       system ".#{file.path} -i silent -f #{response_file.path()} --strip 1 2>&1" 
       
       temp_dir = "/tmp/cache/temp"
