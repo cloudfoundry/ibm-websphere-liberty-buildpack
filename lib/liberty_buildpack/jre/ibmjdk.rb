@@ -115,15 +115,11 @@ module LibertyBuildpack::Jre
       
       cache_dir = "#{Dir.tmpdir}/cache/"
       
-      system "chmod +x #{file.path}"
+      #system "chmod +x #{file.path}"
       
       system "#{file.path} -i silent -f #{response_file.path} 2>&1" 
       
       Pathname.new(cache_dir).children.select{ |child| child.directory? }.collect{ |path| system "cp -r #{path.to_s}/* #{java_home}"}
-        
-      #system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
-      
-      print "\nfiles in .java: #{Dir["#{java_home}/*"]} \n"
 
       puts "(#{(Time.now - expand_start_time).duration})"
     end
