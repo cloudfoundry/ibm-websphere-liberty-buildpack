@@ -41,8 +41,8 @@ module LibertyBuildpack::Repository
     # @return [String] the URI of the file found
     def find_item(version)
       version = VersionResolver.resolve(version, @index.keys)
-      uri = @index[version.to_s]["url"]
-      license = @index[version.to_s]["license"]
+      uri = @index[version.to_s]['url']
+      license = @index[version.to_s]['license']
       return version, uri, license # rubocop:disable RedundantReturn
     end
 

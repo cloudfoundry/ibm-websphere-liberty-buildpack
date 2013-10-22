@@ -74,8 +74,8 @@ module LibertyBuildpack
     def compile
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
-      
-      license_file = File.expand_path("../../config/licenses.yml", File.dirname(__FILE__))
+
+      license_file = File.expand_path('../../config/licenses.yml', File.dirname(__FILE__))
       if File.exists? license_file
         license_ids = YAML.load_file(license_file)
       else

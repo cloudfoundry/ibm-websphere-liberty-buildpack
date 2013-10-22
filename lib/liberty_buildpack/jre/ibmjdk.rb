@@ -63,20 +63,20 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def compile(license_ids)
-      unless @license.nil?
-        license = open(@license).read.scan(/L\/N:\s*(.*?)\</m).last.first
+      if @license.nil?
+        raise "The HTTP IBM JVM License was not found at: #{@license} \n"
       else
-        raise "The http version of the Liberty license has not been found"
+        license = open(@license).read.scan(/L\/N:\s*(.*?)\</m).last.first
       end
       if license_ids['IBM_JVM_LICENSE'] == license
         download_start_time = Time.now
-      
+
         print "-----> Downloading IBM #{@version} JRE from #{@uri} "
 
         LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
           puts "(#{(Time.now - download_start_time).duration})"
           expand file
-          end
+        end
         copy_killjava_script
       else
         raise "\nYou have not accepted the IBM JVM License. \nVisit #{@license} and extract the license number (L/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
@@ -104,22 +104,22 @@ module LibertyBuildpack::Jre
     def expand(file)
       expand_start_time = Time.now
       print "       Expanding JRE to #{JAVA_HOME} "
-      
+
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
-      
+
       cache_dir = "#{Dir.tmpdir}/cache/"
-      
-      response_file = File.new("#{cache_dir}response.properties", "w")
-      response_file.puts("INSTALLER_UI=silent")
+
+      response_file = File.new("#{cache_dir}response.properties", 'w')
+      response_file.puts('INSTALLER_UI=silent')
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
-      response_file.close()
-      
+      response_file.close
+
       system "chmod +x #{file.path}"
-      
-      system "#{file.path} -i silent -f #{response_file.path} 2>&1" 
-      
-      Pathname.new(cache_dir).children.select{ |child| child.directory? }.collect{ |path| system "cp -r #{path.to_s}/* #{java_home}"}
+
+      system "#{file.path} -i silent -f #{response_file.path} 2>&1"
+
+      Pathname.new(cache_dir).children.select{ |child| child.directory? }.collect{ |path| system "cp -r #{path.to_s}/* #{java_home}" }
 
       puts "(#{(Time.now - expand_start_time).duration})"
     end

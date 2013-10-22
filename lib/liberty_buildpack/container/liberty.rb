@@ -71,12 +71,12 @@ module LibertyBuildpack::Container
     #
     # @return [void]
     def compile(license_ids)
-      unless @liberty_license.nil?
-        liberty_license = open(@liberty_license).read.scan(/L\/N:\s*(.*?)\</m).last.first
-      else
+      if @liberty_license.nil?
         raise "The HTTP IBM Liberty Profile License was not found at: #{@liberty_license} \n"
+      else
+        liberty_license = open(@liberty_license).read.scan(/L\/N:\s*(.*?)\</m).last.first
       end
-      
+
       if license_ids['IBM_LIBERTY_LICENSE'] == liberty_license
         download_liberty
         update_server_xml
