@@ -108,20 +108,20 @@ module LibertyBuildpack::Jre
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
       
-      #response_file = File.new("/tmp/cache/response.properties", "w")
-      #response_file.puts("INSTALLER_UI=silent")
-      #response_file.puts("USER_INSTALL_DIR=#{java_home}")
-      #response_file.close()
+      response_file = File.new("/tmp/cache/response.properties", "w")
+      response_file.puts("INSTALLER_UI=silent")
+      response_file.puts("USER_INSTALL_DIR=#{java_home}")
+      response_file.close()
       
-      #cache_dir = "#{Dir.tmpdir}/cache/"
+      cache_dir = "#{Dir.tmpdir}/cache/"
       
-      #system "chmod +x #{file.path}"
+      system "chmod +x #{file.path}"
       
-      #system "#{file.path} -i silent -f #{response_file.path} 2>&1" 
+      system "#{file.path} -i silent -f #{response_file.path} 2>&1" 
       
-      #Pathname.new(cache_dir).children.select{ |child| child.directory? }.collect{ |path| system "cp -r #{path.to_s}/* #{java_home}"}
+      Pathname.new(cache_dir).children.select{ |child| child.directory? }.collect{ |path| system "cp -r #{path.to_s}/* #{java_home}"}
         
-      system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
+      #system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
       
       print "\nfiles in .java: #{Dir["#{java_home}/*"]} \n"
 
