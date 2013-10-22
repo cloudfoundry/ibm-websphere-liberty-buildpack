@@ -12,7 +12,7 @@ In order to use the buildpack you will first need to complete the following:
 * Download the wlp-developers-runtime-8.5.5.0.jar from [wasdev.net](http://wasdev.net).
 
 * Download the latest IBM JRE for Linux from the [developerWorks Java site][].
-  The download will be in a .bin format.
+  The download will be in an archive .bin format.
    
 * Copy the binaries to a location that the buildpack will be able to access via HTTP. For details see
   [Repositories][]. For an example see [Setting up your Web Server][example]

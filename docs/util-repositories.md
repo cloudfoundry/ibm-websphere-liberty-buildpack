@@ -5,7 +5,7 @@ Many components need to have access to multiple versions of binaries.  The build
 The repository is an HTTP-accessible collection of files.  The repository root must contain an `index.yml` file that is a mapping of concrete versions to absolute URIs consisting of a series of lines of the form:
 ```yaml
 <version>: 
-    url: <URI of binary>
+    uri: <URI of binary>
     license: <URI of license>
 ```
 
