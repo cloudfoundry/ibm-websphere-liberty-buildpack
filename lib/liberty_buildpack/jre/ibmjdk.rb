@@ -113,7 +113,9 @@ module LibertyBuildpack::Jre
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
       response_file.close()
       
-      system "chmod 755 /tmp/cache/*"
+      print "tmp dir: #{Dir.tmpdir}"
+      
+      system "chmod +x #{file.path}"
       
       system "#{file.path} -i silent -f #{response_file.path} 2>&1" 
       
