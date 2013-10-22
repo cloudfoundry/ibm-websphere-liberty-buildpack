@@ -20,6 +20,7 @@ require 'liberty_buildpack/container/container_utils'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
+require 'open-uri'
 
 module LibertyBuildpack::Container
   # Encapsulates the detect, compile, and release functionality for Liberty applications.
@@ -38,7 +39,7 @@ module LibertyBuildpack::Container
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
-      @liberty_version, @liberty_uri = Liberty.find_liberty(@app_dir, @configuration)
+      @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
     end
@@ -69,13 +70,23 @@ module LibertyBuildpack::Container
     # Downloads and unpacks a Liberty instance
     #
     # @return [void]
-    def compile
-      download_liberty
-      update_server_xml
-      link_application
-      link_libs
-      make_server_script_runnable
-      set_liberty_system_properties
+    def compile(license_ids)
+      if @liberty_license.nil?
+        raise "The HTTP IBM Liberty Profile License was not found at: #{@liberty_license} \n"
+      else
+        liberty_license = open(@liberty_license).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
+      end
+
+      if license_ids['IBM_LIBERTY_LICENSE'] == liberty_license
+        download_liberty
+        update_server_xml
+        link_application
+        link_libs
+        make_server_script_runnable
+        set_liberty_system_properties
+      else
+        raise "\nYou have not accepted the IBM Liberty Profile License. \nVisit #{@liberty_license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n"
+      end
     end
 
     # Creates the command to run the Liberty application.
@@ -193,19 +204,20 @@ module LibertyBuildpack::Container
 
     def self.find_liberty(app_dir, configuration)
       if server_xml(app_dir)
-        version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+        version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
       elsif web_inf(app_dir)
-        version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+        version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
       else
         version = nil
         uri = nil
+        license = nil
       end
 
-      return version, uri
+      return version, uri, license
     rescue => e
       raise RuntimeError, "Liberty container error: #{e.message}", e.backtrace
     end
