@@ -74,7 +74,7 @@ module LibertyBuildpack::Container
       if @liberty_license.nil?
         raise "The HTTP IBM Liberty Profile License was not found at: #{@liberty_license} \n"
       else
-        liberty_license = open(@liberty_license).read.scan(/L\/N:\s*(.*?)\</m).last.first
+        liberty_license = open(@liberty_license).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
       end
 
       if license_ids['IBM_LIBERTY_LICENSE'] == liberty_license

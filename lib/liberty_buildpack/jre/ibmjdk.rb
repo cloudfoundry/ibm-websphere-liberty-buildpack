@@ -66,7 +66,7 @@ module LibertyBuildpack::Jre
       if @license.nil?
         raise "The HTTP IBM JVM License was not found at: #{@license} \n"
       else
-        license = open(@license).read.scan(/L\/N:\s*(.*?)\</m).last.first
+        license = open(@license).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
       end
       if license_ids['IBM_JVM_LICENSE'] == license
         download_start_time = Time.now
