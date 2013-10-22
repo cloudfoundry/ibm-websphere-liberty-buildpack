@@ -113,15 +113,15 @@ module LibertyBuildpack::Jre
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
       response_file.close()
       
-      print "tmp dir: #{Dir.tmpdir}"
+      cache_dir = "#{Dir.tmpdir}/cache/"
       
       system "chmod +x #{file.path}"
       
       system "#{file.path} -i silent -f #{response_file.path} 2>&1" 
       
-      Pathname.new("/tmp/cache/").children.select{ |child| child.directory? }.collect{ |path| system "cp -r #{path.to_s}/* #{java_home}"}
+      Pathname.new(cache_dir).children.select{ |child| child.directory? }.collect{ |path| system "cp -r #{path.to_s}/* #{java_home}"}
         
-      print "files in .java: #{Dir[java_home]}"
+      print "\nfiles in .java: #{Dir["#{java_home}/*"]} \n"
       
       #system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
 
