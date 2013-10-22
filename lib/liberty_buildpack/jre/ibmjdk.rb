@@ -119,7 +119,7 @@ module LibertyBuildpack::Jre
 
       system "#{file.path} -i silent -f #{response_file.path} 2>&1"
 
-      Pathname.new(cache_dir).children.select{ |child| child.directory? }.map { |path| system "cp -r #{path.to_s}/* #{ java_home }" }
+      Pathname.new(cache_dir).children.select { |child| child.directory? }.map { |path| system "cp -r #{path.to_s}/* #{java_home}" }
 
       puts "(#{(Time.now - expand_start_time).duration})"
     end
