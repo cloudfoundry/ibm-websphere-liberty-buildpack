@@ -44,8 +44,6 @@ module LibertyBuildpack::Repository
       KEY_REPOSITORY_ROOT = 'repository_root'.freeze
 
       KEY_VERSION = 'version'.freeze
-      
-      LICENSE_ID = 'license'.freeze
 
       def self.index(repository_root)
         RepositoryIndex.new(repository_root)

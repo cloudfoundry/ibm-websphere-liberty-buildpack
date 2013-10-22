@@ -108,12 +108,12 @@ module LibertyBuildpack::Jre
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
       
-      response_file = File.new("/tmp/cache/response.properties", "w")
+      cache_dir = "#{Dir.tmpdir}/cache/"
+      
+      response_file = File.new("#{cache_dir}response.properties", "w")
       response_file.puts("INSTALLER_UI=silent")
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
       response_file.close()
-      
-      cache_dir = "#{Dir.tmpdir}/cache/"
       
       system "chmod +x #{file.path}"
       
@@ -136,10 +136,6 @@ module LibertyBuildpack::Jre
 
     def java_home
       File.join @app_dir, JAVA_HOME
-    end
-    
-    def tmp_dir
-      File.join @app_dir, TMP_DIR
     end
 
     def memory(configuration)

@@ -22,7 +22,6 @@ require 'liberty_buildpack/diagnostics/common'
 require 'pathname'
 require 'time'
 require 'yaml'
-require 'open-uri'
 
 module LibertyBuildpack
 
@@ -130,7 +129,6 @@ module LibertyBuildpack
       java_home = ''
       java_opts = []
       @lib_directory = Buildpack.lib_directory app_dir
-      @search_directory = app_dir
       environment = ENV.to_hash
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
