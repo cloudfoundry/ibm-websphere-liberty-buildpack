@@ -85,7 +85,7 @@ module LibertyBuildpack::Container
         make_server_script_runnable
         set_liberty_system_properties
       else
-        raise "\nYou have not accepted the IBM Liberty Profile License. \nVisit #{@liberty_license} and extract the license number (L/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n"
+        raise "\nYou have not accepted the IBM Liberty Profile License. \nVisit #{@liberty_license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n"
       end
     end
 

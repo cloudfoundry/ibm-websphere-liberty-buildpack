@@ -79,7 +79,7 @@ module LibertyBuildpack::Jre
         end
         copy_killjava_script
       else
-        raise "\nYou have not accepted the IBM JVM License. \nVisit #{@license} and extract the license number (L/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
+        raise "\nYou have not accepted the IBM JVM License. \nVisit #{@license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
       end
     end
 
