@@ -115,7 +115,7 @@ module LibertyBuildpack::Jre
       
       cache_dir = "#{Dir.tmpdir}/cache/"
       
-      #system "chmod +x #{file.path}"
+      system "chmod +x #{file.path}"
       
       system "#{file.path} -i silent -f #{response_file.path} 2>&1" 
       
