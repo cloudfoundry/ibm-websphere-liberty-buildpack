@@ -48,6 +48,7 @@ module LibertyBuildpack::Jre
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
       @version, @uri, @license = IBMJdk.find_ibmjdk(@configuration)
+      @license_id = context[:license_ids][:jvm_license]
       context[:java_home].concat JAVA_HOME
     end
 
@@ -62,13 +63,14 @@ module LibertyBuildpack::Jre
     # Downloads and unpacks a JRE
     #
     # @return [void]
-    def compile(license_ids)
+    def compile
       if @license.nil?
         raise "The HTTP IBM JVM License was not found at: #{@license} \n"
       else
+        #The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<". 
         license = open(@license).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
       end
-      if license_ids['IBM_JVM_LICENSE'] == license
+      if @license_id == license
         download_start_time = Time.now
 
         print "-----> Downloading IBM #{@version} JRE from #{@uri} "

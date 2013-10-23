@@ -75,16 +75,9 @@ module LibertyBuildpack
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
 
-      license_file = File.expand_path('../../config/licenses.yml', File.dirname(__FILE__))
-      if File.exists? license_file
-        license_ids = YAML.load_file(license_file)
-      else
-        license_ids = ENV
-      end
-
-      jre.compile license_ids
+      jre.compile
       frameworks.each { |framework| framework.compile }
-      the_container.compile license_ids
+      the_container.compile
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
@@ -115,6 +108,7 @@ module LibertyBuildpack
     private
 
     COMPONENTS_CONFIG = '../../config/components.yml'.freeze
+    LICENSE_CONFIG = '../../config/licenses.yml'.freeze
 
     LIB_DIRECTORY = '.lib'
 
@@ -132,6 +126,15 @@ module LibertyBuildpack
       environment = ENV.to_hash
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
+      jvm_license = 'IBM_JVM_LICENSE'
+      liberty_license = 'IBM_LIBERTY_LICENSE'
+      
+      license_file = File.expand_path(LICENSE_CONFIG, File.dirname(__FILE__))
+      if File.exists? license_file
+        license_ids = YAML.load_file(license_file)
+      else
+        license_ids = { jvm_license: ENV[jvm_license], liberty_license: ENV[liberty_license] }
+      end
 
       basic_context = {
           app_dir: app_dir,
@@ -140,7 +143,8 @@ module LibertyBuildpack
           java_opts: java_opts,
           lib_directory: @lib_directory,
           vcap_application: vcap_application ? YAML.load(vcap_application) : {},
-          vcap_services: vcap_services ? YAML.load(vcap_services) : {}
+          vcap_services: vcap_services ? YAML.load(vcap_services) : {},
+          license_ids: license_ids ? license_ids : {}
       }
 
       @jres = Buildpack.construct_components(components, 'jres', basic_context, @logger)

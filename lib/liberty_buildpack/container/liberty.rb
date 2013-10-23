@@ -42,6 +42,7 @@ module LibertyBuildpack::Container
       @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
+      @license_id = context[:license_ids][:liberty_license]
     end
 
     # Get a list of web applications that are in the server directory
@@ -70,14 +71,15 @@ module LibertyBuildpack::Container
     # Downloads and unpacks a Liberty instance
     #
     # @return [void]
-    def compile(license_ids)
+    def compile
       if @liberty_license.nil?
         raise "The HTTP IBM Liberty Profile License was not found at: #{@liberty_license} \n"
       else
+        #The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<". 
         liberty_license = open(@liberty_license).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
       end
 
-      if license_ids['IBM_LIBERTY_LICENSE'] == liberty_license
+      if license_id == liberty_license
         download_liberty
         update_server_xml
         link_application
