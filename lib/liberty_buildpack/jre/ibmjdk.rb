@@ -64,13 +64,7 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def compile
-      if @license.nil?
-        raise "The HTTP IBM JVM License was not found at: #{@license} \n"
-      else
-        # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
-        license = open(@license).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
-      end
-      if @license_id == license
+      if LibertyBuildpack::Util.check_license(@license, @license_id)
         download_start_time = Time.now
 
         print "-----> Downloading IBM #{@version} JRE from #{@uri} "
