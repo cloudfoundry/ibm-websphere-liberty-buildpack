@@ -79,7 +79,7 @@ module LibertyBuildpack::Container
         liberty_license = open(@liberty_license).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
       end
 
-      if license_id == liberty_license
+      if @license_id == liberty_license
         download_liberty
         update_server_xml
         link_application
