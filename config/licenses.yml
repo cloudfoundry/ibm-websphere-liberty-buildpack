@@ -15,5 +15,5 @@
 
 # Configuration for the Liberty container
 ---
-jvm_license: IBM_JVM_LICENSE
-liberty_license: IBM_LIBERTY_LICENSE
+IBM_JVM_LICENSE: L-AWON-8GALN9
+IBM_LIBERTY_LICENSE: L-JTHS-95XRL8
