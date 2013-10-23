@@ -12,8 +12,7 @@ In order to use the buildpack you will first need to complete the following:
 * Download the wlp-developers-runtime-8.5.5.0.jar from [wasdev.net](http://wasdev.net).
 
 * Download the latest IBM JRE for Linux from the [developerWorks Java site][].
-  The download will be in a .bin format. For instructions on how to convert this file into a .tgz 
-  archive see [JRE repackaging][]
+  The download will be in an archive .bin format.
    
 * Copy the binaries to a location that the buildpack will be able to access via HTTP. For details see
   [Repositories][]. For an example see [Setting up your Web Server][example]
@@ -58,7 +57,6 @@ bundle install --gemfile Gemfile.rubymine-debug
 [pull request]: https://help.github.com/articles/using-pull-requests
 [Pull requests]: http://help.github.com/send-pull-requests
 [example]: docs/installation.md#setting-up-your-web-server
-[JRE repackaging]: docs/ibmjre.md
 [options]: docs/server-xml-options.md
 [Repositories]: docs/util-repositories.md
 [ibmjdk.yml]: config/ibmjdk.yml
