@@ -2,9 +2,11 @@
 Many components need to have access to multiple versions of binaries.  The buildpack provides a `Repository` abstraction to encapsulate version resolution and download URI creation.
 
 ## Repository Structure
-The repository is an HTTP-accessible collection of files.  The repository root must contain an `index.yml` file ([example][]) that is a mapping of concrete versions to absolute URIs consisting of a series of lines of the form:
+The repository is an HTTP-accessible collection of files.  The repository root must contain an `index.yml` file that is a mapping of concrete versions to absolute URIs consisting of a series of lines of the form:
 ```yaml
-<version>: <URI>
+<version>: 
+    uri: <URI of binary>
+    license: <URI of license>
 ```
 
 The collection of files may be stored alongside the index file or elsewhere.
@@ -13,14 +15,13 @@ An example filesystem might look like:
 
 ```
 /index.yml
-/openjdk-1.6.0_27.tar.gz
-/openjdk-1.7.0_21.tar.gz
-/openjdk-1.8.0_M7.tar.gz
+/ibm-java-jre-7.0-5.0-x86_64-archive.bin
+/ibm-java-jre-7.0-5.0-x86_64-License.html
 ```
 
 ## Usage
 
-The main class used when dealing with a repository is [`LibertyBuildpack::Repository::ConfiguredItem`][].  It provides a single method that is used to resolve a specific version and its URI.
+The main class used when dealing with a repository is [`LibertyBuildpack::Repository::ConfiguredItem`][].  It provides a single method that is used to resolve a specific version to the URI containing the binary as well as a URI containing the License.
 
 ```ruby
 # Finds an instance of the file based on the configuration.
@@ -30,7 +31,7 @@ The main class used when dealing with a repository is [`LibertyBuildpack::Reposi
 # @option configuration [String] :version the version of the file to resolve
 # @param [Block, nil] version_validator an optional version validation block
 # @return [LibertyBuildpack::Util::TokenizedVersion] the chosen version of the file
-# @return [String] the URI of the chosen version of the file
+# @return [String] the URI and License URI of the chosen version of the file
 def self.find_item(configuration, &version_validator)
 ```
 
@@ -66,5 +67,4 @@ In addition to declaring a specific versions to use, you can also specify a boun
 | `1.7.0_+` | Selects the greatest available version less than `1.7.1`. Use this syntax to stay up to date with the latest security releases in a particular version.
 
 
-[example]: http://download.pivotal.io.s3.amazonaws.com/openjdk/lucid/x86_64/index.yml
 [`LibertyBuildpack::Repository::ConfiguredItem`]: ../lib/liberty_buildpack/repository/configured_item.rb

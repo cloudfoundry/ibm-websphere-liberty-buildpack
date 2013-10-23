@@ -21,8 +21,10 @@ require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/tokenized_version'
+require 'liberty_buildpack/util/license_management'
 require 'liberty_buildpack/jre/memory/memory_limit'
 require 'liberty_buildpack/jre/memory/memory_size'
+require 'pathname'
 
 module LibertyBuildpack::Jre
 
@@ -46,8 +48,8 @@ module LibertyBuildpack::Jre
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
-      @version, @uri = IBMJdk.find_ibmjdk(@configuration)
-
+      @version, @uri, @license = IBMJdk.find_ibmjdk(@configuration)
+      @license_id = context[:license_ids]['IBM_JVM_LICENSE']
       context[:java_home].concat JAVA_HOME
     end
 
@@ -63,14 +65,19 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def compile
-      download_start_time = Time.now
-      print "-----> Downloading IBM #{@version} JRE from #{@uri} "
+      if LibertyBuildpack::Util.check_license(@license, @license_id)
+        download_start_time = Time.now
 
-      LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
-        puts "(#{(Time.now - download_start_time).duration})"
-        expand file
+        print "-----> Downloading IBM #{@version} JRE from #{@uri} "
+
+        LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
+          puts "(#{(Time.now - download_start_time).duration})"
+          expand file
+        end
+        copy_killjava_script
+      else
+        raise "\nYou have not accepted the IBM JVM License. \nVisit #{@license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
       end
-      copy_killjava_script
     end
 
     # Build Java memory options and places then in +context[:java_opts]+
@@ -97,7 +104,19 @@ module LibertyBuildpack::Jre
 
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
-      system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
+
+      cache_dir = "#{Dir.tmpdir}/cache/"
+
+      response_file = File.new("#{cache_dir}response.properties", 'w')
+      response_file.puts('INSTALLER_UI=silent')
+      response_file.puts("USER_INSTALL_DIR=#{java_home}")
+      response_file.close
+
+      system "chmod +x #{file.path}"
+
+      system "#{file.path} -i silent -f #{response_file.path} 2>&1"
+
+      Pathname.new(cache_dir).children.select { |child| child.directory? }.map { |path| system "mv #{path.to_s}/* #{java_home}" }
 
       puts "(#{(Time.now - expand_start_time).duration})"
     end
