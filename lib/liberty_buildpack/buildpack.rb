@@ -75,9 +75,16 @@ module LibertyBuildpack
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
 
-      jre.compile
+      license_file = File.expand_path('../../config/licenses.yml', File.dirname(__FILE__))
+      if File.exists? license_file
+        license_ids = YAML.load_file(license_file)
+      else
+        license_ids = ENV
+      end
+
+      jre.compile license_ids
       frameworks.each { |framework| framework.compile }
-      the_container.compile
+      the_container.compile license_ids
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the

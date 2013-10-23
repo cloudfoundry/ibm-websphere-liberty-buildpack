@@ -48,7 +48,10 @@ module LibertyBuildpack::Jre
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
       @version, @uri, @license = IBMJdk.find_ibmjdk(@configuration)
+<<<<<<< HEAD
       @license_id = context[:license_ids][:jvm_license]
+=======
+>>>>>>> 5be4e0a99136bae90a08e35d2a97866fef2e0e1d
       context[:java_home].concat JAVA_HOME
     end
 
@@ -63,6 +66,7 @@ module LibertyBuildpack::Jre
     # Downloads and unpacks a JRE
     #
     # @return [void]
+<<<<<<< HEAD
     def compile
       if @license.nil?
         raise "The HTTP IBM JVM License was not found at: #{@license} \n"
@@ -71,6 +75,15 @@ module LibertyBuildpack::Jre
         license = open(@license).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
       end
       if @license_id == license
+=======
+    def compile(license_ids)
+      if @license.nil?
+        raise "The HTTP IBM JVM License was not found at: #{@license} \n"
+      else
+        license = open(@license).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
+      end
+      if license_ids['IBM_JVM_LICENSE'] == license
+>>>>>>> 5be4e0a99136bae90a08e35d2a97866fef2e0e1d
         download_start_time = Time.now
 
         print "-----> Downloading IBM #{@version} JRE from #{@uri} "
