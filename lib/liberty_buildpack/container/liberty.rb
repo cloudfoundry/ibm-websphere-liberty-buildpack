@@ -43,7 +43,7 @@ module LibertyBuildpack::Container
       @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
-      @license_id = context[:license_ids][:liberty_license]
+      @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
     end
 
     # Get a list of web applications that are in the server directory

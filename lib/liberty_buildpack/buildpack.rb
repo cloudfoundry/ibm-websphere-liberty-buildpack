@@ -133,7 +133,7 @@ module LibertyBuildpack
       if File.exists? license_file
         license_ids = YAML.load_file(license_file)
       else
-        license_ids = { jvm_license: ENV[jvm_license], liberty_license: ENV[liberty_license] }
+        license_ids = { jvm_license => ENV[jvm_license], liberty_license => ENV[liberty_license] }
       end
 
       basic_context = {
