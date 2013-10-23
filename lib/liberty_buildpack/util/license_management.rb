@@ -22,7 +22,7 @@ module LibertyBuildpack::Util
 
   def self.check_license(license_uri, license_id)    
     if license_uri.nil?
-      raise "The HTTP IBM JVM License was not found at: #{@license} \n"
+      raise "The HTTP License was not found at: #{@license} \n"
     else
       # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
       license = open(license_uri).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first

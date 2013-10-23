@@ -20,6 +20,7 @@ require 'liberty_buildpack/container/container_utils'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
+require 'liberty_buildpack/util/license_management'
 require 'open-uri'
 
 module LibertyBuildpack::Container
@@ -72,14 +73,7 @@ module LibertyBuildpack::Container
     #
     # @return [void]
     def compile
-      if @liberty_license.nil?
-        raise "The HTTP IBM Liberty Profile License was not found at: #{@liberty_license} \n"
-      else
-        # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
-        liberty_license = open(@liberty_license).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
-      end
-
-      if @license_id == liberty_license
+      if LibertyBuildpack::Util.check_license(@liberty_license, @license_id)
         download_liberty
         update_server_xml
         link_application
