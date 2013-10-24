@@ -120,6 +120,7 @@ module LibertyBuildpack::Container
 
     WEB_INF = 'WEB-INF'.freeze
 
+    # second checkpoint
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
       if server_xml
@@ -142,10 +143,10 @@ module LibertyBuildpack::Container
         include_file.add_attribute('location', 'runtime-vars.xml')
 
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
-      elsif Liberty.web_inf(@app_dir)
+      elsif Liberty.web_inf(@app_dir) or ear(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
+        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)        
       else
         raise 'Neither a server.xml or WEB-INF directory was found.'
       end
