@@ -160,14 +160,22 @@ module LibertyBuildpack::Container
       system "chmod +x #{server_script}"
     end
 
+    # checkpoint three
     def server_name
+        puts "[INFO] determining server name"
       if Liberty.liberty_directory @app_dir
+        puts "[INFO] pushed packaged server"
         candidates = Dir[File.join(@app_dir, 'wlp', 'usr', 'servers', '*')]
         raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}" if candidates.size != 1
         File.basename(candidates[0])
       elsif Liberty.server_directory @app_dir
+        puts "[INFO] pushed unpackaged server"
         return 'defaultServer'
       elsif Liberty.web_inf @app_dir
+        puts "[INFO] pushed plain application (web-inf)"
+        return 'defaultServer'
+      elsif Liberty.ear(@app_dir)
+        puts "[INFO] pushed ear"
         return 'defaultServer'
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
