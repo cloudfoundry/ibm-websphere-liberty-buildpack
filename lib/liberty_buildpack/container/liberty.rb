@@ -193,8 +193,14 @@ module LibertyBuildpack::Container
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
+    # first checkpoint for .ears and other applications
     def self.find_liberty(app_dir, configuration)
-      if server_xml(app_dir)
+      puts "[INFO] find liberty directory: #{app_dir} config: #{configuration}"
+      if ears(app_dir)
+        version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+          fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
+        end
+      elsif server_xml(app_dir)
         version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
@@ -290,6 +296,12 @@ module LibertyBuildpack::Container
         raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}"
       end
       candidates.any? ? candidates[0] : nil
+    end
+ 
+    def self.ear(app_dir)
+      ears = Dir.glob(File.join(app_dir, "*.ear"))
+      puts "[INFO] ears found: #{ears}"
+      ears != [] || ears != nil ? ears : nil
     end
 
     def self.server_xml(app_dir)
