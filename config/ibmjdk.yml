@@ -15,5 +15,5 @@
 
 # Configuration for JRE repository
 ---
-repository_root: "http://file.w3.bluemix.net/buildpack/jre/"
+repository_root: "http://9.20.238.233:80/buildpack/jre/"
 version: 1.7.0_+
