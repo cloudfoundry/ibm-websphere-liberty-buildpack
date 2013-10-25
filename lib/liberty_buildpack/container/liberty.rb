@@ -73,7 +73,6 @@ module LibertyBuildpack::Container
     # @return [void]
     def compile
       download_liberty
-      print "[INFO] updating server.xml"
       update_server_xml
       link_application
       link_libs
@@ -200,7 +199,6 @@ module LibertyBuildpack::Container
 
     # first checkpoint for .ears and other applications
     def self.find_liberty(app_dir, configuration)
-      print "[INFO] find liberty directory: #{app_dir} config: #{configuration}"
       if Liberty.ear(app_dir)
         version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
@@ -305,7 +303,6 @@ module LibertyBuildpack::Container
  
     def self.ear(app_dir)
       ears = Dir.glob(File.join(app_dir, "*.ear"))
-      # print "[INFO] ears found: #{ears}"
       ears != [] || ears != nil ? ears : nil
     end
 
