@@ -122,10 +122,10 @@ module LibertyBuildpack::Container
 
     # second checkpoint
     def update_server_xml
-      puts "[INFO] updating server.xml"
+      #puts "[INFO] updating server.xml"
       server_xml = Liberty.server_xml(@app_dir)
       if server_xml
-        puts "[INFO] server.xml found"
+        #puts "[INFO] server.xml found"
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         server_xml_doc.context[:attribute_quote] = :quote
 
@@ -145,8 +145,8 @@ module LibertyBuildpack::Container
         include_file.add_attribute('location', 'runtime-vars.xml')
 
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
-      elsif Liberty.web_inf(@app_dir) # or Liberty.ear(@app_dir)
-        puts "[INFO] webinf or ear found"
+      elsif Liberty.web_inf(@app_dir) or Liberty.ear(@app_dir)
+        #puts "[INFO] webinf or ear found"
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)        
@@ -164,19 +164,19 @@ module LibertyBuildpack::Container
     def server_name
         #puts "[INFO] determining server name"
       if Liberty.liberty_directory @app_dir
-        puts "[INFO] pushed packaged server"
+        #puts "[INFO] pushed packaged server"
         candidates = Dir[File.join(@app_dir, 'wlp', 'usr', 'servers', '*')]
         raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}" if candidates.size != 1
         File.basename(candidates[0])
       elsif Liberty.server_directory @app_dir
-        puts "[INFO] pushed unpackaged server"
+        #puts "[INFO] pushed unpackaged server"
         return 'defaultServer'
       elsif Liberty.web_inf @app_dir
-        puts "[INFO] pushed plain application (web-inf)"
+        #puts "[INFO] pushed plain application (web-inf)"
         return 'defaultServer'
-      #elsif Liberty.ear(@app_dir) #this causes the weird error to occur!!
-        #puts "[INFO] pushed ear"
-        #return 'defaultServer'
+      elsif Liberty.ear(@app_dir) #this causes the weird error to occur!!
+        # puts "[INFO] pushed ear"
+        return 'defaultServer'
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
       end
