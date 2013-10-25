@@ -51,7 +51,10 @@ module LibertyBuildpack::Container
       server_xml = Liberty.server_xml(@app_dir)
       if Liberty.web_inf(@app_dir)
         apps_found = [@app_dir]
-        
+      
+      elsif Liberty.ear(@app_dir)  
+        apps_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
+        Liberty.expand_apps(apps_found)
       elsif server_xml
         apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear'])))
         # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
@@ -225,13 +228,14 @@ module LibertyBuildpack::Container
       "liberty-#{version}"
     end
 
+    
     def link_application
-      if Liberty.liberty_directory(@app_dir)
-        FileUtils.rm_rf(usr)
-        FileUtils.mkdir_p(liberty_home)
-        FileUtils.ln_sf(Pathname.new(File.join(@app_dir, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home)
-      elsif Liberty.server_directory(@app_dir)
-        FileUtils.rm_rf(default_server_path)
+      if Liberty.liberty_directory(@app_dir) #if the file <app-dir>/wlp/usr/servers/*/server.xml exists (packaged server)
+        FileUtils.rm_rf(usr) # delete the old version created for a packaged server
+        FileUtils.mkdir_p(liberty_home) # creates .liberty dir
+        FileUtils.ln_sf(Pathname.new(File.join(@app_dir, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home) # ln_sf forces soft linking of parameters (old, new) from new to old
+      elsif Liberty.server_directory(@app_dir) #if a server.xml exists within the app_dir (unpackaged server)
+        FileUtils.rm_rf(default_server_path) #.liberty/usr/servers/defaultServer
         FileUtils.mkdir_p(default_server_path)
         default_server_pathname = Pathname.new(default_server_path)
         Pathname.glob(File.join(@app_dir, '*')) do |file|
@@ -242,7 +246,7 @@ module LibertyBuildpack::Container
 
     def link_libs
       apps.each do |app_dir|
-        libs = ContainerUtils.libs(app_dir, @lib_directory)
+        libs = ContainerUtils.libs(app_dir, @lib_directory) # Returns an +Array+ containing the relative paths of the JARs located in the additional libraries directory.
 
         if libs
           app_web_inf_lib = Liberty.web_inf_lib(app_dir)
