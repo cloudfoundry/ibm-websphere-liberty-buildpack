@@ -174,9 +174,9 @@ module LibertyBuildpack::Container
       elsif Liberty.web_inf @app_dir
         puts "[INFO] pushed plain application (web-inf)"
         return 'defaultServer'
-      elsif Liberty.ear(@app_dir)
-        puts "[INFO] pushed ear"
-        return 'defaultServer'
+      #elsif Liberty.ear(@app_dir) #this causes the weird error to occur!!
+       # puts "[INFO] pushed ear"
+        #return 'defaultServer'
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
       end
