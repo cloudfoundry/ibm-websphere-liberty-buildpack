@@ -310,11 +310,11 @@ module LibertyBuildpack::Container
       candidates.any? ? candidates[0] : nil
     end
  
-    #def self.ear(app_dir)
-     # ears = Dir.glob(File.join(app_dir, "*.ear"))
-      #puts "[INFO] ears found: #{ears}"
-      #ears != [] || ears != nil ? ears : nil
-    #end
+    def self.ear(app_dir)
+      ears = Dir.glob(File.join(app_dir, "*.ear"))
+      puts "[INFO] ears found: #{ears}"
+      ears != [] || ears != nil ? ears : nil
+    end
 
     def self.server_xml(app_dir)
       deep_candidates = Dir[File.join(app_dir, SERVER_XML_GLOB)]
