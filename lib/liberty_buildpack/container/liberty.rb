@@ -73,6 +73,7 @@ module LibertyBuildpack::Container
     # @return [void]
     def compile
       download_liberty
+      print "[INFO] updating server.xml"
       update_server_xml
       link_application
       link_libs
@@ -122,10 +123,8 @@ module LibertyBuildpack::Container
 
     # second checkpoint
     def update_server_xml
-      print "[INFO] updating server.xml"
       server_xml = Liberty.server_xml(@app_dir)
       if server_xml
-        print "[INFO] server.xml found"
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         server_xml_doc.context[:attribute_quote] = :quote
 
@@ -146,7 +145,6 @@ module LibertyBuildpack::Container
 
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       elsif Liberty.web_inf(@app_dir) or Liberty.ear(@app_dir)
-        print "[INFO] webinf or ear found"
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)        
