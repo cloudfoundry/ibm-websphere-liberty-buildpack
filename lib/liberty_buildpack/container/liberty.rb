@@ -169,10 +169,10 @@ module LibertyBuildpack::Container
         raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}" if candidates.size != 1
         File.basename(candidates[0])
       elsif Liberty.server_directory @app_dir
-        #puts "[INFO] pushed unpackaged server"
+        puts "[INFO] pushed unpackaged server"
         return 'defaultServer'
       elsif Liberty.web_inf @app_dir
-        #puts "[INFO] pushed plain application (web-inf)"
+        puts "[INFO] pushed plain application (web-inf)"
         return 'defaultServer'
       #elsif Liberty.ear(@app_dir) #this causes the weird error to occur!!
         #puts "[INFO] pushed ear"
