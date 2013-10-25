@@ -53,7 +53,7 @@ module LibertyBuildpack::Container
         apps_found = [@app_dir]
         
       elsif server_xml
-        apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', '*.war')))
+        apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear'])))
         # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
         Liberty.expand_apps(apps_found)
       end
@@ -160,22 +160,17 @@ module LibertyBuildpack::Container
       system "chmod +x #{server_script}"
     end
 
-    # checkpoint three
+    # checkpoint three - don't add any printouts here it causes an error!
     def server_name
-        #puts "[INFO] determining server name"
       if Liberty.liberty_directory @app_dir
-        #puts "[INFO] pushed packaged server"
         candidates = Dir[File.join(@app_dir, 'wlp', 'usr', 'servers', '*')]
         raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}" if candidates.size != 1
         File.basename(candidates[0])
       elsif Liberty.server_directory @app_dir
-        #puts "[INFO] pushed unpackaged server"
         return 'defaultServer'
       elsif Liberty.web_inf @app_dir
-        #puts "[INFO] pushed plain application (web-inf)"
         return 'defaultServer'
-      elsif Liberty.ear(@app_dir) #this causes the weird error to occur!!
-        # puts "[INFO] pushed ear"
+      elsif Liberty.ear(@app_dir) 
         return 'defaultServer'
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
@@ -208,11 +203,11 @@ module LibertyBuildpack::Container
     # first checkpoint for .ears and other applications
     def self.find_liberty(app_dir, configuration)
       #puts "[INFO] find liberty directory: #{app_dir} config: #{configuration}"
-      #if Liberty.ear(app_dir)
-       # version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
-        #  fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
-        #end
-      if server_xml(app_dir)
+      if Liberty.ear(app_dir)
+        version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+          fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
+        end
+      elsif server_xml(app_dir)
         version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
@@ -312,7 +307,7 @@ module LibertyBuildpack::Container
  
     def self.ear(app_dir)
       ears = Dir.glob(File.join(app_dir, "*.ear"))
-      puts "[INFO] ears found: #{ears}"
+      # puts "[INFO] ears found: #{ears}"
       ears != [] || ears != nil ? ears : nil
     end
 
