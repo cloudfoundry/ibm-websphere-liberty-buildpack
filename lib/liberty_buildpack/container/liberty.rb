@@ -122,10 +122,10 @@ module LibertyBuildpack::Container
 
     # second checkpoint
     def update_server_xml
-      #puts "[INFO] updating server.xml"
+      print "[INFO] updating server.xml"
       server_xml = Liberty.server_xml(@app_dir)
       if server_xml
-        #puts "[INFO] server.xml found"
+        print "[INFO] server.xml found"
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         server_xml_doc.context[:attribute_quote] = :quote
 
@@ -146,7 +146,7 @@ module LibertyBuildpack::Container
 
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       elsif Liberty.web_inf(@app_dir) or Liberty.ear(@app_dir)
-        #puts "[INFO] webinf or ear found"
+        print "[INFO] webinf or ear found"
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)        
@@ -202,7 +202,7 @@ module LibertyBuildpack::Container
 
     # first checkpoint for .ears and other applications
     def self.find_liberty(app_dir, configuration)
-      #puts "[INFO] find liberty directory: #{app_dir} config: #{configuration}"
+      print "[INFO] find liberty directory: #{app_dir} config: #{configuration}"
       if Liberty.ear(app_dir)
         version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
@@ -307,7 +307,7 @@ module LibertyBuildpack::Container
  
     def self.ear(app_dir)
       ears = Dir.glob(File.join(app_dir, "*.ear"))
-      # puts "[INFO] ears found: #{ears}"
+      # print "[INFO] ears found: #{ears}"
       ears != [] || ears != nil ? ears : nil
     end
 
