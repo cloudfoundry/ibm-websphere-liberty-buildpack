@@ -122,10 +122,10 @@ module LibertyBuildpack::Container
 
     # second checkpoint
     def update_server_xml
-      puts "[INFO] updating server.xml"
+      #puts "[INFO] updating server.xml"
       server_xml = Liberty.server_xml(@app_dir)
       if server_xml
-        puts "[INFO] server.xml found"
+        #puts "[INFO] server.xml found"
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         server_xml_doc.context[:attribute_quote] = :quote
 
@@ -146,7 +146,7 @@ module LibertyBuildpack::Container
 
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       elsif Liberty.web_inf(@app_dir) # or Liberty.ear(@app_dir)
-        puts "[INFO] webinf or ear found"
+        #puts "[INFO] webinf or ear found"
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)        
