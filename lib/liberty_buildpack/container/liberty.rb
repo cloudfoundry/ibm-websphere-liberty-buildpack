@@ -162,7 +162,7 @@ module LibertyBuildpack::Container
 
     # checkpoint three
     def server_name
-        puts "[INFO] determining server name"
+        #puts "[INFO] determining server name"
       if Liberty.liberty_directory @app_dir
         puts "[INFO] pushed packaged server"
         candidates = Dir[File.join(@app_dir, 'wlp', 'usr', 'servers', '*')]
