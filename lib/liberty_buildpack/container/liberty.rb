@@ -73,16 +73,14 @@ module LibertyBuildpack::Container
     #
     # @return [void]
     def compile
-      if LibertyBuildpack::Util.check_license(@liberty_license, @license_id)
-        download_liberty
-        update_server_xml
-        link_application
-        link_libs
-        make_server_script_runnable
-        set_liberty_system_properties
-      else
-        raise "\nYou have not accepted the IBM Liberty Profile License. \nVisit #{@liberty_license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n"
-      end
+      raise "\nYou have not accepted the IBM Liberty Profile License. \nVisit #{@liberty_license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n" unless LibertyBuildpack::Util.check_license(@liberty_license, @license_id)
+
+      download_liberty
+      update_server_xml
+      link_application
+      link_libs
+      make_server_script_runnable
+      set_liberty_system_properties
     end
 
     # Creates the command to run the Liberty application.

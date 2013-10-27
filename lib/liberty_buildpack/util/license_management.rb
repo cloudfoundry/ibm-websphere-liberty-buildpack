@@ -20,13 +20,18 @@ require 'liberty_buildpack/util/format_duration'
 
 module LibertyBuildpack::Util
 
-  def self.check_license(license_uri, license_id)    
-    if license_uri.nil?
-      raise "The HTTP License was not found at: #{@license} \n"
-    else
-      # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
-      license = open(license_uri).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
-    end
+  # Compares the provided license id with the id that is extracted from the license url.
+  #
+  # @param [String] url of the license to check against
+  # @param [String] actual id provided by the user
+  # @raise if the license url is nil
+  # @return [boolean] return true if the license id's match, false otherwise
+  def self.check_license(license_uri, license_id)
+    raise 'The license URL has returned nil' if license_uri.nil?
+
+    # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
+    license = open(license_uri).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
+
     license_id == license ? true : false
   end
 

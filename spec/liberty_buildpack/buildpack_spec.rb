@@ -40,6 +40,7 @@ module LibertyBuildpack
           'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
           'jres' => ['Test::StubJre1', 'Test::StubJre2']
       )
+      YAML.stub(:load_file).with(File.expand_path('config/licenses.yml')).and_return(nil)
 
       Test::StubContainer1.stub(:new).and_return(stub_container1)
       Test::StubContainer2.stub(:new).and_return(stub_container2)
@@ -145,6 +146,7 @@ module LibertyBuildpack
       File.stub(:exists?).with(File.expand_path('config/stubframework2.yml')).and_return(false)
       File.stub(:exists?).with(File.expand_path('config/stubcontainer1.yml')).and_return(false)
       File.stub(:exists?).with(File.expand_path('config/stubcontainer2.yml')).and_return(false)
+      File.stub(:exists?).with(File.expand_path('config/licenses.yml')).and_return(true)
       YAML.stub(:load_file).with(File.expand_path('config/stubjre1.yml')).and_return('x' => 'y')
 
       with_buildpack { |buildpack| buildpack.detect }

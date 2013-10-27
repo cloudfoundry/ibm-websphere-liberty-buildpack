@@ -3,7 +3,15 @@
 The `liberty-buildpack` is a [Cloud Foundry][] buildpack for running applications on IBM's WebSphere Application Server Liberty Profile.  It is designed to run most "packaged" servers.
 
 ## Usage
-In order to use the buildpack you will first need to complete the following:
+To deploy applications using the IBM WebSphere Application Server Liberty Buildpack, use the following command:
+
+```bash
+cf push --buildpack https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
+```
+For further details on the options available for deploying your applications see [options][]
+
+## Forking the buildpack   
+If you wish to fork the buildpack and host your own binaries, then complete the following:
 
 * Fork the [ibm-websphere-liberty-buildpack](https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack).
 
@@ -23,13 +31,11 @@ In order to use the buildpack you will first need to complete the following:
 
 * Commit and push the changes
 
-* You should now be able to deploy your applications using the following command:
+* You should now be able to deploy applications to your forked buildpack with the following command:
 
 ```bash
-cf push --buildpack="URL to forked repository"
+cf push --buildpack "URL to forked repository"
 ```
-    
-For further details on the options available for deploying your applications see [options][]
     
 
 ## Running Tests

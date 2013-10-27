@@ -22,8 +22,8 @@ module LibertyBuildpack::Jre
 
   describe IBMJdk do
 
-    DETAILS_PRE_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.7.0'), 'test-uri']
-    DETAILS_POST_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.8.0'), 'test-uri']
+    DETAILS_PRE_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.7.0'), 'test-uri', 'spec/fixtures/license.html']
+    DETAILS_POST_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.8.0'), 'test-uri', 'spec/fixtures/license.html']
 
     let(:application_cache) { double('ApplicationCache') }
     let(:memory_heuristic) { double('MemoryHeuristic', resolve: %w(opt-1 opt-2)) }
@@ -31,6 +31,8 @@ module LibertyBuildpack::Jre
     before do
       $stdout = StringIO.new
       $stderr = StringIO.new
+      FileUtils.rm_rf('/tmp/jre_temp')
+      Dir.mkdir('/tmp/jre_temp')
     end
 
     it 'should detect with id of ibmjdk-<version>' do
@@ -41,24 +43,27 @@ module LibertyBuildpack::Jre
             app_dir: '',
             java_home: '',
             java_opts: [],
-            configuration: {}
+            configuration: {},
+            license_ids: {}
         ).detect
 
         expect(detected).to eq('ibmjdk-1.7.0')
       end
     end
 
-    it 'should extract Java from a GZipped TAR' do
+    it 'should extract Java from a bin script' do
       Dir.mktmpdir do |root|
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
+        LibertyBuildpack::Jre::IBMJdk.stub(:cache_dir).and_return('/tmp/jre_temp')
+        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.bin'))
 
         IBMJdk.new(
             app_dir: root,
             configuration: {},
             java_home: '',
-            java_opts: []
+            java_opts: [],
+            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
         ).compile
 
         java = File.join(root, '.java', 'jre', 'bin', 'java')
@@ -75,10 +80,26 @@ module LibertyBuildpack::Jre
             app_dir: '/application-directory',
             java_home: java_home,
             java_opts: [],
-            configuration: {}
+            configuration: {},
+            license_ids: {}
         )
 
         expect(java_home).to eq('.java')
+      end
+    end
+
+    it 'should fail when the license ids do not match' do
+      Dir.mktmpdir do |root|
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+        expect do
+          IBMJdk.new(
+            app_dir: '',
+            java_home: '',
+            java_opts: [],
+            configuration: {},
+            license_ids: { 'IBM_JVM_LICENSE' => 'Incorrect' }
+          ).compile
+        end.to raise_error(/You have not accepted the IBM JVM License/)
       end
     end
 
@@ -90,7 +111,8 @@ module LibertyBuildpack::Jre
               app_dir: '',
               java_home: '',
               java_opts: [],
-              configuration: {}
+              configuration: {},
+              license_ids: {}
           ).detect
         end.to raise_error(/IBM\ JRE\ error:\ test\ error/)
       end
@@ -106,7 +128,8 @@ module LibertyBuildpack::Jre
             app_dir: '/application-directory',
             java_home: '',
             java_opts: java_opts,
-            configuration: {}
+            configuration: {},
+            license_ids: {}
         ).release
 
         expect(java_opts).to include('-Xnocompressedrefs')
@@ -124,7 +147,8 @@ module LibertyBuildpack::Jre
             app_dir: '/application-directory',
             java_home: '',
             java_opts: java_opts,
-            configuration: {}
+            configuration: {},
+            license_ids: {}
         ).release
 
         expect(java_opts).to include('-Xtune:virtualized')
@@ -142,7 +166,8 @@ module LibertyBuildpack::Jre
             app_dir: '/application-directory',
             java_home: '',
             java_opts: java_opts,
-            configuration: {}
+            configuration: {},
+            license_ids: {}
         ).release
 
         expect(java_opts).to include('-Xtune:virtualized')
@@ -160,7 +185,8 @@ module LibertyBuildpack::Jre
             app_dir: root,
             java_home: '',
             java_opts: java_opts,
-            configuration: {}
+            configuration: {},
+            license_ids: {}
         ).release
 
         expect(java_opts).to include("-XX:OnOutOfMemoryError=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{IBMJdk::KILLJAVA_FILE_NAME}")
@@ -171,14 +197,15 @@ module LibertyBuildpack::Jre
       Dir.mktmpdir do |root|
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
+        LibertyBuildpack::Jre::IBMJdk.stub(:cache_dir).and_return('/tmp/jre_temp')
+        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.bin'))
 
-        java_opts = []
         IBMJdk.new(
             app_dir: root,
+            configuration: {},
             java_home: '',
-            java_opts: java_opts,
-            configuration: {}
+            java_opts: [],
+            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
         ).compile
 
         killjava_content = File.read(File.join(LibertyBuildpack::Diagnostics.get_diagnostic_directory(root), IBMJdk::KILLJAVA_FILE_NAME))

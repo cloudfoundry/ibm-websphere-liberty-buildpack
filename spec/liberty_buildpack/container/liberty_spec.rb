@@ -23,7 +23,7 @@ module LibertyBuildpack::Container
 
     LIBERTY_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('8.5.5')
 
-    LIBERTY_DETAILS = [LIBERTY_VERSION, 'test-liberty-uri']
+    LIBERTY_DETAILS = [LIBERTY_VERSION, 'test-liberty-uri', 'spec/fixtures/license.html']
 
     let(:application_cache) { double('ApplicationCache') }
 
@@ -38,7 +38,10 @@ module LibertyBuildpack::Container
         .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
         app_dir: 'spec/fixtures/container_liberty',
-        configuration: {}
+        configuration: {},
+        java_home: '',
+        java_opts: [],
+        license_ids: {}
         ).detect
 
         expect(detected).to include('liberty-8.5.5')
@@ -49,7 +52,10 @@ module LibertyBuildpack::Container
         .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
         app_dir: 'spec/fixtures/container_liberty_server',
-        configuration: {}
+        configuration: {},
+        java_home: '',
+        java_opts: [],
+        license_ids: {}
         ).detect
 
         expect(detected).to include('liberty-8.5.5')
@@ -60,7 +66,10 @@ module LibertyBuildpack::Container
         .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
         app_dir: 'spec/fixtures/container_liberty_single_server',
-        configuration: {}
+        configuration: {},
+        java_home: '',
+        java_opts: [],
+        license_ids: {}
         ).detect
 
         expect(detected).to include('liberty-8.5.5')
@@ -90,7 +99,10 @@ module LibertyBuildpack::Container
           expect do
             Liberty.new(
             app_dir: root,
-            configuration: {}
+            configuration: {},
+            java_home: '',
+            java_opts: [],
+            license_ids: {}
             ).detect
           end.to raise_error(/Incorrect\ number\ of\ servers\ to\ deploy/)
         end # mktmpdir
@@ -99,7 +111,10 @@ module LibertyBuildpack::Container
       it 'should not detect when WEB-INF and server.xml are absent' do
         detected = Liberty.new(
         app_dir: 'spec/fixtures/container_main',
-        configuration: {}
+        configuration: {},
+        java_home: '',
+        java_opts: [],
+        license_ids: {}
         ).detect
 
         expect(detected).to be_nil
@@ -107,6 +122,26 @@ module LibertyBuildpack::Container
     end
 
     describe 'compile' do
+      it 'should fail if license ids do not match' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'WEB-INF')
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          expect do
+            Liberty.new(
+              app_dir: root,
+              lib_directory: '',
+              configuration: {},
+              java_home: '',
+              java_opts: [],
+              license_ids: { 'IBM_LIBERTY_LICENSE' => 'Incorrect' }
+            ).compile
+          end.to raise_error(/You have not accepted the IBM Liberty Profile License/)
+        end
+      end
+
       it 'should extract Liberty from a JAR file' do
         Dir.mktmpdir do |root|
           Dir.mkdir File.join(root, 'WEB-INF')
@@ -122,7 +157,10 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           lib_directory: library_directory,
-          configuration: {}
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
           liberty_dir = File.join root, '.liberty'
@@ -161,7 +199,10 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           lib_directory: library_directory,
-          configuration: {}
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
           server_script = File.join(root, '.liberty', 'bin', 'server')
@@ -185,7 +226,10 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           lib_directory: library_directory,
-          configuration: {}
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
           server_script = File.join(root, '.liberty', 'bin', 'server')
@@ -208,7 +252,10 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           lib_directory: library_directory,
-          configuration: {}
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
           expect(File.exists?(server_xml_file)).to be_true
@@ -235,7 +282,10 @@ module LibertyBuildpack::Container
 
           Liberty.new(
           app_dir: root,
-          configuration: {}
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
           liberty_directory = File.join(root, '.liberty')
@@ -268,7 +318,10 @@ module LibertyBuildpack::Container
 
           Liberty.new(
           app_dir: root,
-          configuration: {}
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
           liberty_directory = File.join(root, '.liberty')
@@ -314,7 +367,10 @@ module LibertyBuildpack::Container
 
           Liberty.new(
           app_dir: root,
-          configuration: {}
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
@@ -346,7 +402,10 @@ module LibertyBuildpack::Container
 
           Liberty.new(
           app_dir: root,
-          configuration: {}
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
@@ -373,7 +432,7 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-          Liberty.new(app_dir: root, configuration: {}).compile
+          Liberty.new(app_dir: root, configuration: {}, java_home: '', java_opts: [], license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }).compile
 
           liberty_directory = File.join(root, '.liberty')
           expect(Dir.exists?(liberty_directory)).to be_true
@@ -412,7 +471,10 @@ module LibertyBuildpack::Container
           liberty = Liberty.new(
           app_dir: root,
           lib_directory: lib_directory,
-          configuration: {}
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           )
           liberty.compile
 
@@ -454,7 +516,10 @@ module LibertyBuildpack::Container
           liberty = Liberty.new(
           app_dir: root,
           lib_directory: lib_directory,
-          configuration: {}
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           )
           liberty.compile
 
@@ -489,7 +554,8 @@ module LibertyBuildpack::Container
         app_dir: 'spec/fixtures/container_liberty',
         java_home: 'test-java-home',
         java_opts: %w(test-opt-2 test-opt-1),
-        configuration: {}
+        configuration: {},
+        license_ids: {}
         ).release
 
         expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" JVM_ARGS=\" test-opt-1 test-opt-2\" .liberty/bin/server run defaultServer")
@@ -503,7 +569,8 @@ module LibertyBuildpack::Container
         app_dir: 'spec/fixtures/container_liberty_server',
         java_home: 'test-java-home',
         java_opts: %w(test-opt-2 test-opt-1),
-        configuration: {}
+        configuration: {},
+        license_ids: {}
         ).release
 
         expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" JVM_ARGS=\" test-opt-1 test-opt-2\" .liberty/bin/server run myServer")
@@ -517,7 +584,8 @@ module LibertyBuildpack::Container
         app_dir: 'spec/fixtures/container_liberty_single_server',
         java_home: 'test-java-home',
         java_opts: %w(test-opt-2 test-opt-1),
-        configuration: {}
+        configuration: {},
+        license_ids: {}
         ).release
 
         expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" JVM_ARGS=\" test-opt-1 test-opt-2\" .liberty/bin/server run defaultServer")
@@ -549,7 +617,8 @@ module LibertyBuildpack::Container
             app_dir: root,
             java_home: 'test-java-home',
             java_opts: %w(test-opt-2 test-opt-1),
-            configuration: {}
+            configuration: {},
+            license_ids: {}
             ).release
           end.to raise_error(/Incorrect\ number\ of\ servers\ to\ deploy/)
         end
@@ -572,7 +641,8 @@ module LibertyBuildpack::Container
         FileUtils.cp_r('spec/fixtures/framework_auto_reconfiguration_servlet_2', spring_dir)
         liberty_container = Liberty.new(
         app_dir: root,
-        configuration: {}
+        configuration: {},
+        license_ids: {}
         )
 
         apps = liberty_container.apps
@@ -590,7 +660,8 @@ module LibertyBuildpack::Container
         FileUtils.cp('spec/fixtures/stub-spring.war', spring1_war)
         liberty_container = Liberty.new(
         app_dir: root,
-        configuration: {}
+        configuration: {},
+        license_ids: {}
         )
 
         apps = liberty_container.apps
@@ -610,7 +681,8 @@ module LibertyBuildpack::Container
         FileUtils.cp('spec/fixtures/stub-spring.war', spring2_war)
         liberty_container = Liberty.new(
         app_dir: root,
-        configuration: {}
+        configuration: {},
+        license_ids: {}
         )
 
         apps = liberty_container.apps

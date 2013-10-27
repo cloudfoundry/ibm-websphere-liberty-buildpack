@@ -1,2 +1,4 @@
 ---
-resolved-version: resolved-uri
+resolved-version: 
+  uri: resolved-uri
+  license: resolved-license
