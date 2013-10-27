@@ -126,15 +126,8 @@ module LibertyBuildpack
       environment = ENV.to_hash
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
-      jvm_license = 'IBM_JVM_LICENSE'
-      liberty_license = 'IBM_LIBERTY_LICENSE'
-      
-      license_file = File.expand_path(LICENSE_CONFIG, File.dirname(__FILE__))
-      if File.exists? license_file
-        license_ids = YAML.load_file(license_file)
-      else
-        license_ids = { jvm_license => ENV[jvm_license], liberty_license => ENV[liberty_license] }
-      end
+
+      license_ids = get_license_hash
 
       basic_context = {
           app_dir: app_dir,
@@ -253,6 +246,19 @@ module LibertyBuildpack
 
     def jre
       @jres.find { |jre| jre.detect }
+    end
+
+    def get_license_hash
+      jvm_license = 'IBM_JVM_LICENSE'
+      liberty_license = 'IBM_LIBERTY_LICENSE'
+
+      license_file = File.expand_path(LICENSE_CONFIG, File.dirname(__FILE__))
+      if File.exists? license_file
+        license_ids = YAML.load_file(license_file)
+      else
+        license_ids = { jvm_license => ENV[jvm_license], liberty_license => ENV[liberty_license] }
+      end
+      license_ids
     end
 
   end
