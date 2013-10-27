@@ -5,16 +5,16 @@ The `liberty-buildpack` is a [Cloud Foundry][] buildpack for running application
 ## Usage
 To deploy applications using the IBM WebSphere Application Server Liberty Buildpack, you are required to accept the IBM Liberty license and IBM JRE license by actioning the following:
 * Read the current IBM [Liberty-License][] and the current IBM [JVM-License][].
-* Extract the "D/N: {License number}" from the license.
-* Add this as an environment variable inside of the "manifest.yml" file that gets pushed with your application.
+* Extract the "D/N: {License code}" from the license.
+* Add the following environment variables and extracted license codes inside of the "manifest.yml" file that gets pushed with your application.
 
 ```
   env:
-    IBM_JVM_LICENSE: {jvm license number}
-    IBM_LIBERTY_LICENSE: {liberty license number}
+    IBM_JVM_LICENSE: {jvm license code}
+    IBM_LIBERTY_LICENSE: {liberty license code}
 ```
 
-* Once the license acceptance envrionment variables are set, use the following command:
+* Once the license acceptance environment variables are set, use the following command:
 
 ```bash
 cf push --buildpack https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
