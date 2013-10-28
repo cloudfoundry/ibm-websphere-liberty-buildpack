@@ -149,24 +149,17 @@ module LibertyBuildpack::Container
       elsif Liberty.web_inf(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)    
-        apps.each do |app| 
-            puts "#{app}"
-        end    
+        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)      
       elsif Liberty.ear(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)     
         
-        # server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
-        # server_xml_doc.context[:attribute_quote] = :quote
-        
-        
-          apps.each do |app| 
-            puts "#{app}"
-           # application.add_attribute('location', "../../../../#{app}")
-            #application.add_attribute('type', 'ear')
-          end
+        application = REXML::XPath.match(server_xml_doc, '/server/appliaction')
+        application.delete_attribute('location')
+        application.delete_attribute('type')
+        application.add_attribute('type', 'ear')
+        application.add_attribute('location', "../../../../")
       else
         raise 'Neither a server.xml or WEB-INF directory was found.'
       end
