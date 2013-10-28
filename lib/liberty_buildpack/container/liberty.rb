@@ -158,7 +158,11 @@ module LibertyBuildpack::Container
         server_xml_doc = File.open(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'), 'r') { |file| REXML::Document.new(file) }
         application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
         puts application.attributes['location']
-        puts application.attributes['type'] = 'ear'
+        puts application.attributes['type']
+        application.attributes["location"] = "../../../../"
+        application.attributes["type"] = "ear"
+        puts application.attributes['location']
+        puts application.attributes['type']
       else
         raise 'Neither a server.xml or WEB-INF directory was found.'
       end
