@@ -155,17 +155,18 @@ module LibertyBuildpack::Container
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)     
         
-        server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
-        server_xml_doc.context[:attribute_quote] = :quote
+        # server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
+        # server_xml_doc.context[:attribute_quote] = :quote
         
         if apps = Liberty.apps
-          application = REXML::XPath.match(server_xml_doc, '/server/application')
-          application.delete_attribute('location')
-          application.delete_attribute('type')
+          #application = REXML::XPath.match(server_xml_doc, '/server/application')
+          #application.delete_attribute('location')
+          #application.delete_attribute('type')
         
           apps.each do |app| 
-            application.add_attribute('location', "../../../../#{app}")
-            application.add_attribute('type', 'ear')
+            puts "#{app}"
+           # application.add_attribute('location', "../../../../#{app}")
+            #application.add_attribute('type', 'ear')
           end
         end
       else
