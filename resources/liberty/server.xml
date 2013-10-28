@@ -11,8 +11,9 @@
                   httpPort="${port}"
                    />
 
-        <application name="myEar" context-root="/" location="../../../../"
-        type="ear" />
+        <application name="myapp" context-root="/" location="../../../../../"
+        type="war" />
+        
         
     <include location="runtime-vars.xml" />
 	

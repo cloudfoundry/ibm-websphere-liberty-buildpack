@@ -146,10 +146,24 @@ module LibertyBuildpack::Container
         include_file.add_attribute('location', 'runtime-vars.xml')
 
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
-      elsif Liberty.web_inf(@app_dir) or Liberty.ear(@app_dir)
+      elsif Liberty.web_inf(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)        
+      elsif Liberty.ear(@app_dir)
+        FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
+        resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
+        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)     
+        
+        server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
+        server_xml_doc.context[:attribute_quote] = :quote
+
+        application = REXML::XPath.match(server_xml_doc, '/server/application')
+        application.delete_attribute('location')
+        application.delete_attribute('type')
+        
+        application.add_attribute('location', '../../../../'+Liberty.apps[0])
+        application.add_attribute('type', 'ear')
       else
         raise 'Neither a server.xml or WEB-INF directory was found.'
       end
