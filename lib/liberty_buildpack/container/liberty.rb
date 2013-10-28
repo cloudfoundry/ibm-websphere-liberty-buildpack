@@ -158,7 +158,7 @@ module LibertyBuildpack::Container
         server_xml = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml')
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
-        application.attributes["location"] = "../../../../"
+        application.attributes["location"] = "../../../../#{File.basename(Liberty.ear(@app_dir)[0])}"
         application.attributes["type"] = "ear"
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       else
