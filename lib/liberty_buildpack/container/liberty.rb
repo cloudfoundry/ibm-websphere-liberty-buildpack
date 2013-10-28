@@ -158,17 +158,12 @@ module LibertyBuildpack::Container
         # server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         # server_xml_doc.context[:attribute_quote] = :quote
         
-        if apps = Liberty.apps
-          #application = REXML::XPath.match(server_xml_doc, '/server/application')
-          #application.delete_attribute('location')
-          #application.delete_attribute('type')
         
           apps.each do |app| 
             puts "#{app}"
            # application.add_attribute('location', "../../../../#{app}")
             #application.add_attribute('type', 'ear')
           end
-        end
       else
         raise 'Neither a server.xml or WEB-INF directory was found.'
       end
