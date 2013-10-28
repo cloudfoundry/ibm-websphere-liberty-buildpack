@@ -65,19 +65,17 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def compile
-      if LibertyBuildpack::Util.check_license(@license, @license_id)
-        download_start_time = Time.now
+      raise "\nYou have not accepted the IBM JVM License. \nVisit #{@license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n" unless LibertyBuildpack::Util.check_license(@license, @license_id)
 
-        print "-----> Downloading IBM #{@version} JRE from #{@uri} "
+      download_start_time = Time.now
 
-        LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
-          puts "(#{(Time.now - download_start_time).duration})"
-          expand file
-        end
-        copy_killjava_script
-      else
-        raise "\nYou have not accepted the IBM JVM License. \nVisit #{@license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
+      print "-----> Downloading IBM #{@version} JRE from #{@uri} "
+
+      LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
+        puts "(#{(Time.now - download_start_time).duration})"
+        expand file
       end
+      copy_killjava_script
     end
 
     # Build Java memory options and places then in +context[:java_opts]+
@@ -105,9 +103,9 @@ module LibertyBuildpack::Jre
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
 
-      cache_dir = "#{Dir.tmpdir}/cache/"
+      cache_dir = IBMJdk.cache_dir(file)
 
-      response_file = File.new("#{cache_dir}response.properties", 'w')
+      response_file = File.new(File.join(cache_dir, 'response.properties'), 'w')
       response_file.puts('INSTALLER_UI=silent')
       response_file.puts("USER_INSTALL_DIR=#{java_home}")
       response_file.close
@@ -133,6 +131,10 @@ module LibertyBuildpack::Jre
 
     def java_home
       File.join @app_dir, JAVA_HOME
+    end
+
+    def self.cache_dir(file)
+      File.dirname(file.path)
     end
 
     def memory(configuration)

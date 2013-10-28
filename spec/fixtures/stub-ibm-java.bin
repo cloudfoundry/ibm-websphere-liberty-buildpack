@@ -1,0 +1,6 @@
+rm -rf /tmp/jre_temp
+mkdir /tmp/jre_temp
+mkdir /tmp/jre_temp/jre_dir
+mkdir /tmp/jre_temp/jre_dir/jre
+mkdir /tmp/jre_temp/jre_dir/jre/bin
+echo "java" > /tmp/jre_temp/jre_dir/jre/bin/java
