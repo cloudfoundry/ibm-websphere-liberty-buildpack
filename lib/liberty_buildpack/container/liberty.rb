@@ -335,7 +335,7 @@ module LibertyBuildpack::Container
       apps.each do |app|
         if File.file? app
           temp_directory = "#{app}.tmp"
-          system("unzip -oxq '#{app}'")
+          system("unzip -oxq '#{app}' -d '#{temp_directory}'")
           File.delete(app)
           File.rename(temp_directory, app)
         end
@@ -345,7 +345,7 @@ module LibertyBuildpack::Container
     def self.expand_ear(apps)
       apps.each do |ear|
         if File.file? ear
-           system("unzip -joxq '#{ear}' -d '#{temp_directory}'")
+           system("unzip -joxq '#{ear}'")
            File.delete(ear)
         end
       end
