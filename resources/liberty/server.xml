@@ -14,6 +14,9 @@
         <application name="myapp" context-root="/" location="../../../../../"
         type="war" />
         
+        <application name="myEar" context-root="/" location="../../../../../"
+        type="ear" />
+        
     <include location="runtime-vars.xml" />
 	
 </server>

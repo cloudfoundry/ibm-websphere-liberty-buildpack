@@ -234,12 +234,12 @@ module LibertyBuildpack::Container
         FileUtils.rm_rf(usr) # delete the old version created for a packaged server
         FileUtils.mkdir_p(liberty_home) # creates .liberty dir
         FileUtils.ln_sf(Pathname.new(File.join(@app_dir, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home) # ln_sf forces soft linking of parameters (old, new) from new to old
-      elsif Liberty.server_directory(@app_dir) #if a server.xml exists within the app_dir (unpackaged server)
+      elsif Liberty.server_directory(@app_dir) #if a server.xml exists within the app_dir (unpackaged server) / single app
         FileUtils.rm_rf(default_server_path) #.liberty/usr/servers/defaultServer
         FileUtils.mkdir_p(default_server_path)
-        default_server_pathname = Pathname.new(default_server_path)
-        Pathname.glob(File.join(@app_dir, '*')) do |file|
-          FileUtils.ln_sf(file.relative_path_from(default_server_pathname), default_server_path)
+        default_server_pathname = Pathname.new(default_server_path) #.liberty/usr/servers/defaultServer as actual Pathname
+        Pathname.glob(File.join(@app_dir, '*')) do |file| # each file in the appdir create a link in .liberty/usr/servers/defaultServer
+          FileUtils.ln_sf(file.relative_path_from(default_server_pathname), default_server_path) 
         end
       end
     end
@@ -323,7 +323,6 @@ module LibertyBuildpack::Container
     def self.expand_apps(apps)
       apps.each do |app|
         if File.file? app
-          puts "application being expanded #{app}"
           temp_directory = "#{app}.tmp"
           system("unzip -oxq '#{app}' -d '#{temp_directory}'")
           File.delete(app)
