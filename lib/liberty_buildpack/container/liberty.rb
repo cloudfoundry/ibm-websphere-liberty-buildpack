@@ -149,7 +149,10 @@ module LibertyBuildpack::Container
       elsif Liberty.web_inf(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)        
+        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)    
+        apps.each do |app| 
+            puts "#{app}"
+        end    
       elsif Liberty.ear(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
