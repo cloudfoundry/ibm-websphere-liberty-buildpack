@@ -238,10 +238,10 @@ module LibertyBuildpack::Container
         FileUtils.rm_rf(default_server_path) #.liberty/usr/servers/defaultServer
         FileUtils.mkdir_p(default_server_path)
         default_server_pathname = Pathname.new(default_server_path) #.liberty/usr/servers/defaultServer as actual Pathname
+        puts "Server.xml looks for #{Pathname.glob(File.join(@app_dir, default_server_path, "../../../../*"))} (lvl 4)"
+        puts "Server.xml looks for #{Pathname.glob(File.join(@app_dir, default_server_path, "../../../../../*"))} (lvl 5)"
         Pathname.glob(File.join(@app_dir, '*')) do |file| # each file in the appdir create a link in .liberty/usr/servers/defaultServer
           FileUtils.ln_sf(file.relative_path_from(default_server_pathname), default_server_path) 
-          puts "Server.xml looks for #{Pathname.glob(File.join(@app_dir, default_server_path, "../../../../*"))} (lvl 4)"
-          puts "Server.xml looks for #{Pathname.glob(File.join(@app_dir, default_server_path, "../../../../../*"))} (lvl 5)"
         end
       end
     end
