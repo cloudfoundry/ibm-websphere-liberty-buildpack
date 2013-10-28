@@ -322,6 +322,7 @@ module LibertyBuildpack::Container
 
     def self.expand_apps(apps)
       apps.each do |app|
+      puts "application being expanded #{app}"
         if File.file? app
           temp_directory = "#{app}.tmp"
           system("unzip -oxq '#{app}' -d '#{temp_directory}'")
