@@ -156,7 +156,7 @@ module LibertyBuildpack::Container
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)     
         
         server_xml_doc = File.open(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'), 'r') { |file| REXML::Document.new(file) }
-        application = REXML::XPath.match(server_xml_doc, '/server/appliaction')
+        application = REXML::XPath.match(server_xml_doc, '/server/application')
         application.delete_attribute('location')
         application.delete_attribute('type')
         application.add_attribute('type', 'ear')
