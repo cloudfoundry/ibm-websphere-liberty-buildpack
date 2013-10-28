@@ -345,8 +345,8 @@ module LibertyBuildpack::Container
     def self.expand_ear(apps)
       apps.each do |ear|
         if File.file? ear
-           puts "unzipping #{ear}"
-           system("unzip -joxq '#{ear}'")
+           system("unzip -oxq '#{ear}'")
+           File.delete(ear)
         end
       end
     end
