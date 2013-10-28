@@ -54,7 +54,7 @@ module LibertyBuildpack::Container
       
       elsif Liberty.ear(@app_dir)  
         apps_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
-        Liberty.expand_apps(apps_found)
+        Liberty.expand_ear(apps_found)
       elsif server_xml
         apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear'])))
         # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
@@ -158,7 +158,8 @@ module LibertyBuildpack::Container
         server_xml = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml')
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
-        application.attributes["location"] = "../../../../#{File.basename(Liberty.ear(@app_dir)[0])}"
+        application.attributes["location"] = "../../../../"
+        # application.attributes["location"] = "../../../../#{File.basename(Liberty.ear(@app_dir)[0])}"
         application.attributes["type"] = "ear"
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       else
@@ -338,6 +339,15 @@ module LibertyBuildpack::Container
           system("unzip -oxq '#{app}' -d '#{temp_directory}'")
           File.delete(app)
           File.rename(temp_directory, app)
+        end
+      end
+    end
+    
+    def self.expand_ear(apps)
+      apps.each do |ear|
+        if File.file? ear
+           system("unzip -joxq '#{app}' -d '#{temp_directory}'")
+           File.delete(ear)
         end
       end
     end
