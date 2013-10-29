@@ -346,7 +346,7 @@ module LibertyBuildpack::Container
       apps.each do |app|
         if File.file? app
           system("unzip -oxq '#{app}' -d ./app")
-          # FileUtils.rm_rf("#{app}")
+          FileUtils.rm_rf("#{app}")
           puts "current dir = #{FileUtils.pwd()} app = #{app}"
         end
       end
