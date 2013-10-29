@@ -346,7 +346,7 @@ module LibertyBuildpack::Container
     def self.expand_ear(apps)
       apps.each do |ear|
         if File.file? ear
-          puts "unzipping ear"
+          puts "unzipping #{ear}"
           #system("unzip -oq '#{ear}' ./") # causes file exists exception (/tmp/staged/app/MyFirstJEE6App.ear)
           temp_directory = "#{ear}.tmp"
           system("unzip -oxq '#{ear}' -d '#{temp_directory}'")
