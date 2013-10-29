@@ -345,9 +345,8 @@ module LibertyBuildpack::Container
     def self.expand_ear(apps)
       apps.each do |app|
         if File.file? app
-          temp_directory = "#{app}.tmp"
           system("unzip -oxq '#{app}' -d ./app")
-          FileUtils.rm_rf("./app/#{File.basename(app)}")
+          # FileUtils.rm_rf("#{app}")
           puts "current dir = #{FileUtils.pwd()} app = #{app}"
         end
       end
