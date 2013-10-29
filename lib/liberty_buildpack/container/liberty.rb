@@ -346,13 +346,13 @@ module LibertyBuildpack::Container
       apps.each do |app|
         if File.file? app
           system("unzip -oxq '#{app}' -d ./app")
-          FileUtils.rm_rf("#{app}")
           contents = Dir.entries("app")
           contents.each do |file|
             if File.basename(file).chr != "."
               puts "#{file} - #{File.ftype("./app/#{file}")}"
             end
           end
+          FileUtils.rm_rf("#{app}")
         end
       end
     end
