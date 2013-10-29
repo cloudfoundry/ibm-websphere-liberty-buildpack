@@ -346,8 +346,8 @@ module LibertyBuildpack::Container
       apps.each do |app|
         if File.file? app
           temp_directory = "#{app}.tmp"
-          system("unzip -oxq '#{app}'")
-          File.delete(app)
+          system("unzip -oxq '#{app}' -d ./app")
+          FileUtils.rm_rf(app)
         end
       end
     end
