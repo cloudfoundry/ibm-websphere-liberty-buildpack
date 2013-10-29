@@ -347,7 +347,10 @@ module LibertyBuildpack::Container
         if File.file? app
           system("unzip -oxq '#{app}' -d ./app")
           FileUtils.rm_rf("#{app}")
-          puts "current dir = #{FileUtils.pwd()} app = #{app}"
+          contents = Dir.entries("app")
+          contents.each do |file|
+            puts "#{file} - #{File.ftype(file)} - #{File.ctyme(file)}}"
+          end
         end
       end
     end
