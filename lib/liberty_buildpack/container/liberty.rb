@@ -347,8 +347,8 @@ module LibertyBuildpack::Container
         if File.file? app
           temp_directory = "#{app}.tmp"
           system("unzip -oxq '#{app}' -d ./app")
-          FileUtils.rm_rf(app)
-          puts "current dir = #{FileUtils.pwd()}"
+          FileUtils.rm_rf("./app/#{File.basename(app)}")
+          puts "current dir = #{FileUtils.pwd()} app = #{app}"
         end
       end
     end
