@@ -53,7 +53,6 @@ module LibertyBuildpack::Container
         apps_found = [@app_dir]
       
       elsif Liberty.ear(@app_dir)  
-        puts "found an ear"
         apps_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
         Liberty.expand_ear(apps_found)
       elsif server_xml
@@ -346,7 +345,6 @@ module LibertyBuildpack::Container
     def self.expand_ear(apps)
       apps.each do |ear|
         if File.file? ear
-          puts "unzipping #{ear}"
           #system("unzip -oq '#{ear}' ./") # causes file exists exception (/tmp/staged/app/MyFirstJEE6App.ear)
           # temp_directory = "#{ear}.tmp"
           # system("unzip -oxq '#{ear}' -d '#{temp_directory}'")
