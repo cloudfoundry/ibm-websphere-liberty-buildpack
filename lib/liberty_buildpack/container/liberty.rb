@@ -54,7 +54,7 @@ module LibertyBuildpack::Container
       
       elsif Liberty.ear(@app_dir)  
         apps_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
-         Liberty.expand_apps(apps_found)
+         Liberty.expand_ear(apps_found)
       elsif server_xml
         apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear'])))
         # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
@@ -345,14 +345,10 @@ module LibertyBuildpack::Container
     def self.expand_ear(apps)
       apps.each do |ear|
         if File.file? ear
-          content = Dir.glob("app/*")
-          print "Current directory content before extract #{content}"
-          #system("unzip -oq '#{ear}' ./") # causes file exists exception (/tmp/staged/app/MyFirstJEE6App.ear)
-          # temp_directory = "#{ear}.tmp"
-          # system("unzip -oxq '#{ear}' -d '#{temp_directory}'")
-          # File.delete(ear)
-          # system("mv '#{temp_directory}'/* ../")
-          # FileUtils.rm_rf(temp_directory)
+          temp_directory = "#{app}.tmp"
+          system("unzip -oxq '#{app}' -d '#{temp_directory}'")
+          File.delete(app)
+          File.rename(temp_directory, app)
         end
       end
     end
