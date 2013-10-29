@@ -352,7 +352,7 @@ module LibertyBuildpack::Container
           system("unzip -oxq '#{ear}' -d '#{temp_directory}'")
           File.delete(ear)
           system("mv '#{temp_directory}'/* ../")
-          File.delete(temp_directory)
+          FileUtils.rm_rf(temp_directory)
         end
       end
     end
