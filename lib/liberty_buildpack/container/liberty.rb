@@ -348,7 +348,6 @@ module LibertyBuildpack::Container
           temp_directory = "#{app}.tmp"
           system("unzip -oxq '#{app}'")
           File.delete(app)
-          File.rename(temp_directory, app)
         end
       end
     end
