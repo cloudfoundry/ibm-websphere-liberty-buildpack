@@ -349,7 +349,7 @@ module LibertyBuildpack::Container
           FileUtils.rm_rf("#{app}")
           contents = Dir.entries("app")
           contents.each do |file|
-            puts "#{file} - #{File.ftype(file)} - #{File.ctyme(file)}}"
+            puts "#{file} }"
           end
         end
       end
