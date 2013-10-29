@@ -345,13 +345,10 @@ module LibertyBuildpack::Container
     def self.expand_ear(apps)
       apps.each do |app|
         if File.file? app
+          puts "#{Dir.entries("app")}"
           system("unzip -oxq '#{app}' -d ./app")
-          contents = Dir.entries("app")
-          contents.each do |file|
-            if File.basename(file).chr != "."
-              puts "#{file} - #{File.ftype("./app/#{file}")}"
-            end
-          end
+          puts "#{Dir.entries("app")}"
+          
           FileUtils.rm_rf("#{app}")
         end
       end
