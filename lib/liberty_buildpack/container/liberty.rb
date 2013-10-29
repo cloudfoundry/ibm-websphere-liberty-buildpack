@@ -350,7 +350,7 @@ module LibertyBuildpack::Container
           contents = Dir.entries("app")
           contents.each do |file|
             if File.basename(file).chr != "."
-              puts "#{file} - #{File.ftype(file)}"
+              puts "#{file} - #{File.ftype("./app/#{file}")}"
             end
           end
         end
