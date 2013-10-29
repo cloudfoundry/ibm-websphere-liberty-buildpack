@@ -348,7 +348,7 @@ module LibertyBuildpack::Container
           temp_directory = "#{app}.tmp"
           system("unzip -oxq '#{app}' -d ./app")
           FileUtils.rm_rf(app)
-          File.delete(app)
+          puts "current dir = #{FileUtils.pwd()}"
         end
       end
     end
