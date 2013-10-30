@@ -52,7 +52,7 @@ module LibertyBuildpack::Container
       if Liberty.web_inf(@app_dir)
         apps_found = [@app_dir]
       
-      elsif Liberty.ear(@app_dir)  
+      elsif Liberty.contains_ear(@app_dir)  
         apps_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
          Liberty.expand_ear(apps_found)
       elsif server_xml
@@ -150,7 +150,7 @@ module LibertyBuildpack::Container
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)      
-      elsif Liberty.ear(@app_dir)
+      elsif Liberty.contains_ear(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)     
@@ -158,7 +158,7 @@ module LibertyBuildpack::Container
         server_xml = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml')
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
-        # application.attributes["location"] = "../../../../#{File.basename(Liberty.ear(@app_dir)[0])}"
+        # application.attributes["location"] = "../../../../#{File.basename(Liberty.contains_ear(@app_dir)[0])}"
         application.attributes["type"] = "ear"
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       else
@@ -181,7 +181,7 @@ module LibertyBuildpack::Container
         return 'defaultServer'
       elsif Liberty.web_inf @app_dir
         return 'defaultServer'
-      elsif Liberty.ear(@app_dir) 
+      elsif Liberty.contains_ear(@app_dir) 
         return 'defaultServer'
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
@@ -213,7 +213,7 @@ module LibertyBuildpack::Container
 
     # first checkpoint for .ears and other applications
     def self.find_liberty(app_dir, configuration)
-      if Liberty.ear(app_dir)
+      if Liberty.contains_ear(app_dir)
         version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
@@ -257,14 +257,16 @@ module LibertyBuildpack::Container
 
     def link_libs
       apps.each do |app_dir|
+        if Liberty.ear?(app_dir)
         libs = ContainerUtils.libs(app_dir, @lib_directory) # Returns an +Array+ containing the relative paths of the JARs located in the additional libraries directory.
 
-        if libs
-          app_web_inf_lib = Liberty.web_inf_lib(app_dir)
-          FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)
-          app_web_inf_lib_path = Pathname.new(app_web_inf_lib)
-          Pathname.glob(File.join(@lib_directory, '*.jar')) do |jar|
-            FileUtils.ln_sf(jar.relative_path_from(app_web_inf_lib_path), app_web_inf_lib)
+          if libs
+            app_web_inf_lib = Liberty.web_inf_lib(app_dir)
+            FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)
+            app_web_inf_lib_path = Pathname.new(app_web_inf_lib)
+            Pathname.glob(File.join(@lib_directory, '*.jar')) do |jar|
+              FileUtils.ln_sf(jar.relative_path_from(app_web_inf_lib_path), app_web_inf_lib)
+            end
           end
         end
       end
@@ -316,9 +318,13 @@ module LibertyBuildpack::Container
       candidates.any? ? candidates[0] : nil
     end
  
-    def self.ear(app_dir)
+    def self.contains_ear(app_dir)
       ears = Dir.glob(File.join(app_dir, "*.ear"))
       ears != [] || ears != nil ? ears : nil
+    end
+    
+    def self.ear?(app)
+      app.include? ".ear"
     end
 
     def self.server_xml(app_dir)
