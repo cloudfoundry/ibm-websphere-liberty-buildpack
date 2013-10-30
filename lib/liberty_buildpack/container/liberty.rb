@@ -268,7 +268,8 @@ module LibertyBuildpack::Container
               FileUtils.ln_sf(jar.relative_path_from(app_web_inf_lib_path), app_web_inf_lib)
             end
           elsif Liberty.ear?(app_dir)
-            ear_lib_path = Pathname.new("#{app_dir}/lib")
+            ear_lib = File.join(app_dir, "/lib")
+            ear_lib_path = Pathname.new(ear_lib)
             FileUtils.mkdir_p(ear_lib) unless File.exists?(ear_lib)
             Pathname.glob(File.join(@lib_directory, '*.jar')) do |jar|
               FileUtils.ln_sf(jar.relative_path_from(ear_lib_path), ear_lib)
