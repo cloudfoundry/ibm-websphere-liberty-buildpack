@@ -257,10 +257,10 @@ module LibertyBuildpack::Container
 
     def link_libs
       apps.each do |app_dir|
-        if Liberty.ear?(app_dir)
         libs = ContainerUtils.libs(app_dir, @lib_directory) # Returns an +Array+ containing the relative paths of the JARs located in the additional libraries directory.
 
-          if libs
+        if libs
+          if !Liberty.ear?(app_dir)
             app_web_inf_lib = Liberty.web_inf_lib(app_dir)
             FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)
             app_web_inf_lib_path = Pathname.new(app_web_inf_lib)
