@@ -348,7 +348,7 @@ module LibertyBuildpack::Container
           puts "#{Dir.entries("app")}"
           system("unzip -oxq '#{app}' -d ./app")
           puts "#{Dir.entries("app")}"
-          #FileUtils.rm_rf("#{app}")
+          FileUtils.rm_rf("#{app}")
         end
       end
     end
