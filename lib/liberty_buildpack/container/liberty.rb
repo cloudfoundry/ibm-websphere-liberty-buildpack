@@ -53,8 +53,9 @@ module LibertyBuildpack::Container
         apps_found = [@app_dir]
       
       elsif Liberty.contains_ear(@app_dir)  
-        apps_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
-         Liberty.expand_ear(apps_found)
+        ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
+        Liberty.expand_ear(ear_found)
+        apps_found = [@app_dir]
       elsif server_xml
         apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear'])))
         # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
@@ -122,6 +123,8 @@ module LibertyBuildpack::Container
     SERVER_XML = 'server.xml'.freeze
 
     WEB_INF = 'WEB-INF'.freeze
+    
+    META_INF = 'META-INF'.freeze
 
     # second checkpoint
     def update_server_xml
@@ -162,7 +165,7 @@ module LibertyBuildpack::Container
         application.attributes["type"] = "ear"
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       else
-        raise 'Neither a server.xml or WEB-INF directory was found.'
+        raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
       end
     end
 
@@ -261,13 +264,15 @@ module LibertyBuildpack::Container
 
         if libs
           if Liberty.web_inf(app_dir)
+            puts "war found"
             app_web_inf_lib = Liberty.web_inf_lib(app_dir)
             FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)
             app_web_inf_lib_path = Pathname.new(app_web_inf_lib)
             Pathname.glob(File.join(@lib_directory, '*.jar')) do |jar|
               FileUtils.ln_sf(jar.relative_path_from(app_web_inf_lib_path), app_web_inf_lib)
             end
-          elsif Liberty.ear?(app_dir)
+          elsif Liberty.meta_inf(app_dir)
+            puts "ear found"
             ear_lib = File.join(app_dir, "/lib")
             ear_lib_path = Pathname.new(ear_lib)
             FileUtils.mkdir_p(ear_lib) unless File.exists?(ear_lib)
@@ -309,9 +314,18 @@ module LibertyBuildpack::Container
       File.join app_dir, 'WEB-INF', 'lib'
     end
 
+    def self.ear_lib(app_dir)
+      File.join app_dir, 'lib'
+    end
+
     def self.web_inf(app_dir)
       web_inf = File.join(app_dir, WEB_INF)
       File.directory?(File.join(app_dir, WEB_INF)) ? web_inf : nil
+    end
+    
+    def self.meta_inf(app_dir)
+      meta_inf = File.join(app_dir, META_INF)
+      File.directory?(meta_inf) ? meta_inf : nil
     end
 
     def self.server_directory(server_dir)
@@ -360,9 +374,7 @@ module LibertyBuildpack::Container
     def self.expand_ear(apps)
       apps.each do |app|
         if File.file? app
-          puts "#{Dir.entries("app")}"
           system("unzip -oxq '#{app}' -d ./app")
-          puts "#{Dir.entries("app")}"
           FileUtils.rm_rf("#{app}")
           puts "#{Dir.entries("app")}"
         end
