@@ -117,9 +117,9 @@ module LibertyBuildpack::Framework
         IO.popen("unzip -l -qq #{File.join(".","app", "*.war")} | awk '{print $NF}'") { 
           |io| while (line = io.gets) do 
             list << " #{line}" 
-            puts line
             end }
         # end
+        puts list
         list.include? "spring-core"
       end
       
