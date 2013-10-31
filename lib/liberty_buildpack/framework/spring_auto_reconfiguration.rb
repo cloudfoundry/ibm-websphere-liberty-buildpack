@@ -115,7 +115,7 @@ module LibertyBuildpack::Framework
         list = ""
         types = ['*.zip', '*.ear', '*.jar', '*.war']
         types.each do |type|
-        IO.popen("unzip -l #{File.join(app_dir, type)}") { 
+        IO.popen("unzip -l #{File.join(".","app", type)}") { 
           |io| while (line = io.gets) do 
             list << " #{line}" 
             puts line
