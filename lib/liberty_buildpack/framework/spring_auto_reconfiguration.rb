@@ -109,11 +109,7 @@ module LibertyBuildpack::Framework
       def self.spring_application?(app_dir)
         # bool = spring_application_within_archive? app_dir
         # puts "Spring appliaction within archive = #{bool}"
-        if Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any? or spring_application_within_archive? app_dir
-          puts "a spring application was found"
-          return true
-        end
-        return false
+        Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any? or spring_application_within_archive? app_dir
       end
       
       def self.spring_application_within_archive?(app_dir)
