@@ -6,7 +6,8 @@ The `liberty-buildpack` is a [Cloud Foundry][] buildpack for running application
 To deploy applications using the IBM WebSphere Application Server Liberty Buildpack, you are required to accept the IBM Liberty license and IBM JRE license by actioning the following:
 * Read the current IBM [Liberty-License][] and the current IBM [JVM-License][].
 * Extract the "D/N: {License code}" from the license.
-* Add the following environment variables and extracted license codes inside of the "manifest.yml" file that gets pushed with your application.
+* Add the following environment variables and extracted license codes inside of the "manifest.yml" file that gets pushed with your application. For further information on the format of
+the manifest.yml file refer to the [manifest documentation][].
 
 ```
   env:
@@ -28,7 +29,7 @@ If you wish to fork the buildpack and host your own binaries, then complete the 
 
 * Clone the forked repository to your local machine.
 
-* Download the wlp-developers-runtime-8.5.5.0.jar from [wasdev.net](http://wasdev.net).
+* Download the wlp-developers-runtime-8.5.5.0.jar from [wasdev.net][].
 
 * Download the latest IBM JRE for Linux from the [developerWorks Java site][].
   The download will be in an archive .bin format.
@@ -78,6 +79,8 @@ bundle install --gemfile Gemfile.rubymine-debug
 [Repositories]: docs/util-repositories.md
 [ibmjdk.yml]: config/ibmjdk.yml
 [liberty.yml]: config/liberty.yml
+[wasdev.net]: http://wasdev.net
 [developerWorks Java site]: https://www.ibm.com/developerworks/java/jdk/
 [Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.0/lafiles/runtime//en.html
 [JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-AWON-8GALN9&title=IBM%C2%AE+SDK%2C+Java-+Technology+Edition%2C+Version+7.0&l=en
+[manifest documentation]: http://docs.cloudfoundry.com/docs/using/deploying-apps/manifest.html
