@@ -113,9 +113,9 @@ module LibertyBuildpack::Framework
       
       def self.spring_application_within_archive?(app_dir)
         list = ""
-        types = ['*.zip', '*.ear', '*.jar', '*.war']
+        # types = ['*.zip', '*.ear', '*.jar', '*.war']
         types.each do |type|
-        IO.popen("unzip -l #{File.join(".","app", type)}") { 
+        IO.popen("unzip -l #{File.join(".","app", "*.war")}") { 
           |io| while (line = io.gets) do 
             list << " #{line}" 
             puts line
