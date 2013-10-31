@@ -260,11 +260,11 @@ module LibertyBuildpack::Container
 
     def link_libs
       apps.each do |app_dir|
-        libs = ContainerUtils.libs(app_dir, @lib_directory) # Returns an +Array+ containing the relative paths of the JARs located in the additional libraries directory.
+        libs = ContainerUtils.libs(app_dir, @lib_directory) # Returns an +Array+ containing the relative paths 
+                                                            # of the JARs located in the additional libraries directory.
 
         if libs
           if Liberty.web_inf(app_dir)
-            puts "war found"
             app_web_inf_lib = Liberty.web_inf_lib(app_dir)
             FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)
             app_web_inf_lib_path = Pathname.new(app_web_inf_lib)
@@ -272,7 +272,6 @@ module LibertyBuildpack::Container
               FileUtils.ln_sf(jar.relative_path_from(app_web_inf_lib_path), app_web_inf_lib)
             end
           elsif Liberty.meta_inf(app_dir)
-            puts "ear found"
             ear_lib = File.join(app_dir, "/lib")
             ear_lib_path = Pathname.new(ear_lib)
             FileUtils.mkdir_p(ear_lib) unless File.exists?(ear_lib)

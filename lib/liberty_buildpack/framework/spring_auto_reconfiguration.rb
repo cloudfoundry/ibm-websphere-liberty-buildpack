@@ -46,6 +46,7 @@ module LibertyBuildpack::Framework
     # @return [String] returns +spring-auto-reconfiguration-<version>+ if the application is a candidate for
     #                  auto-reconfiguration otherwise returns +nil+
     def detect
+      puts "searching for spring apps"
       @auto_reconfiguration_version, @auto_reconfiguration_uri = SpringAutoReconfiguration.find_auto_reconfiguration(@app_dir, @configuration)
       @auto_reconfiguration_version ? id(@auto_reconfiguration_version) : nil
     end
@@ -108,8 +109,13 @@ module LibertyBuildpack::Framework
 
       def self.spring_application?(app_dir)
         Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any?
+       
       end
-
+      
+    #  def self.spring_application_within_archive?(app_dir)
+        
+     # end
+      
   end
 
 end
