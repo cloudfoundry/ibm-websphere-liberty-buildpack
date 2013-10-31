@@ -58,10 +58,10 @@ module LibertyBuildpack
       jre_detections = Buildpack.component_detections @jres
       raise "Application can be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
 
-      framework_detections = Buildpack.component_detections @frameworks
-
       container_detections = Buildpack.component_detections @containers
       raise "Application can be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
+
+      framework_detections = Buildpack.component_detections @frameworks
 
       tags = container_detections.empty? ? [] : jre_detections.concat(framework_detections).concat(container_detections).flatten.compact
       @logger.debug { "Detection Tags: #{tags}" }
@@ -76,8 +76,8 @@ module LibertyBuildpack
       FileUtils.mkdir_p @lib_directory
 
       jre.compile
-      frameworks.each { |framework| framework.compile }
       the_container.compile
+      frameworks.each { |framework| framework.compile }
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
@@ -87,8 +87,8 @@ module LibertyBuildpack
     def release
       the_container = container # diagnose detect failure early
       jre.release
-      frameworks.each { |framework| framework.release }
       command = the_container.release
+      frameworks.each { |framework| framework.release }
 
       payload = {
           'addons' => [],

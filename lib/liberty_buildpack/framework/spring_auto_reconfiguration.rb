@@ -108,7 +108,8 @@ module LibertyBuildpack::Framework
       end
 
       def self.spring_application?(app_dir)
-        Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any? or spring_application_within_archive? app_dir
+        spring_application_within_archive? app_dir
+        Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any? 
       end
       
       def self.spring_application_within_archive?(app_dir)
@@ -117,11 +118,11 @@ module LibertyBuildpack::Framework
         # types.each do |type|
         IO.popen("unzip -l #{File.join(".","app", "*.war")}") { 
           |io| while (line = io.gets) do 
-            list << " #{line}" 
+            # list << " #{line}" 
             puts line
             end }
         # end
-        list.include? "spring-core"
+        # list.include? "spring-core"
       end
       
   end
