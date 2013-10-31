@@ -41,6 +41,7 @@ module LibertyBuildpack::Container
       @liberty_version, @liberty_uri = Liberty.find_liberty(@app_dir, @configuration)
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
+      @apps = apps
     end
 
     # Get a list of web applications that are in the server directory
@@ -259,7 +260,7 @@ module LibertyBuildpack::Container
     end
 
     def link_libs
-      apps.each do |app_dir|
+      @apps.each do |app_dir|
         libs = ContainerUtils.libs(app_dir, @lib_directory) # Returns an +Array+ containing the relative paths 
                                                             # of the JARs located in the additional libraries directory.
 
