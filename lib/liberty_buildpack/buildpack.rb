@@ -137,6 +137,8 @@ module LibertyBuildpack
           vcap_services: vcap_services ? YAML.load(vcap_services) : {}
       }
 
+      puts "constructing components #{status}"
+
       @jres = Buildpack.construct_components(components, 'jres', basic_context, @logger)
       @frameworks = Buildpack.construct_components(components, 'frameworks', basic_context, @logger)
       @containers = Buildpack.construct_components(components, 'containers', basic_context, @logger)
