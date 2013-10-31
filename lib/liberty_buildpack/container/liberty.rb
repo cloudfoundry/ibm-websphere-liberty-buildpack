@@ -42,6 +42,7 @@ module LibertyBuildpack::Container
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @status = context[:status]
+      puts @status
       @apps = apps
     end
 
