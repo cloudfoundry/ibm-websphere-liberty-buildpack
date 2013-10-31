@@ -112,13 +112,13 @@ module LibertyBuildpack::Framework
       
       def self.spring_application_within_archive?(app_dir)
         list = ""
-        # types = ['*.zip', '*.ear', '*.jar', '*.war']
-        # types.each do |type|
-        IO.popen("unzip -l -qq #{File.join(".","app", "*.war")} | awk '{print $NF}'") { 
+        types = ['*.zip', '*.ear', '*.jar', '*.war']
+        types.each do |type|
+        IO.popen("unzip -l -qq #{File.join(".","app", "#{type}")} | awk '{print $NF}'") { 
           |io| while (line = io.gets) do 
             list << "#{line}" 
             end }
-        # end
+        end
         list.include? "spring-core"
       end
       
