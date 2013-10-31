@@ -115,12 +115,12 @@ module LibertyBuildpack::Framework
         types = ['*.zip', '*.ear', '*.jar', '*.war']
         archives = Dir.glob(File.join(app_dir, "**",types))
         archives.each do |file|
-          puts "current file #{file}"
           IO.popen("unzip -l -qq #{file}") { 
           |io| while (line = io.gets) do 
             list << "#{line}" 
             end }
           end
+        puts list
         list.include? "spring-core"
       end
       
