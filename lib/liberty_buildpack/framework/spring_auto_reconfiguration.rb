@@ -47,7 +47,6 @@ module LibertyBuildpack::Framework
     #                  auto-reconfiguration otherwise returns +nil+
     def detect
       @auto_reconfiguration_version, @auto_reconfiguration_uri = SpringAutoReconfiguration.find_auto_reconfiguration(@app_dir, @configuration)
-       puts "searching for spring apps"
       @auto_reconfiguration_version ? id(@auto_reconfiguration_version) : nil
     end
 
@@ -108,21 +107,20 @@ module LibertyBuildpack::Framework
       end
 
       def self.spring_application?(app_dir)
-        spring_application_within_archive? app_dir
-        Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any? 
+        Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any? or spring_application_within_archive? app_dir
       end
       
       def self.spring_application_within_archive?(app_dir)
         list = ""
         # types = ['*.zip', '*.ear', '*.jar', '*.war']
         # types.each do |type|
-        IO.popen("unzip -l #{File.join(".","app", "*.war")}") { 
+        IO.popen("unzip -l -qq #{File.join(".","app", "*.war")} | awk '{print $NF}'") { 
           |io| while (line = io.gets) do 
-            # list << " #{line}" 
+            list << " #{line}" 
             puts line
             end }
         # end
-        # list.include? "spring-core"
+        list.include? "spring-core"
       end
       
   end
