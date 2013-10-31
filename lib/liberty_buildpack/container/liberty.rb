@@ -51,7 +51,6 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
-      puts Symbol.all_symbols.inspect
       
       if Liberty.web_inf(@app_dir) or Liberty.contains_ear(@app_dir)  
         apps_found = [@app_dir]
