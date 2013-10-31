@@ -107,7 +107,9 @@ module LibertyBuildpack::Framework
       end
 
       def self.spring_application?(app_dir)
-        Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any? or spring_application_within_archive? app_dir
+        bool = spring_application_within_archive? app_dir
+        puts "Srping appliaction within archive = #{bool}"
+        Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any? or bool
       end
       
       def self.spring_application_within_archive?(app_dir)
@@ -120,7 +122,6 @@ module LibertyBuildpack::Framework
             list << "#{line}" 
             end }
           end
-        puts list
         list.include? "spring-core"
       end
       
