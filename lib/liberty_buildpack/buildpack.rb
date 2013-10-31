@@ -38,10 +38,10 @@ module LibertyBuildpack
     # @param [String] app_dir the path of the application directory
     # @param [String] message an error message with an insert for the reason for failure
     # @return [Object] the return value from the given block
-    def self.drive_buildpack_with_logger(app_dir, message)
+    def self.drive_buildpack_with_logger(app_dir, status, message)
       logger = LibertyBuildpack::Diagnostics::LoggerFactory.create_logger app_dir
       begin
-        yield new(app_dir)
+        yield new(app_dir, status)
       rescue => e
         logger.error(message % e.inspect)
         logger.debug("Exception #{e.inspect} backtrace:\n#{e.backtrace.join("\n")}")
@@ -58,10 +58,10 @@ module LibertyBuildpack
       jre_detections = Buildpack.component_detections @jres
       raise "Application can be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
 
+      framework_detections = Buildpack.component_detections @frameworks
+
       container_detections = Buildpack.component_detections @containers
       raise "Application can be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
-
-      framework_detections = Buildpack.component_detections @frameworks
 
       tags = container_detections.empty? ? [] : jre_detections.concat(framework_detections).concat(container_detections).flatten.compact
       @logger.debug { "Detection Tags: #{tags}" }
@@ -76,8 +76,8 @@ module LibertyBuildpack
       FileUtils.mkdir_p @lib_directory
 
       jre.compile
-      the_container.compile
       frameworks.each { |framework| framework.compile }
+      the_container.compile
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
@@ -87,8 +87,8 @@ module LibertyBuildpack
     def release
       the_container = container # diagnose detect failure early
       jre.release
-      command = the_container.release
       frameworks.each { |framework| framework.release }
+      command = the_container.release
 
       payload = {
           'addons' => [],
@@ -112,7 +112,7 @@ module LibertyBuildpack
     LIB_DIRECTORY = '.lib'
 
     # Instances should only be constructed by this class.
-    def initialize(app_dir)
+    def initialize(app_dir, status)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       Buildpack.log_git_data @logger
       Buildpack.dump_environment_variables @logger
@@ -128,6 +128,7 @@ module LibertyBuildpack
 
       basic_context = {
           app_dir: app_dir,
+          status: status,
           environment: environment,
           java_home: java_home,
           java_opts: java_opts,

@@ -41,6 +41,7 @@ module LibertyBuildpack::Container
       @liberty_version, @liberty_uri = Liberty.find_liberty(@app_dir, @configuration)
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
+      @status = context[:status]
       @apps = apps
     end
 
@@ -50,18 +51,24 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
-      if Liberty.web_inf(@app_dir)
-        apps_found = [@app_dir]
+      puts Symbol.all_symbols.inspect
       
-      elsif Liberty.contains_ear(@app_dir)  
-        ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
-        Liberty.expand_ear(ear_found)
+      if Liberty.web_inf(@app_dir) or Liberty.contains_ear(@app_dir)  
         apps_found = [@app_dir]
       elsif server_xml
-        apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear'])))
-        # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
-        Liberty.expand_apps(apps_found)
+        apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear']))) # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
       end
+      
+      if @status.to_s == 'detect'
+        puts "status = #{@atatus}, in detect case"
+        if Liberty.contains_ear(@app_dir)  
+          ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
+          Liberty.expand_ear(ear_found)
+        elsif server_xml
+          Liberty.expand_apps(apps_found)
+        end
+      end
+      
       apps_found
     end
 
