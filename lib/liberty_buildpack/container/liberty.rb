@@ -58,7 +58,7 @@ module LibertyBuildpack::Container
         apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear']))) # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
       end
       
-      if @status.to_s == 'detect'
+      if @status == :detect
         if Liberty.contains_ear(@app_dir)  
           ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
           Liberty.expand_ear(ear_found)
