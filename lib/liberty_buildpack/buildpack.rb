@@ -55,6 +55,8 @@ module LibertyBuildpack
     #                         this application.  If no container can run the application, the array will be empty
     #                         (+[]+).
     def detect
+      STDOUT.puts("STD Currently in detect")
+      STDERR.puts("ERR currently in detect")
       jre_detections = Buildpack.component_detections @jres
       raise "Application can be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
 
