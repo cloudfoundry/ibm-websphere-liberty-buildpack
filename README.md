@@ -11,8 +11,8 @@ the manifest.yml file refer to the [manifest documentation][].
 
 ```
   env:
-    IBM_JVM_LICENSE: {jvm license code}
-    IBM_LIBERTY_LICENSE: {liberty license code}
+    IBM_JVM_LICENSE: <jvm license code>
+    IBM_LIBERTY_LICENSE: <liberty license code>
 ```
 
 * Once the license acceptance environment variables are set, use the following command:
@@ -46,10 +46,9 @@ If you wish to fork the buildpack and host your own binaries, then complete the 
 * You should now be able to deploy applications to your forked buildpack with the following command:
 
 ```bash
-cf push --buildpack "URL to forked repository"
+cf push --buildpack <URL to forked repository>
 ```
     
-
 ## Running Tests
 To run the tests, do the following:
 
