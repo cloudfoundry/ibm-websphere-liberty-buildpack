@@ -42,8 +42,7 @@ module LibertyBuildpack::Diagnostics
       end
 
       @@monitor.synchronize do
-        #@@logger = Logger.new(LogSplitter.new(File.open(log_file, 'a'), $stderr))
-        @@logger = Logger.new(File.open(log_file, 'a'))
+        @@logger = Logger.new(LogSplitter.new(File.open(log_file, 'a'), $stderr))
       end
 
       set_log_level
@@ -150,7 +149,7 @@ module LibertyBuildpack::Diagnostics
       # Initializes a Logger.
       # @param [Object] log_dev the destination 'device' to log to
       def initialize(log_dev)
-        super(log_dev)
+        super
       end
 
       # Logs a message with a given severity.
