@@ -56,7 +56,7 @@ module LibertyBuildpack
     #                         (+[]+).
     def detect
       STDOUT.puts("STD Currently in detect")
-      STDOUT.puts("Logger: #{LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.inspect})
+      STDOUT.puts("Logger: #{LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.inspect}")
       STDERR.puts("ERR currently in detect")
       
       jre_detections = Buildpack.component_detections @jres
