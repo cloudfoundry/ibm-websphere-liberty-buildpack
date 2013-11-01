@@ -52,7 +52,7 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
-      @logger.debug{"Current status in buildpack: #{@status}"}
+      @logger.error{"Current status in buildpack: #{@status}"}
       if Liberty.web_inf(@app_dir) or Liberty.contains_ear(@app_dir)  
         apps_found = [@app_dir]
       elsif server_xml
