@@ -55,7 +55,7 @@ module LibertyBuildpack
     #                         this application.  If no container can run the application, the array will be empty
     #                         (+[]+).
     def detect
-      @logger.info { "I'm MERRILY detecting" }
+      @logger.info "I'm MERRILY detecting"
       
       jre_detections = Buildpack.component_detections @jres
       raise "Application can be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
@@ -76,7 +76,6 @@ module LibertyBuildpack
     def compile
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
-      @logger.debug { "Buildpack compile" }
       jre.compile
       frameworks.each { |framework| framework.compile }
       the_container.compile
@@ -91,7 +90,6 @@ module LibertyBuildpack
       jre.release
       frameworks.each { |framework| framework.release }
       command = the_container.release
-      @logger.debug { "Buildpack release" }
       payload = {
           'addons' => [],
           'config_vars' => {},
