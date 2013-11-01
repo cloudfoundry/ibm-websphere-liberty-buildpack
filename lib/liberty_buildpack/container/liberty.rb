@@ -41,7 +41,7 @@ module LibertyBuildpack::Container
       @liberty_version, @liberty_uri = Liberty.find_liberty(@app_dir, @configuration)
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
-      @logger = Logger.new(File.open(File.join(@app_dir, 'test.log'), File::WRONLY | File::APPEND | File::CREAT)
+      @logger = Logger.new(File.open(File.join(@app_dir, 'test.log'), File::WRONLY | File::APPEND | File::CREAT))
       @status = context[:status]
       @apps = apps
     end
