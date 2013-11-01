@@ -41,6 +41,7 @@ module LibertyBuildpack::Container
       @liberty_version, @liberty_uri = Liberty.find_liberty(@app_dir, @configuration)
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
+      @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @status = context[:status]
       @apps = apps
     end
@@ -51,7 +52,7 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
-      
+      @logger.debug{"Current status in buildpack: #{@status}"}
       if Liberty.web_inf(@app_dir) or Liberty.contains_ear(@app_dir)  
         apps_found = [@app_dir]
       elsif server_xml
@@ -59,7 +60,6 @@ module LibertyBuildpack::Container
       end
       
       if @status == :detect
-        puts "first extraction"
         if Liberty.contains_ear(@app_dir)  
           ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
           Liberty.expand_ear(ear_found)
