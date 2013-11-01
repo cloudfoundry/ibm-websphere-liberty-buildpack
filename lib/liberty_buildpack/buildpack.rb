@@ -74,7 +74,7 @@ module LibertyBuildpack
     def compile
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
-
+      @logger.debug { "Buildpack compile" }
       jre.compile
       frameworks.each { |framework| framework.compile }
       the_container.compile
@@ -89,7 +89,7 @@ module LibertyBuildpack
       jre.release
       frameworks.each { |framework| framework.release }
       command = the_container.release
-
+      @logger.debug { "Buildpack release" }
       payload = {
           'addons' => [],
           'config_vars' => {},
