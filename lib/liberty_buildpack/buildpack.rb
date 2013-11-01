@@ -56,7 +56,9 @@ module LibertyBuildpack
     #                         (+[]+).
     def detect
       STDOUT.puts("STD Currently in detect")
+      STDOUT.puts("Logger: #{LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.inspect})
       STDERR.puts("ERR currently in detect")
+      
       jre_detections = Buildpack.component_detections @jres
       raise "Application can be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
 
