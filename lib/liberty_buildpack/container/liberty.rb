@@ -62,9 +62,11 @@ module LibertyBuildpack::Container
         end
         apps_found = [@app_dir]
       elsif server_xml
+        @logger.debug("Determined a server push, searching for apps and extracting.")
         apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear']))) # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
         unless Liberty.all_extracted?(apps_found) 
           Liberty.expand_apps(apps_found)
+          @logger.debug("Expanded apps")
         end
       end      
       apps_found
@@ -372,6 +374,7 @@ module LibertyBuildpack::Container
           system("unzip -oxq '#{app}' -d '#{temp_directory}'")
           File.delete(app)
           File.rename(temp_directory, app)
+          puts "#{Dir.entries("app")}"
         end
       end
     end
@@ -390,11 +393,7 @@ module LibertyBuildpack::Container
     def self.all_extracted?(file_array)
       state = true
       file_array.each do |file|
-        if (File.directory? file)
-          state = true
-        else
-          state = false
-        end
+        state = false unless File.directory?(file) 
       end
       state
     end
