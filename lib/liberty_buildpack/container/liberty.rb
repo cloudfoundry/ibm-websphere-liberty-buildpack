@@ -52,6 +52,7 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
+      puts "in the apps method"
       if Liberty.web_inf(@app_dir)
         apps_found = [@app_dir]
         
