@@ -63,7 +63,9 @@ module LibertyBuildpack::Container
         apps_found = [@app_dir]
       elsif server_xml
         apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear']))) # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
-        # unless ??? Liberty.expand_apps(apps_found)
+        unless Liberty.all_extracted?(apps_found) 
+          Liberty.expand_apps(apps_found)
+        end
       end      
       apps_found
     end
@@ -382,6 +384,19 @@ module LibertyBuildpack::Container
           puts "#{Dir.entries("app")}"
         end
       end
+    end
+    
+    
+    def self.all_extracted?(file_array)
+      state = true
+      file_array.each do |file|
+        if (File.directory? file)
+          state = true
+        else
+          state = false
+        end
+      end
+      state
     end
 
   end
