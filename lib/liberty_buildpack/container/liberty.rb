@@ -63,10 +63,11 @@ module LibertyBuildpack::Container
         apps_found = [@app_dir]
       elsif server_xml
         puts "Determined a server push, searching for apps and extracting."
+        @logger.info("Determined a server push, searching for apps and extracting.")
         apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear']))) # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
         unless Liberty.all_extracted?(apps_found) 
           Liberty.expand_apps(apps_found)
-          @logger.debug("Expanded apps")
+          @logger.info("Expanded apps")
         end
       end      
       apps_found
