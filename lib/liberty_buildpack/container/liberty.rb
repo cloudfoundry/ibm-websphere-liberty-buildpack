@@ -52,21 +52,19 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
-      if Liberty.web_inf(@app_dir) or Liberty.contains_ear(@app_dir)  
+      if Liberty.web_inf(@app_dir)
+        apps_found = [@app_dir]
+        
+      elsif Liberty.contains_ear(@app_dir)  
+        unless Liberty.meta_inf(@app_dir)
+          ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
+          Liberty.expand_ear(ear_found)
+        end
         apps_found = [@app_dir]
       elsif server_xml
         apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear']))) # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
-      end
-      
-      if @status == :detect
-        if Liberty.contains_ear(@app_dir)  
-          ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
-          Liberty.expand_ear(ear_found)
-        elsif server_xml
-          Liberty.expand_apps(apps_found)
-        end
-      end
-      
+        # unless ??? Liberty.expand_apps(apps_found)
+      end      
       apps_found
     end
 
