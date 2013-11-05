@@ -59,18 +59,18 @@ module LibertyBuildpack::Container
       elsif Liberty.contains_ear(@app_dir)  
         unless Liberty.meta_inf(@app_dir)
           ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
-          @logger.info("path to ear: #{ear_found}")
           Liberty.expand_ear(ear_found)
         end
         apps_found = [@app_dir]
+        @logger.info("path to ear: #{apps_found}")
         @logger.info("single ear push")
       elsif server_xml
         puts "Determined a server push, searching for apps and extracting."
         @logger.info("Determined a server push, searching for apps and extracting.")
         apps_found = Dir.glob(File.expand_path(File.join(server_xml, '..', '**', ['*.war', '*.ear']))) # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
-        @logger.info("path to apps: #{apps_found}")
         unless Liberty.all_extracted?(apps_found) 
           Liberty.expand_apps(apps_found)
+          @logger.info("path to apps: #{apps_found}")
           @logger.info("Expanded apps")
         end
       end      
