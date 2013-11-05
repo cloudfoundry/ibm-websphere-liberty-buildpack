@@ -356,7 +356,7 @@ module LibertyBuildpack::Container
     def self.contains_ear(app_dir)
       ears = Dir.glob(File.join(app_dir, "*.ear"))
       puts "[INFO] #{ears}"
-      ears != [] or ears != nil ? ears : nil
+      (ears == [] or ears == nil) ? nil : ears
     end
     
     def self.ear?(app)
