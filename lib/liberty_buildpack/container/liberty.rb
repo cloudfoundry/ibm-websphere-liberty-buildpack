@@ -52,26 +52,19 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
-      @logger.info("in apps method")
       if Liberty.web_inf(@app_dir)
         apps_found = [@app_dir]
-        @logger.info("single war push")
       elsif Liberty.contains_ear(@app_dir)  
-        unless Liberty.meta_inf(@app_dir)
+        unless Liberty.meta_inf(@app_dir) #Meta-infs are contained in all archives condition must change
           ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
           Liberty.expand_ear(ear_found)
         end
         apps_found = [@app_dir]
-        @logger.info("single ear push, path to ear: #{apps_found}")
       elsif server_xml
-        @logger.info("Determined a server push, searching for apps and extracting.")
-        
         ["*.war","*.ear"].each {|suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', suffix )))} # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
         
-        @logger.info("Expanded apps, path to apps: #{apps_found}")
         unless Liberty.all_extracted?(apps_found) 
           Liberty.expand_apps(apps_found)
-          @logger.info("Expanded apps")
         end
       end      
       apps_found
@@ -275,7 +268,7 @@ module LibertyBuildpack::Container
       @apps.each do |app_dir|
         libs = ContainerUtils.libs(app_dir, @lib_directory) # Returns an +Array+ containing the relative paths 
                                                             # of the JARs located in the additional libraries directory.
-
+        
         if libs
           if Liberty.web_inf(app_dir)
             app_web_inf_lib = Liberty.web_inf_lib(app_dir)
