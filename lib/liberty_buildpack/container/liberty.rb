@@ -355,8 +355,7 @@ module LibertyBuildpack::Container
  
     def self.contains_ear(app_dir)
       ears = Dir.glob(File.join(app_dir, "*.ear"))
-      puts "#{@logger}"
-      # @logger.info("#{ears}")
+      puts "[INFO] #{ears}"
       ears != [] || ears != nil ? ears : nil
     end
     
