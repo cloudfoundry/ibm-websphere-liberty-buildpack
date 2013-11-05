@@ -52,15 +52,17 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
+      @logger.info("in apps method")
       if Liberty.web_inf(@app_dir)
         apps_found = [@app_dir]
-        
+        @logger.info("single war push")
       elsif Liberty.contains_ear(@app_dir)  
         unless Liberty.meta_inf(@app_dir)
           ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
           Liberty.expand_ear(ear_found)
         end
         apps_found = [@app_dir]
+        @logger.info("single ear push")
       elsif server_xml
         puts "Determined a server push, searching for apps and extracting."
         @logger.info("Determined a server push, searching for apps and extracting.")
