@@ -238,13 +238,6 @@ module LibertyBuildpack::Container
         end
       elsif web_inf(app_dir)
         version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
-    def self.find_liberty(app_dir, configuration)
-      if server_xml(app_dir)
-        version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
-          fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
-        end
-      elsif web_inf(app_dir)
-        version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
       else
