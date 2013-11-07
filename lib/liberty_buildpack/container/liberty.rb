@@ -52,7 +52,7 @@ module LibertyBuildpack::Container
 
     # Extracts archives that are pushed initially
     def prep_app(app_dir)
-      if app = contains_type(app_dir, "*.zip")
+      if app = Liberty.contains_type(app_dir, "*.zip")
         Liberty.splat_expand(app)
       elsif app = Liberty.contains_type(app_dir, "*.ear")
         Liberty.splat_expand(app)
