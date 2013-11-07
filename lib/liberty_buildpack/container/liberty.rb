@@ -55,6 +55,7 @@ module LibertyBuildpack::Container
       if app = Dir.glob(File.join(app_dir, '*.zip'))
         Liberty.splat_expand(app)
       elsif app = Liberty.contains_ear(@app_dir)
+        @logger.info("pushing an ear")
         Liberty.splat_expand(app)
       end
     end
@@ -73,7 +74,6 @@ module LibertyBuildpack::Container
         Liberty.expand_apps(wars)
       elsif server_xml
         ["*.war","*.ear"].each {|suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', suffix )))} # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
-        @logger.info("applications in the server #{apps_found}")
         Liberty.expand_apps(apps_found)
       end      
       apps_found
