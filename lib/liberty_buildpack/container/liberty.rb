@@ -200,7 +200,7 @@ module LibertyBuildpack::Container
         return 'defaultServer'
       elsif Liberty.web_inf @app_dir
         return 'defaultServer'
-      elsif Liberty.meta_inf(app_dir) 
+      elsif Liberty.meta_inf(@app_dir) 
         return 'defaultServer'
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
