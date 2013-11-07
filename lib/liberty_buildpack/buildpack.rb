@@ -23,7 +23,6 @@ require 'pathname'
 require 'time'
 require 'yaml'
 require 'rubygems'
-require 'zip'
 
 module LibertyBuildpack
 
