@@ -5,6 +5,7 @@ group :development do
   gem 'redcarpet'
   gem 'rubocop'
   gem 'yard'
+  gem 'rubyzip'
 end
 
 group :development, :test do

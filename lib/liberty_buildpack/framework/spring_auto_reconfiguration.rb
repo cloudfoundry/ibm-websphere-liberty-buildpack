@@ -21,6 +21,7 @@ require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/download'
 require 'liberty_buildpack/util/format_duration'
+require 'rubyzip'
 
 module LibertyBuildpack::Framework
 
@@ -114,16 +115,33 @@ module LibertyBuildpack::Framework
       end
       
       def self.spring_application_within_archive?(app_dir)
-        list = ""
+        #list = ""
+        #types = ['*.zip', '*.ear', '*.jar', '*.war']
+        #archives = Dir.glob(File.join(app_dir, "**",types))
+        #archives.each do |file|
+          #IO.popen("unzip -l -qq #{file}") { 
+          #|io| while (line = io.gets) do 
+            #list << "#{line}" 
+            #end }
+          #end
+        #list.include? "spring-core"
+        puts find_archives(app_dir)
+      end
+      
+      def self.find_archives(app_dir)
         types = ['*.zip', '*.ear', '*.jar', '*.war']
         archives = Dir.glob(File.join(app_dir, "**",types))
         archives.each do |file|
-          IO.popen("unzip -l -qq #{file}") { 
-          |io| while (line = io.gets) do 
-            list << "#{line}" 
-            end }
-          end
-        list.include? "spring-core"
+          zf = Zip::File.new(file)
+          zf.each_with_index {
+            |entry, index|
+  
+            puts "entry #{index} is #{entry.name}, size = #{entry.size}, compressed size = #{entry.compressed_size}"
+            # use zf.get_input_stream(entry) to get a ZipInputStream for the entry
+            # entry can be the ZipEntry object or any object which has a to_s method that
+            # returns the name of the entry.
+          }
+        end
       end
   end
 

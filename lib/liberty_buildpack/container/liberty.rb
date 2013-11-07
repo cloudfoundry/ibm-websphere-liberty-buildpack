@@ -57,7 +57,7 @@ module LibertyBuildpack::Container
       server_xml = Liberty.server_xml(@app_dir)
       if Liberty.web_inf(@app_dir)
         apps_found = [@app_dir]
-      elsif Liberty.contains_ear(@app_dir)  
+      elsif Liberty.contains_ear(@app_dir) || Liberty.meta_inf(@app_dir)  
         unless Liberty.meta_inf(@app_dir) #Meta-infs are contained in all archives condition must change
           ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
           Liberty.expand_ear(ear_found)
@@ -196,7 +196,7 @@ module LibertyBuildpack::Container
         return 'defaultServer'
       elsif Liberty.web_inf @app_dir
         return 'defaultServer'
-      elsif Liberty.contains_ear(@app_dir) 
+      elsif Liberty.meta_inf(app_dir) 
         return 'defaultServer'
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
