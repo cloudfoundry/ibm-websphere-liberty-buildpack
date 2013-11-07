@@ -37,7 +37,7 @@ module LibertyBuildpack::Container
     def initialize(context)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @app_dir = context[:app_dir]
-      Liberty.prep_app(@app_dir)
+      prep_app(@app_dir)
       @java_home = context[:java_home]
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
@@ -51,12 +51,10 @@ module LibertyBuildpack::Container
     end
 
     # Extracts archives that are pushed initially
-    def self.prep_app(app_dir)
-      puts "preparing the app #{app_dir}"
+    def prep_app(app_dir)
       if app = contains_type(app_dir, "*.zip")
         Liberty.splat_expand(app)
       elsif app = Liberty.contains_type(app_dir, "*.ear")
-        @logger.info("pushing an ear")
         Liberty.splat_expand(app)
       end
     end
@@ -359,7 +357,6 @@ module LibertyBuildpack::Container
 
     def self.contains_type(app_dir, type)
       files = Dir.glob(File.join(app_dir, type))
-      puts "ears found = #{files}"
       (files == [] or files == nil) ? nil : files
     end
     
