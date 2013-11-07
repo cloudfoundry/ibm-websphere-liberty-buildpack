@@ -46,7 +46,17 @@ module LibertyBuildpack::Container
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @status = context[:status]
+      Liberty.prep_app(@app_dir)
       @apps = apps
+    end
+
+    # Extracts archives that are pushed initially
+    def self.prep_app(app_dir)
+      if app = Dir.glob(File.join(app_dir, '*.zip'))
+        Liberty.splat_expand(app)
+      elsif app = Liberty.contains_ear(@app_dir)
+        Liberty.splat_expand(app)
+      end
     end
 
     # Get a list of web applications that are in the server directory
@@ -57,18 +67,14 @@ module LibertyBuildpack::Container
       server_xml = Liberty.server_xml(@app_dir)
       if Liberty.web_inf(@app_dir)
         apps_found = [@app_dir]
-      elsif Liberty.contains_ear(@app_dir) || Liberty.meta_inf(@app_dir)  
-        unless Liberty.meta_inf(@app_dir) #Meta-infs are contained in all archives condition must change
-          ear_found = Dir.glob(File.expand_path(File.join(@app_dir, '*.ear')))
-          Liberty.expand_ear(ear_found)
-        end
+      elsif Liberty.meta_inf(@app_dir)  
         apps_found = [@app_dir]
+        wars = Dir.glob(File.expand_path(File.join(@app_dir, '*.war' )))
+        Liberty.expand_apps(wars)
       elsif server_xml
-        ["*.war","*.ear"].each {|suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', 'dropins', suffix )))} # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
+        ["*.war","*.ear"].each {|suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', suffix )))} # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
         @logger.info("applications in the server #{apps_found}")
-        unless Liberty.all_extracted?(apps_found) # does that mean the modules in the ear get extracted again?
-          Liberty.expand_apps(apps_found)
-        end
+        Liberty.expand_apps(apps_found)
       end      
       apps_found
     end
@@ -275,7 +281,6 @@ module LibertyBuildpack::Container
       @apps.each do |app_dir|
         libs = ContainerUtils.libs(app_dir, @lib_directory) # Returns an +Array+ containing the relative paths 
                                                             # of the JARs located in the additional libraries directory.
-        
         if libs
           if Liberty.web_inf(app_dir)
             app_web_inf_lib = Liberty.web_inf_lib(app_dir)
@@ -383,7 +388,7 @@ module LibertyBuildpack::Container
       end
     end
     
-    def self.expand_ear(apps)
+    def self.splat_expand(apps)
       apps.each do |app|
         if File.file? app
           system("unzip -oxq '#{app}' -d ./app")
