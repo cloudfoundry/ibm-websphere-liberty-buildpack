@@ -23,4 +23,5 @@ require 'liberty_buildpack/buildpack'
 
 build_dir = ARGV[0]
 
+
 LibertyBuildpack::Buildpack.drive_buildpack_with_logger(build_dir, :compile, 'Compile failed with exception %s') { |buildpack| buildpack.compile }

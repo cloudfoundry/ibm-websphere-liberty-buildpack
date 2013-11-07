@@ -125,7 +125,6 @@ module LibertyBuildpack::Framework
           end
         list.include? "spring-core"
       end
-      
   end
 
 end

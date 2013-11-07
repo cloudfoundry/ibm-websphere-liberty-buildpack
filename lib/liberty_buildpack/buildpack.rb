@@ -55,8 +55,6 @@ module LibertyBuildpack
     #                         this application.  If no container can run the application, the array will be empty
     #                         (+[]+).
     def detect
-      @logger.debug("I'm MERRILY detecting")
-      
       jre_detections = Buildpack.component_detections @jres
       raise "Application can be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
 
@@ -90,6 +88,7 @@ module LibertyBuildpack
       jre.release
       frameworks.each { |framework| framework.release }
       command = the_container.release
+
       payload = {
           'addons' => [],
           'config_vars' => {},
@@ -109,6 +108,8 @@ module LibertyBuildpack
 
     COMPONENTS_CONFIG = '../../config/components.yml'.freeze
 
+    LICENSE_CONFIG = '../../config/licenses.yml'.freeze
+
     LIB_DIRECTORY = '.lib'
 
     # Instances should only be constructed by this class.
@@ -125,6 +126,7 @@ module LibertyBuildpack
       environment = ENV.to_hash
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
+      license_ids = get_license_hash
 
       basic_context = {
           app_dir: app_dir,
@@ -134,7 +136,8 @@ module LibertyBuildpack
           java_opts: java_opts,
           lib_directory: @lib_directory,
           vcap_application: vcap_application ? YAML.load(vcap_application) : {},
-          vcap_services: vcap_services ? YAML.load(vcap_services) : {}
+          vcap_services: vcap_services ? YAML.load(vcap_services) : {},
+          license_ids: license_ids ? license_ids : {}
       }
 
       @jres = Buildpack.construct_components(components, 'jres', basic_context, @logger)
@@ -245,6 +248,18 @@ module LibertyBuildpack
       @jres.find { |jre| jre.detect }
     end
 
+    def get_license_hash
+      jvm_license = 'IBM_JVM_LICENSE'
+      liberty_license = 'IBM_LIBERTY_LICENSE'
+
+      license_file = File.expand_path(LICENSE_CONFIG, File.dirname(__FILE__))
+      if File.exists? license_file
+        license_ids = YAML.load_file(license_file)
+      else
+        license_ids = { jvm_license => ENV[jvm_license], liberty_license => ENV[liberty_license] }
+      end
+      license_ids
+    end
   end
 
 end

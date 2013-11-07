@@ -23,10 +23,13 @@ describe 'compile script', :integration do
   before(:all) do
     @cache = File.join(Dir.tmpdir, 'compile_cache')
     FileUtils.rm_rf(@cache)
+    ENV.update({ 'IBM_JVM_LICENSE' => 'L-AWON-8GALN9', 'IBM_LIBERTY_LICENSE' => 'L-JTHS-95XRL8' })
   end
 
   after(:all) do
     FileUtils.rm_rf(@cache)
+    ENV.delete('IBM_JVM_LICENSE')
+    ENV.delete('IBM_LIBERTY_LICENSE')
   end
 
   it 'should fail to compile when no containers detect' do
@@ -39,7 +42,6 @@ describe 'compile script', :integration do
   it 'should work with the liberty WEB-INF case' do
     Dir.mktmpdir do |root|
       FileUtils.cp_r'spec/fixtures/container_liberty/.', root
-
       with_memory_limit('1G') do
         Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
           expect(wait_thr.value).to be_success

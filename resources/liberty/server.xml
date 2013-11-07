@@ -4,7 +4,6 @@
     <featureManager>
         <feature>webProfile-6.0</feature>
         <feature>jaxrs-1.1</feature>
-        <feature>ejbLite-3.1</feature>
     </featureManager>
 
     <httpEndpoint id="defaultHttpEndpoint"
@@ -15,7 +14,7 @@
         <application name="myapp" context-root="/" location="../../../../../"
         type="war" />
         
-        
+
     <include location="runtime-vars.xml" />
 	
 </server>
