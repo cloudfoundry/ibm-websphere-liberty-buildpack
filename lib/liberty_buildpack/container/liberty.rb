@@ -146,7 +146,7 @@ module LibertyBuildpack::Container
 
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
-      @logger.info("The current contents are")
+      @logger.info("The current contents are #{Dir.glob(File.join(@app_dir, '*'))}")
       if server_xml
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         server_xml_doc.context[:attribute_quote] = :quote
@@ -383,7 +383,6 @@ module LibertyBuildpack::Container
           system("unzip -oxq '#{app}' -d '#{temp_directory}'")
           File.delete(app)
           File.rename(temp_directory, app)
-          puts "#{Dir.entries("app")}"
         end
       end
     end
@@ -393,7 +392,6 @@ module LibertyBuildpack::Container
         if File.file? app
           system("unzip -oxq '#{app}' -d ./app")
           FileUtils.rm_rf("#{app}")
-          puts "#{Dir.entries("app")}"
         end
       end
     end
