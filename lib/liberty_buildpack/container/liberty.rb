@@ -36,6 +36,7 @@ module LibertyBuildpack::Container
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context)
       @app_dir = context[:app_dir]
+      Liberty.prep_app(@app_dir)
       @java_home = context[:java_home]
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
@@ -46,7 +47,6 @@ module LibertyBuildpack::Container
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @status = context[:status]
-      Liberty.prep_app(@app_dir)
       @apps = apps
     end
 
@@ -235,7 +235,7 @@ module LibertyBuildpack::Container
 
     # first checkpoint for .ears and other applications
     def self.find_liberty(app_dir, configuration)
-      if Liberty.contains_ear(app_dir)
+      if meta_inf(app_dir)
         version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
