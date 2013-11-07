@@ -64,7 +64,7 @@ module LibertyBuildpack::Container
         end
         apps_found = [@app_dir]
       elsif server_xml
-        ["*.war","*.ear"].each {|suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', suffix )))} # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
+        ["*.war","*.ear"].each {|suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', 'dropins', suffix )))} # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
         @logger.info("applications in the server #{apps_found}")
         unless Liberty.all_extracted?(apps_found) # does that mean the modules in the ear get extracted again?
           Liberty.expand_apps(apps_found)
