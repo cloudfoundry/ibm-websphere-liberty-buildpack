@@ -140,6 +140,7 @@ module LibertyBuildpack::Container
 
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
+      @logger.info("The current contents are")
       if server_xml
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         server_xml_doc.context[:attribute_quote] = :quote
@@ -164,7 +165,7 @@ module LibertyBuildpack::Container
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)      
-      elsif Liberty.contains_ear(@app_dir)
+      elsif Liberty.meta_inf(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)     
