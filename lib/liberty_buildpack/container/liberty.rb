@@ -397,10 +397,9 @@ module LibertyBuildpack::Container
     def self.all_extracted?(file_array)
       state = true
       file_array.each do |file|
-        if File.file?(file) 
-          state = false
-        end
-        end
+          if File.file?(file) 
+            state = false
+          end
       end
       LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("all_extracted? #{state}")
       return state
