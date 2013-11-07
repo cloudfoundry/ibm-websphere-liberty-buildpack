@@ -53,9 +53,9 @@ module LibertyBuildpack::Container
     # Extracts archives that are pushed initially
     def self.prep_app(app_dir)
       puts "preparing the app #{app_dir}"
-      if app = Dir.glob(File.join(app_dir, '*.zip'))
+      if app = contains_type(app_dir, "*.zip")
         Liberty.splat_expand(app)
-      elsif app = Liberty.contains_ear(app_dir)
+      elsif app = Liberty.contains_type(app_dir, "*.ear")
         @logger.info("pushing an ear")
         Liberty.splat_expand(app)
       end
@@ -180,7 +180,6 @@ module LibertyBuildpack::Container
         server_xml = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml')
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
-        # application.attributes["location"] = "../../../../#{File.basename(Liberty.contains_ear(@app_dir)[0])}"
         application.attributes["type"] = "ear"
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       else
@@ -357,10 +356,11 @@ module LibertyBuildpack::Container
       candidates.any? ? candidates[0] : nil
     end
 
-    def self.contains_ear(app_dir)
-      ears = Dir.glob(File.join(app_dir, "*.ear"))
-      puts "ears found = #{ears}"
-      (ears == [] or ears == nil) ? nil : ears
+
+    def self.contains_type(app_dir, type)
+      files = Dir.glob(File.join(app_dir, type))
+      puts "ears found = #{files}"
+      (files == [] or files == nil) ? nil : files
     end
     
     def self.ear?(app)
