@@ -22,6 +22,8 @@ require 'liberty_buildpack/diagnostics/common'
 require 'pathname'
 require 'time'
 require 'yaml'
+require 'rubygems'
+require 'zip'
 
 module LibertyBuildpack
 

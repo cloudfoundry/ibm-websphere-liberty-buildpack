@@ -21,7 +21,6 @@ require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/download'
 require 'liberty_buildpack/util/format_duration'
-require 'rubyzip'
 
 module LibertyBuildpack::Framework
 
