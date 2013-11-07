@@ -35,6 +35,7 @@ module LibertyBuildpack::Container
     # @option context [String] :lib_directory the directory that additional libraries are placed in
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context)
+      @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @app_dir = context[:app_dir]
       Liberty.prep_app(@app_dir)
       @java_home = context[:java_home]
@@ -45,7 +46,6 @@ module LibertyBuildpack::Container
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
-      @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @status = context[:status]
       @apps = apps
     end
