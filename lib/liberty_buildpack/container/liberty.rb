@@ -52,9 +52,10 @@ module LibertyBuildpack::Container
 
     # Extracts archives that are pushed initially
     def self.prep_app(app_dir)
+      @logger.info("preparing the app #{app_dir}")
       if app = Dir.glob(File.join(app_dir, '*.zip'))
         Liberty.splat_expand(app)
-      elsif app = Liberty.contains_ear(@app_dir)
+      elsif app = Liberty.contains_ear(app_dir)
         @logger.info("pushing an ear")
         Liberty.splat_expand(app)
       end
