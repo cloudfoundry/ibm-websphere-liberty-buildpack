@@ -16,6 +16,7 @@
 
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/framework'
+require 'liberty_buildpack/framework/framework_util'
 require 'liberty_buildpack/framework/spring_auto_reconfiguration/web_xml_modifier'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
@@ -108,36 +109,11 @@ module LibertyBuildpack::Framework
       end
 
       def self.spring_application?(app_dir)
-        Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any? or spring_application_within_archive? app_dir
+        spring_apps = FrameworkUtils.find(app_dir, SPRING_JAR_PATTERN) 
+        FrameworkUtils.link_libs(spring_apps, @lib_directory)
+        (spring_libs != nil && spring_libs != []) or FrameworkUtils.application_within_archive?(app_dir, "spring-core")
       end
       
-      def self.spring_application_within_archive?(app_dir)
-        list = ""
-        archives = Dir.glob(File.join(app_dir, "**",'*.jar'))
-        archives.each do |file|
-          IO.popen("unzip -l -qq #{file}") { 
-          |io| while (line = io.gets) do 
-            list << "#{line}" 
-            end }
-          end
-        list.include? "spring-core"
-      end
-      
-      def self.find_archives(app_dir)
-        types = ['*.zip', '*.ear', '*.jar', '*.war']
-        archives = Dir.glob(File.join(app_dir, "**",types))
-        archives.each do |file|
-          zf = Zip::File.new(file)
-          zf.each_with_index {
-            |entry, index|
-  
-            puts "entry #{index} is #{entry.name}, size = #{entry.size}, compressed size = #{entry.compressed_size}"
-            # use zf.get_input_stream(entry) to get a ZipInputStream for the entry
-            # entry can be the ZipEntry object or any object which has a to_s method that
-            # returns the name of the entry.
-          }
-        end
-      end
   end
 
 end

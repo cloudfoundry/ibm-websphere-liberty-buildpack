@@ -65,7 +65,7 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
-      if Liberty.web_inf(@app_dir)
+      if Liberty.web_inf(@app_dir) #must check for webinf first because ears could have wars can have meta inf as well
         apps_found = [@app_dir]
       elsif Liberty.meta_inf(@app_dir)  
         apps_found = [@app_dir]
@@ -94,7 +94,6 @@ module LibertyBuildpack::Container
       download_liberty
       update_server_xml
       link_application
-      link_libs
       make_server_script_runnable
       set_liberty_system_properties
     end
@@ -271,30 +270,6 @@ module LibertyBuildpack::Container
         default_server_pathname = Pathname.new(default_server_path) #.liberty/usr/servers/defaultServer as actual Pathname
         Pathname.glob(File.join(@app_dir, '*')) do |file| # each file in the appdir create a link in .liberty/usr/servers/defaultServer
           FileUtils.ln_sf(file.relative_path_from(default_server_pathname), default_server_path) 
-        end
-      end
-    end
-
-    def link_libs
-      @apps.each do |app_dir|
-        libs = ContainerUtils.libs(app_dir, @lib_directory) # Returns an +Array+ containing the relative paths 
-                                                            # of the JARs located in the additional libraries directory.
-        if libs
-          if Liberty.web_inf(app_dir)
-            app_web_inf_lib = Liberty.web_inf_lib(app_dir)
-            FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)
-            app_web_inf_lib_path = Pathname.new(app_web_inf_lib)
-            Pathname.glob(File.join(@lib_directory, '*.jar')) do |jar|
-              FileUtils.ln_sf(jar.relative_path_from(app_web_inf_lib_path), app_web_inf_lib)
-            end
-          elsif Liberty.meta_inf(app_dir)
-            ear_lib = File.join(app_dir, "/lib")
-            ear_lib_path = Pathname.new(ear_lib)
-            FileUtils.mkdir_p(ear_lib) unless File.exists?(ear_lib)
-            Pathname.glob(File.join(@lib_directory, '*.jar')) do |jar|
-              FileUtils.ln_sf(jar.relative_path_from(ear_lib_path), ear_lib)
-            end
-          end
         end
       end
     end
