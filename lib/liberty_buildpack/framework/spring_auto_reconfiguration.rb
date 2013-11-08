@@ -120,7 +120,6 @@ module LibertyBuildpack::Framework
             list << "#{line}" 
             end }
           end
-          puts "Archive contents: \n #{list}" 
         list.include? "spring-core"
       end
       
