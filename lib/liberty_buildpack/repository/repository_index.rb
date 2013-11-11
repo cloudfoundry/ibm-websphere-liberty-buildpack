@@ -42,7 +42,7 @@ module LibertyBuildpack::Repository
     def find_item(version)
       version = VersionResolver.resolve(version, @index.keys)
 	  uri = @index[version.to_s]
-	  if @index[version.to_s].has_key? 'uri'
+	  if @index[version.to_s].include? 'uri'
 		uri = @index[version.to_s]['uri']
 		license = @index[version.to_s]['license']
 	  end
