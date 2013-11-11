@@ -41,7 +41,7 @@ module LibertyBuildpack::Repository
       VersionResolver.stub(:resolve).with('test-version', %w(resolved-version)).and_return('resolved-version')
 
       repository_index = RepositoryIndex.new('test-uri')
-      expect(repository_index.find_item('test-version')).to eq(%w(resolved-version resolved-uri))
+      expect(repository_index.find_item('test-version')).to eq(['resolved-version', 'resolved-uri', nil])
     end
 
   end
