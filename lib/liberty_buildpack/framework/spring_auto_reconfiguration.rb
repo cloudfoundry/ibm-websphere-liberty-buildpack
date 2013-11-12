@@ -110,7 +110,6 @@ module LibertyBuildpack::Framework
 
       def self.spring_application?(app_dir)
         spring_apps = FrameworkUtils.find(app_dir, SPRING_JAR_PATTERN) 
-        @logger.info("spring applications found = #{spring_apps}")
         FrameworkUtils.link_libs(spring_apps, @lib_directory)
         (spring_apps != nil && spring_apps != []) or FrameworkUtils.application_within_archive?(app_dir, "spring-core")
       end
