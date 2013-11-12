@@ -23,13 +23,13 @@ module LibertyBuildpack::Framework
 
   class FrameworkUtils
 
-    def self.find(pattern, app_dir)
+    def self.find(app_dir, pattern)
       apps = []
       matches = Dir["#{app_dir}/**/#{pattern}"]
       matches.each do |path|
-        [".ear", "META-INF", "WEB-INF"].each do |app|
+        [".ear", "\/META-INF", "\/WEB-INF"].each do |app|
           if path.include? app
-            apps << path.scan(/.*\w+app/)
+            apps.concat(path.scan(/.*\w+#{Regexp.quote(app)}/))
             break
           end
         end
@@ -59,17 +59,17 @@ module LibertyBuildpack::Framework
 
     def self.link_libs(apps, lib_dir)
       apps.each do |app_dir|
-        libs = ContainerUtils.libs(app_dir, lib_dir) # Returns an +Array+ containing the relative paths
+        libs = LibertyBuildpack::Container::ContainerUtils.libs(app_dir, lib_dir) # Returns an +Array+ containing the relative paths
         # of the JARs located in the additional libraries directory.
         if libs
-          if Liberty.web_inf(app_dir)
+          if LibertyBuildpack::Container::Liberty.web_inf(app_dir)
             app_web_inf_lib = web_inf_lib(app_dir)
             FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)
             app_web_inf_lib_path = Pathname.new(app_web_inf_lib)
             Pathname.glob(File.join(lib_dir, '*.jar')) do |jar|
               FileUtils.ln_sf(jar.relative_path_from(app_web_inf_lib_path), app_web_inf_lib)
             end
-          elsif Liberty.meta_inf(app_dir)
+          elsif LibertyBuildpack::Container::Liberty.meta_inf(app_dir)
             ear_lib_path = Pathname.new(ear_lib)
             FileUtils.mkdir_p(ear_lib) unless File.exists?(ear_lib)
             Pathname.glob(File.join(lib_dir, '*.jar')) do |jar|
