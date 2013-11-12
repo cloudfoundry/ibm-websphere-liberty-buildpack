@@ -32,7 +32,7 @@ module LibertyBuildpack::Framework
             if app.include? ".ear" or app.include? ".war"
               apps.concat(path.scan(/.*\w+#{Regexp.quote(app)}/))
             else
-              apps.concat(path.scan(/.*\w+#{Regexp.quote(app)}/){|match| match.scan(/.*\w+\//)})
+              apps << path.scan(/.*\w+#{Regexp.quote(app)}/){|match| match.scan(/.*\w+\//)}
             end
             break
           end
