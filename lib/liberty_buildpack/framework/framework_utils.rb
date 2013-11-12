@@ -27,9 +27,13 @@ module LibertyBuildpack::Framework
       apps = []
       matches = Dir["#{app_dir}/**/#{pattern}"]
       matches.each do |path|
-        [".ear", "\/META-INF", "\/WEB-INF"].each do |app|
+        [".ear", ".war", "\/WEB-INF", "\/META-INF"].each do |app|
           if path.include? app
-            apps.concat(path.scan(/.*\w+#{Regexp.quote(app)}/))
+            if app.include? ".ear" or app.include? ".war"
+              apps.concat(path.scan(/.*\w+#{Regexp.quote(app)}/))
+            else
+              apps.concat(path.scan(/.*\w+#{Regexp.quote(app)}/).scan(/.*\w+\//))
+            end
             break
           end
         end
@@ -62,7 +66,6 @@ module LibertyBuildpack::Framework
         libs = LibertyBuildpack::Container::ContainerUtils.libs(app_dir, lib_dir) 
         LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Current app #{app_dir}")
         if libs
-          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("libs is not nli #{libs}")
           if LibertyBuildpack::Container::Liberty.web_inf(app_dir)
             app_web_inf_lib = web_inf_lib(app_dir)
             FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)

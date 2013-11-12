@@ -38,7 +38,6 @@ module LibertyBuildpack::Framework
     def initialize(context = {})
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @lib_directory = context[:lib_directory]
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Setting @lib-directory to #{@lib_directory}")
       @configuration = context[:configuration]
       @app_dir = context[:app_dir]
       @status = context[:status]
