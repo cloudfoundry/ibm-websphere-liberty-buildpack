@@ -49,7 +49,7 @@ module LibertyBuildpack::Framework
     # @return [String] returns +spring-auto-reconfiguration-<version>+ if the application is a candidate for
     #                  auto-reconfiguration otherwise returns +nil+
     def detect
-      @auto_reconfiguration_version, @auto_reconfiguration_uri = SpringAutoReconfiguration.find_auto_reconfiguration(@app_dir, @configuration)
+      @auto_reconfiguration_version, @auto_reconfiguration_uri = SpringAutoReconfiguration.find_auto_reconfiguration(@app_dir, @configuration, @lib_directory)
       @auto_reconfiguration_version ? id(@auto_reconfiguration_version) : nil
     end
 
@@ -74,8 +74,8 @@ module LibertyBuildpack::Framework
 
       WEB_XML = File.join 'WEB-INF', 'web.xml'
 
-      def self.find_auto_reconfiguration(app_dir, configuration)
-        if spring_application? app_dir
+      def self.find_auto_reconfiguration(app_dir, configuration, lib_dir)
+        if spring_application?(app_dir, lib_dir)
           version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
         else
           version = nil
@@ -109,11 +109,11 @@ module LibertyBuildpack::Framework
         end
       end
 
-      def self.spring_application?(app_dir)
+      def self.spring_application?(app_dir, lib_dir)
         LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Searching for spring applications in  #{app_dir}")
         spring_apps = FrameworkUtils.find(app_dir, SPRING_JAR_PATTERN) 
         LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("The spring apps found are #{spring_apps}")
-        FrameworkUtils.link_libs(spring_apps, @lib_directory)
+        FrameworkUtils.link_libs(spring_apps, lib_dir)
         (spring_apps != nil && spring_apps != []) or FrameworkUtils.application_within_archive?(app_dir, "spring-core")
       end
       
