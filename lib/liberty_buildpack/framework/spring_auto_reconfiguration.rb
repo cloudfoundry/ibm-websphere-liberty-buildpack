@@ -38,6 +38,7 @@ module LibertyBuildpack::Framework
     def initialize(context = {})
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @lib_directory = context[:lib_directory]
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Setting @lib-directory to #{@lib_directory}")
       @configuration = context[:configuration]
       @app_dir = context[:app_dir]
       @status = context[:status]
@@ -109,6 +110,7 @@ module LibertyBuildpack::Framework
       end
 
       def self.spring_application?(app_dir)
+        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Searching for spring applications in  #{app_dir}")
         spring_apps = FrameworkUtils.find(app_dir, SPRING_JAR_PATTERN) 
         LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("The spring apps found are #{spring_apps}")
         FrameworkUtils.link_libs(spring_apps, @lib_directory)

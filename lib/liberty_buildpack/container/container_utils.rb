@@ -47,7 +47,7 @@ module LibertyBuildpack::Container
     # @return [Array<String>] the relative paths of the JARs located in the additional libraries directory
     def self.libs(app_dir, lib_directory)
       libs = []
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("The lib dir is  #{lib_directory}")
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("The lib dir is  #{lib_directory.to_s}")
       if lib_directory
         root_directory = Pathname.new(app_dir)
         libs = Pathname.new(lib_directory).children
