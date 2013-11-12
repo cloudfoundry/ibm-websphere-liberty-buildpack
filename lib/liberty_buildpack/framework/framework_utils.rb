@@ -32,9 +32,7 @@ module LibertyBuildpack::Framework
             if app.include? ".ear" or app.include? ".war"
               apps.concat(path.scan(/.*\w+#{Regexp.quote(app)}/))
             else
-              spring_app = path.scan(/.*\w+#{Regexp.quote(app)}/){|match| match.scan(/.*\w+\//)}
-              LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Application found = #{spring_app}")
-              apps << spring_app
+              path.scan(/.*\w+#{Regexp.quote(app)}/){|match| apps.concat(match.scan(/.*\w+\//))}
             end
             break
           end
