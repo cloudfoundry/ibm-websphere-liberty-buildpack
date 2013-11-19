@@ -27,7 +27,7 @@ module LibertyBuildpack::Container
 
     let(:application_cache) { double('ApplicationCache') }
 
-    before do
+    before do 
       $stdout = StringIO.new
       $stderr = StringIO.new
     end
@@ -38,6 +38,20 @@ module LibertyBuildpack::Container
         .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
         app_dir: 'spec/fixtures/container_liberty',
+        configuration: {},
+        java_home: '',
+        java_opts: [],
+        license_ids: {}
+        ).detect
+
+        expect(detected).to include('liberty-8.5.5')
+      end
+
+      it 'should detect META-INF' do
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        .and_return(LIBERTY_DETAILS)
+        detected = Liberty.new(
+        app_dir: 'spec/fixtures/container_liberty_ear',
         configuration: {},
         java_home: '',
         java_opts: [],
