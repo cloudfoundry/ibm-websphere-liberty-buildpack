@@ -230,12 +230,7 @@ module LibertyBuildpack::Container
     # first checkpoint for .ears and other applications
     def self.find_liberty(app_dir, configuration)
     LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("the app dir is: #{app_dir}")
-      if meta_inf(app_dir)
-        version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
-          fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
-        end
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("finding liberty for the meta-inf app #{@app_dir} with version #{version}")
-      elsif server_xml(app_dir)
+      if server_xml(app_dir)
         version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
@@ -243,6 +238,11 @@ module LibertyBuildpack::Container
         version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
+      elsif meta_inf(app_dir)
+        version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+          fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
+        end
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("finding liberty for the meta-inf app #{@app_dir} with version #{version}")
       else
         version = nil
         uri = nil
