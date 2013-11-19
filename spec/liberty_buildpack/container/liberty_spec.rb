@@ -51,7 +51,7 @@ module LibertyBuildpack::Container
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
-        app_dir: 'spec/fixtures/container_liberty_ear',
+        app_dir: 'spec/fixtures/container_liberty',
         configuration: {},
         java_home: '',
         java_opts: [],
