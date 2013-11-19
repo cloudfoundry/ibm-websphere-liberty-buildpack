@@ -82,7 +82,7 @@ module LibertyBuildpack::Container
     # @return [String] returns +liberty-<version>+ if and only if the application has a server.xml, otherwise
     #                  returns +nil+
     def detect
-      $stdout.puts "I found #{liberty_id(@liberty_version)} for the app #{@app_dir}"
+      $stdout.puts "I found for the app #{@app_dir}"
       @liberty_version ? [liberty_id(@liberty_version)] : nil
     end
 
