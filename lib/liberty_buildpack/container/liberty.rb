@@ -312,7 +312,7 @@ module LibertyBuildpack::Container
 
     def self.meta_inf(app_dir)
       meta_inf = File.join(app_dir, META_INF)
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("A meta inf dir exists? #{File.directory?(meta_inf)}")
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("#{meta_inf} dir exists? #{File.directory?(meta_inf)}")
       File.directory?(meta_inf) ? meta_inf : nil
     end
 
