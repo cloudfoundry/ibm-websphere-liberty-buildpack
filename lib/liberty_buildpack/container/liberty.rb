@@ -43,6 +43,7 @@ module LibertyBuildpack::Container
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
       @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
+      puts "I found #{@liberty_version} for the app #{@app_dir}"
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
@@ -51,7 +52,6 @@ module LibertyBuildpack::Container
 
     # Extracts archives that are pushed initially
     def prep_app(app_dir)
-      puts "I found #{liberty_id(@liberty_version)} for the app #{@app_dir}"
       if app = Liberty.contains_type(app_dir, '*.zip')
         Liberty.splat_expand(app)
       elsif app = Liberty.contains_type(app_dir, '*.ear')
