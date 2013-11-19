@@ -307,13 +307,14 @@ module LibertyBuildpack::Container
 
     def self.web_inf(app_dir)
       web_inf = File.join(app_dir, WEB_INF)
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("#{web_inf} dir exists? #{File.directory?(web_inf)}")
       File.directory?(File.join(app_dir, WEB_INF)) ? web_inf : nil
     end
 
     def self.meta_inf(app_dir)
       meta_inf = File.join(app_dir, META_INF)
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("#{meta_inf} dir exists? #{File.directory?(meta_inf)}")
-      File.directory?(meta_inf) ? meta_inf : nil
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("#{meta_inf} dir exists? #{File.directory?(File.join(app_dir, META_INF))}")
+      File.directory?(File.join(app_dir, META_INF)) ? meta_inf : nil
     end
 
     def self.server_directory(server_dir)
