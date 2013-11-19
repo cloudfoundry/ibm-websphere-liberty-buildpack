@@ -43,7 +43,7 @@ module LibertyBuildpack::Container
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
       @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
-      puts "I found #{@liberty_version} for the app #{@app_dir}"
+      $stderr.puts "I found #{@liberty_version} for the app #{@app_dir}"
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
