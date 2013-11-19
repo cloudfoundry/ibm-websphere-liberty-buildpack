@@ -57,7 +57,7 @@ module LibertyBuildpack::Container
         java_opts: [],
         license_ids: {}
         ).detect
-        $stderr.puts "i found #{detected}"
+        $stdout.print "i found #{detected}"
         expect(detected).to include('liberty-8.5.5')
       end
 
