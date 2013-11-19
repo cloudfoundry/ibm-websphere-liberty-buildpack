@@ -23,7 +23,7 @@ module LibertyBuildpack::Jre
   describe IBMJdk do
     DETAILS_PRE_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.7.0'), 'test-uri', 'spec/fixtures/license.html']
     DETAILS_POST_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.8.0'), 'test-uri', 'spec/fixtures/license.html']
-    
+
     let(:application_cache) { double('ApplicationCache') }
     let(:memory_heuristic) { double('MemoryHeuristic', resolve: %w(opt-1 opt-2)) }
 
@@ -57,7 +57,6 @@ module LibertyBuildpack::Jre
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         LibertyBuildpack::Jre::IBMJdk.stub(:cache_dir).and_return('/tmp/jre_temp')
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.bin'))
-
 
         IBMJdk.new(
             app_dir: root,

@@ -52,9 +52,9 @@ module LibertyBuildpack::Container
 
     # Extracts archives that are pushed initially
     def prep_app(app_dir)
-      if app = Liberty.contains_type(app_dir, "*.zip")
+      if app = Liberty.contains_type(app_dir, '*.zip')
         Liberty.splat_expand(app)
-      elsif app = Liberty.contains_type(app_dir, "*.ear")
+      elsif app = Liberty.contains_type(app_dir, '*.ear')
         Liberty.splat_expand(app)
       end
     end
@@ -65,16 +65,16 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
-      if Liberty.web_inf(@app_dir) #must check for webinf first because ears could have wars can have meta inf as well
+      if Liberty.web_inf(@app_dir) # must check for webinf first because ears could have wars can have meta inf as well
         apps_found = [@app_dir]
-      elsif Liberty.meta_inf(@app_dir)  
+      elsif Liberty.meta_inf(@app_dir)
         apps_found = [@app_dir]
         wars = Dir.glob(File.expand_path(File.join(@app_dir, '*.war' )))
         Liberty.expand_apps(wars)
       elsif server_xml
-        ["*.war","*.ear"].each {|suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', suffix )))} # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
+        ['*.war', '*.ear'].each { |suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', suffix))) } # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
         Liberty.expand_apps(apps_found)
-      end      
+      end
       apps_found
     end
 
@@ -168,16 +168,15 @@ module LibertyBuildpack::Container
       elsif Liberty.web_inf(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)      
+        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
       elsif Liberty.meta_inf(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)     
-        
+        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
         server_xml = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml')
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
-        application.attributes["type"] = "ear"
+        application.attributes['type'] = 'ear'
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       else
         raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
@@ -199,7 +198,7 @@ module LibertyBuildpack::Container
         return 'defaultServer'
       elsif Liberty.web_inf @app_dir
         return 'defaultServer'
-      elsif Liberty.meta_inf(@app_dir) 
+      elsif Liberty.meta_inf(@app_dir)
         return 'defaultServer'
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
@@ -228,7 +227,6 @@ module LibertyBuildpack::Container
 
       puts "(#{(Time.now - expand_start_time).duration})"
     end
-
 
     # first checkpoint for .ears and other applications
     def self.find_liberty(app_dir, configuration)
@@ -260,16 +258,16 @@ module LibertyBuildpack::Container
     end
 
     def link_application
-      if Liberty.liberty_directory(@app_dir) #if the file <app-dir>/wlp/usr/servers/*/server.xml exists (packaged server)
+      if Liberty.liberty_directory(@app_dir) # if the file <app-dir>/wlp/usr/servers/*/server.xml exists (packaged server)
         FileUtils.rm_rf(usr) # delete the old version created for a packaged server
         FileUtils.mkdir_p(liberty_home) # creates .liberty dir
         FileUtils.ln_sf(Pathname.new(File.join(@app_dir, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home) # ln_sf forces soft linking of parameters (old, new) from new to old
-      elsif Liberty.server_directory(@app_dir) #if a server.xml exists within the app_dir (unpackaged server) / single app
-        FileUtils.rm_rf(default_server_path) #.liberty/usr/servers/defaultServer
+      elsif Liberty.server_directory(@app_dir) # if a server.xml exists within the app_dir (unpackaged server) / single app
+        FileUtils.rm_rf(default_server_path) # .liberty/usr/servers/defaultServer
         FileUtils.mkdir_p(default_server_path)
-        default_server_pathname = Pathname.new(default_server_path) #.liberty/usr/servers/defaultServer as actual Pathname
+        default_server_pathname = Pathname.new(default_server_path) # .liberty/usr/servers/defaultServer as actual Pathname
         Pathname.glob(File.join(@app_dir, '*')) do |file| # each file in the appdir create a link in .liberty/usr/servers/defaultServer
-          FileUtils.ln_sf(file.relative_path_from(default_server_pathname), default_server_path) 
+          FileUtils.ln_sf(file.relative_path_from(default_server_pathname), default_server_path)
         end
       end
     end
@@ -310,7 +308,7 @@ module LibertyBuildpack::Container
       web_inf = File.join(app_dir, WEB_INF)
       File.directory?(File.join(app_dir, WEB_INF)) ? web_inf : nil
     end
-    
+
     def self.meta_inf(app_dir)
       meta_inf = File.join(app_dir, META_INF)
       File.directory?(meta_inf) ? meta_inf : nil
@@ -329,16 +327,14 @@ module LibertyBuildpack::Container
       candidates.any? ? candidates[0] : nil
     end
 
-
     def self.contains_type(app_dir, type)
       files = Dir.glob(File.join(app_dir, type))
-      (files == [] or files == nil) ? nil : files
-    end
-    
-    def self.ear?(app)
-      app.include? ".ear"
+      files == [] || files == nil ? nil : files
     end
 
+    def self.ear?(app)
+      app.include? '.ear'
+    end
 
     def self.server_xml(app_dir)
       deep_candidates = Dir[File.join(app_dir, SERVER_XML_GLOB)]
@@ -360,7 +356,7 @@ module LibertyBuildpack::Container
         end
       end
     end
-    
+
     def self.splat_expand(apps)
       apps.each do |app|
         if File.file? app
@@ -369,17 +365,14 @@ module LibertyBuildpack::Container
         end
       end
     end
-    
-    
+
     def self.all_extracted?(file_array)
       state = true
       file_array.each do |file|
-          if File.file?(file) 
-            state = false
-          end
+          state = false if File.file?(file)
       end
       LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("all_extracted? #{state}")
-      return state
+      state
     end
 
   end

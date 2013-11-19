@@ -27,7 +27,7 @@ module LibertyBuildpack::Container
 
     let(:application_cache) { double('ApplicationCache') }
 
-    before do 
+    before do
       $stdout = StringIO.new
       $stderr = StringIO.new
     end
@@ -46,6 +46,13 @@ module LibertyBuildpack::Container
 
         expect(detected).to include('liberty-8.5.5')
       end
+
+=begin
+ test scenarios
+    1.) .ear pushed
+        - 
+  
+=end
 
       it 'should detect META-INF' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
