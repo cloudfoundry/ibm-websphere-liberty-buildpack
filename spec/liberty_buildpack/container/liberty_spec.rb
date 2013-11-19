@@ -43,7 +43,7 @@ module LibertyBuildpack::Container
         java_opts: [],
         license_ids: {}
         ).detect
-        $stdout.puts "I found #{detected} for a WEB-INF app"
+
         expect(detected).to include('liberty-8.5.5')
       end
 
@@ -57,7 +57,7 @@ module LibertyBuildpack::Container
         java_opts: [],
         license_ids: {}
         ).detect
-        $stdout.puts "I found #{detected} for a META-INF app"
+
         expect(detected).to include('liberty-8.5.5')
       end
 
