@@ -43,7 +43,7 @@ module LibertyBuildpack::Container
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
       @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
-      $stderr.puts "I found #{@liberty_version} for the app #{@app_dir}"
+      @logger.info("I found #{@liberty_version} for the app #{@app_dir}")
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
@@ -233,6 +233,7 @@ module LibertyBuildpack::Container
         version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("finding liberty for the meta-inf app #{@app_dir} with version #{version}")
       elsif server_xml(app_dir)
         version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
