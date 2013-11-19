@@ -229,7 +229,6 @@ module LibertyBuildpack::Container
 
     # first checkpoint for .ears and other applications
     def self.find_liberty(app_dir, configuration)
-    LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("the app dir is: #{app_dir}")
       if server_xml(app_dir)
         version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
