@@ -48,7 +48,6 @@ module LibertyBuildpack::Jre
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
-      @status = context[:status]
       @version, @uri, @license = IBMJdk.find_ibmjdk(@configuration)
       @license_id = context[:license_ids]['IBM_JVM_LICENSE']
       context[:java_home].concat JAVA_HOME

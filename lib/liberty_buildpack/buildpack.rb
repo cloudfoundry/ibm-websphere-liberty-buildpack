@@ -39,10 +39,10 @@ module LibertyBuildpack
     # @param [String] app_dir the path of the application directory
     # @param [String] message an error message with an insert for the reason for failure
     # @return [Object] the return value from the given block
-    def self.drive_buildpack_with_logger(app_dir, status, message)
+    def self.drive_buildpack_with_logger(app_dir, message)
       logger = LibertyBuildpack::Diagnostics::LoggerFactory.create_logger app_dir
       begin
-        yield new(app_dir, status)
+        yield new(app_dir)
       rescue => e
         logger.error(message % e.inspect)
         logger.debug("Exception #{e.inspect} backtrace:\n#{e.backtrace.join("\n")}")
@@ -114,7 +114,7 @@ module LibertyBuildpack
     LIB_DIRECTORY = '.lib'
 
     # Instances should only be constructed by this class.
-    def initialize(app_dir, status)
+    def initialize(app_dir)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       Buildpack.log_git_data @logger
       Buildpack.dump_environment_variables @logger
@@ -131,7 +131,6 @@ module LibertyBuildpack
 
       basic_context = {
           app_dir: app_dir,
-          status: status,
           environment: environment,
           java_home: java_home,
           java_opts: java_opts,

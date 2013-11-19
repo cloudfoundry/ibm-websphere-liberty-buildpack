@@ -46,7 +46,6 @@ module LibertyBuildpack::Container
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
-      @status = context[:status]
       @apps = apps
     end
 

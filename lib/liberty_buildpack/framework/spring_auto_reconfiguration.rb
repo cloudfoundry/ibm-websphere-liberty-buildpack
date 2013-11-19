@@ -40,7 +40,6 @@ module LibertyBuildpack::Framework
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
       @app_dir = context[:app_dir]
-      @status = context[:status]
     end
 
     # Detects whether this application is suitable for auto-reconfiguration
