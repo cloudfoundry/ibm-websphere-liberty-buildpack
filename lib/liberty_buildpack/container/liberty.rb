@@ -43,6 +43,7 @@ module LibertyBuildpack::Container
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
       @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
+      @logger.info('#{liberty_version}')
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
@@ -143,7 +144,6 @@ module LibertyBuildpack::Container
 
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
-      @logger.info("The current contents are #{Dir.glob(File.join(@app_dir, '*'))}")
       if server_xml
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         server_xml_doc.context[:attribute_quote] = :quote
