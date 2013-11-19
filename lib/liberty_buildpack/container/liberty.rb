@@ -242,7 +242,6 @@ module LibertyBuildpack::Container
         version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("finding liberty for the meta-inf app #{@app_dir} with version #{version}")
       else
         version = nil
         uri = nil
@@ -307,13 +306,11 @@ module LibertyBuildpack::Container
 
     def self.web_inf(app_dir)
       web_inf = File.join(app_dir, WEB_INF)
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("#{web_inf} dir exists? #{File.directory?(web_inf)}")
       File.directory?(File.join(app_dir, WEB_INF)) ? web_inf : nil
     end
 
     def self.meta_inf(app_dir)
       meta_inf = File.join(app_dir, META_INF)
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("#{meta_inf} dir exists? #{File.directory?(File.join(app_dir, META_INF))}")
       File.directory?(File.join(app_dir, META_INF)) ? meta_inf : nil
     end
 
