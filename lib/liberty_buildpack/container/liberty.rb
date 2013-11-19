@@ -51,6 +51,7 @@ module LibertyBuildpack::Container
 
     # Extracts archives that are pushed initially
     def prep_app(app_dir)
+      puts "I found #{liberty_id(@liberty_version)} for the app #{@app_dir}"
       if app = Liberty.contains_type(app_dir, '*.zip')
         Liberty.splat_expand(app)
       elsif app = Liberty.contains_type(app_dir, '*.ear')
@@ -82,7 +83,6 @@ module LibertyBuildpack::Container
     # @return [String] returns +liberty-<version>+ if and only if the application has a server.xml, otherwise
     #                  returns +nil+
     def detect
-      puts "I found #{liberty_id(@liberty_version)} for the app #{@app_dir}"
       @liberty_version ? [liberty_id(@liberty_version)] : nil
     end
 
