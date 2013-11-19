@@ -48,7 +48,7 @@ module LibertyBuildpack::Framework
         IO.popen("unzip -l -qq #{file}") do
           |io| while (line = io.gets)
             list << "#{line}"
-          end 
+          end
         end
       end
       list.include? pattern
