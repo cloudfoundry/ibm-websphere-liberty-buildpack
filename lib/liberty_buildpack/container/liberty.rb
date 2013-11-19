@@ -43,7 +43,6 @@ module LibertyBuildpack::Container
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
       @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
-      $stdout.puts "I found #{liberty_id(@liberty_version)} for the app #{@app_dir}"
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
@@ -83,6 +82,7 @@ module LibertyBuildpack::Container
     # @return [String] returns +liberty-<version>+ if and only if the application has a server.xml, otherwise
     #                  returns +nil+
     def detect
+      $stdout.puts "I found #{liberty_id(@liberty_version)} for the app #{@app_dir}"
       @liberty_version ? [liberty_id(@liberty_version)] : nil
     end
 
