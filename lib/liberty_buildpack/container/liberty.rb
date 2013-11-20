@@ -176,8 +176,7 @@ module LibertyBuildpack::Container
         application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
         application.attributes['type'] = 'ear'
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
-        @logger.info("An EAR was pushed with the application element")
-        @logger.info("#{application}")
+        @logger.info("#{server_xml_doc}")
       else
         raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
       end
