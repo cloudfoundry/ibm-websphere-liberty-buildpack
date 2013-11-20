@@ -140,7 +140,7 @@ module LibertyBuildpack::Container
         end # mktmpdir
       end # it
 
-      it 'should not detect when WEB-INF and server.xml are absent' do
+      it 'should not detect when WEB-INF and META-INF and server.xml are absent' do
         detected = Liberty.new(
         app_dir: 'spec/fixtures/container_main',
         configuration: {},
@@ -268,6 +268,31 @@ module LibertyBuildpack::Container
           expect(File.executable?(server_script)).to be_true
         end
       end
+      
+      it 'should make the ./bin/server script runnable for the META-INF case' do
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        .and_return(LIBERTY_DETAILS)
+        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'META-INF')
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          server_script = File.join(root, '.liberty', 'bin', 'server')
+          expect(File.executable?(server_script)).to be_true
+        end
+      end
 
       it 'should produce the correct server.xml for the WEB-INF case' do
         Dir.mktmpdir do |root|
@@ -294,7 +319,37 @@ module LibertyBuildpack::Container
 
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="../../../../../"').to be_true
+          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="../../../../../" type="war"').to be_true
+          expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
+        end
+      end
+
+      it 'should produce the correct server.xml for the META-INF case' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'META-INF')
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+          server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
+          expect(File.exists?(server_xml_file)).to be_true
+
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents.include? '<featureManager>').to be_true
+          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="../../../../../" type="ear"').to be_true
           expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
         end
       end
