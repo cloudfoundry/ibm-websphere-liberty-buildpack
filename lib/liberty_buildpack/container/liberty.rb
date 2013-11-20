@@ -163,20 +163,19 @@ module LibertyBuildpack::Container
         include_file.add_attribute('location', 'runtime-vars.xml')
 
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
-      elsif Liberty.web_inf(@app_dir)
-        FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
-        resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
-      elsif Liberty.meta_inf(@app_dir)
-        FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
-        resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
-        modify_server_xml_attribute(resources, '/server/application', 'type', 'ear')
       else
-        raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
+        FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
+        resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
+        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
+        if Liberty.web_inf(@app_dir)
+        elsif Liberty.meta_inf(@app_dir)
+          modify_server_xml_attribute(resources, '/server/application', 'type', 'ear')
+        else
+          raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
+        end
       end
     end
-    
+
     def modify_server_xml_attribute(element_path, attribute, value)
       server_xml = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml')
       server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
