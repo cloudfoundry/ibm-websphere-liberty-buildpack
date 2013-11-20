@@ -34,16 +34,19 @@ module LibertyBuildpack::Container
 
     describe 'prepare applications' do
       it 'should extract all applications' do
-        Liberty.new(
-        app_dir: 'spec/fixtures/container_liberty_extract',
-        configuration: {},
-        java_home: '',
-        java_opts: [],
-        license_ids: {}
-        )
+        Dir.mktmpdir do |root|
+          app_dir = File.join(root, 'spec/fixtures/container_liberty_extract')
+          Liberty.new(
+          app_dir: app_dir,
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: {}
+          )
         
-        apps = Dir.glob(File.join(app_dir, '*'))
-        apps.each { |file| expect(File.directory? file).to be_true }
+          apps = Dir.glob(File.join(app_dir, '*'))
+          apps.each { |file| expect(File.directory? file).to be_true }
+        end
       end
     end
 
