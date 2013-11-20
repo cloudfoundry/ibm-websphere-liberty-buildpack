@@ -33,11 +33,22 @@ module LibertyBuildpack::Framework
       $stderr = StringIO.new
     end
 
-    it 'should detect with Spring JAR' do
+    it 'should detect with Spring JAR in WEB-INF' do
       LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
 
       detected = SpringAutoReconfiguration.new(
         app_dir: 'spec/fixtures/framework_auto_reconfiguration_servlet_3',
+        configuration: {}
+      ).detect
+
+      expect(detected).to eq('spring-auto-reconfiguration-0.6.8')
+    end
+
+    it 'should detect with Spring JAR in EAR app' do
+      LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
+
+      detected = SpringAutoReconfiguration.new(
+        app_dir: 'spec/fixtures/framework_auto_reconfiguration_servlet_4',
         configuration: {}
       ).detect
 

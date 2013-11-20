@@ -583,7 +583,7 @@ module LibertyBuildpack::Container
       end
     end
 
-    it 'finds multiple wars' do
+    it 'finds multiple applications' do
       Dir.mktmpdir do |root|
         FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
         app_dir = File.join(root, 'apps', 'wars')
