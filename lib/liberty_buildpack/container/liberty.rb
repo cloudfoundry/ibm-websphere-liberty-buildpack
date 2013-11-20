@@ -256,15 +256,15 @@ module LibertyBuildpack::Container
     end
 
     def link_application
-      if Liberty.liberty_directory(@app_dir) # if the file <app-dir>/wlp/usr/servers/*/server.xml exists (packaged server)
-        FileUtils.rm_rf(usr) # delete the old version created for a packaged server
-        FileUtils.mkdir_p(liberty_home) # creates .liberty dir
-        FileUtils.ln_sf(Pathname.new(File.join(@app_dir, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home) # ln_sf forces soft linking of parameters (old, new) from new to old
-      elsif Liberty.server_directory(@app_dir) # if a server.xml exists within the app_dir (unpackaged server) / single app
-        FileUtils.rm_rf(default_server_path) # .liberty/usr/servers/defaultServer
+      if Liberty.liberty_directory(@app_dir)
+        FileUtils.rm_rf(usr)
+        FileUtils.mkdir_p(liberty_home)
+        FileUtils.ln_sf(Pathname.new(File.join(@app_dir, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home)
+      elsif Liberty.server_directory(@app_dir)
+        FileUtils.rm_rf(default_server_path)
         FileUtils.mkdir_p(default_server_path)
-        default_server_pathname = Pathname.new(default_server_path) # .liberty/usr/servers/defaultServer as actual Pathname
-        Pathname.glob(File.join(@app_dir, '*')) do |file| # each file in the appdir create a link in .liberty/usr/servers/defaultServer
+        default_server_pathname = Pathname.new(default_server_path)
+        Pathname.glob(File.join(@app_dir, '*')) do |file|
           FileUtils.ln_sf(file.relative_path_from(default_server_pathname), default_server_path)
         end
       end
