@@ -51,10 +51,9 @@ module LibertyBuildpack::Container
 
     # Extracts archives that are pushed initially
     def prep_app(app_dir)
-      if app = Liberty.contains_type(app_dir, '*.zip')
-        Liberty.splat_expand(app)
-      elsif app = Liberty.contains_type(app_dir, '*.ear')
-        Liberty.splat_expand(app)
+      ['*.zip', '*.ear'].each do |archive|
+        app = Liberty.contains_type(app_dir, archive)
+        Liberty.splat_expand(app) if app
       end
     end
 
@@ -163,16 +162,17 @@ module LibertyBuildpack::Container
         include_file.add_attribute('location', 'runtime-vars.xml')
 
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
-      else
+      elsif Liberty.web_inf(@app_dir)
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
-        if Liberty.web_inf(@app_dir)
-        elsif Liberty.meta_inf(@app_dir)
-          modify_server_xml_attribute(resources, '/server/application', 'type', 'ear')
-        else
-          raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
-        end
+      elsif Liberty.meta_inf(@app_dir)
+        FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
+        resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
+        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
+        modify_server_xml_attribute(resources, '/server/application', 'type', 'ear')
+      else
+        raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
       end
     end
 
