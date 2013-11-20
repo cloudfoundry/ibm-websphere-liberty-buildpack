@@ -351,7 +351,7 @@ module LibertyBuildpack::Container
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to be_true
           expect(server_xml_contents.include? '<application context-root=\'/\' location=\'../../../../../\' name=\'myapp\' type=\'ear\'').to be_true
-          expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
+          expect(server_xml_contents.include? 'httpPort=\'${port}\'').to be_true
         end
       end
 
