@@ -43,7 +43,7 @@ module LibertyBuildpack::Container
           java_opts: [],
           license_ids: {}
           )
-        
+
           apps = Dir.glob(File.join(app_dir, '*'))
           apps.each { |file| expect(File.directory? file).to be_true }
         end
@@ -268,7 +268,7 @@ module LibertyBuildpack::Container
           expect(File.executable?(server_script)).to be_true
         end
       end
-      
+
       it 'should make the ./bin/server script runnable for the META-INF case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_DETAILS)
@@ -350,7 +350,7 @@ module LibertyBuildpack::Container
 
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application context-root="/" location="../../../../../" name="myapp"').to be_true
+          expect(server_xml_contents.include? 'context-root="/" location="../../../../../" name="myapp"').to be_true
           expect(server_xml_contents.include? 'type="ear"').to be_true
           expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
         end
