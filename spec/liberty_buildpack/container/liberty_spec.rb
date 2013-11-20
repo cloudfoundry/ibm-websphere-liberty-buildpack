@@ -587,11 +587,17 @@ module LibertyBuildpack::Container
       Dir.mktmpdir do |root|
         FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
         app_dir = File.join(root, 'apps', 'wars')
+        app_dir2 = File.join(root, 'apps', 'ears')
         spring1_war = File.join(app_dir, 'spring1.war')
         spring2_war = File.join(app_dir, 'spring2.war')
+        spring1_ear = File.join(app_dir, 'spring1.ear')
+        spring2_ear = File.join(app_dir, 'spring2.ear')
         FileUtils.mkdir_p(app_dir)
+        FileUtils.mkdir_p(app_dir2)
         FileUtils.cp('spec/fixtures/stub-spring.war', spring1_war)
         FileUtils.cp('spec/fixtures/stub-spring.war', spring2_war)
+        FileUtils.cp('spec/fixtures/stub-spring.ear', spring1_ear)
+        FileUtils.cp('spec/fixtures/stub-spring.ear', spring2_ear)
         liberty_container = Liberty.new(
         app_dir: root,
         configuration: {},
@@ -599,9 +605,11 @@ module LibertyBuildpack::Container
         )
 
         apps = liberty_container.apps
-        expect(apps).to match_array([spring1_war, spring2_war])
+        expect(apps).to match_array([spring1_war, spring2_war, spring1_ear, spring2_ear])
         expect(File.directory?(spring1_war)).to be_true
         expect(File.directory?(spring2_war)).to be_true
+        expect(File.directory?(spring1_ear)).to be_true
+        expect(File.directory?(spring2_ear)).to be_true
       end
     end
   end
