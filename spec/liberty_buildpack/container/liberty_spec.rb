@@ -690,6 +690,25 @@ module LibertyBuildpack::Container
         expect(File.directory?(spring1_war)).to be_true
       end
     end
+    
+    it 'finds an expanded ear' do
+      Dir.mktmpdir do |root|
+        FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
+        app_dir = File.join(root, 'apps')
+        spring1_ear = File.join(app_dir, 'spring.ear')
+        FileUtils.mkdir_p(app_dir)
+        FileUtils.cp('spec/fixtures/stub-spring.ear', spring1_ear)
+        liberty_container = Liberty.new(
+        app_dir: root,
+        configuration: {},
+        license_ids: {}
+        )
+
+        apps = liberty_container.apps
+        expect(apps).to match_array([spring1_ear])
+        expect(File.directory?(spring1_ear)).to be_true
+      end
+    end
 
     it 'finds multiple applications' do
       Dir.mktmpdir do |root|
