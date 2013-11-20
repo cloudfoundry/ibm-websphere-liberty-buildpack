@@ -32,6 +32,21 @@ module LibertyBuildpack::Container
       $stderr = StringIO.new
     end
 
+    describe 'prepare applications' do
+      it 'should extract all applications' do
+        Liberty.new(
+        app_dir: 'spec/fixtures/container_liberty_extract',
+        configuration: {},
+        java_home: '',
+        java_opts: [],
+        license_ids: {}
+        )
+        
+        apps = Dir.glob(File.join(app_dir, '*'))
+        apps.each { |file| expect(File.directory? file).to be_true }
+      end
+    end
+
     describe 'detect' do
       it 'should detect WEB-INF' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
