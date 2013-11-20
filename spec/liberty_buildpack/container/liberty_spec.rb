@@ -320,7 +320,7 @@ module LibertyBuildpack::Container
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to be_true
           expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="../../../../../"').to be_true
-          expect(server_xml_contents.include? 'type=\'war\'').to be_true
+          expect(server_xml_contents.include? 'type="war"').to be_true
           expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
         end
       end
@@ -351,7 +351,7 @@ module LibertyBuildpack::Container
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to be_true
           expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="../../../../../"').to be_true
-          expect(server_xml_contents.include? 'type=\'ear\'').to be_true
+          expect(server_xml_contents.include? 'type="ear"').to be_true
           expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
         end
       end
