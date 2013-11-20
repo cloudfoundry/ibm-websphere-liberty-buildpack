@@ -548,6 +548,21 @@ module LibertyBuildpack::Container
         expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" JVM_ARGS=\" test-opt-1 test-opt-2\" .liberty/bin/server run defaultServer")
       end
 
+      it 'should return correct execution command for the META-INF case' do
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        .and_return(LIBERTY_VERSION)
+
+        command = Liberty.new(
+        app_dir: 'spec/fixtures/container_liberty_ear',
+        java_home: 'test-java-home',
+        java_opts: %w(test-opt-2 test-opt-1),
+        configuration: {},
+        license_ids: {}
+        ).release
+
+        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" JVM_ARGS=\" test-opt-1 test-opt-2\" .liberty/bin/server run defaultServer")
+      end
+
       it 'should return correct execution command for the zipped-up server case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
@@ -624,6 +639,25 @@ module LibertyBuildpack::Container
         FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
         app_dir = File.join(root, 'apps')
         spring_dir = File.join(app_dir, 'spring.war')
+        FileUtils.mkdir_p(spring_dir)
+        FileUtils.cp_r('spec/fixtures/framework_auto_reconfiguration_servlet_2', spring_dir)
+        liberty_container = Liberty.new(
+        app_dir: root,
+        configuration: {},
+        license_ids: {}
+        )
+
+        apps = liberty_container.apps
+        expect(apps).to match_array([spring_dir])
+        expect(File.directory?(spring_dir)).to be_true
+      end
+    end
+    
+    it 'finds a single ear' do
+      Dir.mktmpdir do |root|
+        FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
+        app_dir = File.join(root, 'apps')
+        spring_dir = File.join(app_dir, 'spring.ear')
         FileUtils.mkdir_p(spring_dir)
         FileUtils.cp_r('spec/fixtures/framework_auto_reconfiguration_servlet_2', spring_dir)
         liberty_container = Liberty.new(
