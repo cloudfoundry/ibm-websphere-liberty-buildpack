@@ -171,14 +171,18 @@ module LibertyBuildpack::Container
         FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
         resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
         FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
-        server_xml = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml')
-        server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
-        application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
-        application.attributes['type'] = 'ear'
-        File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
+        modify_server_xml_attribute(resources, '/server/application', 'type', 'ear')
       else
         raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
       end
+    end
+    
+    def modify_server_xml_attribute(element_path, attribute, value)
+      server_xml = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml')
+      server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
+      element = REXML::XPath.match(server_xml_doc, element_path)[0]
+      element.attributes[attribute] = value
+      File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
     end
 
     def make_server_script_runnable

@@ -652,7 +652,7 @@ module LibertyBuildpack::Container
         expect(File.directory?(spring_dir)).to be_true
       end
     end
-    
+
     it 'finds a single ear' do
       Dir.mktmpdir do |root|
         FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
@@ -690,7 +690,7 @@ module LibertyBuildpack::Container
         expect(File.directory?(spring1_war)).to be_true
       end
     end
-    
+
     it 'finds an expanded ear' do
       Dir.mktmpdir do |root|
         FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
