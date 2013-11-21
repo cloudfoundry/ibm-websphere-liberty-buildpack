@@ -16,6 +16,7 @@
 
 require 'spec_helper'
 require 'liberty_buildpack/container/liberty'
+require 'liberty_buildpack/container/container_utils'
 
 module LibertyBuildpack::Container
 
