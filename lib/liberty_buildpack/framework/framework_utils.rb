@@ -26,6 +26,7 @@ module LibertyBuildpack::Framework
     def self.find(app_dir, pattern)
       apps = []
       matches = Dir["#{app_dir}/**/#{pattern}"]
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Apps with pattern found #{matches}")
       matches.each do |path|
         ['.ear', '.war', "\/WEB-INF", "\/META-INF"].each do |app|
           if path.include? app
@@ -35,9 +36,12 @@ module LibertyBuildpack::Framework
               path.scan(/.*\w+#{Regexp.quote(app)}/) { |match| apps.concat(match.scan(/.*\w+\//)) }
             end
             break
+          else
+            
           end
         end
       end
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Apps with pattern returned #{apps}")
       apps
     end
 
