@@ -75,6 +75,7 @@ module LibertyBuildpack::Framework
       WEB_XML = File.join 'WEB-INF', 'web.xml'
 
       def self.find_auto_reconfiguration(app_dir, configuration, lib_dir)
+        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Looking for spring in appdie: #{app_dir}")
         if spring_application?(app_dir, lib_dir)
           version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
         else
