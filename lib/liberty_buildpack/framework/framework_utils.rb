@@ -27,13 +27,13 @@ module LibertyBuildpack::Framework
       apps = []
       matches = Dir["#{app_dir}/**/#{pattern}"]
       matches.each do |path|
-        ['.ear', '.war', "\/WEB-INF", "\/META-INF"].each do |app|
-          if path.include? app
-            if app.include?('.ear') || app.include?('.war')
-              apps.concat(path.scan(/.*\w+#{Regexp.quote(app)}/))
-            else
-              path.scan(/.*\w+#{Regexp.quote(app)}/) { |match| apps.concat(match.scan(/.*\w+\//)) }
+        ['.ear', '.war', "\/WEB-INF", 'lib'].each do |app_type|
+          if path.include? app_type
+            if app_type == 'lib'
+              path.scan(/^(.*)\/.*\w+\//) { |match| apps.concat(match) }
+              break
             end
+            path.scan(/.*\w+#{Regexp.quote(app_type)}/) { |match| apps.concat(match.scan(/.*\w+\//)) }
             break
           end
         end
