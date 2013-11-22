@@ -81,7 +81,6 @@ module LibertyBuildpack::Framework
           version = nil
           uri = nil
         end
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Is a spring app?: #{version}, #{uri}")
         return version, uri # rubocop:disable RedundantReturn
       end
 

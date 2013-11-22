@@ -29,22 +29,18 @@ module LibertyBuildpack::Framework
       matches.each do |path|
         ['.ear', '.war', "\/WEB-INF", 'lib'].each do |app_type|
           if path.include? app_type
-            LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Checking for #{app_type}")
             if app_type != 'lib'
               match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
               apps.concat(match)
-              LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("rest - Applications with the pattern found #{apps}, #{match}")
               break
             else
               match = path.scan(/^(.*)\/.*\w+\//)
               apps.concat(match)
-              LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("lib - Applications with the pattern found #{apps}")
               break
             end
           end
         end
       end
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Framework Jars found #{matches}")
       apps
     end
 
