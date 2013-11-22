@@ -59,9 +59,7 @@ module LibertyBuildpack::Framework
       LibertyBuildpack::Util.download(@auto_reconfiguration_version, @auto_reconfiguration_uri, 'Auto Reconfiguration', jar_name(@auto_reconfiguration_version), @lib_directory)
       spring_apps = FrameworkUtils.find(@app_dir, SPRING_JAR_PATTERN)
       FrameworkUtils.link_libs(spring_apps , @lib_directory)
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Finished compiling linking libs")
       spring_apps.each { |app| modify_web_xml(app) }
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Finished compiling framework")
     end
 
     # Does nothing
@@ -114,7 +112,6 @@ module LibertyBuildpack::Framework
 
       def self.spring_application?(app_dir, lib_dir)
         spring_apps = FrameworkUtils.find(app_dir, SPRING_JAR_PATTERN)
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Checking for Spring app: #{spring_apps}")
         spring_apps if spring_apps != [] || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
       end
   end

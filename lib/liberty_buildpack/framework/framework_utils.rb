@@ -66,6 +66,7 @@ module LibertyBuildpack::Framework
     end
 
     def self.link_libs(apps, lib_dir)
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Linking libs of following apps #{apps}")
       apps.each do |app_dir|
         libs = LibertyBuildpack::Container::ContainerUtils.libs(app_dir, lib_dir)
         if libs
