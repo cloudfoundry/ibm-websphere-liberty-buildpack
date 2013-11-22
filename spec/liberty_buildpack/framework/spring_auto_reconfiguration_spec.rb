@@ -23,7 +23,7 @@ module LibertyBuildpack::Framework
 
     SPRING_AUTO_RECONFIGURATION_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('0.6.8')
 
-    SPRING_AUTO_RECONFIGURATION_DETAILS = [SPRING_AUTO_RECONFIGURATION_VERSION, 'test-uri']
+    SPRING_AUTO_RECONFIGURATION_DETAILS = [SPRING_AUTO_RECONFIGURATION_VERSION, 'test-uri', 'nil']
 
     let(:application_cache) { double('ApplicationCache') }
     let(:web_xml_modifier) { double('WebXmlModifier') }
@@ -71,7 +71,7 @@ module LibertyBuildpack::Framework
 
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('blah').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
+        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
 
         SpringAutoReconfiguration.new(
           app_dir: root,
