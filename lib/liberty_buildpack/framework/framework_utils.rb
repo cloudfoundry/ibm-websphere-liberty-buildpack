@@ -31,16 +31,17 @@ module LibertyBuildpack::Framework
           if path.include? app_type
             if app_type != 'lib'
               path.scan(/^(.*)\/.*\w+\//) { |match| apps.concat(match) }
+              LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Applications with the pattern found #{apps}")
               break
             else
               path.scan(/.*\w+#{Regexp.quote(app_type)}/) { |match| apps.concat(match.scan(/.*\w+\//)) }
+              LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Applications with the pattern found #{apps}")
               break
             end
           end
         end
       end
       LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Framework Jars found #{matches}")
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Applications with the pattern found #{apps}")
       apps
     end
 
