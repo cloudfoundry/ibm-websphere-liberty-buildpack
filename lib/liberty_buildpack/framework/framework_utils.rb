@@ -31,7 +31,7 @@ module LibertyBuildpack::Framework
           if path.include? app_type
             LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Checking for #{app_type}")
             if app_type != 'lib'
-              path.scan(/.*\w+#{Regexp.quote(app_type)}/) { |match| apps.concat(match.scan(/.*\w+\//)) }
+              path.scan(/.*\w+#{Regexp.quote(app_type)}/) { |match| apps.concat(match) }
               LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("rest - Applications with the pattern found #{apps}")
               break
             else
