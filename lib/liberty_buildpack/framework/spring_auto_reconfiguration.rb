@@ -60,6 +60,7 @@ module LibertyBuildpack::Framework
       spring_apps = FrameworkUtils.find(@app_dir, SPRING_JAR_PATTERN)
       FrameworkUtils.link_libs(spring_apps , @lib_directory)
       spring_apps.each { |app| modify_web_xml(app) }
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Finished compiling framework")
     end
 
     # Does nothing
