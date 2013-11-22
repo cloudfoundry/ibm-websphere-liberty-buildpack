@@ -77,14 +77,14 @@ module LibertyBuildpack::Framework
       WEB_XML = File.join 'WEB-INF', 'web.xml'
 
       def self.find_auto_reconfiguration(app_dir, configuration, lib_dir)
-        # if spring_application?(app_dir, lib_dir)
-          # LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring app found")
-          # version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
-        # else
+        if spring_application?(app_dir, lib_dir)
+          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring app found")
+          version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
+        else
           LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("no spring app found")
           version = nil
           uri = nil
-        # end
+        end
         return version, uri # rubocop:disable RedundantReturn
       end
 
@@ -113,9 +113,10 @@ module LibertyBuildpack::Framework
       end
 
       def self.spring_application?(app_dir, lib_dir)
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Checking for Spring app in app: #{app_dir} & lib #{lib_dir}")
-        spring_apps = FrameworkUtils.find(app_dir, SPRING_JAR_PATTERN)
-        (spring_apps != nil && spring_apps != []) || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
+        # LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Checking for Spring app in app: #{app_dir} & lib #{lib_dir}")
+        # spring_apps = FrameworkUtils.find(app_dir, SPRING_JAR_PATTERN)
+        # (spring_apps != nil && spring_apps != []) || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
+        return false
       end
   end
 
