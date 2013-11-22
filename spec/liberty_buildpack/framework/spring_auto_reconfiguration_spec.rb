@@ -73,7 +73,7 @@ module LibertyBuildpack::Framework
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
         
-        LibertyBuildpack::Container::ContainerUtils.stub(:libs).and_return(lib_directory)
+        LibertyBuildpack::Container::ContainerUtils.stub(:libs).and_return([lib_directory])
       
         SpringAutoReconfiguration.new(
           app_dir: 'spec/fixtures/framework_auto_reconfiguration_servlet_5',
