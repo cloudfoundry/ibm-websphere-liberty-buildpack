@@ -38,6 +38,8 @@ module LibertyBuildpack::Framework
           end
         end
       end
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Framework Jars found #{matches}")
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Applications with the pattern found #{apps}")
       apps
     end
 
