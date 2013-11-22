@@ -32,11 +32,12 @@ module LibertyBuildpack::Framework
             LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Checking for #{app_type}")
             if app_type != 'lib'
               match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
+              apps.concat(match)
               LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("rest - Applications with the pattern found #{apps}, #{match}")
-              apps.concat(match.scan(/.*\w+\//))
               break
             else
               match = path.scan(/^(.*)\/.*\w+\//)
+              apps.concat(match)
               LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("lib - Applications with the pattern found #{apps}")
               break
             end
