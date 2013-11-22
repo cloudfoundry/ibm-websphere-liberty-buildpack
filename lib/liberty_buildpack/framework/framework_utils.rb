@@ -53,6 +53,7 @@ module LibertyBuildpack::Framework
             list << "#{line}"
           end
         end
+      end
       list.include? pattern
     end
 
