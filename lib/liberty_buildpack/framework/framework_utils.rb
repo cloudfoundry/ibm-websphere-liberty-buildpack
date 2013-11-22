@@ -28,20 +28,20 @@ module LibertyBuildpack::Framework
       matches = Dir["#{app_dir}/**/#{pattern}"]
       LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Looking for pattern in #{app_dir}, found matches #{matches}")
       matches.each do |path|
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Applications matching the pattern #{matches}")
-        ['.ear', '.war', "\/WEB-INF", 'lib'].each do |app_type|
-          if path.include? app_type
-            if app_type != 'lib'
-              match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
-              apps.concat(match)
-              break
-            else
-              match = path.scan(/^(.*)\/.*\w+\//)
-              apps.concat(match)
-              break
-            end
-          end
-        end
+        # LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Applications matching the pattern #{matches}")
+        # ['.ear', '.war', "\/WEB-INF", 'lib'].each do |app_type|
+          # if path.include? app_type
+            # if app_type != 'lib'
+              # match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
+              # apps.concat(match)
+              # break
+            # else
+              # match = path.scan(/^(.*)\/.*\w+\//)
+              # apps.concat(match)
+              # break
+            # end
+          # end
+        # end
       end
       LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Applications containing spring #{apps}")
       apps

@@ -78,8 +78,8 @@ module LibertyBuildpack::Framework
 
       def self.find_auto_reconfiguration(app_dir, configuration, lib_dir)
         if spring_application?(app_dir, lib_dir)
-          version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
           LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring app found")
+          version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
         else
           LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("no spring app found")
           version = nil
