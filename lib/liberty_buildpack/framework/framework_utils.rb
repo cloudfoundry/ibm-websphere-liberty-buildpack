@@ -48,11 +48,11 @@ module LibertyBuildpack::Framework
       list = ''
       archives = Dir.glob(File.join(app_dir, '**', '*.jar'))
       archives.each do |file|
-        IO.popen("unzip -l -qq #{file}") do |io|
-          line = io.gets
-          list << "#{line}" while line
+        IO.popen("unzip -l -qq #{file}") do |io| 
+          while (line = io.gets)
+            list << "#{line}"
+          end
         end
-      end
       list.include? pattern
     end
 
