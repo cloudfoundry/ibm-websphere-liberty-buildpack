@@ -29,12 +29,13 @@ module LibertyBuildpack::Framework
       matches.each do |path|
         ['.ear', '.war', "\/WEB-INF", 'lib'].each do |app_type|
           if path.include? app_type
-            if app_type == 'lib'
+            if app_type != 'lib'
               path.scan(/^(.*)\/.*\w+\//) { |match| apps.concat(match) }
               break
+            else
+              path.scan(/.*\w+#{Regexp.quote(app_type)}/) { |match| apps.concat(match.scan(/.*\w+\//)) }
+              break
             end
-            path.scan(/.*\w+#{Regexp.quote(app_type)}/) { |match| apps.concat(match.scan(/.*\w+\//)) }
-            break
           end
         end
       end
