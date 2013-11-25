@@ -72,6 +72,7 @@ module LibertyBuildpack::Framework
         
         if libs
           if LibertyBuildpack::Container::Liberty.web_inf(app_dir)
+          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("Linking libs of a war")
             app_web_inf_lib = web_inf_lib(app_dir)
             FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)
             app_web_inf_lib_path = Pathname.new(app_web_inf_lib)

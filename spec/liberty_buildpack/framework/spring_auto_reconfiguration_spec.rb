@@ -68,12 +68,13 @@ module LibertyBuildpack::Framework
       Dir.mktmpdir do |root|
         lib_directory = File.join root, '.lib'
         Dir.mkdir lib_directory
-
+        lib_dir_path = new Pathname(lib_directory)
+        
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
         
-        LibertyBuildpack::Container::ContainerUtils.stub(:libs).and_return([lib_directory.relative_path_from('spec/fixtures/framework_auto_reconfiguration_servlet_5')])
+        LibertyBuildpack::Container::ContainerUtils.stub(:libs).and_return([lib_dir_path.relative_path_from('spec/fixtures/framework_auto_reconfiguration_servlet_5')])
       
         SpringAutoReconfiguration.new(
           app_dir: 'spec/fixtures/framework_auto_reconfiguration_servlet_5',
