@@ -15,7 +15,8 @@
 # limitations under the License.
 
 require 'fileutils'
-require 'liberty_buildpack/container'
+require 'liberty_buildpack/container/liberty'
+require 'liberty_buildpack/container/container_utils'
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/framework'
 
