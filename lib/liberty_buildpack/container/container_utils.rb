@@ -54,7 +54,7 @@ module LibertyBuildpack::Container
           .map { |file| file.relative_path_from(root_directory) }
             .sort
       end
-
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("Linking libs #{libs}")
       libs
     end
 
