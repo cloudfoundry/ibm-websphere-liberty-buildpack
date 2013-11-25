@@ -71,8 +71,6 @@ module LibertyBuildpack::Framework
         lib_dir_path = Pathname.new(lib_directory)
         FileUtils.cp_r 'spec/fixtures/framework_auto_reconfiguration_servlet_5/.', root
         
-        puts "#{Dir.glob(File.join(root, '*'))}"
-        
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
