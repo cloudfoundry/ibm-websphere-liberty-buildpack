@@ -83,8 +83,8 @@ module LibertyBuildpack::Framework
 
         expect(File.exists? File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar')).to be_true
         expect(File.directory? File.join(root, 'no_spring_app.war', 'WEB-INF', 'lib')).to be_false
-        # expect(File.symlink?(File.join(root, 'spring_app.ear', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to be_true
-        expect(File.symlink?(File.join(root, 'spring_app.war', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to be_true
+        #expect(File.symlink?(File.join(root, 'spring_app.ear', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to be_true
+        expect(File.symlink?(File.join(root, 'spring_app.war','WEB-INF', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to be_true
       end
     end
 
