@@ -46,16 +46,16 @@ module LibertyBuildpack::Framework
     end
 
     def self.application_within_archive?(app_dir, pattern)
-      list = ''
-      archives = Dir.glob(File.join(app_dir, '**', '*.jar'))
-      archives.each do |file|
-        IO.popen("unzip -l -qq #{file}") do |io| 
-          while (line = io.gets)
-            list << "#{line}"
-          end
-        end
-      end
-      list.include? pattern
+      #list = ''
+      #archives = Dir.glob(File.join(app_dir, '**', '*.jar'))
+      #archives.each do |file|
+        #IO.popen("unzip -l -qq #{file}") do |io| 
+         # while (line = io.gets)
+          #  list << "#{line}"
+         # end
+       # end
+     # end
+      #list.include? pattern
     end
 
     def self.create_lib_dir(start_dir)
