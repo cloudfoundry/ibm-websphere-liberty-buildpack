@@ -68,13 +68,12 @@ module LibertyBuildpack::Framework
       Dir.mktmpdir do |root|
         lib_directory = File.join root, '.lib'
         Dir.mkdir lib_directory
-        lib_dir_path = Pathname.new(lib_directory)
         FileUtils.cp_r 'spec/fixtures/framework_auto_reconfiguration_servlet_5/.', root
-        
+
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
-        
+
         SpringAutoReconfiguration.new(
           app_dir: root,
           lib_directory: lib_directory,
@@ -84,7 +83,7 @@ module LibertyBuildpack::Framework
         expect(File.exists? File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar')).to be_true
         expect(File.directory? File.join(root, 'no_spring_app.war', 'WEB-INF', 'lib')).to be_false
         expect(File.symlink?(File.join(root, 'spring_app.ear', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to be_true
-        expect(File.symlink?(File.join(root, 'spring_app.war','WEB-INF', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to be_true
+        expect(File.symlink?(File.join(root, 'spring_app.war', 'WEB-INF', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to be_true
       end
     end
 
@@ -93,7 +92,7 @@ module LibertyBuildpack::Framework
         lib_directory = File.join root, '.lib'
         Dir.mkdir lib_directory
         FileUtils.cp_r 'spec/fixtures/framework_auto_reconfiguration_servlet_5/.', root
-        
+
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
