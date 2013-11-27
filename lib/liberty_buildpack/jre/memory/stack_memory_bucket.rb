@@ -36,7 +36,6 @@ module LibertyBuildpack::Jre
       super('stack', weighting, size, false, total_memory)
       @weighting = weighting
       @total_memory = total_memory
-      size = DEFAULT_STACK_SIZE unless size
     end
 
     # Returns the excess memory in this memory bucket.
@@ -59,7 +58,7 @@ module LibertyBuildpack::Jre
 
     private
 
-      DEFAULT_STACK_SIZE = MemorySize.new('1024K') # 1 MB
+    DEFAULT_STACK_SIZE = MemorySize.new('1024K') # 1 MB
 
   end
 

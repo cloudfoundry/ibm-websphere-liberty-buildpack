@@ -37,11 +37,10 @@ is assumed.
 ## Server Configurations (including a server.xml)
 
 ### Liberty Directory Push
-Another way of deploying your application is to use the 
+The recommended way of deploying a Liberty server is to use the 
 `./bin/server package myServer --include=usr` command from your Liberty 
-installation and package the `usr` directory including your application,
-so that it can be pushed to the cloud. If you execute
-`cf push --path="myServer.zip"` from the server directory
+installation and export your `usr` directory including your application. 
+If you execute `cf push --path="myServer.zip"` from the server directory
 of your application (e.g. `/usr/servers/myServer`) then the buildpack
 will detect the server.xml in the server definitions contained within
 the package and proceed to modify them.

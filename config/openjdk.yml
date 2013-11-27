@@ -13,13 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for components to use in the buildpack
+# Configuration for OpenJdk repository
 ---
-containers: 
-  - "LibertyBuildpack::Container::Liberty"
-jres:
-  - "LibertyBuildpack::Jre::IBMJdk"
-  - "LibertyBuildpack::Jre::OpenJdk"
-frameworks:
-  - "LibertyBuildpack::Framework::JavaOpts"
-  - "LibertyBuildpack::Framework::SpringAutoReconfiguration"
+repository_root: "http://download.pivotal.io.s3.amazonaws.com/openjdk/lucid/x86_64"
+version: 1.7.0_+
