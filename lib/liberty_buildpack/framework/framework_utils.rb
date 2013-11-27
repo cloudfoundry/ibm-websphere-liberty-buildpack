@@ -71,14 +71,11 @@ module LibertyBuildpack::Framework
     end
 
     def self.link_libs(apps, lib_dir)
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("Linking libs of following apps #{apps}")
       apps.each do |app_dir|
         libs = LibertyBuildpack::Container::ContainerUtils.libs(app_dir, lib_dir)
         if libs
-          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("Linking app #{app_dir} Webinf? #{LibertyBuildpack::Container::Liberty.web_inf(app_dir)} Metainf? #{LibertyBuildpack::Container::Liberty.meta_inf(app_dir)}")
           if LibertyBuildpack::Container::Liberty.web_inf(app_dir)
             app_web_inf_lib = web_inf_lib(app_dir)
-            LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("Linking libs of WAR: #{app_web_inf_lib} & #{lib_dir}")
             FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)
             app_web_inf_lib_path = Pathname.new(app_web_inf_lib)
             Pathname.glob(File.join(lib_dir, '*.jar')) do |jar|
@@ -87,7 +84,6 @@ module LibertyBuildpack::Framework
           elsif LibertyBuildpack::Container::Liberty.meta_inf(app_dir)
             app_ear_lib = ear_lib(app_dir)
             ear_lib_path = Pathname.new(app_ear_lib)
-            LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("Linking libs of EAR #{ear_lib_path} & #{lib_dir}")
             FileUtils.mkdir_p(app_ear_lib) unless File.exists?(app_ear_lib)
             Pathname.glob(File.join(lib_dir, '*.jar')) do |jar|
               FileUtils.ln_sf(jar.relative_path_from(ear_lib_path), app_ear_lib)

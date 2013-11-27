@@ -308,7 +308,6 @@ module LibertyBuildpack::Container
 
     def self.meta_inf(app_dir)
       meta_inf = File.join(app_dir, META_INF)
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("Checking for meta inf of #{meta_inf}")
       File.directory?(File.join(app_dir, META_INF)) ? meta_inf : nil
     end
 
@@ -369,7 +368,6 @@ module LibertyBuildpack::Container
       file_array.each do |file|
           state = false if File.file?(file)
       end
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("all_extracted? #{state}")
       state
     end
 
