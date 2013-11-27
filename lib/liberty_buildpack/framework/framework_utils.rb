@@ -85,11 +85,12 @@ module LibertyBuildpack::Framework
               FileUtils.ln_sf(jar.relative_path_from(app_web_inf_lib_path), app_web_inf_lib)
             end
           elsif LibertyBuildpack::Container::Liberty.meta_inf(app_dir)
-            ear_lib_path = Pathname.new(ear_lib)
+            app_ear_lib = ear_lib(app_dir)
+            ear_lib_path = Pathname.new(app_ear_lib)
             LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("Linking libs of EAR #{ear_lib_path} & #{lib_dir}")
-            FileUtils.mkdir_p(ear_lib) unless File.exists?(ear_lib)
+            FileUtils.mkdir_p(app_ear_lib) unless File.exists?(app_ear_lib)
             Pathname.glob(File.join(lib_dir, '*.jar')) do |jar|
-              FileUtils.ln_sf(jar.relative_path_from(ear_lib_path), ear_lib)
+              FileUtils.ln_sf(jar.relative_path_from(ear_lib_path), app_ear_lib)
             end
           end
         end
