@@ -34,6 +34,7 @@ module LibertyBuildpack::Repository
     def self.find_item(configuration, &version_validator)
       repository_root = ConfiguredItem.repository_root(configuration)
       version = ConfiguredItem.version(configuration)
+      yield version if block_given?
       version_validator.call(version) if version_validator
       index = ConfiguredItem.index(repository_root)
       index.find_item version

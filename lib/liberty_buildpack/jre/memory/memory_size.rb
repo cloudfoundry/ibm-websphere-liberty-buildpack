@@ -79,8 +79,9 @@ module LibertyBuildpack::Jre
     # @param [MemorySize] other the memory size to add
     # @return [MemorySize] the result
     def +(other)
-      raise "Cannot add an instance of #{other.class} to a MemorySize" unless other.is_a? MemorySize
-      MemorySize.from_numeric(@bytes + other.bytes)
+      memory_size_operation(other) do |self_bytes, other_bytes|
+        self_bytes + other_bytes
+      end
     end
 
     # Multiply this memory size by a numeric factor.
@@ -97,8 +98,9 @@ module LibertyBuildpack::Jre
     # @param [MemorySize] other the memory size to subtract
     # @return [MemorySize] the result
     def -(other)
-      raise "Cannot subtract an instance of #{other.class} from a MemorySize" unless other.is_a? MemorySize
-      MemorySize.from_numeric(@bytes - other.bytes)
+      memory_size_operation(other) do |self_bytes, other_bytes|
+        self_bytes - other_bytes
+      end
     end
 
     # Divide a memory size by a memory size or a numeric value. The units are respected, so the result of diving by a
@@ -114,29 +116,34 @@ module LibertyBuildpack::Jre
 
     protected
 
-      # @!attribute [r] bytes
-      #   @return [Numeric] the size in bytes of this memory size
-      attr_reader :bytes
+    # @!attribute [r] bytes
+    #   @return [Numeric] the size in bytes of this memory size
+    attr_reader :bytes
 
     private
 
-      KILO = 1024
+    KILO = 1024
 
-      def self.is_integer(v)
-        f = Float(v)
-        f && f.floor == f
-      rescue
-        false
-      end
+    def memory_size_operation(other)
+      raise "Invalid parameter: instance of #{other.class} is not a MemorySize" unless other.is_a? MemorySize
+      MemorySize.from_numeric(yield @bytes, other.bytes)
+    end
 
-      def self.from_numeric(n)
-        MemorySize.new("#{n.to_s}B")
-      end
+    def self.is_integer(v)
+      f = Float(v)
+      f && f.floor == f
+    rescue
+      false
+    end
+
+    def self.from_numeric(n)
+      MemorySize.new("#{n.to_s}B")
+    end
 
     public
 
-      # Zero byte memory size
-      ZERO = from_numeric 0
+    # Zero byte memory size
+    ZERO = from_numeric 0
 
   end
 
