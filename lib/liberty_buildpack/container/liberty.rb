@@ -168,11 +168,11 @@ module LibertyBuildpack::Container
 
     def modify_endpoints(endpoints)
       if endpoints.empty?
-          endpoint = REXML::Element.new('httpEndpoint', server_xml_doc.root)
-        else
-          endpoint = endpoints[0]
-          endpoints.drop(1).each { |element| element.parent.delete_element(element) }
-        end
+        endpoint = REXML::Element.new('httpEndpoint', server_xml_doc.root)
+      else
+        endpoint = endpoints[0]
+        endpoints.drop(1).each { |element| element.parent.delete_element(element) }
+      end
         endpoint.add_attribute('host', '*')
         endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
         endpoint.delete_attribute('httpsPort')
