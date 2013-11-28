@@ -163,14 +163,9 @@ module LibertyBuildpack::Container
 
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       elsif Liberty.web_inf(@app_dir)
-        FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
-        resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
+        create_server_xml
       elsif Liberty.meta_inf(@app_dir)
-        FileUtils.mkdir_p(File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer'))
-        resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-        FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
-        server_xml = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml')
+        server_xml = create_server_xml
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
         application.attributes['type'] = 'ear'
@@ -178,6 +173,15 @@ module LibertyBuildpack::Container
       else
         raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
       end
+    end
+
+    def create_server_xml
+      server_xml_dir = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer')
+      server_xml = File.join(server_xml_dir, 'server.xml')
+      FileUtils.mkdir_p(server_xml_dir)
+      resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
+      FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
+      server_xml
     end
 
     def make_server_script_runnable
