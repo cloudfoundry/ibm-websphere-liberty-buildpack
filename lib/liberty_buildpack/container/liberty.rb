@@ -147,16 +147,7 @@ module LibertyBuildpack::Container
         server_xml_doc.context[:attribute_quote] = :quote
 
         endpoints = REXML::XPath.match(server_xml_doc, '/server/httpEndpoint')
-
-        if endpoints.empty?
-          endpoint = REXML::Element.new('httpEndpoint', server_xml_doc.root)
-        else
-          endpoint = endpoints[0]
-          endpoints.drop(1).each { |element| element.parent.delete_element(element) }
-        end
-        endpoint.add_attribute('host', '*')
-        endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
-        endpoint.delete_attribute('httpsPort')
+        modify_endpoints(endpoints)
 
         include_file = REXML::Element.new('include', server_xml_doc.root)
         include_file.add_attribute('location', 'runtime-vars.xml')
@@ -173,6 +164,18 @@ module LibertyBuildpack::Container
       else
         raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
       end
+    end
+
+    def modify_endpoints(endpoints)
+      if endpoints.empty?
+          endpoint = REXML::Element.new('httpEndpoint', server_xml_doc.root)
+        else
+          endpoint = endpoints[0]
+          endpoints.drop(1).each { |element| element.parent.delete_element(element) }
+        end
+        endpoint.add_attribute('host', '*')
+        endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
+        endpoint.delete_attribute('httpsPort')
     end
 
     def create_server_xml
