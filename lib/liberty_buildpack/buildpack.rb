@@ -128,6 +128,7 @@ module LibertyBuildpack
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
       license_ids = get_license_hash
+      jvm_type = environment['JVM']
 
       basic_context = {
           app_dir: app_dir,
@@ -137,12 +138,10 @@ module LibertyBuildpack
           lib_directory: @lib_directory,
           vcap_application: vcap_application ? YAML.load(vcap_application) : {},
           vcap_services: vcap_services ? YAML.load(vcap_services) : {},
-          license_ids: license_ids ? license_ids : {}
+          license_ids: license_ids ? license_ids : {},
+          jvm_type: jvm_type
       }
-
-      @jres = Buildpack.construct_components(components, 'jres', basic_context, @logger)
-      @frameworks = Buildpack.construct_components(components, 'frameworks', basic_context, @logger)
-      @containers = Buildpack.construct_components(components, 'containers', basic_context, @logger)
+      initialize_components(components, basic_context)
     end
 
     def self.dump_environment_variables(logger)
@@ -259,6 +258,12 @@ module LibertyBuildpack
         license_ids = { jvm_license => ENV[jvm_license], liberty_license => ENV[liberty_license] }
       end
       license_ids
+    end
+
+    def initialize_components(components, basic_context)
+      @jres = Buildpack.construct_components(components, 'jres', basic_context, @logger)
+      @frameworks = Buildpack.construct_components(components, 'frameworks', basic_context, @logger)
+      @containers = Buildpack.construct_components(components, 'containers', basic_context, @logger)
     end
   end
 

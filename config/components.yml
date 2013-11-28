@@ -19,6 +19,7 @@ containers:
   - "LibertyBuildpack::Container::Liberty"
 jres:
   - "LibertyBuildpack::Jre::IBMJdk"
+  - "LibertyBuildpack::Jre::OpenJdk"
 frameworks:
   - "LibertyBuildpack::Framework::JavaOpts"
   - "LibertyBuildpack::Framework::SpringAutoReconfiguration"
