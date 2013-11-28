@@ -147,7 +147,7 @@ module LibertyBuildpack::Container
         server_xml_doc.context[:attribute_quote] = :quote
 
         endpoints = REXML::XPath.match(server_xml_doc, '/server/httpEndpoint')
-        modify_endpoints(endpoints)
+        modify_endpoints(endpoints, server_xml_doc)
 
         include_file = REXML::Element.new('include', server_xml_doc.root)
         include_file.add_attribute('location', 'runtime-vars.xml')
@@ -166,7 +166,7 @@ module LibertyBuildpack::Container
       end
     end
 
-    def modify_endpoints(endpoints)
+    def modify_endpoints(endpoints, server_xml_doc)
       if endpoints.empty?
         endpoint = REXML::Element.new('httpEndpoint', server_xml_doc.root)
       else
