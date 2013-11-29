@@ -138,7 +138,7 @@ module LibertyBuildpack::Container
               java_opts: [],
               license_ids: { 'IBM_LIBERTY_LICENSE' => 'Incorrect' }
             ).compile
-          end.to raise_error(/You have not accepted the IBM Liberty Profile License/)
+          end.to raise_error
         end
       end
 

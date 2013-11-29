@@ -73,7 +73,10 @@ module LibertyBuildpack::Container
     #
     # @return [void]
     def compile
-      raise "\nYou have not accepted the IBM Liberty Profile License. \nVisit #{@liberty_license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n" unless LibertyBuildpack::Util.check_license(@liberty_license, @license_id)
+      unless LibertyBuildpack::Util.check_license(@liberty_license, @license_id)
+        print "\nYou have not accepted the IBM Liberty License.\n\nVisit the following uri:\n#{@liberty_license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n"
+        raise
+      end
 
       download_liberty
       update_server_xml
