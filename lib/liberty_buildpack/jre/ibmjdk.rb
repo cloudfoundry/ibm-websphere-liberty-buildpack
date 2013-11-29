@@ -66,7 +66,10 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def compile
-      raise "\nYou have not accepted the IBM JVM License. \nVisit #{@license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n" unless LibertyBuildpack::Util.check_license(@license, @license_id)
+      unless LibertyBuildpack::Util.check_license(@license, @license_id)
+        print "\nYou have not accepted the IBM JVM License.\n\nVisit the following uri:\n#{@license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
+        raise
+      end
 
       download_start_time = Time.now
 
@@ -104,18 +107,22 @@ module LibertyBuildpack::Jre
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
 
-      cache_dir = IBMJdk.cache_dir(file)
+      if File.basename(file.path).end_with?('.bin.cached', '.bin')
+        cache_dir = IBMJdk.cache_dir(file)
 
-      response_file = File.new(File.join(cache_dir, 'response.properties'), 'w')
-      response_file.puts('INSTALLER_UI=silent')
-      response_file.puts("USER_INSTALL_DIR=#{java_home}")
-      response_file.close
+        response_file = File.new(File.join(cache_dir, 'response.properties'), 'w')
+        response_file.puts('INSTALLER_UI=silent')
+        response_file.puts("USER_INSTALL_DIR=#{java_home}")
+        response_file.close
 
-      system "chmod +x #{file.path}"
+        system "chmod +x #{file.path}"
 
-      system "#{file.path} -i silent -f #{response_file.path} 2>&1"
+        system "#{file.path} -i silent -f #{response_file.path} 2>&1"
 
-      Pathname.new(cache_dir).children.select { |child| child.directory? }.map { |path| system "mv #{path.to_s}/* #{java_home}" }
+        Pathname.new(cache_dir).children.select { |child| child.directory? }.map { |path| system "mv #{path.to_s}/* #{java_home}" }
+      else
+        system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
+      end
 
       puts "(#{(Time.now - expand_start_time).duration})"
     end
