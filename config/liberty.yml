@@ -17,3 +17,4 @@
 ---
 repository_root: "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/"
 version: 8.5.+
+minify: true

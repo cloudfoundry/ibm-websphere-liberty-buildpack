@@ -134,8 +134,7 @@ module LibertyBuildpack::Container
               app_dir: root,
               lib_directory: '',
               configuration: {},
-              java_home: '',
-              java_opts: [],
+              environment: {},
               license_ids: { 'IBM_LIBERTY_LICENSE' => 'Incorrect' }
             ).compile
           end.to raise_error
@@ -158,8 +157,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: library_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -200,8 +198,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: library_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -227,8 +224,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: library_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -253,8 +249,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: library_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
@@ -283,8 +278,7 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -319,8 +313,7 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -368,8 +361,7 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -403,8 +395,7 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -432,7 +423,7 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-          Liberty.new(app_dir: root, configuration: {}, java_home: '', java_opts: [], license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }).compile
+          Liberty.new(app_dir: root, configuration: {}, environment: {}, license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }).compile
 
           liberty_directory = File.join(root, '.liberty')
           expect(Dir.exists?(liberty_directory)).to be_true
@@ -472,8 +463,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: lib_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           )
           liberty.compile
@@ -517,8 +507,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: lib_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           )
           liberty.compile
