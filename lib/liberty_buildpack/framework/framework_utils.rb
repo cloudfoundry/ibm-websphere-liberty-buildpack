@@ -47,6 +47,7 @@ module LibertyBuildpack::Framework
           end
         end
       end
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Matches found #{apps}")
       apps
     end
 
