@@ -78,12 +78,12 @@ module LibertyBuildpack::Framework
       WEB_XML = File.join 'WEB-INF', 'web.xml'
 
       def self.find_auto_reconfiguration(app_dir, configuration, lib_dir)
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Find auto reconfig app in: #{app_dir}")
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring application? #{spring_application?(app_dir, lib_dir)}")
+        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Find auto reconfig app in: #{app_dir}")
         if spring_application?(app_dir, lib_dir)
           LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Downloading spring library")
           version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
         else
+          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("No spring found")
           version = nil
           uri = nil
         end
@@ -116,6 +116,7 @@ module LibertyBuildpack::Framework
 
       def self.spring_application?(app_dir, lib_dir)
         spring_apps = FrameworkUtils.find(app_dir, SPRING_JAR_PATTERN)
+        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring apps #{spring_apps}")
         spring_apps if spring_apps != [] || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
       end
   end
