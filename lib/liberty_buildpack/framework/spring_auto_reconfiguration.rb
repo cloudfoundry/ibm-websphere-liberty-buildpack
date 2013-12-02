@@ -79,6 +79,7 @@ module LibertyBuildpack::Framework
 
       def self.find_auto_reconfiguration(app_dir, configuration, lib_dir)
       LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Find auto reconfig app in: #{app_dir}")
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring application? #{spring_application?(app_dir, lib_dir)}")
         if spring_application?(app_dir, lib_dir)
           LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Downloading spring library")
           version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
