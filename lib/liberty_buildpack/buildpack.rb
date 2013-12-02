@@ -58,14 +58,10 @@ module LibertyBuildpack
     def detect
       jre_detections = Buildpack.component_detections @jres
       raise "Application can be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
-      @logger.info("Detected JRE")
       framework_detections = Buildpack.component_detections @frameworks
-      @logger.info("Detected framework")
       container_detections = Buildpack.component_detections @containers
       raise "Application can be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
-      @logger.info("Detected container")
       tags = container_detections.empty? ? [] : jre_detections.concat(framework_detections).concat(container_detections).flatten.compact
-      @logger.debug { "Detection Tags: #{tags}" }
       tags
     end
 
@@ -261,7 +257,6 @@ module LibertyBuildpack
     end
 
     def initialize_components(components, basic_context)
-      @logger.info("initializing components")
       @jres = Buildpack.construct_components(components, 'jres', basic_context, @logger)
       @frameworks = Buildpack.construct_components(components, 'frameworks', basic_context, @logger)
       @containers = Buildpack.construct_components(components, 'containers', basic_context, @logger)
