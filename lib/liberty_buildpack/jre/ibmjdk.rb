@@ -52,6 +52,7 @@ module LibertyBuildpack::Jre
       @license_id = context[:license_ids]['IBM_JVM_LICENSE']
       @jvm_type = context[:jvm_type]
       context[:java_home].concat JAVA_HOME unless context[:java_home].include? JAVA_HOME
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("JRE nitialised")
     end
 
     # Detects which version of Java this application should use.  *NOTE:* This method will always return _some_ value,
