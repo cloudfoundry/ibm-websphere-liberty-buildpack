@@ -39,7 +39,7 @@ module LibertyBuildpack::Framework
               apps.concat(match)
               break
             else
-              match = path.scan(%r{^(.*)\/.*\w+\/})
+              match = path.scan(/^(.*)\/.*\w+\//)
               apps.concat(match)
               break
             end
