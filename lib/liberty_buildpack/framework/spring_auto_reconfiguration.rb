@@ -47,6 +47,7 @@ module LibertyBuildpack::Framework
     # @return [String] returns +spring-auto-reconfiguration-<version>+ if the application is a candidate for
     #                  auto-reconfiguration otherwise returns +nil+
     def detect
+      @logger.info("Detecting if spring app exists")
       @auto_reconfiguration_version, @auto_reconfiguration_uri = SpringAutoReconfiguration.find_auto_reconfiguration(@app_dir, @configuration, @lib_directory)
       @auto_reconfiguration_version ? id(@auto_reconfiguration_version) : nil
     end
@@ -56,7 +57,9 @@ module LibertyBuildpack::Framework
     # @return [void]
     def compile
       detect if @auto_reconfiguration_uri.nil?
+      @logger.info("Compile Spring auto-reconfig called")
       LibertyBuildpack::Util.download(@auto_reconfiguration_version, @auto_reconfiguration_uri, 'Auto Reconfiguration', jar_name(@auto_reconfiguration_version), @lib_directory)
+      @logger.info("Downloaded auto reconfig")
       spring_apps = FrameworkUtils.find(@app_dir, SPRING_JAR_PATTERN)
       FrameworkUtils.link_libs(spring_apps , @lib_directory)
       spring_apps.each { |app| modify_web_xml(app) }
@@ -75,6 +78,7 @@ module LibertyBuildpack::Framework
       WEB_XML = File.join 'WEB-INF', 'web.xml'
 
       def self.find_auto_reconfiguration(app_dir, configuration, lib_dir)
+      LibertyBuildpack::Diagnostics::LoggerFactory.create_logger.info("Find auto reconfig app in: #{app_dir}")
         if spring_application?(app_dir, lib_dir)
           version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
         else
