@@ -68,6 +68,8 @@ module LibertyBuildpack::Framework
       list.include? pattern
     end
 
+    # creates a lib directory in the appropriate location for the application
+    # @param [String] start_dir the root directory of the application
     def self.create_lib_dir(start_dir)
       if Liberty.web_inf(start_dir)
         FileUtils.mkdir_p(File.join(start_dir, 'WEB_INF', 'lib'))
@@ -76,6 +78,9 @@ module LibertyBuildpack::Framework
       end
     end
 
+    # Links the framework libraries to the library directory of the application
+    # @param [Array] apps the applications to link to
+    # @param [String] lib_dir the path to the framework library directory
     def self.link_libs(apps, lib_dir)
       apps.each do |app_dir|
         libs = LibertyBuildpack::Container::ContainerUtils.libs(app_dir, lib_dir)
@@ -99,10 +104,16 @@ module LibertyBuildpack::Framework
       end
     end
 
+    # creates a path to the library in a WAR
+    # @param [String] app_dir the path to the application
+    # @return the path to WEB-INF/lib
     def self.web_inf_lib(app_dir)
       File.join app_dir, 'WEB-INF', 'lib'
     end
 
+    # creates a path to the library in a EAR
+    # @param [String] app_dir the path to the application
+    # @return the path to app.ear/lib
     def self.ear_lib(app_dir)
       File.join app_dir, 'lib'
     end
