@@ -22,17 +22,19 @@ module LibertyBuildpack::Util
 
   # Compares the provided license id with the id that is extracted from the license url.
   #
-  # @param [String] url of the license to check against
-  # @param [String] actual id provided by the user
-  # @raise if the license url is nil
+  # @param [String] license_uri the url of the license containing our license id
+  # @param [String] license_id the license id provided by the user
   # @return [boolean] return true if the license id's match, false otherwise
   def self.check_license(license_uri, license_id)
-    raise 'The license URL has returned nil' if license_uri.nil?
-
-    # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
-    license = open(license_uri).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
-
-    license_id == license ? true : false
+    result = false
+    if license_uri.nil?
+      result = true
+    else
+      # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
+      license = open(license_uri).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
+      license_id == license ? result = true : result = false
+    end
+    result
   end
 
 end
