@@ -63,14 +63,14 @@ module LibertyBuildpack::Container
     def apps
       apps_found = []
       server_xml = Liberty.server_xml(@app_dir)
-      if Liberty.web_inf(@app_dir) # must check for webinf first because ears could have wars can have meta inf as well
+      if Liberty.web_inf(@app_dir)
         apps_found = [@app_dir]
       elsif Liberty.meta_inf(@app_dir)
         apps_found = [@app_dir]
         wars = Dir.glob(File.expand_path(File.join(@app_dir, '*.war')))
         Liberty.expand_apps(wars)
       elsif server_xml
-        ['*.war', '*.ear'].each { |suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', suffix))) } # searches for files that satisfy server.xml/../**/*.war and returns an array of the matches
+        ['*.war', '*.ear'].each { |suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', suffix))) }
         Liberty.expand_apps(apps_found)
       end
       apps_found
@@ -138,8 +138,6 @@ module LibertyBuildpack::Container
 
     META_INF = 'META-INF'.freeze
 
-    # second checkpoint
-
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
       if server_xml
@@ -178,6 +176,7 @@ module LibertyBuildpack::Container
         endpoint.delete_attribute('httpsPort')
     end
 
+    # Copies the template server xml into the server directory structure and prepares it
     def create_server_xml
       server_xml_dir = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer')
       server_xml = File.join(server_xml_dir, 'server.xml')
@@ -232,7 +231,6 @@ module LibertyBuildpack::Container
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
-    # first checkpoint for .ears and other applications
     def self.find_liberty(app_dir, configuration)
       if server_xml(app_dir)
         version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|

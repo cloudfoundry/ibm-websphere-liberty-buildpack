@@ -24,6 +24,10 @@ module LibertyBuildpack::Framework
 
   class FrameworkUtils
 
+    # Find matches to the provided pattern in the given directory
+    # @param [String] app_dir the directory structure in which we look for the pattern
+    # @param [String] pattern the pattern that needs to be satisfied
+    # @return [Array] applications within that directory that match the pattern
     def self.find(app_dir, pattern)
       apps = []
       matches = Dir["#{app_dir}/**/#{pattern}"]
@@ -49,6 +53,10 @@ module LibertyBuildpack::Framework
       apps
     end
 
+    # Checks if the directory contains an archive that satisfies the pattern
+    # @param [String] app_dir the directory containing archives
+    # @param [String] pattern the pattern that should be matched
+    # @return [boolean]
     def self.application_within_archive?(app_dir, pattern)
       list = ''
       archives = Dir.glob(File.join(app_dir, '**', '*.jar'))
