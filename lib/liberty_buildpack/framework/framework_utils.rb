@@ -22,6 +22,7 @@ require 'liberty_buildpack/framework'
 
 module LibertyBuildpack::Framework
 
+  # Utility methods for frameworks
   class FrameworkUtils
 
     # Find matches to the provided pattern in the given directory
