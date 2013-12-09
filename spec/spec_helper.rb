@@ -35,4 +35,5 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 tmpdir = Dir.tmpdir
 diagnostics_directory = File.join(tmpdir, LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY)
 FileUtils.rm_rf diagnostics_directory
-LibertyBuildpack::Diagnostics::LoggerFactory.create_logger tmpdir
+raise 'Failed to create logger' if LibertyBuildpack::Diagnostics::LoggerFactory.create_logger(tmpdir).nil?
+

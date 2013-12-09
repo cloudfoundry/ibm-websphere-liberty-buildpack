@@ -15,7 +15,7 @@
 # limitations under the License.
 
 require 'liberty_buildpack/util'
-require 'liberty_buildpack/util/application_cache'
+require 'liberty_buildpack/util/download_cache'
 require 'liberty_buildpack/util/format_duration'
 
 module LibertyBuildpack::Util
@@ -30,9 +30,10 @@ module LibertyBuildpack::Util
     raise 'The license URL has returned nil' if license_uri.nil?
 
     # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
-    license = open(license_uri).read.scan(/D\/N:\s*(.*?)\s*\</m).last.first
-
-    license_id == license ? true : false
+    LibertyBuildpack::Util::DownloadCache.new.get(license_uri) do |file|
+      license = file.read.force_encoding('ISO-8859-1').scan(/D\/N:\s*(.*?)\s*\</m).last.first
+      return license_id == license
+    end
   end
 
 end
