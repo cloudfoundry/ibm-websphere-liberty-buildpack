@@ -41,3 +41,33 @@ CLEAN.include %w(.yardoc coverage)
 CLOBBER.include %w(doc pkg)
 
 task :default => [ :rubocop, :check_api_doc, :yard, :spec ]
+
+desc "Package buildpack together with admin cache"
+task :package, [:zipfile] do |t, args|
+  source = File.dirname(__FILE__)
+  basename = File.basename(source)
+  if args.zipfile.nil?
+    zipfile = File.expand_path(File.join('..', "#{basename}.zip"), source)
+  else
+    zipfile = args.zipfile
+    zipfile << ".zip" unless zipfile.end_with? (".zip")
+  end
+  puts "Using #{zipfile} as a buildpack zip output file"
+  if File.exists? (zipfile)
+    puts "The output file already exists. Change the output location."
+    exit 1
+  end
+  require 'tmpdir'
+  Dir.mktmpdir do |root|
+    $LOAD_PATH.unshift File.expand_path(File.join('..', 'resources'), __FILE__)
+    require 'download_buildpack_cache'
+
+    FileUtils.cp_r(source, root)
+    dest = File.join(root, basename)
+    bc = BuildpackCache.new(File.join(dest, 'admin_cache'))
+    configs = bc.collect_configs
+    bc.download_cache(configs)
+    system("cd #{dest} && zip -r #{zipfile} .")
+  end
+end
+
