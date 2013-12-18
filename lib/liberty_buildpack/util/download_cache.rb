@@ -92,6 +92,8 @@ module LibertyBuildpack::Util
 
     private
 
+      ADMIN_CACHE = File.join('..', '..', '..', 'admin_cache').freeze
+
       HTTP_ERRORS = [
         EOFError,
         Errno::ECONNREFUSED,
@@ -112,18 +114,19 @@ module LibertyBuildpack::Util
       end
 
       def download(filenames, uri)
+        return if look_aside(filenames, uri) || check_locally(filenames, uri)
         rich_uri = URI(uri)
 
         Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: use_ssl?(rich_uri)) do |http|
-          request = Net::HTTP::Get.new(uri)
+          request = Net::HTTP::Get.new(rich_uri.request_uri)
           http.request request do |response|
             write_response(filenames, response)
           end
         end
 
-      rescue *HTTP_ERRORS
+      rescue *HTTP_ERRORS => e
         puts 'FAIL'
-        raise "Unable to download from #{uri}"
+        raise "Unable to download from #{uri}: #{e}"
       end
 
       def filenames(uri)
@@ -164,7 +167,7 @@ module LibertyBuildpack::Util
         rich_uri = URI(uri)
 
         Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: use_ssl?(rich_uri)) do |http|
-          request = Net::HTTP::Get.new(uri)
+          request = Net::HTTP::Get.new(rich_uri.request_uri)
           set_header request, 'If-None-Match', filenames[:etag]
           set_header request, 'If-Modified-Since', filenames[:last_modified]
 
@@ -173,8 +176,50 @@ module LibertyBuildpack::Util
           end
         end
 
-      rescue *HTTP_ERRORS
-        @logger.warn "Unable to update from #{uri}. Using cached version."
+      rescue *HTTP_ERRORS => e
+        @logger.warn "Unable to update from #{uri}: #{e}. Using cached version."
+      end
+
+      def look_aside(filenames, uri)
+        cache_locations = []
+        cache_locations << File.expand_path(ADMIN_CACHE, File.dirname(__FILE__))
+        buildpack_cache_directory = ENV['BUILDPACK_CACHE']
+        cache_locations << File.join(buildpack_cache_directory, 'ibm-liberty-buildpack') unless buildpack_cache_directory.nil?
+        cache_locations = cache_locations.select { |location| File.directory? location }
+        return false if cache_locations.empty?
+        @logger.debug "Looking in buildpack cache for #{uri}."
+        key = URI.escape(uri, '/')
+        cache_locations.each do |buildpack_cache|
+          stashed = File.join(buildpack_cache, "#{key}.cached")
+          @logger.debug { "Looking in buildpack cache for file '#{stashed}'" }
+          if File.exist? stashed
+            copy_to_cache(stashed, filenames[:cached])
+            @logger.debug "Using copy of #{uri} from buildpack cache."
+            return true
+          else
+            @logger.debug "Buildpack cache does not contain #{uri}..."
+            @logger.debug { "Buildpack cache contents:\n#{`ls -lR #{buildpack_cache}`}" }
+          end
+        end
+        false
+      end
+
+      def copy_to_cache(stashed, cache_filename)
+        if File.basename(stashed).end_with?('.bin.cached')
+          FileUtils.cp stashed, cache_filename
+        else
+          FileUtils.ln_s stashed, cache_filename
+        end
+      end
+
+      def check_locally(filenames, uri)
+        # Check if it's a local file and treat it as cached
+        if File.exist?(uri)
+          FileUtils.ln_s File.expand_path(uri), filenames[:cached]
+          @logger.debug "Using local file #{uri}"
+          return true
+        end
+          false
       end
 
       def use_ssl?(uri)

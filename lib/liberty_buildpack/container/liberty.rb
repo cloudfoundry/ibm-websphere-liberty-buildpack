@@ -46,6 +46,7 @@ module LibertyBuildpack::Container
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
+      @environment = context[:environment]
       @apps = apps
     end
 
@@ -88,11 +89,17 @@ module LibertyBuildpack::Container
     #
     # @return [void]
     def compile
-      raise "\nYou have not accepted the IBM Liberty Profile License. \nVisit #{@liberty_license} and extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n" unless LibertyBuildpack::Util.check_license(@liberty_license, @license_id)
+      unless LibertyBuildpack::Util.check_license(@liberty_license, @license_id)
+        print "\nYou have not accepted the IBM Liberty License.\n\nVisit the following uri:\n#{@liberty_license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n"
+        raise
+      end
+
       download_liberty
       update_server_xml
       link_application
       make_server_script_runnable
+      # Need to do minify here to have server_xml updated and applications and libs linked.
+      minify_liberty if minify?
       set_liberty_system_properties
     end
 
@@ -111,6 +118,44 @@ module LibertyBuildpack::Container
     end
 
     private
+
+    def minify?
+      (@environment['minify'].nil? ? (@configuration['minify'] != false) : (@environment['minify'] != 'false')) && java_present?
+    end
+
+    def minify_liberty
+      Dir.mktmpdir do |root|
+        # Create runtime-vars.xml to avoid archive being incorrectly too small
+        runtime_vars_file =  File.join(servers_directory, server_name, 'runtime-vars.xml')
+        File.open(runtime_vars_file, 'w') do |file|
+          file.puts('<server></server>')
+        end
+
+        minified_zip = File.join(root, 'minified.zip')
+        minify_script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" #{File.join(liberty_home, 'bin', 'server')} package #{server_name} --include=minify --archive=#{minified_zip} --os=-z/OS"
+        # Make it quiet unless there're errors (redirect only stdout)
+        minify_script_string << ContainerUtils.space('1>/dev/null')
+
+        system(minify_script_string)
+
+        # Update with minified version only if the generated file exists and not empty.
+        if File.size? minified_zip
+          system("unzip -qq -d #{root} #{minified_zip}")
+          system("rm -rf #{liberty_home} && mv #{root}/wlp #{liberty_home}")
+          # Re-create sym-links for application and libraries.
+          link_application
+          link_libs
+          make_server_script_runnable
+          puts 'Using minified liberty.'
+        else
+          puts 'Minification failed. Continue using the full liberty.'
+        end
+      end
+    end
+
+    def java_present?
+      ! @java_home.nil? && File.directory?(File.join(@app_dir, @java_home))
+    end
 
     def set_liberty_system_properties
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))

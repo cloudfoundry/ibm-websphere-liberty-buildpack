@@ -71,6 +71,25 @@ module LibertyBuildpack::Jre
       end
     end
 
+    it 'should extract Java from a tar gz' do
+      Dir.mktmpdir do |root|
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
+
+        IBMJdk.new(
+            app_dir: root,
+            configuration: {},
+            java_home: '',
+            java_opts: [],
+            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
+        ).compile
+
+        java = File.join(root, '.java', 'jre', 'bin', 'java')
+        expect(File.exists?(java)).to be_true
+      end
+    end
+
     it 'adds the JAVA_HOME to java_home' do
       Dir.mktmpdir do |root|
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
@@ -99,7 +118,7 @@ module LibertyBuildpack::Jre
             configuration: {},
             license_ids: { 'IBM_JVM_LICENSE' => 'Incorrect' }
           ).compile
-        end.to raise_error(/You have not accepted the IBM JVM License/)
+        end.to raise_error
       end
     end
 

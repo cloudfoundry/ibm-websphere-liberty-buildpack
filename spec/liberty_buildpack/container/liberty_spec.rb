@@ -167,11 +167,10 @@ module LibertyBuildpack::Container
               app_dir: root,
               lib_directory: '',
               configuration: {},
-              java_home: '',
-              java_opts: [],
+              environment: {},
               license_ids: { 'IBM_LIBERTY_LICENSE' => 'Incorrect' }
             ).compile
-          end.to raise_error(/You have not accepted the IBM Liberty Profile License/)
+          end.to raise_error
         end
       end
 
@@ -191,8 +190,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: library_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -233,8 +231,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: library_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -260,8 +257,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: library_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -311,8 +307,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: library_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
@@ -372,8 +367,7 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -408,8 +402,7 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -457,8 +450,7 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -492,8 +484,7 @@ module LibertyBuildpack::Container
           Liberty.new(
           app_dir: root,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -520,7 +511,8 @@ module LibertyBuildpack::Container
 
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
-          Liberty.new(app_dir: root, configuration: {}, java_home: '', java_opts: [], license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }).compile
+          Liberty.new(app_dir: root, configuration: {}, environment: {}, license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }).compile
+
           liberty_directory = File.join(root, '.liberty')
           expect(Dir.exists?(liberty_directory)).to be_true
 
@@ -531,6 +523,106 @@ module LibertyBuildpack::Container
           expect(server_xml_contents.include? 'httpsPort=').to be_false
         end
       end
+<<<<<<< HEAD
+=======
+
+      it 'should link additional libraries to a zipped server webapp' do
+        Dir.mktmpdir do |root|
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
+            file.write('your text')
+          end
+          app_dir = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'apps')
+          FileUtils.mkdir_p(app_dir)
+          stub_war_file = File.join('spec', 'fixtures', 'stub-spring.war')
+          war_file = File.join(app_dir, 'test.war')
+          FileUtils.cp(stub_war_file, war_file)
+
+          lib_directory = File.join root, '.lib'
+          Dir.mkdir lib_directory
+
+          Dir['spec/fixtures/additional_libs/*'].each { |file| FileUtils.cp(file, lib_directory) }
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+          liberty = Liberty.new(
+          app_dir: root,
+          lib_directory: lib_directory,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          )
+          liberty.compile
+
+          apps = liberty.apps
+          apps.each do |app|
+            lib = File.join(app, 'WEB-INF', 'lib')
+            test_jar_1 = File.join lib, 'test-jar-1.jar'
+            test_jar_2 = File.join lib, 'test-jar-2.jar'
+            test_text = File.join lib, 'test-text.txt'
+
+            expect(File.exists?(test_jar_1)).to be_true
+            expect(File.symlink?(test_jar_1)).to be_true
+            expect(File.readlink(test_jar_1)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-1.jar')).relative_path_from(Pathname.new(lib)).to_s)
+
+            expect(File.exists?(test_jar_2)).to be_true
+            expect(File.symlink?(test_jar_2)).to be_true
+            expect(File.readlink(test_jar_2)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-2.jar')).relative_path_from(Pathname.new(lib)).to_s)
+
+            expect(File.exists?(test_text)).to be_false
+          end
+        end
+      end
+
+      it 'should link additional libraries to a webapp' do
+        Dir.mktmpdir do |root|
+          app_dir = root
+          Dir.mkdir File.join(app_dir, 'WEB-INF')
+          lib_directory = File.join root, '.lib'
+          Dir.mkdir lib_directory
+
+          Dir['spec/fixtures/additional_libs/*'].each { |file| FileUtils.cp(file, lib_directory) }
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+          liberty = Liberty.new(
+          app_dir: root,
+          lib_directory: lib_directory,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          )
+          liberty.compile
+
+          apps = liberty.apps
+          expect(apps.size).to eq(1)
+          apps.each do |app|
+            lib = File.join(app, 'WEB-INF', 'lib')
+            test_jar_1 = File.join lib, 'test-jar-1.jar'
+            test_jar_2 = File.join lib, 'test-jar-2.jar'
+            test_text = File.join lib, 'test-text.txt'
+
+            expect(File.exists?(test_jar_1)).to be_true
+            expect(File.symlink?(test_jar_1)).to be_true
+            expect(File.readlink(test_jar_1)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-1.jar')).relative_path_from(Pathname.new(lib)).to_s)
+
+            expect(File.exists?(test_jar_2)).to be_true
+            expect(File.symlink?(test_jar_2)).to be_true
+            expect(File.readlink(test_jar_2)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-2.jar')).relative_path_from(Pathname.new(lib)).to_s)
+
+            expect(File.exists?(test_text)).to be_false
+          end
+        end
+      end
+>>>>>>> upstream/master
     end
 
     describe 'release' do
