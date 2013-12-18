@@ -144,7 +144,7 @@ module LibertyBuildpack::Container
           system("rm -rf #{liberty_home} && mv #{root}/wlp #{liberty_home}")
           # Re-create sym-links for application and libraries.
           link_application
-          Framework::FrameworkUtils.link_libs(apps , @lib_directory)
+          LibertyBuildpack::Framework::FrameworkUtils.link_libs(apps , @lib_directory)
           make_server_script_runnable
           puts 'Using minified liberty.'
         else
