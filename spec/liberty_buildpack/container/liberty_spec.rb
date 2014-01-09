@@ -523,8 +523,6 @@ module LibertyBuildpack::Container
           expect(server_xml_contents.include? 'httpsPort=').to be_false
         end
       end
-<<<<<<< HEAD
-=======
 
       it 'should link additional libraries to a zipped server webapp' do
         Dir.mktmpdir do |root|
@@ -622,7 +620,6 @@ module LibertyBuildpack::Container
           end
         end
       end
->>>>>>> upstream/master
     end
 
     describe 'release' do
