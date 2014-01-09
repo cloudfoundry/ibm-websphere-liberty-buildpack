@@ -99,6 +99,7 @@ module LibertyBuildpack::Container
       link_application
       make_server_script_runnable
       # Need to do minify here to have server_xml updated and applications and libs linked.
+      @logger.info("minify? #{minify?}")
       minify_liberty if minify?
       set_liberty_system_properties
     end
@@ -124,6 +125,7 @@ module LibertyBuildpack::Container
     end
 
     def minify_liberty
+      @logger.info("minifying liberty")
       Dir.mktmpdir do |root|
         # Create runtime-vars.xml to avoid archive being incorrectly too small
         runtime_vars_file =  File.join(servers_directory, server_name, 'runtime-vars.xml')
