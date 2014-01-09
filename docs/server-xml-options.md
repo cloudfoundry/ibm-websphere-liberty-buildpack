@@ -3,8 +3,8 @@ Buildpack-enabled Options for Server.xml
 
 Liberty's server behavior is controlled through a file with the name `server.xml`.
 
-## WAR Files
-If you are pushing a WAR or "exploded" (i.e. unzipped) WAR file, then a 
+## WAR and EAR Files
+If you are pushing a WAR, EAR or "exploded" (i.e. unzipped) file of either type, then a 
 server.xml will be generated for you with the correct parameters for use 
 with Cloud Foundry.  That server.xml will look something like this:
 
