@@ -1,5 +1,5 @@
 # Liberty Container
-The Liberty Container allows a web application or liberty server to be run.  These applications are run as the a web application in a Liberty container.
+You can run a web application or Liberty server package in the Liberty Container.
 
 <table border>
   <tr>
@@ -9,20 +9,28 @@ The Liberty Container allows a web application or liberty server to be run.  The
     <td><strong>Tags</strong></td><td><tt>liberty-&lang;version&rang;</tt></td>
   </tr>
 </table>
-Tags are printed to standard output by the buildpack detect script
+Tags are printed to standard output by the Buildpack `detect` script.
 
-In order to specify [Spring profiles][], set the [`SPRING_PROFILES_ACTIVE`][SPRING_PROFILES_ACTIVE] environment variable.  This is automatically detected and used by Spring.
+To specify the [Spring profiles][], set the [`SPRING_PROFILES_ACTIVE`][SPRING_PROFILES_ACTIVE] environment variable.  This is automatically detected and used by Spring.
 
 ## Configuration
-For general information on configuring the buildpack, refer to [Configuration and Extension][Configuration_and_Extension].
+For general information on configuring the Buildpack, refer to [Configuration and Extension][Configuration_and_Extension].
 
-The container can be configured by modifying the [`config/liberty.yml`][liberty.yml] file.  The container uses the [`Repository` utility support][repositories] and so it supports the [version syntax][version_syntax] defined there.
+You can modify the [`config/liberty.yml`][liberty.yml] file to configure the container. The container uses the [`Repository` utility support][repositories] and it supports the [version syntax][version_syntax].
 
 
 | Name | Description
 | ---- | -----------
 |`repository_root`| The URL of the Liberty repository index ([details][repositories])  
-|`version`| The version of Liberty to use. Candidate versions can be found in [this listing][liberty.yml].  
+|`version`| The version of the Liberty profile. You can find the candidate versions [here][liberty.yml].
+|`minify`| Boolean indicating whether the Liberty server should be minified. Minification potentially reduces the size of the deployed Liberty server because only the requested features are included, but it might result in longer push times. The default value is `false`.
+
+The `minify` option can be overridden on a per-application basis by specifying a `minify` environment variable in the `manifest.yml` for the application. For example:
+
+```
+  env:
+    minify: true
+```
 
 [Configuration_and_Extension]: ../README.md#Configuration-and-Extension
 [liberty.yml]: ../config/liberty.yml
