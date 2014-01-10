@@ -125,7 +125,7 @@ module LibertyBuildpack::Container
     end
 
     def minify_liberty
-      @logger.info("minifying liberty")
+      @logger.info('minifying liberty')
       Dir.mktmpdir do |root|
         # Create runtime-vars.xml to avoid archive being incorrectly too small
         runtime_vars_file =  File.join(servers_directory, server_name, 'runtime-vars.xml')
