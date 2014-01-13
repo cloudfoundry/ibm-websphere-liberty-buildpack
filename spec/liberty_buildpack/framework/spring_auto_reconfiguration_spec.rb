@@ -155,7 +155,7 @@ module LibertyBuildpack::Framework
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
         SpringAutoReconfiguration.new(
-        app_dir: root,
+        app_dir: app_dir,
         lib_directory: lib_directory,
         configuration: {}
         ).compile
