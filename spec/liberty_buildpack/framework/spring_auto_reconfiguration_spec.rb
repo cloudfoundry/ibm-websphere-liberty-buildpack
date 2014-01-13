@@ -154,7 +154,7 @@ module LibertyBuildpack::Framework
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-        liberty = LibertyBuildpack::Container::Liberty.new(
+        LibertyBuildpack::Container::Liberty.new(
         app_dir: root,
         lib_directory: lib_directory,
         configuration: {},
@@ -191,6 +191,8 @@ module LibertyBuildpack::Framework
       Dir.mktmpdir do |root|
         app_dir = root
         Dir.mkdir File.join(app_dir, 'WEB-INF')
+        springjar =  File.join(app_dir, 'spring-core.jar')
+        File.new(springjar)
         lib_directory = File.join root, '.lib'
         Dir.mkdir lib_directory
 
@@ -200,7 +202,7 @@ module LibertyBuildpack::Framework
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-        liberty = LibertyBuildpack::Container::Liberty.new(
+        LibertyBuildpack::Container::Liberty.new(
         app_dir: root,
         lib_directory: lib_directory,
         configuration: {},
