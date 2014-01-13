@@ -154,7 +154,7 @@ module LibertyBuildpack::Framework
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-        liberty = Liberty.new(
+        liberty = LibertyBuildpack::Container::Liberty.new(
         app_dir: root,
         lib_directory: lib_directory,
         configuration: {},
@@ -200,7 +200,7 @@ module LibertyBuildpack::Framework
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-        liberty = Liberty.new(
+        liberty = LibertyBuildpack::Container::Liberty.new(
         app_dir: root,
         lib_directory: lib_directory,
         configuration: {},
