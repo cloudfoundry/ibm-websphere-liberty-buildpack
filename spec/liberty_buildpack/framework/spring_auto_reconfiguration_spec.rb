@@ -191,8 +191,7 @@ module LibertyBuildpack::Framework
       Dir.mktmpdir do |root|
         app_dir = root
         Dir.mkdir File.join(app_dir, 'WEB-INF')
-        File.new('spring-core.jar', 'w')
-        FileUtils.mv('spring-core.jar', app_dir)
+        File.new(File.join(app_dir,'spring-core.jar'), 'w')
 
         lib_directory = File.join root, '.lib'
         Dir.mkdir lib_directory
