@@ -99,7 +99,6 @@ module LibertyBuildpack::Container
       link_application
       make_server_script_runnable
       # Need to do minify here to have server_xml updated and applications and libs linked.
-      @logger.info("minify? #{minify?}")
       minify_liberty if minify?
       set_liberty_system_properties
     end
