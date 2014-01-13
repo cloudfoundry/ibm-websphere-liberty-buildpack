@@ -281,8 +281,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: library_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
@@ -291,7 +290,7 @@ module LibertyBuildpack::Container
         end
       end
 
-      it 'should produce the correct server.xml for the WEB-INF case' do
+      it 'should produce the correct server.xml for the WEB-INF case when the app is of type war' do
         Dir.mktmpdir do |root|
           Dir.mkdir File.join(root, 'WEB-INF')
 
@@ -321,7 +320,7 @@ module LibertyBuildpack::Container
         end
       end
 
-      it 'should produce the correct server.xml for the META-INF case' do
+      it 'should produce the correct server.xml for the META-INF case when the app is of type ear' do
         Dir.mktmpdir do |root|
           Dir.mkdir File.join(root, 'META-INF')
 
@@ -337,8 +336,7 @@ module LibertyBuildpack::Container
           app_dir: root,
           lib_directory: library_directory,
           configuration: {},
-          java_home: '',
-          java_opts: [],
+          environment: {},
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
