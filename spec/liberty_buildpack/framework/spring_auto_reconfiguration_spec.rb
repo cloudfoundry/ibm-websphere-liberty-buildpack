@@ -154,12 +154,6 @@ module LibertyBuildpack::Framework
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-        SpringAutoReconfiguration.new(
-        app_dir: app_dir,
-        lib_directory: lib_directory,
-        configuration: {}
-        ).compile
-
         liberty = Liberty.new(
         app_dir: root,
         lib_directory: lib_directory,
@@ -167,6 +161,12 @@ module LibertyBuildpack::Framework
         environment: {},
         license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
         )
+
+        SpringAutoReconfiguration.new(
+        app_dir: root,
+        lib_directory: lib_directory,
+        configuration: {}
+        ).compile
 
         apps = liberty.apps
         apps.each do |app|
@@ -200,12 +200,6 @@ module LibertyBuildpack::Framework
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-        SpringAutoReconfiguration.new(
-        app_dir: root,
-        lib_directory: lib_directory,
-        configuration: {}
-        ).compile
-
         liberty = Liberty.new(
         app_dir: root,
         lib_directory: lib_directory,
@@ -213,6 +207,12 @@ module LibertyBuildpack::Framework
         environment: {},
         license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
         )
+
+        SpringAutoReconfiguration.new(
+        app_dir: root,
+        lib_directory: lib_directory,
+        configuration: {}
+        ).compile
 
         apps = liberty.apps
         expect(apps.size).to eq(1)
