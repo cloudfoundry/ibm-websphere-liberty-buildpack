@@ -101,7 +101,7 @@ module LibertyBuildpack::Framework
     # @param [Array] apps the applications to link to
     # @param [String] lib_dir the path to the framework library directory
     def self.link_libs(apps, lib_dir)
-      @logger.info('linking libraries')
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('linking libraries')
       apps.each do |app_dir|
         libs = LibertyBuildpack::Container::ContainerUtils.libs(app_dir, lib_dir)
         if libs
