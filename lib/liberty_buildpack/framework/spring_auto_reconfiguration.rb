@@ -93,6 +93,7 @@ module LibertyBuildpack::Framework
       end
 
       def modify_web_xml(app_dir)
+        @logger.info('modifying web xml')
         web_xml = File.join app_dir, WEB_XML
 
         if File.exists? web_xml
