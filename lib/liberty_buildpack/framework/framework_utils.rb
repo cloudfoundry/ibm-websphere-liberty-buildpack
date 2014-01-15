@@ -64,7 +64,7 @@ module LibertyBuildpack::Framework
       matches = Dir["#{app_dir}/**/#{pattern}"]
       matches.each do |path|
         if !(path.include? '.ear') && !(path.include? '.war')
-          libs.concat(match)
+          libs.concat(path)
         end
       end
       libs
