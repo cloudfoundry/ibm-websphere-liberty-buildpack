@@ -62,7 +62,7 @@ module LibertyBuildpack::Framework
       list = ''
       archives = Dir.glob(File.join(app_dir, '**', '*.jar'))
       archives.each do |file|
-        if File.file?
+        if File.file? file
           IO.popen("unzip -l -qq #{file}") do |io|
             io.each_line { |line| list << "#{line}" }
           end
