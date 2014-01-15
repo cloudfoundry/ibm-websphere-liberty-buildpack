@@ -57,8 +57,8 @@ module LibertyBuildpack::Framework
     def compile
       detect if @auto_reconfiguration_uri.nil?
       LibertyBuildpack::Util.download(@auto_reconfiguration_version, @auto_reconfiguration_uri, 'Auto Reconfiguration', jar_name(@auto_reconfiguration_version), @lib_directory)
-      FrameworkUtils.link_libs(method(:spring_apps), @lib_directory)
-      spring_apps.each { |app| modify_web_xml(app) }
+      FrameworkUtils.link_libs(SpringAutoReconfiguration.spring_apps, @lib_directory)
+      SpringAutoReconfiguration.spring_apps.each { |app| modify_web_xml(app) }
     end
 
     # Does nothing
@@ -108,10 +108,10 @@ module LibertyBuildpack::Framework
       end
 
       def self.spring_application?(app_dir, lib_dir)
-        spring_apps != [] || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
+        SpringAutoReconfiguration.spring_apps != [] || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
       end
 
-      def spring_apps
+      def self.spring_apps
         shared_libs = FrameworkUtils.find_shared_libs(app_dir, SPRING_JAR_PATTERN)
         if !shared_libs.nil? && !shared_libs.empty?
           s_apps = FrameworkUtils.find(app_dir, "*")
