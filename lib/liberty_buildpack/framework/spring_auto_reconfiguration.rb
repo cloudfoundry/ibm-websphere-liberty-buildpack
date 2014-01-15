@@ -59,6 +59,7 @@ module LibertyBuildpack::Framework
       LibertyBuildpack::Util.download(@auto_reconfiguration_version, @auto_reconfiguration_uri, 'Auto Reconfiguration', jar_name(@auto_reconfiguration_version), @lib_directory)
       FrameworkUtils.link_libs(SpringAutoReconfiguration.spring_apps(@app_dir), @lib_directory)
       SpringAutoReconfiguration.spring_apps(@app_dir).each { |app| modify_web_xml(app) }
+      @logger.info('completed compile phase in Framework')
     end
 
     # Does nothing
