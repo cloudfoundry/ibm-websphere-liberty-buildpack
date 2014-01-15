@@ -120,6 +120,7 @@ module LibertyBuildpack::Framework
         else
           s_apps = FrameworkUtils.find(app_dir, SPRING_JAR_PATTERN)
         end
+        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring apps found #{s_apps}")
         s_apps
       end
   end
