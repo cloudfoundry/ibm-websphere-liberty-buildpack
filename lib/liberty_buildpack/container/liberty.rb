@@ -124,7 +124,6 @@ module LibertyBuildpack::Container
     end
 
     def minify_liberty
-      @logger.info('minifying liberty')
       Dir.mktmpdir do |root|
         # Create runtime-vars.xml to avoid archive being incorrectly too small
         runtime_vars_file =  File.join(servers_directory, server_name, 'runtime-vars.xml')
@@ -145,7 +144,7 @@ module LibertyBuildpack::Container
           system("rm -rf #{liberty_home} && mv #{root}/wlp #{liberty_home}")
           # Re-create sym-links for application and libraries.
           link_application
-          LibertyBuildpack::Framework::FrameworkUtils.link_libs(apps , @lib_directory)
+          LibertyBuildpack::Framework::FrameworkUtils.link_libs(apps, @lib_directory)
           make_server_script_runnable
           puts 'Using minified liberty.'
         else
@@ -237,7 +236,6 @@ module LibertyBuildpack::Container
       system "chmod +x #{server_script}"
     end
 
-    # checkpoint three - don't add any printouts here it causes an error!
     def server_name
       if Liberty.liberty_directory @app_dir
         candidates = Dir[File.join(@app_dir, 'wlp', 'usr', 'servers', '*')]
