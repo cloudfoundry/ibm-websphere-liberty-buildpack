@@ -104,7 +104,7 @@ module LibertyBuildpack::Framework
       apps.each do |app_dir|
         LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('linking libraries')
         libs = LibertyBuildpack::Container::ContainerUtils.libs(app_dir, lib_dir)
-          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('linking libraries 2')
+        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('linking libraries 2')
         if libs
           if LibertyBuildpack::Container::Liberty.web_inf(app_dir)
             app_web_inf_lib = web_inf_lib(app_dir)

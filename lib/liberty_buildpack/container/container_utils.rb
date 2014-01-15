@@ -48,6 +48,7 @@ module LibertyBuildpack::Container
     def self.libs(app_dir, lib_directory)
       libs = []
       if lib_directory
+        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('app_dir type #{app_dir.class}')
         root_directory = Pathname.new(app_dir)
         libs = Pathname.new(lib_directory).children
         .select { |file| file.extname == '.jar' }
