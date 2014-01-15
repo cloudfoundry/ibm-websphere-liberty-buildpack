@@ -106,7 +106,9 @@ module LibertyBuildpack::Container
 
     def jvm_options
       jvm_options_path = File.join(@app_dir, 'jvm.options')
-      unless File.exist?(jvm_options_path)
+	  if File.exist?(jvm_options_path)
+        puts 'Using jvm.options provided.'
+      else 
         jvm_options_file = File.new(jvm_options_path, 'w')
         jvm_options_file.puts(@java_opts)
         jvm_options_file.close
