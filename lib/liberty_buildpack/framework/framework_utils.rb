@@ -62,10 +62,9 @@ module LibertyBuildpack::Framework
     def self.find_shared_libs(app_dir, pattern)
       libs = []
       matches = Dir["#{app_dir}/**/#{pattern}"]
-       matches.each do |path|
-          if !(path.include? '.ear') && !(path.include? '.war')
-            libs.concat(match)
-          end
+      matches.each do |path|
+        if !(path.include? '.ear') && !(path.include? '.war')
+          libs.concat(match)
         end
       end
       libs
