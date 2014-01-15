@@ -54,6 +54,23 @@ module LibertyBuildpack::Framework
       apps
     end
 
+    # Find matches to the provided pattern in the given directory that aren't within applications
+    # this search is only applicable for server pushes (packaged or exploded)
+    # @param [String] app_dir the directory structure in which we look for the pattern
+    # @param [String] pattern the pattern that needs to be satisfied
+    # @return [Array] applications within that directory that match the pattern
+    def self.find_shared_libs(app_dir, pattern)
+      libs = []
+      matches = Dir["#{app_dir}/**/#{pattern}"]
+       matches.each do |path|
+          if !(path.include? '.ear') && !(path.include? '.war')
+            libs.concat(match)
+          end
+        end
+      end
+      libs
+    end
+
     # Checks if the directory contains an archive that satisfies the pattern
     # @param [String] app_dir the directory containing archives
     # @param [String] pattern the pattern that should be matched
