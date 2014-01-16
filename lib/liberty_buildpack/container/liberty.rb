@@ -79,6 +79,7 @@ module LibertyBuildpack::Container
         raise
       end
 
+      jvm_options
       download_liberty
       update_server_xml
       link_application
@@ -95,15 +96,24 @@ module LibertyBuildpack::Container
     def release
       create_vars_string = File.join(LIBERTY_HOME, 'create_vars.rb') << ' .liberty/usr/servers/' << server_name << '/runtime-vars.xml && '
       java_home_string = "JAVA_HOME=\"$PWD/#{@java_home}\""
-      java_opts_string = ContainerUtils.space(ContainerUtils.to_java_opts_s(@java_opts))
-      java_opts_string = ContainerUtils.space("JVM_ARGS=\"#{java_opts_string}\"")
       start_script_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'bin', 'server'))
       start_script_string << ContainerUtils.space('run')
       server_name_string = ContainerUtils.space(server_name)
-      "#{create_vars_string}#{java_home_string}#{java_opts_string}#{start_script_string}#{server_name_string}"
+      "#{create_vars_string}#{java_home_string}#{start_script_string}#{server_name_string}"
     end
 
     private
+
+    def jvm_options
+      jvm_options_path = File.join(@app_dir, 'jvm.options')
+      if File.exist?(jvm_options_path)
+        puts 'Using jvm.options provided.'
+      else
+        jvm_options_file = File.new(jvm_options_path, 'w')
+        jvm_options_file.puts(@java_opts)
+        jvm_options_file.close
+      end
+    end
 
     def minify?
       (@environment['minify'].nil? ? (@configuration['minify'] != false) : (@environment['minify'] != 'false')) && java_present?
