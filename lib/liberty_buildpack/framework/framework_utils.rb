@@ -29,9 +29,9 @@ module LibertyBuildpack::Framework
     # @param [String] app_dir the directory structure in which we look for the pattern
     # @param [String] pattern the pattern that needs to be satisfied
     # @return [Array] applications within that directory that match the pattern
-    def self.find(app_dir, pattern)
+    def self.find(app_dir, pattern = ["#{app_dir}/**/.war", "#{app_dir}/**/.ear"])
       apps = []
-      matches = Dir["#{app_dir}/**/#{pattern}"]
+      matches = Dir[pattern]
       matches.each do |path|
         ['.ear', '.war', "\/WEB-INF", 'lib'].each do |app_type|
           if path.include? app_type
@@ -63,7 +63,7 @@ module LibertyBuildpack::Framework
     # @return [Array] applications within that directory that match the pattern
     def self.find_shared_libs(app_dir, pattern)
       libs = []
-      matches = Dir["#{app_dir}/**/#{pattern}"]
+      matches = Dir[pattern]
       matches.each do |path|
         if !(path.include? '.ear') && !(path.include? '.war')
           libs << path
