@@ -32,7 +32,6 @@ module LibertyBuildpack::Framework
     def self.find(app_dir, pattern = ["#{app_dir}/**/.war", "#{app_dir}/**/.ear"])
       apps = []
       matches = Dir[pattern]
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("matches #{matches}")
       matches.each do |path|
         ['.ear', '.war', "\/WEB-INF", 'lib'].each do |app_type|
           LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("path #{path}")
