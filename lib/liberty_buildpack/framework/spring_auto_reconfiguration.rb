@@ -117,9 +117,12 @@ module LibertyBuildpack::Framework
       def self.spring_apps(app_dir)
         pattern = "#{app_dir}/**/#{SPRING_JAR_PATTERN}"
         (shared_libs = FrameworkUtils.find_shared_libs(app_dir, pattern)) if !Dir.glob("./**/wlp").each {|file| File.directory? file}.empty?
+        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("completed looking for shared libraries")
         if !shared_libs.nil? && !shared_libs.empty?
+          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("shared libraries exist")
           s_apps = FrameworkUtils.find(app_dir)
         else
+          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("no shared libraries exist")
           s_apps = FrameworkUtils.find(app_dir, pattern)
         end
         s_apps
