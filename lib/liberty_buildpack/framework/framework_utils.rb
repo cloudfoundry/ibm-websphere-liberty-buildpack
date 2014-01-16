@@ -30,6 +30,7 @@ module LibertyBuildpack::Framework
     # @param [String] pattern the pattern that needs to be satisfied
     # @return [Array] applications within that directory that match the pattern
     def self.find(app_dir, pattern = ["#{app_dir}/**/.war", "#{app_dir}/**/.ear"])
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Looking for this pattern #{pattern}")
       apps = []
       matches = Dir[pattern]
       matches.each do |path|
