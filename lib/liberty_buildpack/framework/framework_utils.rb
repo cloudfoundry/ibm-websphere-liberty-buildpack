@@ -49,7 +49,7 @@ module LibertyBuildpack::Framework
               break
             end
           end
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("paths #{apps}")
+        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("paths #{path}")
         end
       end
       LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring apps found #{apps}")
