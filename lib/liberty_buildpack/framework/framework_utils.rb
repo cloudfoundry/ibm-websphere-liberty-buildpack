@@ -30,12 +30,10 @@ module LibertyBuildpack::Framework
     # @param [String] pattern the pattern that needs to be satisfied
     # @return [Array] applications within that directory that match the pattern
     def self.find(app_dir, pattern = ["#{app_dir}/**/*war", "#{app_dir}/**/*.ear"])
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Looking for this pattern #{pattern}")
       apps = []
       matches = Dir.glob(pattern)
       matches.each do |path|
         ['.ear', '.war', "\/WEB-INF", 'lib'].each do |app_type|
-          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("path #{path}")
           if path.include? app_type
             if app_type == '.ear' || app_type == '.war'
               match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
@@ -66,9 +64,7 @@ module LibertyBuildpack::Framework
       libs = []
       matches = Dir[pattern]
       matches.each do |path|
-        if !(path.include? '.ear') && !(path.include? '.war')
-          libs << path
-        end
+        libs << path if !path.include?('.ear') && !path.include?('.war')
       end
       LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring libraries found #{libs}")
       libs
