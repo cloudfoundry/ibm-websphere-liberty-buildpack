@@ -32,8 +32,10 @@ module LibertyBuildpack::Framework
     def self.find(app_dir, pattern = ["#{app_dir}/**/.war", "#{app_dir}/**/.ear"])
       apps = []
       matches = Dir[pattern]
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("matches #{matches}")
       matches.each do |path|
         ['.ear', '.war', "\/WEB-INF", 'lib'].each do |app_type|
+          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("path #{path}")
           if path.include? app_type
             if app_type == '.ear' || app_type == '.war'
               match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
@@ -49,7 +51,6 @@ module LibertyBuildpack::Framework
               break
             end
           end
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("paths #{path}")
         end
       end
       LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring apps found #{apps}")
