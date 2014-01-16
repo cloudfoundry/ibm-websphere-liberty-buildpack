@@ -111,7 +111,7 @@ module LibertyBuildpack::Framework
       end
 
       def self.spring_application?(app_dir, lib_dir)
-        SpringAutoReconfiguration.spring_apps(app_dir) != [] || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
+        SpringAutoReconfiguration.spring_apps(app_dir) != [] # || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
       end
 
       def self.spring_apps(app_dir)
