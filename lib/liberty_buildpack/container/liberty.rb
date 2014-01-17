@@ -141,10 +141,12 @@ module LibertyBuildpack::Container
         # Update with minified version only if the generated file exists and not empty.
         if File.size? minified_zip
           system("unzip -qq -d #{root} #{minified_zip}")
-          system("rm -rf #{liberty_home} && mv #{root}/wlp #{liberty_home}") # instead of removing everything only remove the lib directory and
+          lib_dir = File.join("wlp", "lib")
+          @logger.info("file structure in root #{Dir.glob("#{root}/*/*")}")
+          @logger.info("file structure in liberty home #{Dir.glob("#{liberty_home}/*/*")}")
+          system("rm -rf #{liberty_home}/#{lib_dir} && mv #{root}/#{lib_dir} #{liberty_home}/#{lib_dir}") # instead of removing everything only remove the lib directory and
+          system("rm -rf #{root}/wlp")
           # Re-create sym-links for application and libraries.
-          link_application
-          LibertyBuildpack::Framework::FrameworkUtils.link_libs(apps, @lib_directory)
           make_server_script_runnable
           puts 'Using minified liberty.'
         else
