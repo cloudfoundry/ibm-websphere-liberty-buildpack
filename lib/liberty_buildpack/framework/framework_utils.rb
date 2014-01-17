@@ -102,15 +102,12 @@ module LibertyBuildpack::Framework
     # @param [String] lib_dir the path to the framework library directory
     def self.link_libs(apps, lib_dir)
       apps.each do |app_dir|
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('linking libraries')
         libs = LibertyBuildpack::Container::ContainerUtils.libs(app_dir, lib_dir)
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('linking libraries 2')
         if libs
           if LibertyBuildpack::Container::Liberty.web_inf(app_dir)
             app_web_inf_lib = web_inf_lib(app_dir)
             FileUtils.mkdir_p(app_web_inf_lib) unless File.exists?(app_web_inf_lib)
             app_web_inf_lib_path = Pathname.new(app_web_inf_lib)
-            LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('linking libraries 3')
             Pathname.glob(File.join(lib_dir, '*.jar')) do |jar|
               FileUtils.ln_sf(jar.relative_path_from(app_web_inf_lib_path), app_web_inf_lib)
             end
@@ -121,10 +118,8 @@ module LibertyBuildpack::Framework
             Pathname.glob(File.join(lib_dir, '*.jar')) do |jar|
               FileUtils.ln_sf(jar.relative_path_from(ear_lib_path), app_ear_lib)
             end
-            LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('linking libraries 4')
           end
         end
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('linking libraries 5')
       end
     end
 

@@ -116,7 +116,7 @@ module LibertyBuildpack::Framework
 
       def self.spring_apps(app_dir)
         pattern = "#{app_dir}/**/#{SPRING_JAR_PATTERN}"
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Server structure exists? Dir.glob(\"#{app_dir}/**/wlp\")")
+        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Server structure exists? #{Dir.glob("app_dir/**/wlp")}")
         (shared_libs = FrameworkUtils.find_shared_libs(app_dir, pattern)) unless Dir.glob("#{app_dir}/**/wlp").each { |file| File.directory? file }.empty?
         if !shared_libs.nil? && !shared_libs.empty?
           LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('Entered shared library case')
