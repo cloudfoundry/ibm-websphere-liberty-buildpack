@@ -51,7 +51,6 @@ module LibertyBuildpack::Framework
           end
         end
       end
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring apps found #{apps}")
       apps
     end
 
@@ -66,7 +65,6 @@ module LibertyBuildpack::Framework
       matches.each do |path|
         libs << path if !path.include?('.ear') && !path.include?('.war')
       end
-      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Spring libraries found #{libs}")
       libs
     end
 

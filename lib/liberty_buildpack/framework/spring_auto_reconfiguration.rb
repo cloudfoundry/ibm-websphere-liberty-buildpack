@@ -59,7 +59,6 @@ module LibertyBuildpack::Framework
       LibertyBuildpack::Util.download(@auto_reconfiguration_version, @auto_reconfiguration_uri, 'Auto Reconfiguration', jar_name(@auto_reconfiguration_version), @lib_directory)
       FrameworkUtils.link_libs(SpringAutoReconfiguration.spring_apps(@app_dir), @lib_directory)
       SpringAutoReconfiguration.spring_apps(@app_dir).each { |app| modify_web_xml(app) }
-      @logger.info('completed compile phase in Framework')
     end
 
     # Does nothing
@@ -94,7 +93,6 @@ module LibertyBuildpack::Framework
       end
 
       def modify_web_xml(app_dir)
-        @logger.info('modifying web xml')
         web_xml = File.join app_dir, WEB_XML
 
         if File.exists? web_xml
@@ -116,13 +114,10 @@ module LibertyBuildpack::Framework
 
       def self.spring_apps(app_dir)
         pattern = "#{app_dir}/**/#{SPRING_JAR_PATTERN}"
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info("Server structure exists? #{Dir.glob("app_dir/**/wlp")}")
         (shared_libs = FrameworkUtils.find_shared_libs(app_dir, pattern)) unless Dir.glob("#{app_dir}/**/wlp").each { |file| File.directory? file }.empty?
         if !shared_libs.nil? && !shared_libs.empty?
-          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('Entered shared library case')
           s_apps = FrameworkUtils.find(app_dir)
         else
-          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('Entered no share case')
           s_apps = FrameworkUtils.find(app_dir, pattern)
         end
         s_apps
