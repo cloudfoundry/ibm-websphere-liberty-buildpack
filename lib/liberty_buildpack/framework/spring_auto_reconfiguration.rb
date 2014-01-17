@@ -111,15 +111,17 @@ module LibertyBuildpack::Framework
       end
 
       def self.spring_application?(app_dir, lib_dir)
-        SpringAutoReconfiguration.spring_apps(app_dir) != [] # || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
+        SpringAutoReconfiguration.spring_apps(app_dir) != [] || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
       end
 
       def self.spring_apps(app_dir)
         pattern = "#{app_dir}/**/#{SPRING_JAR_PATTERN}"
         (shared_libs = FrameworkUtils.find_shared_libs(app_dir, pattern)) unless Dir.glob('./**/wlp').each { |file| File.directory? file }.empty?
         if !shared_libs.nil? && !shared_libs.empty?
+          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('Entered shared library case')
           s_apps = FrameworkUtils.find(app_dir)
         else
+          LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.info('Entered no share case')
           s_apps = FrameworkUtils.find(app_dir, pattern)
         end
         s_apps
