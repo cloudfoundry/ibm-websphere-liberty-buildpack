@@ -268,6 +268,7 @@ module LibertyBuildpack::Container
         FileUtils.rm_rf(liberty_home)
         FileUtils.mkdir_p(liberty_home)
         system "unzip -qq #{file.path} -d #{root} 2>&1"
+        @logger.info("#{Dir.glob(File.join(root, 'wlp', '**'))}")
         system "mv #{root}/wlp/* #{liberty_home}/"
       end
 
