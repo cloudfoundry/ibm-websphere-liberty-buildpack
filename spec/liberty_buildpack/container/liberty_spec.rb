@@ -572,12 +572,12 @@ module LibertyBuildpack::Container
         command = Liberty.new(
         app_dir: 'spec/fixtures/container_liberty_ear',
         java_home: 'test-java-home',
-        java_opts: %w(test-opt-2 test-opt-1),
+        java_opts: '',
         configuration: {},
         license_ids: {}
         ).release
 
-        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" JVM_ARGS=\" test-opt-1 test-opt-2\" .liberty/bin/server run defaultServer")
+        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
       end
 
       it 'should return correct execution command for the zipped-up server case' do
