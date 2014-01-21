@@ -3,24 +3,26 @@
 The `liberty-buildpack` is a [Cloud Foundry][] buildpack for running applications on IBM's WebSphere Application Server Liberty Profile.  It is designed to run most "packaged" servers.
 
 ## Usage
-To deploy applications using the IBM WebSphere Application Server Liberty Buildpack, you are required to accept the IBM Liberty license and IBM JRE license by actioning the following:
-* Read the current IBM [Liberty-License][] and the current IBM [JVM-License][].
-* Extract the "D/N: <License code>" from the license.
-* Add the following environment variables and extracted license codes inside of the "manifest.yml" file that gets pushed with your application. For further information on the format of
-the manifest.yml file refer to the [manifest documentation][].
+To deploy applications using the IBM WebSphere Application Server Liberty Buildpack, you are required to accept the IBM Liberty license and IBM JRE license by following the instructions below:
 
-```
-  env:
-    IBM_JVM_LICENSE: <jvm license code>
-    IBM_LIBERTY_LICENSE: <liberty license code>
-```
+1. Read the current IBM [Liberty-License][] and the current IBM [JVM-License][].
+2. Extract the `D/N: <License code>` from the Liberty-License and JVM-License.
+3. Add the following environment variables and extracted license codes to the `manifest.yml` file in the directory from which you push your application. For further information on the format of
+the `manifest.yml` file refer to the [manifest documentation][].
 
-* Once the license acceptance environment variables are set, use the following command:
+    ```
+      env:
+        IBM_JVM_LICENSE: <jvm license code>
+        IBM_LIBERTY_LICENSE: <liberty license code>
+    ```
+
+After you have set the license acceptance environment variables, use the following command to deploy the application with the IBM WebSphere Application Server Liberty Buildpack:
 
 ```bash
 cf push --buildpack https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
 ```
-For further details on the options available for deploying your applications see [options][]
+
+For further details on the options available for deploying your applications see [options][].
 
 ## Forking the buildpack   
 If you wish to fork the buildpack and host your own binaries, then complete the following:

@@ -174,6 +174,32 @@ module LibertyBuildpack::Container
         end
       end
 
+      it 'generate a jvm.options file if one is not provided' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'WEB-INF')
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          environment: {},
+          jvm_opts: %w(test-opt-2 test-opt-1),
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+          jvm_options_file = File.join(root, 'jvm.options')
+          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.readlines(jvm_options_file).grep(/test-opt-1/).size > 0)
+        end
+      end
+
       it 'should extract Liberty from a JAR file' do
         Dir.mktmpdir do |root|
           Dir.mkdir File.join(root, 'WEB-INF')
@@ -531,12 +557,12 @@ module LibertyBuildpack::Container
         command = Liberty.new(
         app_dir: 'spec/fixtures/container_liberty',
         java_home: 'test-java-home',
-        java_opts: %w(test-opt-2 test-opt-1),
+        java_opts: '',
         configuration: {},
         license_ids: {}
         ).release
 
-        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" JVM_ARGS=\" test-opt-1 test-opt-2\" .liberty/bin/server run defaultServer")
+        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
       end
 
       it 'should return correct execution command for the META-INF case' do
@@ -561,12 +587,12 @@ module LibertyBuildpack::Container
         command = Liberty.new(
         app_dir: 'spec/fixtures/container_liberty_server',
         java_home: 'test-java-home',
-        java_opts: %w(test-opt-2 test-opt-1),
+        java_opts: '',
         configuration: {},
         license_ids: {}
         ).release
 
-        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" JVM_ARGS=\" test-opt-1 test-opt-2\" .liberty/bin/server run myServer")
+        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run myServer")
       end
 
       it 'should return correct execution command for single-server case' do
@@ -576,12 +602,12 @@ module LibertyBuildpack::Container
         command = Liberty.new(
         app_dir: 'spec/fixtures/container_liberty_single_server',
         java_home: 'test-java-home',
-        java_opts: %w(test-opt-2 test-opt-1),
+        java_opts: '',
         configuration: {},
         license_ids: {}
         ).release
 
-        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" JVM_ARGS=\" test-opt-1 test-opt-2\" .liberty/bin/server run defaultServer")
+        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
       end
 
       it 'should throw an error when there are multiple servers to deploy' do
