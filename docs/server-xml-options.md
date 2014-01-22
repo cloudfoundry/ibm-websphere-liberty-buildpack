@@ -4,8 +4,8 @@ Buildpack-enabled Options for Server.xml
 Liberty's server behavior is controlled through a file with the name `server.xml`.
 
 ## WAR and EAR Files
-If you are pushing a WAR, EAR or "exploded" (i.e. unzipped) file of either type, then a 
-server.xml will be generated for you with the correct parameters for use 
+If you are pushing a WAR, EAR or "exploded" (i.e. unzipped) file of either type, then a
+server.xml will be generated for you with the correct parameters for use
 with Cloud Foundry.  That server.xml will look something like this:
 
 ```
@@ -21,7 +21,7 @@ with Cloud Foundry.  That server.xml will look something like this:
     <httpEndpoint id="defaultHttpEndpoint"
                   host="*"
                   httpPort="${port}"
-                   />    
+                   />
 </server>
 ```
 
@@ -37,9 +37,9 @@ is assumed.
 ## Server Configurations (including a server.xml)
 
 ### Liberty Directory Push
-The recommended way of deploying a Liberty server is to use the 
-`./bin/server package myServer --include=usr` command from your Liberty 
-installation and export your `usr` directory including your application. 
+The recommended way of deploying a Liberty server is to use the
+`./bin/server package myServer --include=usr` command from your Liberty
+installation and export your `usr` directory including your application.
 If you execute `cf push --path="myServer.zip"` from the server directory
 of your application (e.g. `/usr/servers/myServer`) then the buildpack
 will detect the server.xml in the server definitions contained within
@@ -48,7 +48,7 @@ the package and proceed to modify them.
 ### Server Directory Push
 If you execute `cf push` from the server directory of your application
 (e.g. `/usr/servers/myServer`) then the buildpack will detect the server.xml
-in this directory and proceed to modify it.  
+in this directory and proceed to modify it.
 
 ## Invoking the Application
 
@@ -59,17 +59,16 @@ following URL:
 
 ## Server.xml Modifications
 
-The following modifications happen to your server.xml:
+When a packaged server or a Liberty server directory is pushed, the Liberty
+buildpack detects the server.xml file along with your application. The Liberty
+buildpack makes the following modifications to the server.xml file.
 
-* The buildpack ensures there is exactly one `httpEndpoint` element in your
-configuration.
-* The buildpack ensures that the `httpPort` attribute in this element
-points to a system variable called `${port}`. This will replace any existing
-settings for the `httpPort`.
+* The buildpack ensures there is exactly one `httpEndpoint` element in the file.
+* The buildpack ensures that the `httpPort` attribute in the `httpEndpoint` element
+points to a system variable called `${port}`.
 * The buildpack ensures that the `runtime-vars.xml` file is logically merged
-with your server.xml.  Specifically, the buildpack accomplishes this by
-including the element:
-`<include location="runtime-vars.xml" />` in your server.xml.
+with your server.xml.  Specifically, the buildpack appends the line
+`<include location="runtime-vars.xml" />` to your server.xml.
 
 ## Referencable Variables
 
@@ -78,11 +77,11 @@ referencable from a pushed server.xml.  Note that these variables *are*
 case-sensitive.
 
 * **${port}**: The http port that the Liberty server is listening on.
-* **${vcap_console_port}**: The port where the vcap console is running 
+* **${vcap_console_port}**: The port where the vcap console is running
 (usually the same as ${port}).
 * **${vcap_app_port}**: The port where the app server is listening
 (usually the same as ${port})..
-* **${vcap_console_ip}**: The IP address of the vcap console 
+* **${vcap_console_ip}**: The IP address of the vcap console
 (usually the IP address that the Liberty server is listening on).
 * **${application_name}**: The name of the application, as defined using
 the options in the cf push command.
@@ -125,7 +124,7 @@ The typical set of information is as follows:
 plan (e.g. 100).
 * **connection.name**: A unique identifier for the connection, taking the form
 of a UUID (e.g. d01af3a5fabeb4d45bb321fe114d652ee).
-* **connection.hostname**: The hostname of the server that is running the 
+* **connection.hostname**: The hostname of the server that is running the
 service (e.g. mysql-server.mydomain.com).
 * **connection.host**: The IP address of the server that is running the
 service (e.g. 9.37.193.2).
