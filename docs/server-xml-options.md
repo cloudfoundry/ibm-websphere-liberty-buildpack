@@ -72,23 +72,22 @@ with your server.xml.  Specifically, the buildpack appends the line
 
 ## Referencable Variables
 
-The following variables end up in runtime-vars.xml, and are therefore
-referencable from a pushed server.xml.  Note that these variables *are*
-case-sensitive.
+The following variables are defined in the runtime-vars.xml file, and referenced
+from a pushed server.xml file. All the variables are case-sensitive.
 
 * **${port}**: The http port that the Liberty server is listening on.
 * **${vcap_console_port}**: The port where the vcap console is running
 (usually the same as ${port}).
 * **${vcap_app_port}**: The port where the app server is listening
-(usually the same as ${port})..
+(usually the same as ${port}).
 * **${vcap_console_ip}**: The IP address of the vcap console
 (usually the IP address that the Liberty server is listening on).
-* **${application_name}**: The name of the application, as defined using
-the options in the cf push command.
-* **${application_version}**: The version of this instance of the application.
-Takes the form of a UUID, such as `b687ea75-49f0-456e-b69d-e36e8a854caa`, that
-will change with each successive push of the app that contain new code or
-changes to the application's artifacts.
+* **${application_name}**: The name of the application, as defined by
+using the options in the cf push command.
+* **${application_version}**: The version of this instance of the application,
+which takes the form of a UUID, such as b687ea75-49f0-456e-b69d-e36e8a854caa.
+This variable changes with each successive push of the application that contains
+new code or changes to the application artifacts.
 * **${host}**: The IP address of the DEA that is running the application
 (usually the same as ${vcap_console_ip}).
 * **${application_uris}**: A JSON-style array of the endpoints that can be
