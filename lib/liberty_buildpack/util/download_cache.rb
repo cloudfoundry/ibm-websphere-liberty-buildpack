@@ -118,7 +118,7 @@ module LibertyBuildpack::Util
         rich_uri = URI(uri)
 
         Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: use_ssl?(rich_uri)) do |http|
-          request = Net::HTTP::Get.new(rich_uri.request_uri)
+          request = Net::HTTP::Get.new(rich_uri.request_uri, { 'User-Agent' => 'liberty_buildpack' })
           http.request request do |response|
             write_response(filenames, response)
           end
