@@ -22,7 +22,8 @@ After you have set the license acceptance environment variables, use the followi
 cf push --buildpack https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
 ```
 
-For further details on the options available for deploying your applications see [options][].
+* For further details on the options available for deploying your applications see [options][].
+* For further details on tuning the applications JVM see [tuning options][].
 
 ## Forking the buildpack   
 If you wish to fork the buildpack and host your own binaries, then complete the following:
@@ -77,6 +78,7 @@ bundle install --gemfile Gemfile.rubymine-debug
 [Pull requests]: http://help.github.com/send-pull-requests
 [example]: docs/util-repositories.md#setting-up-your-web-server
 [options]: docs/server-xml-options.md
+[tuning options]: docs/tuning.md
 [Repositories]: docs/util-repositories.md
 [ibmjdk.yml]: config/ibmjdk.yml
 [liberty.yml]: config/liberty.yml
