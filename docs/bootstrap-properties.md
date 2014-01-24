@@ -1,17 +1,19 @@
 Bootstrap.properties configuration options
 ==========================================
 
-The bootstrap.properties file is normally used to configure the Liberty
-server, but some options are not available when using the buildpack
+The `bootstrap.properties` file is used to configure the Liberty
+server but, when running in Cloud Foundry, there are some special
+considerations as documented below.
 
 ## Ports
 
-The default http port is configured for you by the buildpack, as documented
-in [modifications][]. The default https port is currently not available.
+The default HTTP port is configured for you by the Buildpack, as
+documented in [modifications][]. The default HTTPS port is currently
+not available.
 
 ## Logging
 
-The console output is redirected to the stdout.log file and is available
-via `cf logs`
+The console output is redirected to the `stdout.log` file and is
+available via `cf logs`.
 
 [modifications]: server-xml-options.md#serverxml-modifications

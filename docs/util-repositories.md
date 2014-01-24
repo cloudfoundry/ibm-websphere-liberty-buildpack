@@ -1,17 +1,15 @@
 # Repositories
-Many components need to have access to multiple versions of binaries.  The buildpack provides a `Repository` abstraction to encapsulate version resolution and download URI creation.
+The Liberty Buildpack provides a `Repository` abstraction to encapsulate version resolution and download URI creation. By the `Repository` abstraction, components can access multiple versions of binaries.  
 
 ## Repository Structure
-The repository is an HTTP-accessible collection of files.  The repository root must contain an `index.yml` file that is a mapping of concrete versions to absolute URIs consisting of a series of lines of the form:
+The repository is an HTTP-accessible collection of files.  The repository root must contain an `index.yml` file that is a mapping of concrete versions to absolute URIs:
 ```yaml
 <version>: 
     uri: <URI of binary>
     license: <URI of license>
 ```
 
-The collection of files may be stored alongside the index file or elsewhere.
-
-An example filesystem might look like:
+You can store your files in the repository. An example layout might look like:
 
 ```
 /index.yml
@@ -21,7 +19,10 @@ An example filesystem might look like:
 
 ## Usage
 
-The main class used when dealing with a repository is [`LibertyBuildpack::Repository::ConfiguredItem`][].  It provides a single method that is used to resolve a specific version to the URI containing the binary as well as a URI containing the License.
+[`LibertyBuildpack::Repository::ConfiguredItem`][] is used when dealing with a repository.  It provides a single method to resolve:
+
+* A specific version to the URI containing the binary
+* A URI containing the License.
 
 ```ruby
 # Finds an instance of the file based on the configuration.
@@ -35,7 +36,7 @@ The main class used when dealing with a repository is [`LibertyBuildpack::Reposi
 def self.find_item(configuration, &version_validator)
 ```
 
-Usage of the class might look like the following:
+You can use the class as follows:
 
 ```ruby
 version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
@@ -50,15 +51,18 @@ end
 ```
 
 ## Version Syntax and Ordering
-Versions are composed of major, minor, micro, and optional qualifier parts (`<major>.<minor>.<micro>[_<qualifier>]`).  The major, minor, and micro parts must be numeric.  The qualifier part is composed of letters, digits, and hyphens.  The lexical ordering of the qualifier is:
+Versions are composed of the following four parts: major, minor, micro, and optional qualifier. The version format is: `<major>.<minor>.<micro>[_<qualifier>]`.  See the following table for the requirements of each part:
 
-1. hyphen
-2. lowercase letters
-3. uppercase letters
-4. digits
+| Part | Requirement
+| ---- | -----------
+| Major | numeric
+| Minor | numeric
+| Micro | numeric
+| Optional qualifier | letters, digits, and hyphens with lexical ordering: <ol><li>hyphen</li><li>lowercase letters</li><li>uppercase letters</li><li>digits</li></ol>
+
 
 ## Version Wildcards
-In addition to declaring a specific versions to use, you can also specify a bounded range of versions to use.  Appending the `+` symbol to a version prefix chooses the latest version that begins with the prefix.
+Besides declaring a specific version to use, you can also specify a bounded range of versions.  You can append the `+` symbol to a version prefix to use the latest version that begins with the prefix.
 
 | Example | Description
 | ------- | -----------
@@ -68,3 +72,25 @@ In addition to declaring a specific versions to use, you can also specify a boun
 
 
 [`LibertyBuildpack::Repository::ConfiguredItem`]: ../lib/liberty_buildpack/repository/configured_item.rb
+
+# Setting up your web server
+
+Prerequisites: Download the Liberty Profile runtime and IBM JRE for Java 7.0.
+
+1. Copy the wlp-developers-runtime-8.5.5.0.jar into the `<docroot>/buildpack/wlp` directory.
+2. Create `<docroot>/buildpack/wlp/index.yml` which contains  
+	
+	`# version: uri`  
+	`---`  
+	`8.5.5_0:` 
+	    `uri: http://myhost/buildpack/wlp/wlp-developers-runtime-8.5.5.0.jar` 
+	    `license: http://myhost/buildpack/wlp/wlp-developers-runtime-8.5.5.0-License.html` 
+	
+3. Copy the the ibm-java-jre-7.0-5.0-x86_64-archive.bin into the `<docroot>/buildpack/jre` directory.
+4. Create `<docroot>/buildpack/jre/index.yml` which contains  
+	
+	`# version: uri`  
+	`---`  
+	`1.7.0:` 
+	    `uri: http://myhost/buildpack/jre/ibm-java-jre-7.0-5.0-x86_64-archive.bin`
+	    `license: http://myhost/buildpack/jre/ibm-java-jre-7.0-5.0-x86_64-archive-License.html`  
