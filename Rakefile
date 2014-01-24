@@ -14,7 +14,12 @@
 # limitations under the License.
 
 require 'rspec/core/rake_task'
-RSpec::Core::RakeTask.new
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.rspec_opts = '--tty' if ENV.has_key? 'RAKE_FORCE_COLOR'
+end
+
+require 'ci/reporter/rake/rspec'
+task :spec => "ci:setup:rspec"
 
 require 'yard'
 YARD::Rake::YardocTask.new do |t|
@@ -22,7 +27,9 @@ YARD::Rake::YardocTask.new do |t|
 end
 
 require 'rubocop/rake_task'
-Rubocop::RakeTask.new
+Rubocop::RakeTask.new do |t|
+  Sickill::Rainbow.enabled = true if ENV.has_key? 'RAKE_FORCE_COLOR'
+end
 
 require 'open3'
 task :check_api_doc do
@@ -43,19 +50,33 @@ CLOBBER.include %w(doc pkg)
 task :default => [ :rubocop, :check_api_doc, :yard, :spec ]
 
 desc "Package buildpack together with admin cache"
-task :package, [:zipfile] do |t, args|
+task :package, [:zipfile, :hosts] do |t, args|
   source = File.dirname(__FILE__)
   basename = File.basename(source)
   if args.zipfile.nil?
     zipfile = File.expand_path(File.join('..', "#{basename}.zip"), source)
   else
-    zipfile = args.zipfile
+    zipfile = File.expand_path(args.zipfile)
     zipfile << ".zip" unless zipfile.end_with? (".zip")
   end
   puts "Using #{zipfile} as a buildpack zip output file"
   if File.exists? (zipfile)
     puts "The output file already exists. Change the output location."
     exit 1
+  end
+  if args.hosts == '*'
+    cache_hosts = nil
+    puts "Caching all resources"
+  elsif args.hosts == '-'
+    cache_hosts = []
+    puts "Caching disabled"
+  else
+    if args.hosts.nil?
+      cache_hosts = ['public.dhe.ibm.com']
+    else
+      cache_hosts = args.hosts.split
+    end
+    puts "Caching files hosted on #{cache_hosts.join(', ')}"
   end
   require 'tmpdir'
   Dir.mktmpdir do |root|
@@ -65,8 +86,13 @@ task :package, [:zipfile] do |t, args|
     FileUtils.cp_r(source, root)
     dest = File.join(root, basename)
     bc = BuildpackCache.new(File.join(dest, 'admin_cache'))
-    configs = bc.collect_configs
+    # Collect all remote content using all config files
+    configs = bc.collect_configs nil, cache_hosts 
     bc.download_cache(configs)
+    # Fix file permissions
+    system("find #{dest} -type f -exec chmod a+r {} \\;")
+    system("find #{dest} -type d -exec chmod a+rx {} \\;")
+    system("chmod a+rx #{dest}/bin/*")
     system("cd #{dest} && zip -r #{zipfile} .")
   end
 end

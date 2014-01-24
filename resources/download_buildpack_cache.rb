@@ -13,7 +13,7 @@ require 'liberty_buildpack/util/tokenized_version'
 
 # Utility class to download remote resources into local cache directory
 class BuildpackCache
-
+  COMP_INDEX_PATH = '/component_index.yml'.freeze
   INDEX_PATH = '/index.yml'.freeze
   REPOSITORY_ROOT = 'repository_root'.freeze
   VERSION = 'version'.freeze
@@ -43,50 +43,70 @@ class BuildpackCache
     configs.each do |config|
       # Download index.yml first.
       index_uri = index_path(config)
-      download(index_uri)
+      index_file = File.join(@cache_dir, filename(index_uri))
+      download(index_uri, index_file)
       # Parse index.yml to see what files it references
       begin
-        index = YAML.load_file(File.join(@cache_dir, filename(index_uri)))
+        index = YAML.load_file(index_file)
       rescue => e
         abort "ERROR: Failed loading #{index_uri}: #{e}"
       end
       candidate = LibertyBuildpack::Util::TokenizedVersion.new(config[VERSION])
       version = LibertyBuildpack::Repository::VersionResolver.resolve(candidate, index.keys)
-      version_info = index[version.to_s]
-      if version_info.is_a? Hash
-        file_uri = version_info[URI_KEY]
-        license_uri = index[version.to_s][LICENSE_KEY]
-        download(license_uri) if license_uri
-      else
-        file_uri = version_info
-      end
-      download(file_uri)
+      file_uri = download_license(index[version.to_s])
+      file = File.join(@cache_dir, filename(file_uri))
+      download(file_uri, file)
+      # If file is a component_index.yml parse and download files it references as well
+      download_components(file_uri, file) if file_uri.end_with? COMP_INDEX_PATH
     end
   end
 
-  # Obtains the path for a repository
-  #
-  # @param [Hash] config the configuration for the repository
-  # @return [String] the path to the index.yml
   def index_path(config)
     uri = config[REPOSITORY_ROOT]
     uri = uri[0..-2] while uri.end_with? '/'
     "#{uri}#{INDEX_PATH}"
   end
 
-  # Downloads remote location into a file in the cache directory
+  def download_license(file_uri)
+    if file_uri.is_a? Hash
+      license_uri = file_uri[LICENSE_KEY]
+      license_file = File.join(@cache_dir, filename(license_uri))
+      download(license_uri, license_file)
+      file_uri = file_uri[URI_KEY]
+    end
+    file_uri
+  end
+
+  # Downloads remote content referenced in component_index.yml
+  def download_components(file_uri, file)
+    begin
+      comp_index = YAML.load_file(file)
+    rescue => e
+      abort "ERROR: Failed loading #{file_uri}: #{e}"
+    end
+    comp_index.values.each do |comp_uri|
+      comp_file = File.join(@cache_dir, filename(comp_uri))
+      download(comp_uri, comp_file)
+    end
+  end
+
+  # Downloads remote location into the specified target file
   #
   # @param [String] uri location of the remote resource
-  def download(uri)
-    target = File.join(@cache_dir, filename(uri))
+  # @param [String] target filename to copy remote content to
+  def download(uri, target)
     @logger.debug "Downloading file to #{target}"
     rich_uri = URI(uri)
-    Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: rich_uri.scheme == 'https') do |http|
-      request = Net::HTTP::Get.new(rich_uri.request_uri)
-      http.request request do |response|
-        File.open(target, File::CREAT | File::WRONLY) do |file|
-          response.read_body do |chunk|
-            file.write(chunk)
+    if File.exists?(uri)
+      FileUtils.cp uri, target
+    else
+      Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: rich_uri.scheme == 'https') do |http|
+        request = Net::HTTP::Get.new(rich_uri.request_uri)
+        http.request request do |response|
+          File.open(target, File::CREAT | File::WRONLY) do |file|
+            response.read_body do |chunk|
+              file.write(chunk)
+            end
           end
         end
       end
@@ -107,8 +127,8 @@ class BuildpackCache
   # of file sets to be included in the cache.
   #
   # @param [Array<String>] config_files list of config files to check. By default it contains all yml files in buildpack config directory.
-  # @param [Array<String>] cached_hosts list of host names which content should be cached
-  def collect_configs(config_files = nil, cached_hosts = ['public.dhe.ibm.com'])
+  # @param [Array<String>] cached_hosts list of host names which content should be cached. Collect all remote content by default.
+  def collect_configs(config_files = nil, cached_hosts = nil)
     config_files = Dir[File.expand_path(File.join('..', '..', 'config', '*.yml'), __FILE__)] if config_files.nil?
     configs = []
     config_files.each do |file|
@@ -118,7 +138,7 @@ class BuildpackCache
       rescue => e
         abort "ERROR: Failed loading config #{file}: #{e}"
       end
-      if !config.nil? && config.has_key?(REPOSITORY_ROOT) && config.has_key?(VERSION) && cached_hosts.include?(URI(config[REPOSITORY_ROOT]).host)
+      if !config.nil? && config.has_key?(REPOSITORY_ROOT) && config.has_key?(VERSION) && (File.exists?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(config[REPOSITORY_ROOT]).host))
         configs.push(config)
       end
     end
