@@ -1,5 +1,5 @@
 # JREs
-To add a JRE, the class file must be located in [`lib/liberty_buildpack/jre`][] and the class name added to [`config/components.yml`][].  The class must have the following methods:
+To add a JRE, you must add the class file to the [`lib/liberty_buildpack/jre`][] folder and add the class name added to [`config/components.yml`][] file.  In the class file, you must have the following methods:
 
 ```ruby
 # An initializer for the instance.

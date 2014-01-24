@@ -1,5 +1,5 @@
 # Caches
-Many components will want to cache large files that are downloaded for applications.  The buildpack provides a cache abstraction to encapsulate this caching behavior.  The cache abstraction is comprised of three cache types each with the same signature.
+The Libety Buildpack provides a cache abstraction to encapsulate the caching of large files by components.  The cache abstraction is comprised of three cache types each with the same signature.
 
 ```ruby
 # Retrieves an item from the cache.  Retrieval of the item uses the following algorithm:
@@ -30,7 +30,7 @@ def get(uri)
 def evict(uri)
 ```
 
-Usage of a cache might look like the following:
+You can use a cache as follows:
 
 ```ruby
 LibertyBuildpack::Util::DownloadCache.new().get(uri) do |file|
@@ -39,7 +39,7 @@ end
 ```
 
 ## `LibertyBuildpack::Util::DownloadCache`
-The [`DownloadCache`][] is the most generic of the three caches.  It allows you to create a cache that persists files any that write access is available.  The constructor signature looks the following:
+The [`DownloadCache`][] is the most generic of the three caches.  You can create a cache that persists files anywhere that write access is available.  The constructor signature looks as follows:
 
 ```ruby
 # Creates an instance of the cache that is backed by the filesystem rooted at +cache_root+
