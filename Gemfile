@@ -10,5 +10,6 @@ end
 group :development, :test do
   gem 'webmock'
   gem 'rspec'
-  gem 'simplecov'
+  gem 'simplecov-rcov'
+  gem 'ci_reporter'
 end
