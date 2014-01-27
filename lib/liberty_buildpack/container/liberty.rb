@@ -94,7 +94,6 @@ module LibertyBuildpack::Container
         raise
       end
 
-      jvm_options
       download_liberty
       update_server_xml
       link_application
@@ -112,6 +111,7 @@ module LibertyBuildpack::Container
       java_home_string = "JAVA_HOME=\"$PWD/#{@java_home}\""
       start_script_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'bin', 'server'))
       start_script_string << ContainerUtils.space('run')
+      jvm_options
       server_name_string = ContainerUtils.space(server_name)
       "#{create_vars_string}#{java_home_string}#{start_script_string}#{server_name_string}"
     end
@@ -119,14 +119,14 @@ module LibertyBuildpack::Container
     private
 
     def jvm_options
-      jvm_options_path = File.join(@app_dir, 'jvm.options')
-      if File.exist?(jvm_options_path)
-        puts 'Using jvm.options provided.'
-      else
-        jvm_options_file = File.new(jvm_options_path, 'w')
+      jvm_options_src = File.join(@app_dir, 'jvm.options')
+      unless File.exist?(jvm_options_src)
+        jvm_options_file = File.new(jvm_options_src, 'w')
         jvm_options_file.puts(@java_opts)
         jvm_options_file.close
       end
+      jvm_options_dest = Liberty.server_xml_directory(@app_dir)
+      system "mv #{jvm_options_src} #{File.expand_path(jvm_options_dest, File.dirname(__FILE__))}" unless jvm_options_dest.nil?
     end
 
     def minify?
@@ -389,6 +389,15 @@ module LibertyBuildpack::Container
 
     def self.ear?(app)
       app.include? '.ear'
+    end
+
+    def self.server_xml_directory(app_dir)
+      server_xml_dest = File.join(app_dir, LIBERTY_HOME, USR_PATH, '**/server.xml')
+      candidates = Dir.glob(server_xml_dest)
+      if candidates.size > 1
+        raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}"
+      end
+      candidates.any? ? File.dirname(candidates[0]) : nil
     end
 
     def self.server_xml(app_dir)

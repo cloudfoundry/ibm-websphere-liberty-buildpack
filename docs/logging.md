@@ -1,6 +1,6 @@
 # Logging
 
-The Java buildpack logs to both
+The Buildpack logs to both
 `<app dir>/.buildpack-diagnostics/buildpack.log` and standard error.
 Logs are filtered according to the configured log level.
 
@@ -10,32 +10,32 @@ level of `DEBUG` to prevent users from seeing stack traces by default.
 
 ## Sensitive Information in Logs
 
-The Java buildpack logs sensitive information, such as environment variables which may contain security
+The Buildpack logs sensitive information, such as environment variables which may contain security
 credentials.
 
-_You should be careful not to expose this information
-inadvertently_, for example by posting standard error stream contents or the contents of
-`<app dir>/.buildpack-diagnostics/buildpack.log` to a public discussion list.
+Note: Be careful not to expose the sensitive information, for example
+by posting standard error stream contents or the contents of `<app
+dir>/.buildpack-diagnostics/buildpack.log` to a public discussion
+list.
 
 ## Logger Usage
 The `LoggerFactory` class in the `LibertyBuildpack::Diagnostics` module
 manages a single instance of a subclass of the standard Ruby `Logger`.
-In normal usage, the `Buildpack` class creates a logger which is shared
+The `Buildpack` class creates a logger which is shared
 by all other classes and which is retrieved from the `LoggerFactory` as necessary:
 
     logger = LoggerFactory.get_logger
 
-This logger is used like the standard Ruby logger and supports
+This logger is used in the same ways as the standard Ruby logger and supports
 both parameter and block forms:
 
     logger.info('success')
     logger.debug { "#{costly_method}" }
 
 ## Configuration
-For general information on configuring the buildpack, refer to [Configuration and Extension][].
+For general information on configuring the Buildpack, refer to [Configuration and Extension][].
 
-The log level is configured by setting an environment variable
-`$JBP_LOG_LEVEL` to one of:
+You can set the `$JBP_LOG_LEVEL` environment variable to configure the log level. There are five logs levels:
 
     DEBUG | INFO | WARN | ERROR | FATAL
 
@@ -46,10 +46,9 @@ For example:
 If `JBP_LOG_LEVEL` is not set, the default log level is read from the configuration in
 `config/logging.yml`.
 
-The logging levels in `JBP_LOG_LEVEL` and `config/logging.yml` may be
-specified using any mixture of upper and lower case.
+You can use any mixture of upper and lower case letters to specify the logging levels in the `JBP_LOG_LEVEL` environment variable and the `config/logging.yml` file.
 
-Ruby's verbose and debug modes override the default log level to `DEBUG` unless
-`JBP_LOG_LEVEL` has been set, in which case this takes priority.
+If you do not set the `JBP_LOG_LEVEL` environment variable, the Ruby verbose and debug modes override the default log level and change it to `DEBUG`.
+
 
 [Configuration and Extension]: ../README.md#Configuration-and-Extension

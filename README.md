@@ -22,7 +22,8 @@ After you have set the license acceptance environment variables, use the followi
 cf push --buildpack https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
 ```
 
-For further details on the options available for deploying your applications see [options][].
+* For further details on the options available for deploying your applications see [options][].
+* For further details on tuning the applications JVM see [tuning options][].
 
 ## Forking the buildpack   
 If you wish to fork the buildpack and host your own binaries, then complete the following:
@@ -75,8 +76,9 @@ bundle install --gemfile Gemfile.rubymine-debug
 [install additional gems]: http://stackoverflow.com/questions/11732715/how-do-i-install-ruby-debug-base19x-on-mountain-lion-for-intellij
 [pull request]: https://help.github.com/articles/using-pull-requests
 [Pull requests]: http://help.github.com/send-pull-requests
-[example]: docs/installation.md#setting-up-your-web-server
+[example]: docs/util-repositories.md#setting-up-your-web-server
 [options]: docs/server-xml-options.md
+[tuning options]: docs/tuning.md
 [Repositories]: docs/util-repositories.md
 [ibmjdk.yml]: config/ibmjdk.yml
 [liberty.yml]: config/liberty.yml

@@ -1,12 +1,12 @@
 # Security
 
 In addition to security considerations associated with JREs, containers, and frameworks, the
-following points pertain to the security of the buildpack itself.
+following points pertain to the security of the Buildpack itself.
 
 ## Buildpack Forks
 
-If you fork the Liberty buildpack, it is important to keep the fork up to date with the
-original repository. This will ensure that your fork runs with any security fixes that may be necessary.
+If you fork the Liberty Buildpack, keep the fork up to date with the
+original repository to ensure that your fork runs with all the necessary security fixes.
 
 ## Security and Logs
 
