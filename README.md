@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack.png)](https://api.travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack)
+
 # IBM WebSphere Application Server Liberty Buildpack
 
 The `liberty-buildpack` is a [Cloud Foundry][] buildpack for running applications on IBM's WebSphere Application Server Liberty Profile.  It is designed to run most "packaged" servers.
