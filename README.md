@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack.png)](https://api.travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack)
+[![Build Status](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack.png)](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack)
 
 # IBM WebSphere Application Server Liberty Buildpack
 
