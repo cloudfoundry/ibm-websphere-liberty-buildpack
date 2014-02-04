@@ -105,14 +105,18 @@ module LibertyBuildpack::Container
     private
 
     def jvm_options
-      jvm_options_src = File.join(@app_dir, 'jvm.options')
-      unless File.exist?(jvm_options_src)
-        jvm_options_file = File.new(jvm_options_src, 'w')
-        jvm_options_file.puts(@java_opts)
-        jvm_options_file.close
+      return if @java_opts.nil?
+      jvm_options_src = Liberty.find_jvm_options(@app_dir)
+      if File.exist?(jvm_options_src)
+        File.open(jvm_options_src, 'rb') { |f| @java_opts << f.read }
       end
-      jvm_options_dest = Liberty.server_xml_directory(@app_dir)
-      system "mv #{jvm_options_src} #{File.expand_path(jvm_options_dest, File.dirname(__FILE__))}" unless jvm_options_dest.nil?
+      jvm_options_file = File.new(jvm_options_src, 'w')
+      jvm_options_file.puts(@java_opts)
+      jvm_options_file.close
+      if File.exist?(File.join(@app_dir, JVM_OPTIONS)) && File.exist?(default_server_path)
+        default_server_pathname = Pathname.new(default_server_path)
+        FileUtils.ln_sf(Pathname.new(File.join(@app_dir, 'jvm.options')).relative_path_from(Pathname.new(default_server_pathname)), default_server_pathname)
+      end
     end
 
     def minify?
@@ -174,6 +178,8 @@ module LibertyBuildpack::Container
     SERVER_XML_GLOB = 'wlp/usr/servers/*/server.xml'.freeze
 
     SERVER_XML = 'server.xml'.freeze
+
+    JVM_OPTIONS = 'jvm.options'.freeze
 
     WEB_INF = 'WEB-INF'.freeze
 
@@ -350,15 +356,6 @@ module LibertyBuildpack::Container
       candidates.any? ? candidates[0] : nil
     end
 
-    def self.server_xml_directory(app_dir)
-      server_xml_dest = File.join(app_dir, LIBERTY_HOME, USR_PATH, '**/server.xml')
-      candidates = Dir.glob(server_xml_dest)
-      if candidates.size > 1
-        raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}"
-      end
-      candidates.any? ? File.dirname(candidates[0]) : nil
-    end
-
     def self.server_xml(app_dir)
       deep_candidates = Dir[File.join(app_dir, SERVER_XML_GLOB)]
       shallow_candidates = Dir[File.join(app_dir, SERVER_XML)]
@@ -367,6 +364,11 @@ module LibertyBuildpack::Container
         raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}"
       end
       candidates.any? ? candidates[0] : nil
+    end
+
+    def self.find_jvm_options(app_dir)
+      server_xml_dir = Liberty.server_xml(app_dir)
+      server_xml_dir.nil? ? File.join(app_dir, JVM_OPTIONS) : File.join(File.dirname(server_xml_dir), JVM_OPTIONS)
     end
 
     def self.expand_apps(apps)
