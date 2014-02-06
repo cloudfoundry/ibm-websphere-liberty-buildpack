@@ -546,7 +546,7 @@ module LibertyBuildpack::Container
           lib_directory: library_directory,
           configuration: {},
           environment: {},
-          jvm_opts: %w(test-opt-2 test-opt-1),
+          java_opts: %w(test-opt-2 test-opt-1),
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).release
 
@@ -564,7 +564,7 @@ module LibertyBuildpack::Container
             file.write('your text')
           end
           File.open(File.join(root, 'jvm.options'), 'w') do |file|
-            file.write('provided-opt-1')
+            file.write('provided-opt-2')
           end
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
@@ -580,13 +580,13 @@ module LibertyBuildpack::Container
           lib_directory: library_directory,
           configuration: {},
           environment: {},
-          jvm_opts: '',
+          java_opts: 'provided-opt-1',
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).release
 
           jvm_options_file = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')
           expect(File.exists?(jvm_options_file)).to be_true
-          expect(File.readlines(jvm_options_file).grep(/provided-opt-1/).size > 0)
+          expect(File.readlines(jvm_options_file).grep(/provided-opt-2/).size > 0)
         end
       end
 
