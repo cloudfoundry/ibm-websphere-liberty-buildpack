@@ -45,6 +45,7 @@ module LibertyBuildpack::Jre
     # @option context [Array<String>] :java_opts an array that Java options can be added to
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context)
+      @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
@@ -72,7 +73,6 @@ module LibertyBuildpack::Jre
       end
 
       download_start_time = Time.now
-
       print "-----> Downloading IBM #{@version} JRE from #{@uri} "
 
       LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
@@ -109,7 +109,6 @@ module LibertyBuildpack::Jre
 
       if File.basename(file.path).end_with?('.bin.cached', '.bin')
         cache_dir = IBMJdk.cache_dir(file)
-
         response_file = File.new(File.join(cache_dir, 'response.properties'), 'w')
         response_file.puts('INSTALLER_UI=silent')
         response_file.puts("USER_INSTALL_DIR=#{java_home}")

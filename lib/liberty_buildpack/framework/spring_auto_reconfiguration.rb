@@ -16,6 +16,7 @@
 
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/framework'
+require 'liberty_buildpack/framework/framework_utils'
 require 'liberty_buildpack/framework/spring_auto_reconfiguration/web_xml_modifier'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
@@ -46,7 +47,7 @@ module LibertyBuildpack::Framework
     # @return [String] returns +spring-auto-reconfiguration-<version>+ if the application is a candidate for
     #                  auto-reconfiguration otherwise returns +nil+
     def detect
-      @auto_reconfiguration_version, @auto_reconfiguration_uri = SpringAutoReconfiguration.find_auto_reconfiguration(@app_dir, @configuration)
+      @auto_reconfiguration_version, @auto_reconfiguration_uri = SpringAutoReconfiguration.find_auto_reconfiguration(@app_dir, @configuration, @lib_directory)
       @auto_reconfiguration_version ? id(@auto_reconfiguration_version) : nil
     end
 
@@ -56,7 +57,8 @@ module LibertyBuildpack::Framework
     def compile
       detect if @auto_reconfiguration_uri.nil?
       LibertyBuildpack::Util.download(@auto_reconfiguration_version, @auto_reconfiguration_uri, 'Auto Reconfiguration', jar_name(@auto_reconfiguration_version), @lib_directory)
-      modify_web_xml(@app_dir)
+      FrameworkUtils.link_libs(SpringAutoReconfiguration.spring_apps(@app_dir), @lib_directory)
+      SpringAutoReconfiguration.spring_apps(@app_dir).each { |app| modify_web_xml(app) }
     end
 
     # Does nothing
@@ -68,17 +70,17 @@ module LibertyBuildpack::Framework
     private
 
       SPRING_JAR_PATTERN = 'spring-core*.jar'
+      SPRING_APPS_PATTERN = "#{@app_dir}/**/#{SPRING_JAR_PATTERN}"
 
       WEB_XML = File.join 'WEB-INF', 'web.xml'
 
-      def self.find_auto_reconfiguration(app_dir, configuration)
-        if spring_application? app_dir
+      def self.find_auto_reconfiguration(app_dir, configuration, lib_dir)
+        if spring_application?(app_dir, lib_dir)
           version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
         else
           version = nil
           uri = nil
         end
-
         return version, uri # rubocop:disable RedundantReturn
       end
 
@@ -106,10 +108,20 @@ module LibertyBuildpack::Framework
         end
       end
 
-      def self.spring_application?(app_dir)
-        Dir["#{app_dir}/**/#{SPRING_JAR_PATTERN}"].any?
+      def self.spring_application?(app_dir, lib_dir)
+        SpringAutoReconfiguration.spring_apps(app_dir) != [] || FrameworkUtils.application_within_archive?(app_dir, 'spring-core')
       end
 
+      def self.spring_apps(app_dir)
+        pattern = "#{app_dir}/**/#{SPRING_JAR_PATTERN}"
+        (shared_libs = FrameworkUtils.find_shared_libs(app_dir, pattern)) unless Dir.glob("#{app_dir}/**/wlp").each { |file| File.directory? file }.empty?
+        if !shared_libs.nil? && !shared_libs.empty?
+          s_apps = FrameworkUtils.find(app_dir)
+        else
+          s_apps = FrameworkUtils.find(app_dir, pattern)
+        end
+        s_apps
+      end
   end
 
 end

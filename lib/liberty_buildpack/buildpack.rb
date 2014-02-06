@@ -22,6 +22,7 @@ require 'liberty_buildpack/diagnostics/common'
 require 'pathname'
 require 'time'
 require 'yaml'
+require 'rubygems'
 
 module LibertyBuildpack
 
@@ -57,14 +58,10 @@ module LibertyBuildpack
     def detect
       jre_detections = Buildpack.component_detections @jres
       raise "Application can be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
-
       framework_detections = Buildpack.component_detections @frameworks
-
       container_detections = Buildpack.component_detections @containers
       raise "Application can be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
-
       tags = container_detections.empty? ? [] : jre_detections.concat(framework_detections).concat(container_detections).flatten.compact
-      @logger.debug { "Detection Tags: #{tags}" }
       tags
     end
 
@@ -74,7 +71,6 @@ module LibertyBuildpack
     def compile
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
-
       jre.compile
       frameworks.each { |framework| framework.compile }
       the_container.compile
@@ -108,6 +104,7 @@ module LibertyBuildpack
     private
 
     COMPONENTS_CONFIG = '../../config/components.yml'.freeze
+
     LICENSE_CONFIG = '../../config/licenses.yml'.freeze
 
     LIB_DIRECTORY = '.lib'

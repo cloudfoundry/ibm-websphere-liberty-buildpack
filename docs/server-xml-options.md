@@ -3,9 +3,9 @@ Buildpack-enabled Options for Server.xml
 
 Liberty's server behavior is controlled through a file with the name `server.xml`.
 
-## WAR Files
-If you are pushing a WAR or "exploded" (i.e. unzipped) WAR file, then a 
-server.xml will be generated for you with the correct parameters for use 
+## WAR and EAR Files
+If you are pushing a WAR, EAR or "exploded" (i.e. unzipped) file of either type, then a
+server.xml will be generated for you with the correct parameters for use
 with Cloud Foundry.  That server.xml will look something like this:
 
 ```
@@ -21,12 +21,12 @@ with Cloud Foundry.  That server.xml will look something like this:
     <httpEndpoint id="defaultHttpEndpoint"
                   host="*"
                   httpPort="${port}"
-                   />    
+                   />
 </server>
 ```
 
 **NOTE**: This server.xml will also contain a reference to the application
-you pushed, with context root "/".  That is to say, if you pushed an app
+you pushed, with the type of the application (war/ear) and context root "/".  That is to say, if you pushed an app
 using the command `cf push foo`, and your domain is `mydomain.com`, your
 application will be accessible from `http://foo.mydomain.com/`.
 
@@ -37,8 +37,8 @@ is assumed.
 ## Server Configurations (including a server.xml)
 
 ### Liberty Directory Push
-Another way of deploying your application is to use the 
-`./bin/server package myServer --include=usr` command from your Liberty 
+Another way of deploying your application is to use the
+`./bin/server package myServer --include=usr` command from your Liberty
 installation in order to package the `usr` directory of your server.
 If you run the `cf push --path="myServer.zip"` command from the directory
 containing your packaged server (e.g. `/usr/servers/myServer`) then that
@@ -49,7 +49,7 @@ the server.xml contained within the package and proceed to modify it.
 If you execute `cf push` from the server directory of your application
 (e.g. `/usr/servers/myServer`) then that will push the contents of that
 directory to the cloud. The buildpack will detect the server.xml
-in this directory and proceed to modify it.  
+in this directory and proceed to modify it.
 
 ## Invoking the Application
 
@@ -60,37 +60,35 @@ following URL:
 
 ## Server.xml Modifications
 
-The following modifications happen to your server.xml:
+When a packaged server or a Liberty server directory is pushed, the Liberty
+buildpack detects the server.xml file along with your application. The Liberty
+buildpack makes the following modifications to the server.xml file.
 
-* The buildpack ensures there is exactly one `httpEndpoint` element in your
-configuration.
-* The buildpack ensures that the `httpPort` attribute in this element
-points to a system variable called `${port}`. This will replace any existing
-settings for the `httpPort`.
-* The buildpack ensures that the `runtime-vars.xml` file is logically merged
-with your server.xml.  Specifically, the buildpack accomplishes this by
-including the element:
-`<include location="runtime-vars.xml" />` in your server.xml.
+* The buildpack ensures that there is exactly one `httpEndpoint` element in the file.
+* The buildpack ensures that the `httpPort` attribute in the `httpEndpoint` element
+points to a system variable that is called `${port}`.
+* The buildpack ensures that a `runtime-vars.xml` file is logically merged
+with your server.xml file.  Specifically, the buildpack appends the line
+`<include location="runtime-vars.xml" />` to your server.xml file.
 
-## Referencable Variables
+## Referenceable Variables
 
-The following variables end up in runtime-vars.xml, and are therefore
-referencable from a pushed server.xml.  Note that these variables *are*
-case-sensitive.
+The following variables are defined in the runtime-vars.xml file, and referenced
+from a pushed server.xml file. All the variables are case-sensitive.
 
 * **${port}**: The http port that the Liberty server is listening on.
-* **${vcap_console_port}**: The port where the vcap console is running 
+* **${vcap_console_port}**: The port where the vcap console is running
 (usually the same as ${port}).
 * **${vcap_app_port}**: The port where the app server is listening
-(usually the same as ${port})..
-* **${vcap_console_ip}**: The IP address of the vcap console 
+(usually the same as ${port}).
+* **${vcap_console_ip}**: The IP address of the vcap console
 (usually the IP address that the Liberty server is listening on).
-* **${application_name}**: The name of the application, as defined using
-the options in the cf push command.
-* **${application_version}**: The version of this instance of the application.
-Takes the form of a UUID, such as `b687ea75-49f0-456e-b69d-e36e8a854caa`, that
-will change with each successive push of the app that contain new code or
-changes to the application's artifacts.
+* **${application_name}**: The name of the application, as defined by
+using the options in the cf push command.
+* **${application_version}**: The version of this instance of the application,
+which takes the form of a UUID, such as b687ea75-49f0-456e-b69d-e36e8a854caa.
+This variable changes with each successive push of the application that contains
+new code or changes to the application artifacts.
 * **${host}**: The IP address of the DEA that is running the application
 (usually the same as ${vcap_console_ip}).
 * **${application_uris}**: A JSON-style array of the endpoints that can be
@@ -100,49 +98,45 @@ form similar to `2013-08-22 10:10:18 -0400`.
 
 ## Accessing the Information of Bound Services
 
-The service variables accessible from within serer.xml follow [the specifications defined by Cloud Foundry](http://docs.cloudfoundry.com/docs/using/services/spring-service-bindings.html#properties)
+The service variables that are accessible from a server.xml file follow [the specification that is defined by Cloud Foundry](http://docs.cloudfoundry.com/docs/using/services/spring-service-bindings.html#properties).
+For more information about the Cloud Foundry specification, see Property placeholders on the Cloud Foundry document.
 
-When you use bind a Cloud Foundry service to your application, information
-about that service, including connection credentials, gets included in the
+When you want to bind a Cloud Foundry service to your application, information
+about the service, such as connection credentials, is included in the
 environment variables that Cloud Foundry sends to the application.  These
-variables are then accessible from the Liberty server configuration. These
-variables take the form:
+variables are then accessible from the Liberty server configuration file. These
+variables can be in one of the following forms:
 
-`cloud.services.<service-name>.<property>`
+* `cloud.services.<service-name>.<property>`, which describes the information such
+as the name, type, and plan of the service.
 
-**OR**
-
-`cloud.services.<service-name>.connection.<property>`
-
-Information describing the name, type, and plan of the service is accessible
-through the first form.  Information describing the connection information for
-the service take the second form.
+* `cloud.services.<service-name>.connection.<property>`, which describes the connection
+information for the service.
 
 The typical set of information is as follows:
 
-* **name**: The name of the service (e.g. mysql-e3abd).
-* **label**: The type of service created (e.g. mysql-5.5).
+* **name**: The name of the service. For example, mysql-e3abd.
+* **label**: The type of the created service. For example mysql-5.5.
 * **plan**: The service plan, as inidicated by the unique identifier for that
-plan (e.g. 100).
-* **connection.name**: A unique identifier for the connection, taking the form
-of a UUID (e.g. d01af3a5fabeb4d45bb321fe114d652ee).
-* **connection.hostname**: The hostname of the server that is running the 
-service (e.g. mysql-server.mydomain.com).
+plan. For example, 100.
+* **connection.name**: A unique identifier for the connection, which takes the form
+of a UUID. For example, d01af3a5fabeb4d45bb321fe114d652ee.
+* **connection.hostname**: The hostname of the server that is running the
+service. For example, mysql-server.mydomain.com.
 * **connection.host**: The IP address of the server that is running the
-service (e.g. 9.37.193.2).
+service. For example, 9.37.193.2.
 * **connection.port**: The port on which the service is listening for
-incomming connections (e.g. 3306, 3307).
-* **connection.user**: The username used to authenticate this application
-to this service.  The username is auto-generated by Cloud Foundry (e.g.
-unHwANpjAG5wT).
-* **connection.username**: An alias for **connection.user*.
-* **connection.password**: The password used to authenticate this application
-to this service.  The password is auto-generated by Cloud Foundry (e.g.
-pvyCY0YzX9pu5).
+incomming connections. For example, 3306, 3307.
+* **connection.user**: The username that is used to authenticate this application
+to the service.  The username is auto-generated by Cloud Foundry. For example,
+unHwANpjAG5wT.
+* **connection.username**: An alias for connection.user.
+* **connection.password**: The password that is used to authenticate this application
+to the service.  The password is auto-generated by Cloud Foundry. For example,
+pvyCY0YzX9pu5.
 
-So, for example, if I created a MySQL service named `mysql-321` then I could
-access the username I should use to connect to this service with the variable
-name `${cloud.services.mysql-321.connection.user}`.
+For example, if you create a MySQL service: mysql-321, you can connect to this service 
+with the variable name `${cloud.services.mysql-321.connection.user}`.
 
 ## Example Server.xml for Using Services
 

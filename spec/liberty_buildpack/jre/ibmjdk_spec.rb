@@ -21,7 +21,6 @@ require 'liberty_buildpack/jre/ibmjdk'
 module LibertyBuildpack::Jre
 
   describe IBMJdk do
-
     DETAILS_PRE_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.7.0'), 'test-uri', 'spec/fixtures/license.html']
     DETAILS_POST_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.8.0'), 'test-uri', 'spec/fixtures/license.html']
 
@@ -31,6 +30,7 @@ module LibertyBuildpack::Jre
     before do
       $stdout = StringIO.new
       $stderr = StringIO.new
+
       FileUtils.rm_rf('/tmp/jre_temp')
       Dir.mkdir('/tmp/jre_temp')
     end

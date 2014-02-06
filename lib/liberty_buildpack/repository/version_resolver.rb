@@ -39,7 +39,6 @@ module LibertyBuildpack::Repository
       version = tokenized_versions
       .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
         .max { |a, b| a <=> b }
-
       raise "No version resolvable for '#{candidate_version}' in #{versions.join(', ')}" if version.nil?
       version
     end

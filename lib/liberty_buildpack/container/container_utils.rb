@@ -47,16 +47,13 @@ module LibertyBuildpack::Container
     # @return [Array<String>] the relative paths of the JARs located in the additional libraries directory
     def self.libs(app_dir, lib_directory)
       libs = []
-
       if lib_directory
         root_directory = Pathname.new(app_dir)
-
         libs = Pathname.new(lib_directory).children
         .select { |file| file.extname == '.jar' }
           .map { |file| file.relative_path_from(root_directory) }
             .sort
       end
-
       libs
     end
 
