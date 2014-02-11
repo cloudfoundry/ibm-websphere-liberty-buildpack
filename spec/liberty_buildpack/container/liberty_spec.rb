@@ -108,6 +108,21 @@ module LibertyBuildpack::Container
         expect(detected).to include('liberty-8.5.5')
       end
 
+      it 'should throw an error when a server including binaries was pushed' do
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        .and_return(LIBERTY_VERSION)
+
+        expect do
+          Liberty.new(
+          app_dir: 'spec/fixtures/failed-package',
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: {}
+          ).detect
+        end.to raise_error(/Pushed\ a\ wrongly\ packaged\ server\ please\ use\ 'server\ package --include=user'\ to\ package\ a\ server/)
+      end
+
       it 'should throw an error when there are multiple server.xmls' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
