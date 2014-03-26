@@ -68,23 +68,6 @@ module LibertyBuildpack::Framework
       libs
     end
 
-    # Checks if the directory contains an archive that satisfies the pattern
-    # @param [String] app_dir the directory containing archives
-    # @param [String] pattern the pattern that should be matched
-    # @return [boolean]
-    def self.application_within_archive?(app_dir, pattern)
-      list = ''
-      archives = Dir.glob(File.join(app_dir, '**', '*.jar'))
-      archives.each do |file|
-        if File.file? file
-          IO.popen("unzip -l -qq #{file}") do |io|
-            io.each_line { |line| list << "#{line}" }
-          end
-        end
-      end
-      list.include? pattern
-    end
-
     # creates a lib directory in the appropriate location for the application
     # @param [String] start_dir the root directory of the application
     def self.create_lib_dir(start_dir)
