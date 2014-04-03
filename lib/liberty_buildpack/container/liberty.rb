@@ -263,11 +263,7 @@ module LibertyBuildpack::Container
         candidates = Dir[File.join(@app_dir, 'wlp', 'usr', 'servers', '*')]
         raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}" if candidates.size != 1
         File.basename(candidates[0])
-      elsif Liberty.server_directory @app_dir
-        return 'defaultServer'
-      elsif Liberty.web_inf @app_dir
-        return 'defaultServer'
-      elsif Liberty.meta_inf(@app_dir)
+      elsif Liberty.server_directory(@app_dir) || Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
         return 'defaultServer'
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
@@ -412,8 +408,8 @@ module LibertyBuildpack::Container
       bin = File.join(app_dir, 'wlp', 'bin')
       dir = File.exist? bin
       if dir
-        print "\nPushed a wrongly packaged server please use 'server package --include=user' to package a server\n" # workaround for lack of message in cf cli
-        raise "\nPushed a wrongly packaged server please use 'server package --include=user' to package a server\n"
+        print "\nPushed a wrongly packaged server please use 'server package --include=user' to package a server\n"
+        raise "Pushed a wrongly packaged server please use 'server package --include=user' to package a server"
       end
       dir
     end
