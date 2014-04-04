@@ -22,7 +22,6 @@ require 'liberty_buildpack/diagnostics/common'
 require 'pathname'
 require 'time'
 require 'yaml'
-require 'rubygems'
 
 module LibertyBuildpack
 
@@ -71,6 +70,11 @@ module LibertyBuildpack
     def compile
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
+
+      # Report buildpack build version if it's available
+      version_file = Pathname.new(File.expand_path(BUILDPACK_VERSION, __FILE__))
+      version_file.each_line { |line| print line } if version_file.file?
+
       jre.compile
       frameworks.each { |framework| framework.compile }
       the_container.compile
@@ -106,6 +110,7 @@ module LibertyBuildpack
     COMPONENTS_CONFIG = '../../config/components.yml'.freeze
 
     LICENSE_CONFIG = '../../config/licenses.yml'.freeze
+    BUILDPACK_VERSION = '../../../version.txt'.freeze
 
     LIB_DIRECTORY = '.lib'
 

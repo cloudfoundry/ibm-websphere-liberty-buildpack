@@ -15,23 +15,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'liberty_buildpack/util'
-require 'liberty_buildpack/util/cache/download_cache'
+require 'spec_helper'
+require 'liberty_buildpack/util/cache/internet_availability'
 
-module LibertyBuildpack::Util
+shared_context 'internet_availability_helper' do
 
-  # An extension of {DownloadCache} that is configured to use the application cache.  The application
-  # cache location is defined by the second argument (<tt>ARGV[1]</tt>) to the +compile+ script.
-  #
-  # <b>WARNING: This cache should only by used by code run by the +compile+ script</b>
-  class ApplicationCache < Cache::DownloadCache
+  # Reset cache and honour example metadata for cache.
+  before do
+    LibertyBuildpack::Util::Cache::InternetAvailability.clear_internet_availability
+    LibertyBuildpack::Util::Cache::InternetAvailability.store_internet_availability true if example.metadata[:skip_availability_check]
+  end
 
-    def initialize
-      application_cache_directory = ARGV[1]
-      fail 'Application cache directory is undefined' if application_cache_directory.nil?
-      super(Pathname.new(application_cache_directory))
-    end
+  ############
+  # Run test #
+  ############
 
+  # Reset cache
+  after do
+    LibertyBuildpack::Util::Cache::InternetAvailability.clear_internet_availability
   end
 
 end

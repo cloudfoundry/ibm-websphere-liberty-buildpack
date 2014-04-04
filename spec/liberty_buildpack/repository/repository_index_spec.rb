@@ -15,7 +15,7 @@
 # limitations under the License.
 
 require 'spec_helper'
-require 'liberty_buildpack/util/download_cache'
+require 'liberty_buildpack/util/cache/download_cache'
 require 'liberty_buildpack/repository/repository_index'
 
 module LibertyBuildpack::Repository
@@ -25,7 +25,7 @@ module LibertyBuildpack::Repository
     let(:application_cache) { double('ApplicationCache') }
 
     it 'should load index with license' do
-      LibertyBuildpack::Util::DownloadCache.stub(:new).and_return(application_cache)
+      LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
       application_cache.stub(:get).with('test-uri/index.yml')
       .and_yield(File.open('spec/fixtures/test-index.yml'))
       VersionResolver.stub(:resolve).with('test-version', %w(resolved-version)).and_return('resolved-version')
@@ -35,7 +35,7 @@ module LibertyBuildpack::Repository
     end
 
     it 'should load index without license' do
-      LibertyBuildpack::Util::DownloadCache.stub(:new).and_return(application_cache)
+      LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
       application_cache.stub(:get).with('test-uri/index.yml')
       .and_yield(File.open('spec/fixtures/test-index-orig.yml'))
       VersionResolver.stub(:resolve).with('test-version', %w(resolved-version)).and_return('resolved-version')
@@ -43,7 +43,6 @@ module LibertyBuildpack::Repository
       repository_index = RepositoryIndex.new('test-uri')
       expect(repository_index.find_item('test-version')).to eq(['resolved-version', 'resolved-uri', nil])
     end
-
   end
 
 end

@@ -72,6 +72,9 @@ module LibertyBuildpack::Jre
         raise
       end
 
+      # Checks that user has defined a sufficient memory limit
+      check_memory
+
       download_start_time = Time.now
       print "-----> Downloading IBM #{@version} JRE from #{@uri} "
 
@@ -88,6 +91,16 @@ module LibertyBuildpack::Jre
     def release
       @java_opts << "-XX:OnOutOfMemoryError=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{KILLJAVA_FILE_NAME}"
       @java_opts.concat memory(@configuration)
+    end
+
+    # Prints a warning message if a memory limit of less than 512M has been chosen when using the IBM JDK.
+    def check_memory
+      mem_limit = MemoryLimit.memory_limit
+      unless mem_limit.nil?
+        if mem_limit < MemorySize.new('512M')
+          puts '       Avoid Trouble: Specify a minimum of 512M as the Memory Limit for your apps when using IBM JDK.'
+        end
+      end
     end
 
     private

@@ -1,4 +1,5 @@
 # Encoding: utf-8
+# Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright 2013 the original author or authors.
 #
@@ -15,44 +16,43 @@
 # limitations under the License.
 
 require 'spec_helper'
+require 'application_helper'
+require 'internet_availability_helper'
+require 'logging_helper'
 require 'liberty_buildpack/util/application_cache'
 
-module LibertyBuildpack::Util
+describe LibertyBuildpack::Util::ApplicationCache do
+  include_context 'application_helper'
+  include_context 'internet_availability_helper'
+  include_context 'logging_helper'
 
-  describe ApplicationCache do
+  previous_arg_value = ARGV[1]
 
-    before do
-      @previous_value = ARGV[1]
-      ARGV[1] = nil
-    end
+  before do
+    ARGV[1] = nil
 
-    after do
-      ARGV[1] = @previous_value
-    end
+    stub_request(:get, 'http://foo-uri/').with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
+    .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
 
-    it 'should raise an error if ARGV[1] is not defined' do
-      -> { ApplicationCache.new }.should raise_error
-    end
+    stub_request(:head, 'http://foo-uri/')
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .to_return(status: 304, body: '', headers: {})
+  end
 
-    it 'should use ARGV[1] directory' do
-      stub_request(:get, 'http://foo-uri/').to_return(
-        status: 200,
-        body: 'foo-cached',
-        headers: {
-          Etag: 'foo-etag',
-          'Last-Modified' => 'foo-last-modified'
-        }
-      )
+  after do
+    ARGV[1] = previous_arg_value
+  end
 
-      Dir.mktmpdir do |root|
-        ARGV[1] = root
+  it 'should raise an error if ARGV[1] is not defined' do
+    expect { described_class.new }.to raise_error
+  end
 
-        ApplicationCache.new.get('http://foo-uri/') {}
+  it 'should use ARGV[1] directory' do
+    ARGV[1] = app_dir
 
-        expect(Dir[File.join(root, '*.cached')].size).to eq(1)
-      end
-    end
+    described_class.new.get('http://foo-uri/') {}
 
+    expect(Pathname.glob(app_dir + '*.cached').size).to eq(1)
   end
 
 end

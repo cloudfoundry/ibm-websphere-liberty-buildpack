@@ -15,7 +15,7 @@
 # limitations under the License.
 
 require 'liberty_buildpack/repository'
-require 'liberty_buildpack/util/download_cache'
+require 'liberty_buildpack/util/cache/download_cache'
 require 'liberty_buildpack/repository/version_resolver'
 require 'yaml'
 
@@ -29,7 +29,8 @@ module LibertyBuildpack::Repository
     # @param [String] repository_root the root of the repository to create the index for
     def initialize(repository_root)
       @index = {}
-      LibertyBuildpack::Util::DownloadCache.new.get("#{repository_root}#{INDEX_PATH}") do |file| # TODO: Use global cache #50175265
+      repository_root = repository_root[0..-2] while repository_root.end_with? '/'
+      LibertyBuildpack::Util::Cache::DownloadCache.new.get("#{repository_root}#{INDEX_PATH}") do |file|
         @index.merge! YAML.load_file(file)
       end
     end

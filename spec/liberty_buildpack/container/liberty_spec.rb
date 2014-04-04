@@ -23,14 +23,18 @@ module LibertyBuildpack::Container
   describe Liberty do
 
     LIBERTY_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('8.5.5')
+    LIBERTY_SINGLE_DOWNLOAD_URI = 'test-liberty-uri.tar.gz'.freeze # end of URI (here ".tar.gz") is significant in liberty container code
 
-    LIBERTY_DETAILS = [LIBERTY_VERSION, 'test-liberty-uri', 'spec/fixtures/license.html']
+    LIBERTY_DETAILS = [LIBERTY_VERSION, LIBERTY_SINGLE_DOWNLOAD_URI, 'spec/fixtures/license.html']
 
     let(:application_cache) { double('ApplicationCache') }
+    let(:component_index) { double('ComponentIndex') }
 
     before do
       $stdout = StringIO.new
       $stderr = StringIO.new
+      # return license file by default
+      application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
     end
 
     describe 'prepare applications' do
@@ -142,7 +146,7 @@ module LibertyBuildpack::Container
           .and_return(LIBERTY_DETAILS)
 
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
           expect do
             Liberty.new(
@@ -189,6 +193,49 @@ module LibertyBuildpack::Container
         end
       end
 
+      it 'should extract Liberty from a TAR file' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          liberty_dir = File.join root, '.liberty'
+          bin_dir = File.join liberty_dir, 'bin'
+          default_server_xml = File.join liberty_dir, 'templates', 'servers', 'defaultServer', 'server.xml'
+          rest_connector = File.join liberty_dir, 'clients', 'restConnector.jar'
+
+          expect(File.exists?(File.join bin_dir, 'server')).to be_true
+          expect(File.exists?(File.join bin_dir, 'featureManager')).to be_true
+          expect(File.exists?(File.join bin_dir, 'securityUtility')).to be_true
+          expect(File.exists?(File.join bin_dir, 'productInfo')).to be_true
+          expect(File.exists?(default_server_xml)).to be_true
+          expect(File.exists?(rest_connector)).to be_true
+
+          icap_properties = File.join liberty_dir, 'etc', 'extensions', 'icap.properties'
+          expect(File.exists?(icap_properties)).to be_true
+          icap_properties_content = File.read icap_properties
+          expect(icap_properties_content.include? 'productInstall=.liberty/icap').to be_true
+        end
+      end
+
       it 'should extract Liberty from a JAR file' do
         Dir.mktmpdir do |root|
           Dir.mkdir File.join(root, 'WEB-INF')
@@ -196,8 +243,11 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
 
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => 'wlp-developers.jar' })
+
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with('wlp-developers.jar').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
           library_directory = File.join(root, '.lib')
           FileUtils.mkdir_p(library_directory)
@@ -223,13 +273,51 @@ module LibertyBuildpack::Container
         end
       end
 
+      it 'should handle all-in-one as Liberty core' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'WEB-INF')
+
+          LIBERTY_OS_DETAILS = [LIBERTY_VERSION, 'wlp-developers.jar', 'spec/fixtures/license.html']
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_OS_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with('wlp-developers.jar').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          liberty_dir = File.join root, '.liberty'
+          bin_dir = File.join liberty_dir, 'bin'
+          default_server_xml = File.join liberty_dir, 'templates', 'servers', 'defaultServer', 'server.xml'
+          rest_connector = File.join liberty_dir, 'clients', 'restConnector.jar'
+
+          expect(File.exists?(File.join bin_dir, 'server')).to be_true
+          expect(File.exists?(File.join bin_dir, 'featureManager')).to be_true
+          expect(File.exists?(File.join bin_dir, 'securityUtility')).to be_true
+          expect(File.exists?(File.join bin_dir, 'productInfo')).to be_true
+          expect(File.exists?(default_server_xml)).to be_true
+          expect(File.exists?(rest_connector)).to be_true
+        end
+      end
       it 'should make the ./bin/server script runnable for the zipped up server case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_DETAILS)
+        LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+        component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+        application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
         Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
           FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
           File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
             file.write('your text')
@@ -260,11 +348,14 @@ module LibertyBuildpack::Container
       it 'should make the ./bin/server script runnable for the WEB-INF case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_DETAILS)
+        LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+        component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+        application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
         Dir.mktmpdir do |root|
-          Dir.mkdir File.join(root, 'WEB-INF')
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
           library_directory = File.join(root, '.lib')
           FileUtils.mkdir_p(library_directory)
 
@@ -284,11 +375,14 @@ module LibertyBuildpack::Container
       it 'should make the ./bin/server script runnable for the META-INF case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_DETAILS)
+        LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+        component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+        application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
         Dir.mktmpdir do |root|
-          Dir.mkdir File.join(root, 'META-INF')
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'META-INF')
           library_directory = File.join(root, '.lib')
           FileUtils.mkdir_p(library_directory)
 
@@ -307,13 +401,17 @@ module LibertyBuildpack::Container
 
       it 'should produce the correct server.xml for the WEB-INF case when the app is of type war' do
         Dir.mktmpdir do |root|
-          Dir.mkdir File.join(root, 'WEB-INF')
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
 
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
           library_directory = File.join(root, '.lib')
           FileUtils.mkdir_p(library_directory)
@@ -329,21 +427,87 @@ module LibertyBuildpack::Container
 
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application context-root=\'/\' location=\'myapp\' name=\'myapp\'').to be_true
-          expect(server_xml_contents.include? 'type=\'war\'').to be_true
-          expect(server_xml_contents.include? 'httpPort=\'${port}\'').to be_true
+          expect(server_xml_contents.include? '<application context-root="/" location="myapp" name="myapp"').to be_true
+          expect(server_xml_contents.include? 'type="war"').to be_true
+          expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
+        end
+      end
+
+      it 'should produce droplet.yaml for WEB-INF case' do
+        Dir.mktmpdir do |root|
+          droplet_yaml_file = File.join root, 'droplet.yaml'
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          expect(File.exists?(droplet_yaml_file)).to be_true
+
+          droplet_yaml_content = YAML.load(File.read droplet_yaml_file)
+          expect(droplet_yaml_content).to have_key('state_file')
+          expect(droplet_yaml_content['state_file']).to eq('app/.liberty.state')
+        end
+      end
+
+      it 'should NOT produce droplet.yaml for WEB-INF case when there is no icap extensions' do
+        Dir.mktmpdir do |root|
+          droplet_yaml_file = File.join root, 'droplet.yaml'
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub-no-icap.tar.gz'))
+
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          expect(File.exists?(droplet_yaml_file)).to be_false
         end
       end
 
       it 'should produce the correct server.xml for the META-INF case when the app is of type ear' do
         Dir.mktmpdir do |root|
-          Dir.mkdir File.join(root, 'META-INF')
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'META-INF')
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
 
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
           library_directory = File.join(root, '.lib')
           FileUtils.mkdir_p(library_directory)
@@ -359,14 +523,15 @@ module LibertyBuildpack::Container
 
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application context-root=\'/\' location=\'myapp\' name=\'myapp\'').to be_true
-          expect(server_xml_contents.include? 'type=\'ear\'').to be_true
-          expect(server_xml_contents.include? 'httpPort=\'${port}\'').to be_true
+          expect(server_xml_contents.include? '<application context-root="/" location="myapp" name="myapp"').to be_true
+          expect(server_xml_contents.include? 'type="ear"').to be_true
+          expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
         end
       end
 
       it 'should produce the correct results for the zipped-up server configuration' do
         Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
           FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
           File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
             file.write('your text')
@@ -375,8 +540,11 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
 
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
           Liberty.new(
           app_dir: root,
@@ -403,6 +571,8 @@ module LibertyBuildpack::Container
 
       it 'should produce the correct results for single server configuration' do
         Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p root
           File.open(File.join(root, 'server.xml'), 'w') do |file|
             file.write("<server><httpEndpoint id=\"defaultHttpEndpoint\" host=\"*\" httpPort=\"9080\" httpsPort=\"9443\" /></server>")
           end
@@ -410,8 +580,11 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
 
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
           Liberty.new(
           app_dir: root,
@@ -451,6 +624,8 @@ module LibertyBuildpack::Container
 
       it 'should add an http endpoint if missing' do
         Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p root
           File.open(File.join(root, 'server.xml'), 'w') do |file|
             file.write('<server></server>')
           end
@@ -458,8 +633,11 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
 
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
           Liberty.new(
           app_dir: root,
@@ -481,6 +659,8 @@ module LibertyBuildpack::Container
 
       it 'should only have one http endpoint' do
         Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p root
           File.open(File.join(root, 'server.xml'), 'w') do |file|
             file.write('<server>')
             file.write('<httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="9080" httpsPort="9443" />')
@@ -492,8 +672,11 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
 
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
           Liberty.new(
           app_dir: root,
@@ -515,6 +698,8 @@ module LibertyBuildpack::Container
 
       it 'should modify server xml to work with cloud foundry' do
         Dir.mktmpdir do |root|
+          droplet_yaml_file = File.join root, 'droplet.yaml'
+          root = File.join(root, 'app')
           FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
           File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
             file.write("<server><httpEndpoint id=\"defaultHttpEndpoint\" host=\"localhost\" httpPort=\"9080\" httpsPort=\"9443\" /></server>")
@@ -523,29 +708,103 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
 
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
-          Liberty.new(app_dir: root, configuration: {}, environment: {}, license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }).compile
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          Liberty.new(
+          app_dir: root,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
 
           liberty_directory = File.join(root, '.liberty')
           expect(Dir.exists?(liberty_directory)).to be_true
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
-          server_xml_contents = File.read(server_xml_file)
-          expect(server_xml_contents.include? "host=\"*\"").to be_true
-          expect(server_xml_contents.include? "httpPort=\"${port}\"").to be_true
+          server_xml_contents = File.read server_xml_file
+          expect(server_xml_contents.include? 'host="*"').to be_true
+          expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
           expect(server_xml_contents.include? 'httpsPort=').to be_false
+          expect(File.exists?(droplet_yaml_file)).to be_false
+        end
+      end
+
+      it 'should add droplet.yaml when server xml contains myapp application' do
+        Dir.mktmpdir do |root|
+          droplet_yaml_file = File.join root, 'droplet.yaml'
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
+            file.write("<server><httpEndpoint id=\"defaultHttpEndpoint\" host=\"localhost\" httpPort=\"9080\" httpsPort=\"9443\" /><application name=\"myapp\" /></server>")
+          end
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+            .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          Liberty.new(
+            app_dir: root,
+            configuration: {},
+            environment: {},
+            license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          liberty_directory = File.join root, '.liberty'
+          expect(Dir.exists?(liberty_directory)).to be_true
+
+          server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents.include? '<feature>icap:appstate-1.0</feature>').to be_true
+          expect(server_xml_contents.include? "<icap_appstate appName='myapp' markerPath='${home}/.liberty.state'").to be_true
+          expect(server_xml_contents.include? "<httpDispatcher enableWelcomePage='false'/>").to be_true
+
+          expect(File.exists?(droplet_yaml_file)).to be_true
+        end
+      end
+
+      it 'should raise an exception when the repository cannot be found' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+          expect do
+            Liberty.new(
+            app_dir: root,
+            lib_directory: library_directory,
+            configuration: {},
+            environment: {},
+            license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+            ).compile
+          end.to raise_error(RuntimeError, 'Failed to locate a repository containing a component_index and installable components using uri test-liberty-uri.tar.gz.')
         end
       end
     end
 
     describe 'release' do
-
-      it 'generate a jvm.options file if one is not provided' do
+      it 'should generate a jvm.options file if one is not provided in server package case' do
         Dir.mktmpdir do |root|
-          Dir.mkdir File.join(root, 'WEB-INF')
-          FileUtils.mkdir_p File.join(root, '.liberty', 'usr', 'servers', 'defaultServer')
-          File.open(File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'), 'w') do |file|
+          liberty_home = File.join(root, '.liberty')
+          FileUtils.mkdir_p liberty_home
+          FileUtils.ln_sf(Pathname.new(File.join(root, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home)
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'anyServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'anyServer', 'server.xml'), 'w') do |file|
             file.write('your text')
           end
 
@@ -553,7 +812,7 @@ module LibertyBuildpack::Container
           .and_return(LIBERTY_DETAILS)
 
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
           library_directory = File.join(root, '.lib')
           FileUtils.mkdir_p(library_directory)
@@ -566,28 +825,24 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).release
 
-          jvm_options_file = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')
+          jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'anyServer', 'jvm.options')
           expect(File.exists?(jvm_options_file)).to be_true
-          expect(File.readlines(jvm_options_file).grep(/test-opt-1/).size > 0)
+          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
         end
       end
 
-      it 'Use jvm.options file if one is provided.' do
+      it 'should generate a jvm.options file if one is not provided in server directory case' do
         Dir.mktmpdir do |root|
-          Dir.mkdir File.join(root, 'WEB-INF')
           FileUtils.mkdir_p File.join(root, '.liberty', 'usr', 'servers', 'defaultServer')
-          File.open(File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'), 'w') do |file|
+          File.open(File.join(root, 'server.xml'), 'w') do |file|
             file.write('your text')
-          end
-          File.open(File.join(root, 'jvm.options'), 'w') do |file|
-            file.write('provided-opt-2')
           end
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
 
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
           library_directory = File.join(root, '.lib')
           FileUtils.mkdir_p(library_directory)
@@ -596,13 +851,136 @@ module LibertyBuildpack::Container
           lib_directory: library_directory,
           configuration: {},
           environment: {},
-          java_opts: 'provided-opt-1',
+          java_opts: %w(test-opt-2 test-opt-1),
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).release
 
+          jvm_options_file = File.join(root, 'jvm.options')
+          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
+
           jvm_options_file = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')
           expect(File.exists?(jvm_options_file)).to be_true
-          expect(File.readlines(jvm_options_file).grep(/provided-opt-2/).size > 0)
+          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
+        end
+      end
+
+      it 'should use jvm.options file if one is provided in server package case.' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'WEB-INF')
+          liberty_home = File.join(root, '.liberty')
+          FileUtils.mkdir_p liberty_home
+          FileUtils.ln_sf(Pathname.new(File.join(root, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home)
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'defaultServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'server.xml'), 'w') do |file|
+            file.write('your text')
+          end
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'jvm.options'), 'w') do |file|
+            file.write('provided-opt-1')
+          end
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          environment: {},
+          java_opts: %w(test-opt-2 test-opt-1),
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).release
+
+          jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')
+          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.read(jvm_options_file)).to match(/provided-opt-1/)
+          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
+        end
+      end
+
+      it 'should use jvm.options file if one is provided in server directory case.' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'WEB-INF')
+          FileUtils.mkdir_p File.join(root, '.liberty', 'usr', 'servers', 'defaultServer')
+          File.open(File.join(root, 'server.xml'), 'w') do |file|
+            file.write('your text')
+          end
+          File.open(File.join(root, 'jvm.options'), 'w') do |file|
+            file.write('provided-opt-1')
+          end
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          environment: {},
+          java_opts: %w(test-opt-2 test-opt-1),
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).release
+
+          jvm_options_file = File.join(root, 'jvm.options')
+          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.read(jvm_options_file)).to match(/provided-opt-1/)
+          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
+
+          jvm_options_file = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')
+          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.read(jvm_options_file)).to match(/provided-opt-1/)
+          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
+        end
+      end
+
+      it 'should use server jvm.options file instead of the root one if both are provided.' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'WEB-INF')
+          liberty_home = File.join(root, '.liberty')
+          FileUtils.mkdir_p liberty_home
+          FileUtils.ln_sf(Pathname.new(File.join(root, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home)
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'defaultServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'server.xml'), 'w') do |file|
+            file.write('your text')
+          end
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'jvm.options'), 'w') do |file|
+            file.write('good-opt-1')
+          end
+          File.open(File.join(root, 'jvm.options'), 'w') do |file|
+            file.write('bad-opt-1')
+          end
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          environment: {},
+          java_opts: '',
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).release
+
+          jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')
+          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.read(jvm_options_file)).to match(/good-opt-1/)
+          expect(File.read(jvm_options_file)).not_to match(/bad-opt-1/)
         end
       end
 
@@ -685,7 +1063,7 @@ module LibertyBuildpack::Container
           .and_return(LIBERTY_DETAILS)
 
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with('test-liberty-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
           expect do
             Liberty.new(

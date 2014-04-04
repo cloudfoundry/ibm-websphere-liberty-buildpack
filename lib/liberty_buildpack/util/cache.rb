@@ -16,22 +16,7 @@
 # limitations under the License.
 
 require 'liberty_buildpack/util'
-require 'liberty_buildpack/util/cache/download_cache'
 
-module LibertyBuildpack::Util
-
-  # An extension of {DownloadCache} that is configured to use the application cache.  The application
-  # cache location is defined by the second argument (<tt>ARGV[1]</tt>) to the +compile+ script.
-  #
-  # <b>WARNING: This cache should only by used by code run by the +compile+ script</b>
-  class ApplicationCache < Cache::DownloadCache
-
-    def initialize
-      application_cache_directory = ARGV[1]
-      fail 'Application cache directory is undefined' if application_cache_directory.nil?
-      super(Pathname.new(application_cache_directory))
-    end
-
-  end
-
+# A module encapsulating all of the utility components for caching
+module LibertyBuildpack::Util::Cache
 end

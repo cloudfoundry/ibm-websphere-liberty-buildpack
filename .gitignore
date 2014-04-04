@@ -1,8 +1,11 @@
 .DS_Store
 .idea
 .yardoc
+spec/reports
 .buildpath
 .project
+admin_cache
 coverage
 doc
+version.txt
 *~
