@@ -57,5 +57,6 @@ DEPENDENCIES
   rspec
   rubocop
   simplecov-rcov
+  tee
   webmock
   yard
