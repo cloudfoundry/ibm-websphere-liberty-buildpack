@@ -9,6 +9,6 @@ LineLength:
 MethodLength:
   Max: 25
 ParameterLists:
-  Max: 6
+  Max: 10
 AvoidClassVars:
   Enabled: false

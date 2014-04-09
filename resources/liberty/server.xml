@@ -11,7 +11,7 @@
                   httpPort="${port}"
                    />
 
-        <application name="myapp" context-root="/" location="../../../../../"
+        <application name="myapp" context-root="/" location="myapp"
         type="war" />
         
 

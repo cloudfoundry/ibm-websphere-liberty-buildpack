@@ -15,23 +15,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'liberty_buildpack/util'
-require 'liberty_buildpack/util/cache/download_cache'
+require 'spec_helper'
+require 'application_helper'
+require 'fileutils'
 
-module LibertyBuildpack::Util
+shared_context 'buildpack_cache_helper' do
+  include_context 'application_helper'
 
-  # An extension of DownloadCache that is configured to use the application cache.  The application
-  # cache location is defined by the second argument (<tt>ARGV[1]</tt>) to the +compile+ script.
-  #
-  # <b>WARNING: This cache should only by used by code run by the +compile+ script</b>
-  class ApplicationCache < Cache::DownloadCache
+  previous_buildpack_cache = ENV['BUILDPACK_CACHE']
 
-    def initialize
-      application_cache_directory = ARGV[1]
-      fail 'Application cache directory is undefined' if application_cache_directory.nil?
-      super(Pathname.new(application_cache_directory))
-    end
+  let(:buildpack_cache_dir) { app_dir }
 
+  let(:java_buildpack_cache_dir) { buildpack_cache_dir + 'java-buildpack' }
+
+  before do
+    FileUtils.mkdir_p java_buildpack_cache_dir
+    ENV['BUILDPACK_CACHE'] = buildpack_cache_dir.to_s
+  end
+
+  after do
+    ENV['BUILDPACK_CACHE'] = previous_buildpack_cache
   end
 
 end

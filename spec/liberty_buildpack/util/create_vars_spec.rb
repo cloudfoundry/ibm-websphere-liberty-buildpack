@@ -27,7 +27,9 @@ describe 'create vars script', :integration do
 
   it 'should execute to completion when a path for the file is passed' do
     Dir.mktmpdir do |root|
-      Open3.popen3("resources/liberty/create_vars.rb #{File.expand_path root}/file_output.xml") do |stdin, stdout, stderr, wait_thr|
+      filename = File.join(root, 'runtime-vars.xml')
+      File.open(filename, 'w') { |file| file.write('<server></server>') }
+      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |stdin, stdout, stderr, wait_thr|
         expect(wait_thr.value).to be_success
       end
     end
@@ -36,12 +38,11 @@ describe 'create vars script', :integration do
   it 'should put the port variable into play when it is present' do
     ENV['PORT'] = '3939'
     Dir.mktmpdir do |root|
-      filename = File.join(File.expand_path(root), 'file_output.xml')
+      filename = File.join(root, 'runtime-vars.xml')
+      File.open(filename, 'w') { |file| file.write('<server></server>') }
       Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |stdin, stdout, stderr, wait_thr|
         expect(wait_thr.value).to be_success
-
         filecontents = File.read(filename)
-
         expect(filecontents).to include("<variable name='port' value='3939'/>")
       end
     end
@@ -51,7 +52,8 @@ describe 'create vars script', :integration do
     ENV['VCAP_CONSOLE_PORT'] = '32123'
     ENV['VCAP_CONSOLE_IP'] = '0.0.0.0'
     Dir.mktmpdir do |root|
-      filename = File.join(File.expand_path(root), 'file_output.xml')
+      filename = File.join(root, 'runtime-vars.xml')
+      File.open(filename, 'w') { |file| file.write('<server></server>') }
       Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |stdin, stdout, stderr, wait_thr|
         expect(wait_thr.value).to be_success
 
@@ -66,7 +68,8 @@ describe 'create vars script', :integration do
   it 'should correctly parse out elements from VCAP_APPLICATION and flatten them' do
     ENV['VCAP_APPLICATION'] = "{\"application_name\": \"myapp\", \"application_version\": \"23rion23roin23dnj32d\"}"
     Dir.mktmpdir do |root|
-      filename = File.join(File.expand_path(root), 'file_output.xml')
+      filename = File.join(root, 'runtime-vars.xml')
+      File.open(filename, 'w') { |file| file.write('<server></server>') }
       Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |stdin, stdout, stderr, wait_thr|
         expect(wait_thr.value).to be_success
 
@@ -75,31 +78,6 @@ describe 'create vars script', :integration do
         expect(filecontents).to include("<variable name='application_name' value='myapp'/>")
         expect(filecontents).to include("<variable name='application_version' value='23rion23roin23dnj32d'/>")
       end
-    end
-  end
-
-  it 'should skip vcap_services if they are set to empty' do
-    ENV['VCAP_SERVICES'] = '{}'
-    Dir.mktmpdir do |root|
-      filename = File.join(File.expand_path(root), 'file_output.xml')
-      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |stdin, stdout, stderr, wait_thr|
-        expect(wait_thr.value).to be_success
-      end
-    end
-  end
-
-  it 'should correctly parse VCAP_SERVICES' do
-    ENV['VCAP_SERVICES'] = "{\"mongodb-2.2\":[{\"name\":\"mongodb-3244e\",\"label\":\"mongodb-2.2\",\"plan\":\"free\",\"credentials\":{\"hostname\":\"9.37.193.66\",\"host\":\"9.37.193.66\",\"port\":25002,\"username\":\"44b438c9-862a-432c-a72a-6d3e10b258d5\",\"password\":\"972bb9d9-09d2-4c7b-9911-a3b26cad8277\",\"name\":\"68d3650d-72c7-48ad-8b20-b3ebd764b472\",\"db\":\"db\",\"url\":\"mongodb://44b438c9-862a-432c-a72a-6d3e10b258d5:972bb9d9-09d2-4c7b-9911-a3b26cad8277@9.37.193.66:25002/db\"}}],\"mysql-5.5\":[{\"name\":\"mysql-c987\",\"label\":\"mysql-5.5\",\"plan\":\"100\",\"credentials\":{\"name\":\"d8bce47767311498db98febffccae1f54\",\"hostname\":\"9.37.193.66\",\"host\":\"9.37.193.66\",\"port\":3307,\"user\":\"ucLIbd4sAP6Kf\",\"username\":\"ucLIbd4sAP6Kf\",\"password\":\"p5t2b4qpLzJ0j\"}}]}"
-    Dir.mktmpdir do |root|
-      filename = File.join(File.expand_path(root), 'file_output.xml')
-      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |stdin, stdout, stderr, wait_thr|
-        expect(wait_thr.value).to be_success
-      end
-
-      filecontents = File.read(filename)
-
-      expect(filecontents).to include("<variable name='cloud.services.mongodb-3244e.plan' value='free'/>")
-      expect(filecontents).to include("<variable name='cloud.services.mongodb-3244e.connection.hostname' value='9.37.193.66'/>")
     end
   end
 

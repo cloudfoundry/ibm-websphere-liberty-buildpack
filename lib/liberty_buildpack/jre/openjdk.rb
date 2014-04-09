@@ -43,7 +43,7 @@ module LibertyBuildpack::Jre
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
-      @version, @uri = OpenJdk.find_ibmjdk(@configuration)
+      @version, @uri = OpenJdk.find_openjdk(@configuration)
       @jvm_type = context[:jvm_type]
       context[:java_home].concat JAVA_HOME unless context[:java_home].include? JAVA_HOME
     end
@@ -100,7 +100,7 @@ module LibertyBuildpack::Jre
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
-    def self.find_ibmjdk(configuration)
+    def self.find_openjdk(configuration)
       LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
     rescue => e
       raise RuntimeError, "OpenJdk error: #{e.message}", e.backtrace

@@ -1,4 +1,5 @@
 # Encoding: utf-8
+# Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright 2013 the original author or authors.
 #
@@ -14,10 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'liberty_buildpack/util'
-require 'liberty_buildpack/util/download_cache'
+require 'liberty_buildpack/util/cache'
+require 'liberty_buildpack/util/cache/download_cache'
 
-module LibertyBuildpack::Util
+module LibertyBuildpack::Util::Cache
 
   # An extension of {LibertyBuildpack::DownloadCache} that is configured to use the global cache.  The global cache location
   # is defined by the +BUILDPACK_CACHE+ environment variable
@@ -29,8 +30,8 @@ module LibertyBuildpack::Util
     # @raise if the +BUILDPACK_CACHE+ environment variable is +nil+
     def initialize
       global_cache_directory = ENV['BUILDPACK_CACHE']
-      raise 'Global cache directory is undefined' if global_cache_directory.nil?
-      super(global_cache_directory)
+      fail 'Global cache directory is undefined' if global_cache_directory.nil?
+      super(Pathname.new(global_cache_directory))
     end
 
   end

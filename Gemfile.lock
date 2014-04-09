@@ -41,6 +41,7 @@ GEM
     simplecov-rcov (0.2.3)
       simplecov (>= 0.4.1)
     slop (3.4.6)
+    tee (1.0.0)
     webmock (1.13.0)
       addressable (>= 2.2.7)
       crack (>= 0.3.2)
@@ -56,5 +57,6 @@ DEPENDENCIES
   rspec
   rubocop
   simplecov-rcov
+  tee
   webmock
   yard

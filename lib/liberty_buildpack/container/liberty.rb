@@ -17,15 +17,25 @@
 require 'fileutils'
 require 'liberty_buildpack/container'
 require 'liberty_buildpack/container/container_utils'
+require 'liberty_buildpack/container/install_components'
+require 'liberty_buildpack/container/optional_components'
+require 'liberty_buildpack/container/services_manager'
+require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/repository/configured_item'
+require 'liberty_buildpack/repository/component_index'
+require 'liberty_buildpack/util'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
+require 'English'
 require 'liberty_buildpack/util/license_management'
 require 'open-uri'
 
 module LibertyBuildpack::Container
   # Encapsulates the detect, compile, and release functionality for Liberty applications.
   class Liberty
+
+    include LibertyBuildpack::Util
+
     # Creates an instance, passing in an arbitrary collection of options.
     #
     # @param [Hash] context the context that is provided to the instance
@@ -42,7 +52,6 @@ module LibertyBuildpack::Container
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
-      @liberty_version, @liberty_uri, @liberty_license = Liberty.find_liberty(@app_dir, @configuration)
       @vcap_services = context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
@@ -82,19 +91,21 @@ module LibertyBuildpack::Container
     # @return [String] returns +liberty-<version>+ if and only if the application has a server.xml, otherwise
     #                  returns +nil+
     def detect
-      @liberty_version ? [liberty_id(@liberty_version)] : nil
+      liberty_version = Liberty.find_liberty_item(@app_dir, @configuration)[0]
+      liberty_version ? [liberty_id(liberty_version)] : nil
     end
 
     # Downloads and unpacks a Liberty instance
     #
     # @return [void]
     def compile
+      @liberty_components_and_uris, @liberty_license = Liberty.find_liberty_files(@app_dir, @configuration)
       unless LibertyBuildpack::Util.check_license(@liberty_license, @license_id)
         print "\nYou have not accepted the IBM Liberty License.\n\nVisit the following uri:\n#{@liberty_license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n"
         raise
       end
 
-      download_liberty
+      download_and_install_liberty
       update_server_xml
       link_application
       make_server_script_runnable
@@ -107,7 +118,9 @@ module LibertyBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
-      create_vars_string = File.join(LIBERTY_HOME, 'create_vars.rb') << ' .liberty/usr/servers/' << server_name << '/runtime-vars.xml && '
+      server_dir = ' .liberty/usr/servers/' << server_name << '/'
+      runtime_vars_file =  server_dir + 'runtime-vars.xml'
+      create_vars_string = File.join(LIBERTY_HOME, 'create_vars.rb') << runtime_vars_file << ' && '
       java_home_string = "JAVA_HOME=\"$PWD/#{@java_home}\""
       start_script_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'bin', 'server'))
       start_script_string << ContainerUtils.space('run')
@@ -119,17 +132,18 @@ module LibertyBuildpack::Container
     private
 
     def jvm_options
-      return if @java_opts.nil?
-      jvm_options_src = Liberty.find_jvm_options(@app_dir)
+      return if @java_opts.nil? || @java_opts.empty?
+      jvm_options_src = File.join(current_server_dir, JVM_OPTIONS)
       if File.exist?(jvm_options_src)
         File.open(jvm_options_src, 'rb') { |f| @java_opts << f.read }
       end
+      FileUtils.mkdir_p File.dirname(jvm_options_src)
       jvm_options_file = File.new(jvm_options_src, 'w')
       jvm_options_file.puts(@java_opts)
       jvm_options_file.close
-      if File.exist?(File.join(@app_dir, JVM_OPTIONS)) && File.exist?(default_server_path)
+      if File.exists?(default_server_path) && ! File.exists?(File.join(default_server_path, JVM_OPTIONS))
         default_server_pathname = Pathname.new(default_server_path)
-        FileUtils.ln_sf(Pathname.new(File.join(@app_dir, 'jvm.options')).relative_path_from(Pathname.new(default_server_pathname)), default_server_pathname)
+        FileUtils.ln_sf(Pathname.new(jvm_options_src).relative_path_from(default_server_pathname), default_server_path)
       end
     end
 
@@ -138,30 +152,28 @@ module LibertyBuildpack::Container
     end
 
     def minify_liberty
+      print 'Minifying Liberty ... '
+      minify_start_time = Time.now
       Dir.mktmpdir do |root|
-        # Create runtime-vars.xml to avoid archive being incorrectly too small
-        runtime_vars_file =  File.join(servers_directory, server_name, 'runtime-vars.xml')
-        File.open(runtime_vars_file, 'w') do |file|
-          file.puts('<server></server>')
-        end
-
         minified_zip = File.join(root, 'minified.zip')
         minify_script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" #{File.join(liberty_home, 'bin', 'server')} package #{server_name} --include=minify --archive=#{minified_zip} --os=-z/OS"
         # Make it quiet unless there're errors (redirect only stdout)
         minify_script_string << ContainerUtils.space('1>/dev/null')
-
         system(minify_script_string)
-
         # Update with minified version only if the generated file exists and not empty.
         if File.size? minified_zip
           system("unzip -qq -d #{root} #{minified_zip}")
+          if File.exists? icap_extension
+            extensions_dir = File.join(root, 'wlp', 'etc', 'extensions')
+            system("mkdir -p #{extensions_dir} && cp #{icap_extension} #{extensions_dir}")
+          end
           system("rm -rf #{liberty_home}/lib && mv #{root}/wlp/lib #{liberty_home}/lib")
           system("rm -rf #{root}/wlp")
           # Re-create sym-links for application and libraries.
           make_server_script_runnable
-          puts 'Using minified liberty.'
+          print "(#{(Time.now - minify_start_time).duration}).\n\n"
         else
-          puts 'Minification failed. Continue using the full liberty.'
+          print 'failed, will continue using unminified Liberty.\n\n'
         end
       end
     end
@@ -171,10 +183,9 @@ module LibertyBuildpack::Container
     end
 
     def set_liberty_system_properties
-      resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
+      resources_dir = File.expand_path(RESOURCES, File.dirname(__FILE__))
       create_vars_destination = File.join(liberty_home, 'create_vars.rb')
-      FileUtils.cp(File.join(resources, 'create_vars.rb'), create_vars_destination)
-
+      FileUtils.cp(File.join(resources_dir, 'create_vars.rb'), create_vars_destination)
       system("chmod +x #{create_vars_destination}")
     end
 
@@ -204,43 +215,100 @@ module LibertyBuildpack::Container
         server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
         server_xml_doc.context[:attribute_quote] = :quote
 
-        endpoints = REXML::XPath.match(server_xml_doc, '/server/httpEndpoint')
-        modify_endpoints(endpoints, server_xml_doc)
+        update_http_endpoint(server_xml_doc)
 
         include_file = REXML::Element.new('include', server_xml_doc.root)
         include_file.add_attribute('location', 'runtime-vars.xml')
 
+        # Liberty logs must go into cf logs directory so cf logs command displays them.
+        # This is done by modifying server.xml (if it exists)
+        include_file = REXML::Element.new('logging', server_xml_doc.root)
+        include_file.add_attribute('logDirectory', '../../../../../logs')
+
+        # Disable default Liberty Welcome page to avoid returning 200 repsponse before app is ready.
+        disable_welcome_page(server_xml_doc)
+        # Check if appstate ICAP feature can be used
+        appstate_available = check_appstate_feature(server_xml_doc)
+        @services_manager.update_configuration(server_xml_doc, false, current_server_dir)
+
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
       elsif Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
-        server_xml = create_server_xml
-        server_xml_application(server_xml)
+        # rubocop does not allow methods longer than 25 lines, so following is factored out
+        update_server_xml_app(create_server_xml)
+        appstate_available = File.file? icap_extension
       else
         raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
       end
+
+      add_droplet_yaml if appstate_available
     end
 
-    # Uses REXML to edit the application attribute in the server.xml. It specifies the location and
-    # the type.
-    # @return [void]
-    def server_xml_application(server_xml)
-      server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
+    def update_server_xml_app(filename)
+      server_xml_doc = File.open(filename, 'r') { |file| REXML::Document.new(file) }
+      server_xml_doc.context[:attribute_quote] = :quote
+      @services_manager.update_configuration(server_xml_doc, true, current_server_dir)
       application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
-      application.attributes['location'] = 'myapp'
       Liberty.web_inf(@app_dir) ? application.attributes['type'] = 'war' : application.attributes['type'] = 'ear'
-
-      File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
+      File.open(filename, 'w') { |file| server_xml_doc.write(file) }
     end
 
-    def modify_endpoints(endpoints, server_xml_doc)
+    def update_http_endpoint(server_xml_doc)
+      endpoints = REXML::XPath.match(server_xml_doc, '/server/httpEndpoint')
+
       if endpoints.empty?
         endpoint = REXML::Element.new('httpEndpoint', server_xml_doc.root)
       else
         endpoint = endpoints[0]
         endpoints.drop(1).each { |element| element.parent.delete_element(element) }
       end
-        endpoint.add_attribute('host', '*')
-        endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
-        endpoint.delete_attribute('httpsPort')
+      endpoint.add_attribute('host', '*')
+      endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
+      endpoint.delete_attribute('httpsPort')
+    end
+
+    def disable_welcome_page(server_xml_doc)
+      dispatchers = REXML::XPath.match(server_xml_doc, '/server/httpDispatcher')
+      if dispatchers.empty?
+        dispatcher = REXML::Element.new('httpDispatcher', server_xml_doc.root)
+      else
+        dispatcher = dispatchers[0]
+        dispatchers.drop(1).each { |element| element.parent.delete_element(element) }
+      end
+      dispatcher.add_attribute('enableWelcomePage', 'false')
+    end
+
+    def check_appstate_feature(server_xml_doc)
+      # Currently appstate can work only with the application named 'myapp' and only if ICAP features
+      # are enabled via extensions.
+      myapp_apps = REXML::XPath.match(server_xml_doc, '/server/application[@name="myapp"]')
+      if File.file?(icap_extension) && ! myapp_apps.empty?
+
+        # Add icap:appstate-1.0 feature
+        feature_managers = REXML::XPath.match(server_xml_doc, '/server/featureManager')
+        if feature_managers.empty?
+          feature_manager = REXML::Element.new('featureManager', server_xml_doc.root)
+        else
+          feature_manager = feature_managers[0]
+        end
+        appstate_feature = REXML::Element.new('feature', feature_manager)
+        appstate_feature.text = 'icap:appstate-1.0'
+
+        # Turn on marker file using icap_appstate element
+        appstate = REXML::Element.new('icap_appstate', server_xml_doc.root)
+        appstate.add_attribute('appName', 'myapp')
+        appstate.add_attribute('markerPath', '${home}/.liberty.state')
+
+        return true
+      end
+      false
+    end
+
+    def add_droplet_yaml
+      resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
+      container_root = File.expand_path('..', @app_dir)
+      FileUtils.cp(File.join(resources, 'droplet.yaml'), container_root)
+      droplet_yaml = File.join(container_root, 'droplet.yaml')
+      system "sed -i -e 's|app/.liberty.state|#{File.basename(@app_dir)}/.liberty.state|' #{droplet_yaml}"
     end
 
     # Copies the template server xml into the server directory structure and prepares it
@@ -256,6 +324,13 @@ module LibertyBuildpack::Container
     def make_server_script_runnable
       server_script = File.join liberty_home, 'bin', 'server'
       system "chmod +x #{server_script}"
+
+      # scripts that need to be executable for the feature manager to work
+      feature_manager_script = File.join liberty_home, 'bin', 'featureManager'
+      system "chmod +x #{feature_manager_script}"
+      product_info = File.join liberty_home, 'bin', 'productInfo'
+      system "chmod +x #{product_info}"
+
     end
 
     def server_name
@@ -270,43 +345,160 @@ module LibertyBuildpack::Container
       end
     end
 
-    def download_liberty
-      download_start_time = Time.now
-      print "-----> Downloading Liberty #{@liberty_version} from #{@liberty_uri}"
-      LibertyBuildpack::Util::ApplicationCache.new.get(@liberty_uri) do |file| # TODO: Use global cache
-        puts "(#{(Time.now - download_start_time).duration})"
-        expand(file, @configuration)
-      end
-    end
+    # Liberty download component names, as used in the component_index.yml file
+    # pointed to by the index.yml file The index.yml file is
+    # pointed to by the buildpack liberty.yml file.
+    COMPONENT_LIBERTY_CORE   = 'liberty_core'.freeze
+    COMPONENT_LIBERTY_EXT    = 'liberty_ext'.freeze
 
-    def expand(file, configuration)
-      expand_start_time = Time.now
-      print "       Expanding Liberty to #{LIBERTY_HOME} "
-
+    def download_and_install_liberty
+      # create a temp dir where the downloaded files will be extracted to
       Dir.mktmpdir do |root|
         FileUtils.rm_rf(liberty_home)
         FileUtils.mkdir_p(liberty_home)
-        system "unzip -qq #{file.path} -d #{root} 2>&1"
-        system "mv #{root}/wlp/* #{liberty_home}/"
-      end
 
-      puts "(#{(Time.now - expand_start_time).duration})"
+        # 1. download and extract the server to a temporary location.
+        uri = @liberty_components_and_uris[COMPONENT_LIBERTY_CORE]
+        fail 'No Liberty download defined in buildpack.' if uri.nil?
+        download_and_unpack_archive(uri, root)
+
+        @services_manager = ServicesManager.new(@vcap_services, runtime_vars_dir(root))
+
+        # 2. download and extract the server extensions to the same temporary location.
+        if @services_manager.requires_liberty_extensions? || configured_feature_requires_component?(COMPONENT_LIBERTY_EXT)
+          download_and_unpack_archive(uri, root) if (uri = @liberty_components_and_uris.delete(COMPONENT_LIBERTY_EXT))
+        end
+
+        # Services may provide zips or esas or both. Query services to see what's needed.
+        install_list = InstallComponents.new
+        @services_manager.get_required_esas(@liberty_components_and_uris, install_list)
+        # 3. Perform all unzips before moving the server to its proper location.
+        install_list.zips.each { |zip_uri| download_and_unpack_archive(zip_uri, root) }
+
+        # 4. move the server to it's proper location.
+        system "mv #{root}/wlp/* #{liberty_home}/"
+
+        # 5. configure icap extension, if required.
+        system "sed -i -e 's|productInstall=wlp/|productInstall=#{LIBERTY_HOME}/|' #{icap_extension}" if File.file? icap_extension
+
+        # 6. Install esas and services client jars
+        download_and_install_esas(install_list.esas)
+        @services_manager.install_client_jars(@liberty_components_and_uris, current_server_dir)
+      end
     end
 
-    def self.find_liberty(app_dir, configuration)
-      if !bin_dir?(app_dir)
-        if server_xml(app_dir) || web_inf(app_dir) || meta_inf(app_dir)
-          version, uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
-            fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
-          end
+    # is the given liberty component required ? It may be non-optional, in which
+    # case it is required, or it may be optional, in which case it is required
+    # if one of the features it supplies is requested in a server.xml.
+    def configured_feature_requires_component?(component)
+      features_xpath = OptionalComponents::COMPONENT_NAME_TO_FEATURE_XPATH[component]
+      if !features_xpath
+        # component is not optional, as it is not in the optional component hash.
+        true
+      elsif (server_xml = Liberty.server_xml(@app_dir))
+        # component is optional and server.xml is supplied, so check requested features.
+        server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
+        server_features = REXML::XPath.match(server_xml_doc, features_xpath)
+        server_features.length > 0 ? true : false
+      else
+        # component is optional, but no server.xml supplied, so no optional features are requested.
+        false
+      end
+    end
+
+    # This method unpacks an archive file. Supported archive types are .zip, .jar, tar.gz and tgz.
+    # WARNING: Do not use this method to download archive files that should not be unzipped, such as client driver jars.
+    # For each downloaded file, there is a corresponding cached, etag, last_modified, and lock extension.
+    def download_and_unpack_archive(uri, root)
+      # all file types filtered here should be handled inside block.
+      if uri.end_with?('.tgz', '.tar.gz', '.zip', 'jar')
+        print "Downloading from #{uri} ... "
+        download_start_time = Time.now
+        LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
+          print "(#{(Time.now - download_start_time).duration}).\n"
+          install_archive(file, uri, root)
         end
       else
-        version = nil
-        uri = nil
-        license = nil
+        # shouldn't happen, expect index.yml or component_index.yml to always
+        # name files that can be handled here.
+        print("Unknown file type, not downloaded, at #{uri}\n")
       end
+      print("\n")
+    end
 
-      return version, uri, license
+    def install_archive(file, uri, root)
+      print 'Installing archive ... '
+      install_start_time = Time.now
+      if uri.end_with?('.zip', 'jar')
+        system "unzip -oq -d #{root} #{file.path} 2>&1"
+      elsif uri.end_with?('tar.gz', '.tgz')
+        system "tar -zxf #{file.path} -C #{root} 2>&1"
+      else
+        # shouldn't really happen
+        print("Unknown file type, not installed, at #{uri}.\n")
+      end
+      puts "(#{(Time.now - install_start_time).duration}).\n"
+    end
+
+    def download_and_install_esas(esas)
+      esas.each do |esa|
+        # each esa is an array of two entries, uri and options string
+        uri = esa[0]
+        options = esa[1]
+        print "Downloading from #{uri} ... "
+        download_start_time = Time.now
+        # for each downloaded file, there is a corresponding cached, etag, last_modified, and lock extension
+        LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
+          print "(#{(Time.now - download_start_time).duration}).\n"
+          install_esa(file, options)
+        end
+      end
+    end
+
+    def install_esa(file, options)
+      print 'Installing feature ... '
+      install_start_time = Time.now
+      # setup the command and options
+      cmd = File.join(liberty_home, 'bin', 'featureManager')
+      script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" #{cmd} install #{file.path} #{options}"
+      output = `#{script_string}`
+      if  $CHILD_STATUS.to_i != 0
+        puts "\n #{output}"
+      else
+        puts "(#{(Time.now - install_start_time).duration}).\n"
+      end
+      print("\n")
+    end
+
+    # Liberty, features and driver jars are downloaded as a number of separate archives and .esa files.
+    #
+    # Return a map of component name to uri string.
+    def self.find_liberty_files(app_dir, configuration)
+      config_uri, license = Liberty.find_liberty_item(app_dir, configuration).drop(1)
+      # Back to the future. Temporary hack to handle all-in-one liberty core for open source buildpack while the repository is being restructured.
+      if config_uri.end_with?('.jar')
+        components_and_uris = { COMPONENT_LIBERTY_CORE => config_uri }
+      else
+        components_and_uris = LibertyBuildpack::Repository::ComponentIndex.new(config_uri).components
+      end
+      fail "Failed to locate a repository containing a component_index and installable components using uri #{config_uri}." if components_and_uris.nil?
+      [components_and_uris, license]
+    end
+
+    # Reads the contents of the index file in the Liberty Repository's root to return the matching version, artifact uri, and license
+    # of the item that matches the specified version criteria in the buildpack's config file.
+    #
+    # Returns the version, artifact uri, and license of the requested item in the index file
+    def self.find_liberty_item(app_dir, configuration)
+      bin_dir?(app_dir)
+      if server_xml(app_dir) || web_inf(app_dir) || meta_inf(app_dir)
+        version, config_uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+          fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
+        end
+      else
+        version = config_uri = nil
+      end
+      return version, config_uri, license
     rescue => e
       raise RuntimeError, "Liberty container error: #{e.message}", e.backtrace
     end
@@ -315,9 +507,6 @@ module LibertyBuildpack::Container
       "liberty-#{version}"
     end
 
-    # Create required file structure from .liberty to the application when a packaged server was pushed or the user pushed from a server
-    # directory. If only an application was pushed it sym-links it to the apps directory in the defaultServer.
-    # @return [void]
     def link_application
       if Liberty.liberty_directory(@app_dir)
         FileUtils.rm_rf(usr)
@@ -362,6 +551,10 @@ module LibertyBuildpack::Container
 
     def liberty_home
       File.join(@app_dir, LIBERTY_HOME)
+    end
+
+    def icap_extension
+      File.join(liberty_home, 'etc', 'extensions', 'icap.properties')
     end
 
     def self.web_inf_lib(app_dir)
@@ -418,7 +611,7 @@ module LibertyBuildpack::Container
       server_xml_dest = File.join(app_dir, LIBERTY_HOME, USR_PATH, '**/server.xml')
       candidates = Dir.glob(server_xml_dest)
       if candidates.size > 1
-        raise "\nIncorrect number of servers to deploy (expecting exactly one): #{candidates}\n"
+        raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}"
       end
       candidates.any? ? File.dirname(candidates[0]) : nil
     end
@@ -433,9 +626,32 @@ module LibertyBuildpack::Container
       candidates.any? ? candidates[0] : nil
     end
 
-    def self.find_jvm_options(app_dir)
-      server_xml_dir = Liberty.server_xml(app_dir)
-      server_xml_dir.nil? ? File.join(app_dir, JVM_OPTIONS) : File.join(File.dirname(server_xml_dir), JVM_OPTIONS)
+    def current_server_dir
+      dir_name = nil
+      if Liberty.liberty_directory @app_dir
+        # packaged server use case. Push a server zip.
+        dir_name = File.join(@app_dir, 'wlp', 'usr', 'servers', server_name)
+      elsif Liberty.server_directory @app_dir
+        # unpackaged server.xml use case. Push from a server directory
+        dir_name = @app_dir
+      else
+        # push web app use case.
+        dir_name = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer')
+      end
+      dir_name
+    end
+
+    def runtime_vars_dir(root)
+      if Liberty.liberty_directory @app_dir
+        # packaged server use case. create runtime-vars in the server directory.
+        return File.join(@app_dir, 'wlp', 'usr', 'servers', server_name)
+      elsif Liberty.server_directory @app_dir
+        # unpackaged server.xml use case, push directory. create runtime-vars in the @app_dir
+        return @app_dir
+      else
+        # push web app use case. create runtime-vars in the temp staging area, will get copied at end of staging
+        return File.join(root, 'wlp', 'usr', 'servers', 'defaultServer')
+      end
     end
 
     def self.expand_apps(apps)

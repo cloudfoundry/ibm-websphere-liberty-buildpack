@@ -33,6 +33,8 @@ module LibertyBuildpack::Jre
 
       FileUtils.rm_rf('/tmp/jre_temp')
       Dir.mkdir('/tmp/jre_temp')
+      # return license file by default
+      application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
     end
 
     it 'should detect with id of ibmjdk-<version>' do
@@ -87,6 +89,43 @@ module LibertyBuildpack::Jre
 
         java = File.join(root, '.java', 'jre', 'bin', 'java')
         expect(File.exists?(java)).to be_true
+      end
+    end
+
+    it 'should display Avoid Trouble message when specifying <512MB mem limit' do
+      Dir.mktmpdir do |root|
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
+        ENV['MEMORY_LIMIT'] = '256m'
+
+        IBMJdk.new(
+            app_dir: root,
+            configuration: {},
+            java_home: '',
+            java_opts: [],
+            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
+        ).compile
+
+        expect($stdout.string).to match(/Avoid Trouble/)
+      end
+    end
+
+    it 'should not display Avoid Trouble message when specifying 512MB or higher mem limit' do
+      Dir.mktmpdir do |root|
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
+        ENV['MEMORY_LIMIT'] = '512m'
+
+        IBMJdk.new(
+            app_dir: root,
+            configuration: {},
+            java_home: '',
+            java_opts: [],
+            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
+        ).compile
+        expect($stdout.string).not_to match(/Avoid Trouble/)
       end
     end
 

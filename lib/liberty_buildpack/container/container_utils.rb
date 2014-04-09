@@ -51,8 +51,8 @@ module LibertyBuildpack::Container
         root_directory = Pathname.new(app_dir)
         libs = Pathname.new(lib_directory).children
         .select { |file| file.extname == '.jar' }
-          .map { |file| file.relative_path_from(root_directory) }
-            .sort
+        .map { |file| file.relative_path_from(root_directory) }
+        .sort
       end
       libs
     end

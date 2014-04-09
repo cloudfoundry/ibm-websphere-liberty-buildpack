@@ -12,4 +12,5 @@ group :development, :test do
   gem 'rspec'
   gem 'simplecov-rcov'
   gem 'ci_reporter'
+  gem 'tee'
 end
