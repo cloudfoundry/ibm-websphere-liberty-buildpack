@@ -20,7 +20,7 @@ require 'liberty_buildpack/util/cache/download_cache'
 
 module LibertyBuildpack::Util
 
-  # An extension of {DownloadCache} that is configured to use the application cache.  The application
+  # An extension of DownloadCache that is configured to use the application cache.  The application
   # cache location is defined by the second argument (<tt>ARGV[1]</tt>) to the +compile+ script.
   #
   # <b>WARNING: This cache should only by used by code run by the +compile+ script</b>

@@ -71,7 +71,7 @@ module LibertyBuildpack::Services
     #-------------------------------------------
     # Get required components (prereq zips and esas) from services
     #
-    # @param uris - the hash containing the {key, uri} information from the repository
+    # @param uris - the hash containing the <key, uri> information from the repository
     # @param components - the non-null RequiredComponents to update.
     #---------------------------------------------
     def get_required_esas(uris, components)
