@@ -132,15 +132,28 @@ module LibertyBuildpack::Container
     private
 
     def jvm_options
-      return if @java_opts.nil? || @java_opts.empty?
+      # disable 2-phase (XA) transactions via a -D option, as they are unsupported in
+      # Liberty in the cloud (log files need a persistent location, and someone to
+      # recover them).
+      @java_opts << '-Dcom.ibm.tx.jta.disable2PC=true'
+
+      # add existing options from the jvm.options file, if there is one, to the current
+      # options.
       jvm_options_src = File.join(current_server_dir, JVM_OPTIONS)
-      if File.exist?(jvm_options_src)
+      if File.exists?(jvm_options_src)
         File.open(jvm_options_src, 'rb') { |f| @java_opts << f.read }
       end
+
+      # re-write the file with all the options.
       FileUtils.mkdir_p File.dirname(jvm_options_src)
       jvm_options_file = File.new(jvm_options_src, 'w')
       jvm_options_file.puts(@java_opts)
       jvm_options_file.close
+
+      # link from server runtime to the options file, if the options file isn't
+      # already in the runtime defaultServer directory (if a server.xml was
+      # pushed, jvm options will be in the same location, and both are linked
+      # to from the runtime).
       if File.exists?(default_server_path) && ! File.exists?(File.join(default_server_path, JVM_OPTIONS))
         default_server_pathname = Pathname.new(default_server_path)
         FileUtils.ln_sf(Pathname.new(jvm_options_src).relative_path_from(default_server_pathname), default_server_path)

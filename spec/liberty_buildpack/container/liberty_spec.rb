@@ -24,8 +24,8 @@ module LibertyBuildpack::Container
 
     LIBERTY_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('8.5.5')
     LIBERTY_SINGLE_DOWNLOAD_URI = 'test-liberty-uri.tar.gz'.freeze # end of URI (here ".tar.gz") is significant in liberty container code
-
     LIBERTY_DETAILS = [LIBERTY_VERSION, LIBERTY_SINGLE_DOWNLOAD_URI, 'spec/fixtures/license.html']
+    DISABLE_2PC_JAVA_OPT_REGEX = '-Dcom.ibm.tx.jta.disable2PC=true'.freeze
 
     let(:application_cache) { double('ApplicationCache') }
     let(:component_index) { double('ComponentIndex') }
@@ -827,7 +827,10 @@ module LibertyBuildpack::Container
 
           jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'anyServer', 'jvm.options')
           expect(File.exists?(jvm_options_file)).to be_true
-          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
+          file_contents = File.read(jvm_options_file)
+          expect(file_contents).to match(/test-opt-1/)
+          expect(file_contents).to match(/test-opt-2/)
+          expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
         end
       end
 
@@ -861,7 +864,10 @@ module LibertyBuildpack::Container
 
           jvm_options_file = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')
           expect(File.exists?(jvm_options_file)).to be_true
-          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
+          file_contents = File.read(jvm_options_file)
+          expect(file_contents).to match(/test-opt-1/)
+          expect(file_contents).to match(/test-opt-2/)
+          expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
         end
       end
 
@@ -898,8 +904,11 @@ module LibertyBuildpack::Container
 
           jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')
           expect(File.exists?(jvm_options_file)).to be_true
-          expect(File.read(jvm_options_file)).to match(/provided-opt-1/)
-          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
+          file_contents = File.read(jvm_options_file)
+          expect(file_contents).to match(/provided-opt-1/)
+          expect(file_contents).to match(/test-opt-1/)
+          expect(file_contents).to match(/test-opt-2/)
+          expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
         end
       end
 
@@ -938,8 +947,11 @@ module LibertyBuildpack::Container
 
           jvm_options_file = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')
           expect(File.exists?(jvm_options_file)).to be_true
-          expect(File.read(jvm_options_file)).to match(/provided-opt-1/)
-          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
+          file_contents = File.read(jvm_options_file)
+          expect(file_contents).to match(/provided-opt-1/)
+          expect(file_contents).to match(/test-opt-1/)
+          expect(file_contents).to match(/test-opt-2/)
+          expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
         end
       end
 
@@ -979,8 +991,10 @@ module LibertyBuildpack::Container
 
           jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')
           expect(File.exists?(jvm_options_file)).to be_true
-          expect(File.read(jvm_options_file)).to match(/good-opt-1/)
-          expect(File.read(jvm_options_file)).not_to match(/bad-opt-1/)
+          file_contents = File.read(jvm_options_file)
+          expect(file_contents).to match(/good-opt-1/)
+          expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
+          expect(file_contents).not_to match(/bad-opt-1/)
         end
       end
 
