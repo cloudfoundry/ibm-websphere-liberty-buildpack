@@ -17,31 +17,41 @@
 require 'rexml/document'
 require 'yaml'
 require 'fileutils'
+require 'set'
 require 'liberty_buildpack/container'
 require 'liberty_buildpack/container/install_components'
 require 'liberty_buildpack/util/constantize'
 require 'liberty_buildpack/util/application_cache'
+require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/diagnostics/logger_factory'
 
 module LibertyBuildpack::Container
   # The class that encapsulate access to services and services information.
   class ServicesManager
 
-    def initialize(vcap_services, server_dir)
+    def initialize(vcap_services, server_dir, opt_out_string)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
-      @logger.debug("init: server dir is #{server_dir} and vcap_services is #{vcap_services}")
+      @logger.debug("init: server dir is #{server_dir}, vcap_services is #{vcap_services} and opt_out is #{opt_out_string}")
+      @opt_out = parse_opt_out(opt_out_string)
       FileUtils.mkdir_p(server_dir)
-      @all_services = []
-      load_services_config
+      # The collection of service instances that require full autoconfig
+      @services_full_autoconfig = []
+      # The collection of services that have opted out of autoconfig config updates only. Supporting software still needs to be installed.
+      @services_no_xml_updates = []
+      # The collection of services that have opted out of all autoconfig.
+      @services_no_autoconfig = []
+      @config = load_services_config
       parse_vcap_services(vcap_services, server_dir)
     end
 
     #-----------------------------------------------------------------------------------
-    # return true if this service requires Liberty extensions to be installed
+    # return true if any service requires Liberty extensions to be installed
     #-----------------------------------------------------------------------------------
-    #
     def requires_liberty_extensions?
-      @all_services.each do |service|
+      @services_full_autoconfig.each do |service|
+        return true if service.requires_liberty_extensions?
+      end
+      @services_no_xml_updates.each do |service|
         return true if service.requires_liberty_extensions?
       end
       false
@@ -75,7 +85,10 @@ module LibertyBuildpack::Container
     # @param components - the non-null RequiredComponents to update.
     #---------------------------------------------
     def get_required_esas(uris, components)
-      @all_services.each do |service|
+      @services_full_autoconfig.each do |service|
+        service.get_required_esas(uris, components)
+      end
+      @services_no_xml_updates.each do |service|
         service.get_required_esas(uris, components)
       end
     end
@@ -91,7 +104,7 @@ module LibertyBuildpack::Container
       lib_dir = File.join(server_dir, 'lib')
       driver_jars = Dir[File.join(lib_dir, '*.jar')]
       driver_dir = '${server.config.dir}/lib'
-      @all_services.each do |service|
+      @services_full_autoconfig.each do |service|
         if create
           service.create(document.root, server_dir, driver_dir, driver_jars)
         else
@@ -104,16 +117,70 @@ module LibertyBuildpack::Container
 
     SERVICES_CONFIG_DIR = '../services/config/'.freeze
 
+    #-----------------------------------------------
+    # Parse the opt-out string and return a hash of <service,opt_out_level>
+    #
+    # @param string - the opt-out string specified in the environment
+    # @return a non-null Hash
+    #----------------------------------------------
+    def parse_opt_out(string)
+      @logger.debug("Opt-out string is #{string}")
+      retval = {}
+      return retval if string.nil?
+      # The opt-out string may contain multiple entries of form service-level with entries separated by white space.
+      parts = string.split
+      @logger.debug("opt-out string after split is #{parts}")
+      parts.each { |part|  process_opt_out(part, retval) }
+      retval
+    end
+
+    #-----------------------------------------------------
+    # Process the opt-out string for a single service type
+    #
+    # @param string - the opt-out string for a service type
+    # @param hash - the Hash to store the processed and verified entries
+    #----------------------------------------------------
+    def process_opt_out(string, hash)
+      # we expect the string to have form of service_name=option. Extract the service name and option. Service name may contain any chars, including an =.
+      return if string.nil?
+      parts = string.split('=')
+      if parts.length < 2
+        @logger.warn("Service autoconfig opt out specification #{string} is not a legal opt-out specification. Either the specification does not contain an = or it contains disallowed white space. The opt-out request will be ignored.")
+        return
+      end
+      # Under normal circumstances, the service name will not contain an  = and parts will be length 2. if the service name contained an =, the service name will have been
+      # split and will need to be reassembled from the parts. The following handles both cases.
+      service = parts[0...(parts.length - 1)].join('=')
+      if service.empty?
+        @logger.warn("Service autoconfig opt out specification #{string} is not a legal opt-out specification. The service name appears to be missing. The opt-out request will be ignored.")
+        return
+      end
+      spec = parts[-1]
+      if spec.casecmp('all') == 0
+        hash[service] = 'all'
+        @logger.info("opting out of all auto-configuration for service #{service}")
+      elsif spec.casecmp('config') == 0
+        hash[service] = 'config'
+        @logger.info("opting out of auto-configuration configuration updates for service #{service}")
+      else
+        @logger.warn("#{string} is not a legal opt-out specification for service #{service}. The opt-out request will be ignored and the service will be configured normally.")
+      end
+    end
+
+    #-----------------------------------------------
+    # Load service plugins by reading the yaml files
+    #-----------------------------------------------
     def load_services_config
-      @config = {}
+      config = {}
       # Get the directory where the service yml files are located, read file names then load files and update the config hash.
       services_config_path = File.expand_path(SERVICES_CONFIG_DIR, File.dirname(__FILE__))
       Dir.glob("#{services_config_path}/*.yml").each do |file|
         key = File.basename(file, '.yml')
         @logger.debug("loading service config for #{key} from #{file}")
-        @config[key] = YAML.load_file(file)
+        config[key] = YAML.load_file(file)
       end
-      @logger.debug("config is #{@config}")
+      @logger.debug("config is #{config}")
+      config
     end
 
     #-------------------------------------------------
@@ -141,7 +208,7 @@ module LibertyBuildpack::Container
 
     #------------------------------------------------------
     # Process all instances of a given service type. For each instance, write the cloud variables to runtime_vars.xml, create the object
-    # representing the service instance and store it into @all_services
+    # representing the service instance and store it into the appropriate services array
     #
     # @param element - the REXML root element for runtime_vars.xml
     # @param service_type - the String type as read from VCAP_SERVICES
@@ -151,10 +218,11 @@ module LibertyBuildpack::Container
       # all instances of a given type share the same config data. We have a default type for services that don't have a plugin.
       type = get_service_type(service_type)
       config = @config[type]
+      target_array = find_autoconfig_option(service_type)
       @logger.debug("processing service instances of type #{type}. Config is #{config}")
       service_data.each do |instance|
         service_instance = create_instance(element, type, config, instance)
-        @all_services.push(service_instance) if service_instance.nil? == false
+        target_array.push(service_instance) unless service_instance.nil?
       end
     end
 
@@ -166,6 +234,18 @@ module LibertyBuildpack::Container
       'default'
     end
 
+    #-------------------------------------
+    # Determine the autoconfig level for a given service type
+    #
+    # @param service_type - the service type
+    # @return the array instance where service instances of the type are cached
+    #-------------------------------------
+    def find_autoconfig_option(service_type)
+      option = @opt_out[service_type]
+      return @services_full_autoconfig if option.nil?
+      return @services_no_xml_updates if option == 'config'
+      @services_no_autoconfig
+    end
     #------------------------------------------------
     # Create a service instance
     #
@@ -202,15 +282,16 @@ module LibertyBuildpack::Container
     # return a non-null, but possibly empty, array containing the urls that need to be downloaded.
     #---------------------------------------------
     def get_urls_for_client_jars(existing, urls)
-      required = []
-      @all_services.each do |service|
+      jar_urls = Set.new
+      @services_full_autoconfig.each do |service|
         needed = service.get_urls_for_client_jars(existing, urls)
-        if needed.length > 0
-          needed.each do |result|
-            required << result
-          end
-        end
+        jar_urls.merge(needed) unless needed.nil?
       end
+      @services_no_xml_updates.each do |service|
+        needed = service.get_urls_for_client_jars(existing, urls)
+        jar_urls.merge(needed) unless needed.nil?
+      end
+      required = jar_urls.to_a
       @logger.debug("required client jars #{required}")
       required
     end

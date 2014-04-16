@@ -374,8 +374,8 @@ module LibertyBuildpack::Container
         uri = @liberty_components_and_uris[COMPONENT_LIBERTY_CORE]
         fail 'No Liberty download defined in buildpack.' if uri.nil?
         download_and_unpack_archive(uri, root)
-
-        @services_manager = ServicesManager.new(@vcap_services, runtime_vars_dir(root))
+        # read opt-out of service bindings information from env (manifest.yml) and create services manager.
+        @services_manager = ServicesManager.new(@vcap_services, runtime_vars_dir(root), @environment['service_binding_excludes'])
 
         # 2. download and extract the server extensions to the same temporary location.
         if @services_manager.requires_liberty_extensions? || configured_feature_requires_component?(COMPONENT_LIBERTY_EXT)
