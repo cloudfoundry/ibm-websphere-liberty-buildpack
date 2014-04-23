@@ -26,6 +26,7 @@ require 'liberty_buildpack/repository/component_index'
 require 'liberty_buildpack/util'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
+require 'liberty_buildpack/util/properties'
 require 'English'
 require 'liberty_buildpack/util/license_management'
 require 'open-uri'
@@ -584,8 +585,15 @@ module LibertyBuildpack::Container
     end
 
     def self.meta_inf(app_dir)
+      # return nil if META-INF directory doesn't exist. This mimics behavior of previous implementation.
       meta_inf = File.join(app_dir, META_INF)
-      File.directory?(File.join(app_dir, META_INF)) ? meta_inf : nil
+      return nil if File.directory?(meta_inf) == false
+      # To mimic the behavior of the previous (flawed) implementatation, from here on out we only return nil if we can determine it's a jar
+      manifest_file = File.join(app_dir, META_INF, 'MANIFEST.MF')
+      return meta_inf if File.exists?(manifest_file) == false
+      props = LibertyBuildpack::Util::Properties.new(manifest_file)
+      main_class = props['Main-Class']
+      main_class.nil? ? meta_inf : nil
     end
 
     def self.server_directory(server_dir)

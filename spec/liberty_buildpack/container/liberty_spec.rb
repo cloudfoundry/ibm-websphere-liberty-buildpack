@@ -171,6 +171,20 @@ module LibertyBuildpack::Container
 
         expect(detected).to be_nil
       end
+
+      it 'should not detect when a jar file is pushed' do
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        .and_return(LIBERTY_DETAILS)
+        detected = Liberty.new(
+        app_dir: 'spec/fixtures/jar_file',
+        configuration: {},
+        java_home: '',
+        java_opts: [],
+        license_ids: {}
+        ).detect
+
+        expect(detected).to be_nil
+      end
     end
 
     describe 'compile' do
