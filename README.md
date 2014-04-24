@@ -2,7 +2,7 @@
 
 # IBM WebSphere Application Server Liberty Buildpack
 
-The `liberty-buildpack` is a [Cloud Foundry][] buildpack for running applications on IBM's WebSphere Application Server Liberty Profile.  It is designed to run most "packaged" servers.
+The `liberty-buildpack` is a [Cloud Foundry][] Buildpack for running applications on IBM's WebSphere Application Server Liberty Profile. It is designed to run most "packaged" servers.
 
 ## Usage
 To deploy applications using the IBM WebSphere Application Server Liberty Buildpack, you are required to accept the IBM Liberty license and IBM JRE license by following the instructions below:
@@ -21,37 +21,38 @@ the `manifest.yml` file refer to the [manifest documentation][].
 After you have set the license acceptance environment variables, use the following command to deploy the application with the IBM WebSphere Application Server Liberty Buildpack:
 
 ```bash
-cf push --buildpack https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
+cf push <APP-NAME> -p <ARTIFACT> -b https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
 ```
 
 * For further details on the options available for deploying your applications see [options][].
 * For further details on tuning the applications JVM see [tuning options][].
+* For further details on pushing a Java Main application see [java main push][].
 
 ## Forking the buildpack   
-If you wish to fork the buildpack and host your own binaries, then complete the following:
+To fork the Buildpack and host your own binaries, then complete the following:
 
-* Fork the [ibm-websphere-liberty-buildpack](https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack).
+1. Fork the [ibm-websphere-liberty-buildpack](https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack).
 
-* Clone the forked repository to your local machine.
+2. Clone the forked repository to your local machine.
 
-* Download the wlp-developers-runtime-8.5.5.1.jar from [wasdev.net][].
+3. Download the wlp-developers-runtime-8.5.5.1.jar from [wasdev.net][].
 
-* Download the latest IBM JRE for Linux from the [developerWorks Java site][].
+4. Download the latest IBM JRE for Linux from the [developerWorks Java site][].
   The download will be in an archive .bin format.
    
-* Copy the binaries to a location that the buildpack will be able to access via HTTP. For details see
+5. Copy the binaries to a location that the buildpack will be able to access via HTTP. For details see
   [Repositories][]. For an example see [Setting up your Web Server][example]
 
-* Modify the code in [`config/ibmjdk.yml`][ibmjdk.yml] to point to the JRE.
+6. Modify the code in [`config/ibmjdk.yml`][ibmjdk.yml] to point to the JRE.
 
-* Modify the code in [`config/liberty.yml`][liberty.yml] to point to Liberty.
+7. Modify the code in [`config/liberty.yml`][liberty.yml] to point to Liberty.
 
-* Commit and push the changes
+8. Commit and push the changes
 
-* You should now be able to deploy applications to your forked buildpack with the following command:
+9. You should now be able to deploy applications to your forked buildpack with the following command:
 
 ```bash
-cf push --buildpack <URL to forked repository>
+cf push <APP-NAME> -p <ARTIFACT> -b <URL to forked repository>
 ```
     
 ## Running Tests
@@ -81,6 +82,7 @@ bundle install --gemfile Gemfile.rubymine-debug
 [example]: docs/util-repositories.md#setting-up-your-web-server
 [options]: docs/server-xml-options.md
 [tuning options]: docs/tuning.md
+[java main push]: docs/java-main.md
 [Repositories]: docs/util-repositories.md
 [ibmjdk.yml]: config/ibmjdk.yml
 [liberty.yml]: config/liberty.yml
