@@ -16,5 +16,6 @@
         
 
     <include location="runtime-vars.xml" />
+    <logging consoleLogLevel="INFO"/>
 	
 </server>
