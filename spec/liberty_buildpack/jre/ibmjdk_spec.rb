@@ -234,43 +234,6 @@ module LibertyBuildpack::Jre
       end
     end
 
-    it 'adds OnOutOfMemoryError to java_opts' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-
-        java_opts = []
-        IBMJdk.new(
-            app_dir: root,
-            java_home: '',
-            java_opts: java_opts,
-            configuration: {},
-            license_ids: {}
-        ).release
-
-        expect(java_opts).to include("-XX:OnOutOfMemoryError=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{IBMJdk::KILLJAVA_FILE_NAME}")
-      end
-    end
-
-    it 'places the killjava script (with appropriately substituted content) in the diagnostics directory' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        LibertyBuildpack::Jre::IBMJdk.stub(:cache_dir).and_return('/tmp/jre_temp')
-        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.bin'))
-
-        IBMJdk.new(
-            app_dir: root,
-            configuration: {},
-            java_home: '',
-            java_opts: [],
-            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
-        ).compile
-
-        killjava_content = File.read(File.join(LibertyBuildpack::Diagnostics.get_diagnostic_directory(root), IBMJdk::KILLJAVA_FILE_NAME))
-        expect(killjava_content).to include("#{LibertyBuildpack::Diagnostics::LOG_FILE_NAME}")
-      end
-    end
-
   end
 
 end
