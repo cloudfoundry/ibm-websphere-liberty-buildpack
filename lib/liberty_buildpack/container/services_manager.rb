@@ -41,6 +41,8 @@ module LibertyBuildpack::Container
       # The collection of services that have opted out of all autoconfig.
       @services_no_autoconfig = []
       @config = load_services_config
+      # count of service instances by xml stanza type. For example, MySql and DB2 would be the same xml stanza type because both use the dataSource xml stanza.
+      @service_type_instances = {}
       parse_vcap_services(vcap_services, server_dir)
     end
 
@@ -49,12 +51,28 @@ module LibertyBuildpack::Container
     #-----------------------------------------------------------------------------------
     def requires_liberty_extensions?
       @services_full_autoconfig.each do |service|
-        return true if service.requires_liberty_extensions?
+        return true if service[INSTANCE].requires_liberty_extensions?
       end
       @services_no_xml_updates.each do |service|
-        return true if service.requires_liberty_extensions?
+        return true if service[INSTANCE].requires_liberty_extensions?
       end
       false
+    end
+
+    # ------------------------------------------------------
+    # Get the list of Liberty features required by the bound services
+    #
+    # @return [Set<String>] A set containing the features
+    #-------------------------------------------------------
+    def get_required_features
+      features = Set.new
+      @services_full_autoconfig.each do |service|
+        service[INSTANCE].get_required_features(features)
+      end
+      @services_no_xml_updates.each do |service|
+        service[INSTANCE].get_required_features(features)
+      end
+      features
     end
 
     #---------------------------------------------------------
@@ -86,10 +104,10 @@ module LibertyBuildpack::Container
     #---------------------------------------------
     def get_required_esas(uris, components)
       @services_full_autoconfig.each do |service|
-        service.get_required_esas(uris, components)
+        service[INSTANCE].get_required_esas(uris, components)
       end
       @services_no_xml_updates.each do |service|
-        service.get_required_esas(uris, components)
+        service[INSTANCE].get_required_esas(uris, components)
       end
     end
 
@@ -105,10 +123,14 @@ module LibertyBuildpack::Container
       driver_jars = Dir[File.join(lib_dir, '*.jar')]
       driver_dir = '${server.config.dir}/lib'
       @services_full_autoconfig.each do |service|
-        if create
-          service.create(document.root, server_dir, driver_dir, driver_jars)
-        else
-          service.update(document.root, server_dir, driver_dir, driver_jars)
+        begin
+          if create
+            service[INSTANCE].create(document.root, server_dir, driver_dir, driver_jars)
+          else
+            service[INSTANCE].update(document.root, server_dir, driver_dir, driver_jars, get_number_instances(service[CONFIG]))
+          end
+        rescue => e
+          @logger.warn("Failed to update the configuration for a service. Details are  #{e.message}")
         end
       end
     end
@@ -116,6 +138,9 @@ module LibertyBuildpack::Container
     private
 
     SERVICES_CONFIG_DIR = '../services/config/'.freeze
+    CONFIG = 'config'.freeze
+    INSTANCE = 'instance'.freeze
+    XML_STANZA_TYPE = 'server_xml_stanza'.freeze
 
     #-----------------------------------------------
     # Parse the opt-out string and return a hash of <service,opt_out_level>
@@ -218,11 +243,24 @@ module LibertyBuildpack::Container
       # all instances of a given type share the same config data. We have a default type for services that don't have a plugin.
       type = get_service_type(service_type)
       config = @config[type]
+      xml_element = config[XML_STANZA_TYPE]
+      if xml_element.nil?
+        xml_element = 'none'
+        @logger.warn("The configuration file for service type #{type} is missing the required server_xml_stanza element")
+      end
       target_array = find_autoconfig_option(service_type)
       @logger.debug("processing service instances of type #{type}. Config is #{config}")
       service_data.each do |instance|
         service_instance = create_instance(element, type, config, instance)
-        target_array.push(service_instance) unless service_instance.nil?
+        unless service_instance.nil?
+          instance_hash = { INSTANCE => service_instance, CONFIG => config }
+          target_array.push(instance_hash)
+          if @service_type_instances[xml_element].nil?
+            @service_type_instances[xml_element] = 1
+          else
+            @service_type_instances[xml_element] = @service_type_instances[xml_element] + 1
+          end
+        end
       end
     end
 
@@ -230,8 +268,21 @@ module LibertyBuildpack::Container
     # find the service type using the vcap_services name
     #-----------------------------------
     def get_service_type(name)
-      @config.each_key { |key| return key if name.include?(key) }
-      'default'
+      candidates =  []
+      @config.each_key { |key| candidates.push(key) if name.include?(key) }
+      return 'default' if candidates.empty?
+      return candidates[0] if candidates.length == 1
+      # Services typically have a name+version. Plugin yml file names are the name, without the version. Suppose I have two services named monitor-1.0 and appmonitor-2.0
+      # and plugin providers have followed conventions. type appmonitor will not match monitor, but monitor will match both appmonitor and monitor. Choose shorter
+      current = candidate[0]
+      length = current.length
+      candidates[1..(candidates.length - 1)].each do |candidate|
+        if candidate.length < length
+          current = candidate
+          length = current.length
+        end
+      end
+      current
     end
 
     #-------------------------------------
@@ -275,6 +326,17 @@ module LibertyBuildpack::Container
     end
 
     #-------------------------------------------
+    # Determine the number of instances of a given xml type. Instances of an xml type modify the same configuration stanzas
+    # in server.xml. For example, DB2 and MySql are both "dataSource" xml types, even though they are different service types.
+    #
+    # @param config [Hash] - the config hash for a service instance.
+    #------------------------------------------
+    def get_number_instances(config)
+      type = config[XML_STANZA_TYPE]
+      @service_type_instances[type]
+    end
+
+    #-------------------------------------------
     # Determine the list of client driver jar urls that need to be downloaded.
     #
     # @param existing - a non-null array containing the names of jar files that are already installed.
@@ -284,11 +346,11 @@ module LibertyBuildpack::Container
     def get_urls_for_client_jars(existing, urls)
       jar_urls = Set.new
       @services_full_autoconfig.each do |service|
-        needed = service.get_urls_for_client_jars(existing, urls)
+        needed = service[INSTANCE].get_urls_for_client_jars(existing, urls)
         jar_urls.merge(needed) unless needed.nil?
       end
       @services_no_xml_updates.each do |service|
-        needed = service.get_urls_for_client_jars(existing, urls)
+        needed = service[INSTANCE].get_urls_for_client_jars(existing, urls)
         jar_urls.merge(needed) unless needed.nil?
       end
       required = jar_urls.to_a
