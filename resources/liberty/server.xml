@@ -16,5 +16,7 @@
         
 
     <include location="runtime-vars.xml" />
-	
+    <httpDispatcher enableWelcomePage="false"/>
+
+    <logging consoleLogLevel="INFO"/>
 </server>
