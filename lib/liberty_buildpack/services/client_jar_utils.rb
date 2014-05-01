@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License
+require 'liberty_buildpack/diagnostics/logger_factory'
 module LibertyBuildpack::Services
 
   #-----------------------------------
@@ -50,7 +51,7 @@ module LibertyBuildpack::Services
       jars = []
       files.each do |file|
         base_name = File.basename(file)
-        puts "get_jar_names, basename is #{base_name}"
+        # puts "get_jar_names, basename is #{base_name}"
         result = base_name.scan(reg_ex)
         jars.push(base_name) if result.length > 0
       end
@@ -60,15 +61,16 @@ module LibertyBuildpack::Services
     #------------------------------------------------------------------------------------
     # a method to create a global (shared) library
     #
-    # @param doc - the REXML::Document for server.xml
+    # @param doc - the root element of the REXML::Document for server.xml
     # @param lib_id - the String specifying the library id of the library to create
     # @param fileset_id - the String specifying the fileset id of the (nested) fileset to create
     # @param lib_dir - the String specifying the directory where client driver jars are located
     # @param client_jars_string - the String specifying the jar names. Built this by calling the client_jar_string method of this class.
+    # @param api_visibility [String] - the api visibility to set on the shared library.
     # return true (dirty) if the document has changed and needs to be saved. Should never return false.
     # @raise if a library or fileset with the specified id already exists.
     #------------------------------------------------------------------------------------
-    def self.create_global_library(doc, lib_id, fileset_id, lib_dir, client_jars_string)
+    def self.create_global_library(doc, lib_id, fileset_id, lib_dir, client_jars_string, api_visibility = nil)
       # verify that the library and fileset don't already exist
       libs = doc.elements.to_a("//library[@id='#{lib_id}']")
       raise "create_global_library: Library with id #{lib_id} already exists" if libs.size != 0
@@ -78,6 +80,7 @@ module LibertyBuildpack::Services
       # create the library and fileset. Library gets created at global scope and fileset is nested within it.
       library = REXML::Element.new('library', doc.root)
       library.add_attribute('id', lib_id)
+      library.add_attribute('apiTypeVisibility', api_visibility) if api_visibility.nil? == false
       fileset = REXML::Element.new('fileset', library)
       fileset.add_attribute('id', fileset_id)
       fileset.add_attribute('dir', lib_dir)
@@ -86,43 +89,35 @@ module LibertyBuildpack::Services
     end
 
     #------------------------------------------------------------------------------------
-    # a method to that finds the specified fileset for the specified library and updates it as necessary.
+    # Find and update the fileset for the specified client jars.
     #
-    # The method will ensure that only one instance of the shared library and fileset exist and that the library "contains" the fileset.
-    # This may be direct containment (expected) or by-reference.
-    #
-    # @param doc - the REXML::Document for server.xml
-    # @param library - the Element for the library
-    # @param lib_id - the String specifying the library id
-    # @param fileset_id - the String specifying the fileset
-    # @param lib_dir - the String specifying the directory where client driver jars are located
-    # @param client_jars_string - the String specifying the jar names. Built this by calling the client_jar_string method of this class.
-    # return true if the fileset was changed (and document needs to be saved) else false.
+    # @param [Element] doc - the root element of the REXML::Document for server.xml
+    # @param [String] name - the name of the calling service, for serviceability.
+    # @param [Array] library - the array containing the physical Elements that comprise the one logical Library
+    # @param default_id - the default name of the fileset
+    # @param [String] lib_dir - the directory where client driver jars are located
+    # @param [String] client_jars_string - the jars names. Built this by calling the client_jar_string method of this class.
+    # @raise [Exception] if a problem is detected.
     #------------------------------------------------------------------------------------
-    def self.update_library(doc, library, lib_id, fileset_id, lib_dir, client_jars_string)
-      # The library should exist and should be unique. Requirement on the caller to have verified this.
-      # The library must contain the specified fileset by reference or by direct containment. We expect the library to contain a single fileset
-      # but we will tolerate multiples (as long as names are unique)
-      fileset_byref = ClientJarUtils.find_fileset_byref(doc, library, fileset_id)
-      fileset = ClientJarUtils.find_fileset_element(library, fileset_id)
-      raise "update_library: Fileset with id #{fileset_id} does not exist" if fileset_byref.nil? && fileset.nil?
-      raise "update_library: Fileset with id #{fileset_id} has multiple instances " unless fileset_byref.nil? || fileset.nil?
-      fileset ||= fileset_byref
-      # The fileset dir needs to point to lib_dir and the includes needs to equal @client_jars_string
-      dirty = false
-      if fileset.attribute('dir').nil? || fileset.attribute('dir').value != lib_dir
-        # puts "fileset #{fileset_id} dir attribute being updated"
-        fileset.delete_attribute('dir')
+    def self.update_library(doc, name, library, default_id, lib_dir, client_jars_string)
+      # check first for the default fileset. This search should succeed if the user has followed our documented conventions.
+      default = doc.elements.to_a("//fileset[@id='#{default_id}']")
+      unless default.empty?
+        ClientJarUtils.update_default_fileset(default, lib_dir, client_jars_string)
+        return
+      end
+      # Tolerate unexpected fileset ids. We could also add code here to tolerate files.
+      filesets = ClientJarUtils.find_all_filests(doc, library)
+      raise "no filesets found for service #{name}" if filesets.empty?
+      updated = ClientJarUtils.update_fileset(filesets, lib_dir, client_jars_string)
+      # If no fileset was found, we could throw an exception or we can insert a new fileset. DB2 is a degenerate condition. For DB2, the user should specify both the db2jcc4.jar
+      # and the license jar, but in the BlueMix environment they can get away without specifying the license jar. In that case the update method will not find the fileset
+      unless updated
+        # insert the fileset in the last element so it overrides any fileset specified with the same id.
+        fileset = REXML::Element.new('fileset', library[-1])
         fileset.add_attribute('dir', lib_dir)
-        dirty = true
-      end
-      if fileset.attribute('includes').nil? || fileset.attribute('includes').value != client_jars_string
-        # puts "fileset #{fileset_id} includes attribute being updated"
-        fileset.delete_attribute('includes')
         fileset.add_attribute('includes', client_jars_string)
-        dirty = true
       end
-      dirty
     end
 
     #-------------------------------------------
@@ -149,56 +144,76 @@ module LibertyBuildpack::Services
     private
 
     #------------------------------------------------------------------------------------
-    # a private worker method for update_library to that finds the specified fileset by reference, if it exists.
+    # a private worker method for update_library to that finds all filesets in the library.
     #
-    # @param doc - the REXML::Document for server.xml
-    # @param library - the Element for the library
-    # @param fileset_id - the String specifying the fileset
-    # return the single fileset, or null.
-    # @raise if multiple filesets with the specified id exist or if the reference was found but the fileset does not exist.
+    # @param [Element] doc - the root element of the REXML::Document for server.xml
+    # @param [Array] library - the array containing all the physical Elements that comprise the one logical library.
+    # @return [Array] - an array containing all the fileset Elements in the library.
     #------------------------------------------------------------------------------------
-    def self.find_fileset_byref(doc, library, fileset_id)
-      fileset = nil
-      fileset_ref = library.attribute('filesetRef')
-      if fileset_ref.nil? == false
-        # returns a String of comma separated fileset ids
-        # puts "Retrieved filesetRef #{fileset_ref.value}"
-        fileset_ref.value.split(',').each do |name|
-          name = name.strip
-          # puts "processing filesetRef #{name}"
-          if name == fileset_id
-            raise "update_library: Fileset with id #{fileset_id} has multiple instances " unless fileset.nil?
-            # Find the global fileset using the fileset id. Expect exactly one instance.
-            filesets = doc.elements.to_a("//fileset[@id='#{fileset_id}']")
-            raise "update_library: Fileset with id #{fileset_id} does not exist" if filesets.size == 0
-            raise "update_library: Fileset with id #{fileset_id} has multiple instances " if filesets.size > 1
-            fileset = filesets[0]
+    def self.find_all_filests(doc, library)
+      filesets = []
+      library.each do |lib|
+        # check filesetRef first
+        fileset_attribute = lib.attribute('filesetRef').value unless lib.attribute('filesetRef').nil?
+        unless fileset_attribute.nil?
+          by_ref = doc.elements.to_a("//fileset[@id='#{fileset_attribute}']")
+          by_ref.each { |fs| filesets.push(fs) }
+        end
+        # check fileset elements
+        fileset_elements = lib.get_elements('fileset')
+        fileset_elements.each { |element| filesets.push(element) }
+      end
+      filesets
+    end
+
+    #-----------------------------------------------------------------------------------
+    # find the fileset whose includes match the specified client_jar_string and update the dir attribute to lib_dir
+    #
+    # @param [Array] filesets - the array of fileset Elements in a library
+    # @param [String] lib_dir - the directory where client jars are located
+    # @param [String] client_jar_string - the client jars string used to identify the target fileset.
+    #-----------------------------------------------------------------------------------
+    def self.update_default_fileset(filesets, lib_dir, client_jar_string)
+      filesets.each do |fileset|
+        # it would be really odd to find a partitioned fileset, but handle. Delete the dir and includes attributes from all existing elements, then add them back into the last one.
+        fileset.delete_attribute('dir')
+        fileset.delete_attribute('includes')
+      end
+      filesets[-1].add_attribute('dir', lib_dir)
+      filesets[-1].add_attribute('includes', client_jar_string)
+    end
+
+    #-----------------------------------------------------------------------------------
+    # find the fileset whose includes match the specified client_jar_string and update the dir attribute to lib_dir
+    #
+    # @param [Array] filesets - the array of fileset Elements in a library
+    # @param [String] lib_dir - the directory where client jars are located
+    # @param [String] client_jar_string - the client jars string that is used to identify the target fileset.
+    #-----------------------------------------------------------------------------------
+    def self.update_fileset(filesets, lib_dir, client_jar_string)
+      # Tolerate user error where they've included multiple filesets with the same include by updating all.
+      updated = false
+      filesets.each do |fileset|
+        jar_string = fileset.attribute('includes').value unless fileset.attribute('includes').nil?
+        # We need to find out if this fileset's include contains the same entries as the client_jar_string. client_jar_string is sorted, but the entry may not be.
+        unless jar_string.nil?
+          # the includes can either be comma-separated or whitespace-separated.
+          if jar_string.include?(',')
+            jars = jar_string.split(',')
+          else
+            jars = jar_string.split
+          end
+          unless jars.empty?
+            sorted_jar_string = ClientJarUtils.client_jars_string(jars)
+            if sorted_jar_string == client_jar_string
+              # update the dir attribute, overwrite if it already exists.
+              fileset.add_attribute('dir', lib_dir)
+              updated = true
+            end
           end
         end
       end
-      fileset
+      updated
     end
-
-    #------------------------------------------------------------------------------------
-    # a private worker method for update_library to that finds the specified fileset by containment, if it exists.
-    #
-    # @param library - the Element for the library
-    # @param fileset_id - the String specifying the fileset
-    # return the fileset, if found, else null.
-    # @raise if multiple filesets with the specified id exist.
-    #------------------------------------------------------------------------------------
-    def self.find_fileset_element(library, fileset_id)
-      fileset = nil
-      fileset_elements = library.get_elements('fileset')
-      fileset_elements.each do |element|
-        element_id = element.attribute('id')
-        if element_id.nil? == false && element_id.value == fileset_id
-          raise "update_library: Fileset with id #{fileset_id} has multiple instances " unless fileset.nil?
-          fileset = element
-        end
-      end
-      fileset
-    end
-
   end
 end
