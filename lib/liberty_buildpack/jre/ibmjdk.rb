@@ -40,6 +40,8 @@ module LibertyBuildpack::Jre
     # @option context [String] :app_dir the directory that the application exists in
     # @option context [String] :java_home the directory that acts as +JAVA_HOME+
     # @option context [Array<String>] :java_opts an array that Java options can be added to
+    # @option context [Hash] :license_ids the licenses accepted by the user
+    # @option contect [String] :jvm_type the type of jvm the user wants to use e.g ibmjre or openjdk
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
