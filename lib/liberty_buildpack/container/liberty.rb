@@ -221,6 +221,7 @@ module LibertyBuildpack::Container
         server_xml_doc.context[:attribute_quote] = :quote
 
         update_http_endpoint(server_xml_doc)
+        update_web_container(server_xml_doc)
 
         include_file = REXML::Element.new('include', server_xml_doc.root)
         include_file.add_attribute('location', 'runtime-vars.xml')
@@ -269,6 +270,17 @@ module LibertyBuildpack::Container
       endpoint.add_attribute('host', '*')
       endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
       endpoint.delete_attribute('httpsPort')
+    end
+
+    def update_web_container(server_xml_doc)
+      webcontainers = REXML::XPath.match(server_xml_doc, '/server/webContainer')
+      if webcontainers.empty?
+        webcontainer = REXML::Element.new('webContainer', server_xml_doc.root)
+      else
+        webcontainer = webcontainers[0]
+      end
+      webcontainer.add_attribute('trustHostHeaderPort', 'true')
+      webcontainer.add_attribute('extractHostHeaderPort', 'true')
     end
 
     def disable_welcome_page(server_xml_doc)
