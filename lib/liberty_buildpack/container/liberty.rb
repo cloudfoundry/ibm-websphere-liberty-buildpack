@@ -41,9 +41,13 @@ module LibertyBuildpack::Container
     #
     # @param [Hash] context the context that is provided to the instance
     # @option context [String] :app_dir the directory that the application exists in
+    # @option context [Hash] :environment the environment variables available to the application
     # @option context [String] :java_home the directory that acts as +JAVA_HOME+
     # @option context [Array<String>] :java_opts an array that Java options can be added to
     # @option context [String] :lib_directory the directory that additional libraries are placed in
+    # @option context [Hash] :vcap_application the information about the deployed application provided by the Cloud Controller
+    # @option context [Hash] :vcap_services the bound services to the application provided by the Cloud Controller
+    # @option context [Hash] :license_ids the licenses accepted by the user
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
