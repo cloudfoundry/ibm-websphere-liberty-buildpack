@@ -16,6 +16,9 @@
         
 
     <include location="runtime-vars.xml" />
+
+    <webContainer trustHostHeaderPort="true" extractHostHeaderPort="true" />
+    
     <httpDispatcher enableWelcomePage="false"/>
 
     <logging consoleLogLevel="INFO"/>
