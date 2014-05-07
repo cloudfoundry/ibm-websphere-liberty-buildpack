@@ -57,6 +57,10 @@ module LibertyBuildpack
       $stderr = StringIO.new
     end
 
+    after do
+      $stderr = STDERR
+    end
+
     it 'should call detect on all components' do
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_container1.stub(:apps).and_return(['root/app1', 'root/app2'])
