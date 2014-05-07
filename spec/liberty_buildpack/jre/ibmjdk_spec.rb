@@ -37,6 +37,11 @@ module LibertyBuildpack::Jre
       application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
     end
 
+    after do
+      $stdout = STDOUT
+      $stderr = STDERR
+    end
+
     it 'should detect with id of ibmjdk-<version>' do
       Dir.mktmpdir do |root|
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
