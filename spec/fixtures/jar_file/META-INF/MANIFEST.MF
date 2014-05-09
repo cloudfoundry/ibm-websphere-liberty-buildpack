@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: 
+Created-By: Ant 1.4.1
+Main-Class: HelloWorld

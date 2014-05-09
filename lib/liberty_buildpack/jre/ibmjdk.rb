@@ -31,9 +31,6 @@ module LibertyBuildpack::Jre
   # Encapsulates the detect, compile, and release functionality for selecting an OpenJDK JRE.
   class IBMJdk
 
-    # Filename of killjava script used to kill the JVM on OOM.
-    KILLJAVA_FILE_NAME = 'killjava'
-
     # The ratio of heap reservation to total reserved memory
     HEAP_SIZE_RATIO = 0.75
 
@@ -82,14 +79,12 @@ module LibertyBuildpack::Jre
         puts "(#{(Time.now - download_start_time).duration})"
         expand file
       end
-      copy_killjava_script
     end
 
     # Build Java memory options and places then in +context[:java_opts]+
     #
     # @return [void]
     def release
-      @java_opts << "-XX:OnOutOfMemoryError=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{KILLJAVA_FILE_NAME}"
       @java_opts.concat memory(@configuration)
     end
 
@@ -104,8 +99,6 @@ module LibertyBuildpack::Jre
     end
 
     private
-
-    RESOURCES = '../../../resources/openjdk/diagnostics'.freeze
 
     JAVA_HOME = '.java'.freeze
 
@@ -185,17 +178,6 @@ module LibertyBuildpack::Jre
 
     def pre_8
       @version < LibertyBuildpack::Util::TokenizedVersion.new('1.8.0')
-    end
-
-    def copy_killjava_script
-      resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-      killjava_file_content = File.read(File.join resources, KILLJAVA_FILE_NAME)
-      updated_content = killjava_file_content.gsub(/@@LOG_FILE_NAME@@/, LibertyBuildpack::Diagnostics::LOG_FILE_NAME)
-      diagnostic_dir = LibertyBuildpack::Diagnostics.get_diagnostic_directory @app_dir
-      FileUtils.mkdir_p diagnostic_dir
-      File.open(File.join(diagnostic_dir, KILLJAVA_FILE_NAME), 'w', 0755) do |file|
-        file.write updated_content
-      end
     end
 
   end

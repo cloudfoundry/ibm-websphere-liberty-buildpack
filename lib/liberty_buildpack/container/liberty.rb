@@ -53,7 +53,6 @@ module LibertyBuildpack::Container
     def initialize(context)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @app_dir = context[:app_dir]
-      prep_app(@app_dir)
       @java_home = context[:java_home]
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
@@ -63,14 +62,6 @@ module LibertyBuildpack::Container
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
       @environment = context[:environment]
       @apps = apps
-    end
-
-    # Extracts archives that are pushed initially
-    def prep_app(app_dir)
-      ['*.zip', '*.ear'].each do |archive|
-        app = Liberty.contains_type(app_dir, archive)
-        Liberty.splat_expand(app) if app
-      end
     end
 
     # Get a list of web applications that are in the server directory
@@ -235,6 +226,7 @@ module LibertyBuildpack::Container
         server_xml_doc.context[:attribute_quote] = :quote
 
         update_http_endpoint(server_xml_doc)
+        update_web_container(server_xml_doc)
 
         include_file = REXML::Element.new('include', server_xml_doc.root)
         include_file.add_attribute('location', 'runtime-vars.xml')
@@ -283,6 +275,17 @@ module LibertyBuildpack::Container
       endpoint.add_attribute('host', '*')
       endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
       endpoint.delete_attribute('httpsPort')
+    end
+
+    def update_web_container(server_xml_doc)
+      webcontainers = REXML::XPath.match(server_xml_doc, '/server/webContainer')
+      if webcontainers.empty?
+        webcontainer = REXML::Element.new('webContainer', server_xml_doc.root)
+      else
+        webcontainer = webcontainers[0]
+      end
+      webcontainer.add_attribute('trustHostHeaderPort', 'true')
+      webcontainer.add_attribute('extractHostHeaderPort', 'true')
     end
 
     def disable_welcome_page(server_xml_doc)
@@ -378,8 +381,8 @@ module LibertyBuildpack::Container
         uri = @liberty_components_and_uris[COMPONENT_LIBERTY_CORE]
         fail 'No Liberty download defined in buildpack.' if uri.nil?
         download_and_unpack_archive(uri, root)
-
-        @services_manager = ServicesManager.new(@vcap_services, runtime_vars_dir(root))
+        # read opt-out of service bindings information from env (manifest.yml) and create services manager.
+        @services_manager = ServicesManager.new(@vcap_services, runtime_vars_dir(root), @environment['service_binding_excludes'])
 
         # if the liberty feature manager and repository are not being used to install server
         # features, download the required files from the various configured locations. If the
@@ -602,8 +605,15 @@ module LibertyBuildpack::Container
     end
 
     def self.meta_inf(app_dir)
+      # return nil if META-INF directory doesn't exist. This mimics behavior of previous implementation.
       meta_inf = File.join(app_dir, META_INF)
-      File.directory?(File.join(app_dir, META_INF)) ? meta_inf : nil
+      return nil if File.directory?(meta_inf) == false
+      # To mimic the behavior of the previous (flawed) implementatation, from here on out we only return nil if we can determine it's a jar
+      manifest_file = File.join(app_dir, META_INF, 'MANIFEST.MF')
+      return meta_inf if File.exists?(manifest_file) == false
+      props = LibertyBuildpack::Util::Properties.new(manifest_file)
+      main_class = props['Main-Class']
+      main_class.nil? ? meta_inf : nil
     end
 
     def self.server_directory(server_dir)

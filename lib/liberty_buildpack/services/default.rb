@@ -57,6 +57,14 @@ module LibertyBuildpack::Services
       false
     end
 
+    #---------------------------------------------
+    # Get the list of Liberty features required by this service
+    #
+    # @param [Set] features - the Set to add the required features to
+    #---------------------------------------------
+    def get_required_features(features)
+    end
+
     #----------------------------------------------------------------------------------------
     # Use the configured client_jars regular expression to determine which client jars need to be downloaded for this service to function properly
     #
@@ -97,9 +105,10 @@ module LibertyBuildpack::Services
     # @param server_dir - the server directory which is the location for bootstrap.properties and jvm.options
     # @param driver_dir - the symbolic name of the directory where client jars are installed
     # @param available_jars - an array containing the names of all installed client driver jars.
+    # @param number_instances - the number of service instances that update the same service-specific server.xml stanzas
     # @raise if a problem was discovered (incoherent or inconsistent existing configuration, for example)
     #------------------------------------------------------------------------------------
-    def update(doc, server_dir, driver_dir, available_jars)
+    def update(doc, server_dir, driver_dir, available_jars, number_instances)
     end
   end
 end
