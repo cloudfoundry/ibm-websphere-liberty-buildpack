@@ -62,7 +62,6 @@ module LibertyBuildpack::Jre
       Dir.mktmpdir do |root|
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
         LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        LibertyBuildpack::Jre::IBMJdk.stub(:cache_dir).and_return('/tmp/jre_temp')
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.bin'))
 
         IBMJdk.new(
