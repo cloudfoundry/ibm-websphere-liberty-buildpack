@@ -31,9 +31,6 @@ module LibertyBuildpack::Jre
   # Encapsulates the detect, compile, and release functionality for selecting an OpenJDK JRE.
   class IBMJdk
 
-    # Filename of killjava script used to kill the JVM on OOM.
-    KILLJAVA_FILE_NAME = 'killjava'
-
     # The ratio of heap reservation to total reserved memory
     HEAP_SIZE_RATIO = 0.75
 
@@ -82,14 +79,12 @@ module LibertyBuildpack::Jre
         puts "(#{(Time.now - download_start_time).duration})"
         expand file
       end
-      copy_killjava_script
     end
 
     # Build Java memory options and places then in +context[:java_opts]+
     #
     # @return [void]
     def release
-      @java_opts << "-XX:OnOutOfMemoryError=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{KILLJAVA_FILE_NAME}"
       @java_opts.concat memory(@configuration)
     end
 
@@ -105,8 +100,6 @@ module LibertyBuildpack::Jre
 
     private
 
-    RESOURCES = '../../../resources/openjdk/diagnostics'.freeze
-
     JAVA_HOME = '.java'.freeze
 
     KEY_MEMORY_HEURISTICS = 'memory_heuristics'
@@ -121,17 +114,22 @@ module LibertyBuildpack::Jre
       system "mkdir -p #{java_home}"
 
       if File.basename(file.path).end_with?('.bin.cached', '.bin')
-        cache_dir = IBMJdk.cache_dir(file)
-        response_file = File.new(File.join(cache_dir, 'response.properties'), 'w')
-        response_file.puts('INSTALLER_UI=silent')
-        response_file.puts("USER_INSTALL_DIR=#{java_home}")
-        response_file.close
+        Dir.mktmpdir do |temp|
+          response_file = File.new(File.join(temp, 'response.properties'), 'w')
+          response_file.puts('INSTALLER_UI=silent')
+          response_file.puts("USER_INSTALL_DIR=#{java_home}")
+          response_file.close
 
-        system "chmod +x #{file.path}"
+          ## Copy JRE as JRE installer ignoring USER_INSTALL_DIR and admin cache read-only
+          copy = File.join(temp, File.basename(file.path))
+          FileUtils.cp(file.path, copy)
 
-        system "#{file.path} -i silent -f #{response_file.path} 2>&1"
+          system "chmod +x #{copy}"
+          system "#{copy} -i silent -f #{response_file.path} 2>&1"
 
-        Pathname.new(cache_dir).children.select { |child| child.directory? }.map { |path| system "mv #{path.to_s}/* #{java_home}" }
+          ## Move expanded JRE to JAVA_HOME as JRE installer ignoring USER_INSTALL_DIR
+          Pathname.new(temp).children.select { |child| child.directory? }.map { |path| system "mv #{path.to_s}/* #{java_home}" }
+        end
       else
         system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
       end
@@ -185,17 +183,6 @@ module LibertyBuildpack::Jre
 
     def pre_8
       @version < LibertyBuildpack::Util::TokenizedVersion.new('1.8.0')
-    end
-
-    def copy_killjava_script
-      resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-      killjava_file_content = File.read(File.join resources, KILLJAVA_FILE_NAME)
-      updated_content = killjava_file_content.gsub(/@@LOG_FILE_NAME@@/, LibertyBuildpack::Diagnostics::LOG_FILE_NAME)
-      diagnostic_dir = LibertyBuildpack::Diagnostics.get_diagnostic_directory @app_dir
-      FileUtils.mkdir_p diagnostic_dir
-      File.open(File.join(diagnostic_dir, KILLJAVA_FILE_NAME), 'w', 0755) do |file|
-        file.write updated_content
-      end
     end
 
   end

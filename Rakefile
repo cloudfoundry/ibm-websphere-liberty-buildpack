@@ -93,7 +93,7 @@ task :package, [:zipfile, :hosts] do |t, args|
     system("find #{dest} -type f -exec chmod a+r {} \\;")
     system("find #{dest} -type d -exec chmod a+rx {} \\;")
     system("chmod a+rx #{dest}/bin/*")
-    system("cd #{dest} && zip -r #{zipfile} .")
+    system("cd #{dest} && zip -r #{zipfile} -x@.package-exclude .")
   end
 end
 

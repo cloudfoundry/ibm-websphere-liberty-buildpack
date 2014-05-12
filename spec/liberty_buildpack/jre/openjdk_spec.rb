@@ -33,6 +33,11 @@ module LibertyBuildpack::Jre
       $stderr = StringIO.new
     end
 
+    after do
+      $stdout = STDOUT
+      $stderr = STDERR
+    end
+
     it 'should detect with id of openjdk-<version>' do
       Dir.mktmpdir do |root|
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(OPENJDK_DETAILS_PRE_8)

@@ -27,6 +27,10 @@ module LibertyBuildpack::Diagnostics
       $stderr = StringIO.new
     end
 
+    after do
+      $stderr = STDERR
+    end
+
     it 'should create a logger' do
       Dir.mktmpdir do |app_dir|
         logger = new_logger app_dir

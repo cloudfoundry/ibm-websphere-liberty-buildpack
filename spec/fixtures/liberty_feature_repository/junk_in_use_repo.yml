@@ -19,4 +19,5 @@ repository_root: "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere
 version: 8.5.+
 minify: false
 liberty_repository_properties:
-  useRepository: true
+  useRepository: xxx
+  someKey: someValue

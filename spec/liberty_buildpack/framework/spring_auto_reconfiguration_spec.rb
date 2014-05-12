@@ -33,6 +33,11 @@ module LibertyBuildpack::Framework
       $stderr = StringIO.new
     end
 
+    after do
+      $stdout = STDOUT
+      $stderr = STDERR
+    end
+
     it 'should detect with Spring JAR in WEB-INF' do
       LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
 
