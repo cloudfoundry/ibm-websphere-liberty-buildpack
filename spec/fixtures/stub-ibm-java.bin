@@ -1,6 +1,5 @@
-rm -rf /tmp/jre_temp
-mkdir /tmp/jre_temp
-mkdir /tmp/jre_temp/jre_dir
-mkdir /tmp/jre_temp/jre_dir/jre
-mkdir /tmp/jre_temp/jre_dir/jre/bin
-echo "java" > /tmp/jre_temp/jre_dir/jre/bin/java
+# Emulate broken JRE installer behaviour of unpacking in to current directory
+BASEDIR=$(dirname $0)
+rm -rf $BASEDIR/jre_dir
+mkdir -p $BASEDIR/jre_dir/jre/bin
+echo "java" > $BASEDIR/jre_dir/jre/bin/java
