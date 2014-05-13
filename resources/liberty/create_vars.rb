@@ -20,7 +20,7 @@ require 'json'
 require 'rexml/document'
 
 def add_runtime_variable(element, name, value)
-    unless name.nil? || value.nil?
+  unless name.nil? || value.nil?
     new_element = REXML::Element.new('variable', element)
     new_element.add_attribute('name', name.downcase)
       new_element.add_attribute('value', value)
