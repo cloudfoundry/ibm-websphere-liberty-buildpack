@@ -37,6 +37,11 @@ module LibertyBuildpack::Container
       application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
     end
 
+    after do
+      $stdout = STDOUT
+      $stderr = STDERR
+    end
+
     describe 'prepare applications' do
       it 'should extract all applications' do
         Dir.mktmpdir do |root|
@@ -744,7 +749,41 @@ module LibertyBuildpack::Container
           expect(server_xml_contents.include? 'host="*"').to be_true
           expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
           expect(server_xml_contents.include? 'httpsPort=').to be_false
+          expect(server_xml_contents).to match(/<webContainer extractHostHeaderPort='true' trustHostHeaderPort='true'\/>/)
           expect(File.exists?(droplet_yaml_file)).to be_false
+        end
+      end
+
+      it 'should update webContainer element if server.xml already contains one' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
+            file.write("<server><webContainer extractHostHeaderPort='false' trusted='false' /></server>")
+          end
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          Liberty.new(
+          app_dir: root,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          liberty_directory = File.join(root, '.liberty')
+          expect(Dir.exists?(liberty_directory)).to be_true
+
+          server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read server_xml_file
+          expect(server_xml_contents).to match(/<webContainer extractHostHeaderPort="true" trustHostHeaderPort="true" trusted="false"\/>/)
         end
       end
 
@@ -1017,60 +1056,72 @@ module LibertyBuildpack::Container
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
 
-        command = Liberty.new(
-        app_dir: 'spec/fixtures/container_liberty',
-        java_home: 'test-java-home',
-        java_opts: '',
-        configuration: {},
-        license_ids: {}
-        ).release
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty', root)
+          command = Liberty.new(
+            app_dir: File.join(root, 'container_liberty'),
+            java_home: 'test-java-home',
+            java_opts: '',
+            configuration: {},
+            license_ids: {}
+          ).release
 
-        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+        end
       end
 
       it 'should return correct execution command for the META-INF case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
 
-        command = Liberty.new(
-        app_dir: 'spec/fixtures/container_liberty_ear',
-        java_home: 'test-java-home',
-        java_opts: '',
-        configuration: {},
-        license_ids: {}
-        ).release
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty_ear', root)
+          command = Liberty.new(
+            app_dir: File.join(root, 'container_liberty_ear'),
+            java_home: 'test-java-home',
+            java_opts: '',
+            configuration: {},
+            license_ids: {}
+          ).release
 
-        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+        end
       end
 
       it 'should return correct execution command for the zipped-up server case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
 
-        command = Liberty.new(
-        app_dir: 'spec/fixtures/container_liberty_server',
-        java_home: 'test-java-home',
-        java_opts: '',
-        configuration: {},
-        license_ids: {}
-        ).release
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty_server', root)
+          command = Liberty.new(
+            app_dir: File.join(root, 'container_liberty_server'),
+            java_home: 'test-java-home',
+            java_opts: '',
+            configuration: {},
+            license_ids: {}
+          ).release
 
-        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run myServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run myServer")
+        end
       end
 
       it 'should return correct execution command for single-server case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
 
-        command = Liberty.new(
-        app_dir: 'spec/fixtures/container_liberty_single_server',
-        java_home: 'test-java-home',
-        java_opts: '',
-        configuration: {},
-        license_ids: {}
-        ).release
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty_single_server', root)
+          command = Liberty.new(
+            app_dir: File.join(root, 'container_liberty_single_server'),
+            java_home: 'test-java-home',
+            java_opts: '',
+            configuration: {},
+            license_ids: {}
+          ).release
 
-        expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+        end
       end
 
       it 'should throw an error when there are multiple servers to deploy' do

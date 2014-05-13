@@ -1,0 +1,12 @@
+<server description="test liberty feature repository server">
+
+    <featureManager>
+        <feature>jsp-2.2</feature>
+        <feature>featureOne</feature>
+        <feature>featureTwo</feature>
+        <feature>myPrefix:myUserFeature</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint" host="localhost" httpPort="9080"/>
+
+</server>

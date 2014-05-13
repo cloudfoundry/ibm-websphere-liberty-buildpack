@@ -1,9 +1,0 @@
----
-name: liberty
-dependencies:
-- ruby
-files:
-- liberty/Gemfile
-- liberty/Gemfile.lock
-- liberty/{bin,lib, resources,config}/**/*
-- pkg_utils/*
