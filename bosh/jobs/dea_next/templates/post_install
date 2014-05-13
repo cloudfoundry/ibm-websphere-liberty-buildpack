@@ -1,8 +1,0 @@
-#!/bin/bash -e
-
-LIBERTY_PACKAGE_DIR=/var/vcap/packages/liberty
-DEA_NEXT_PACKAGE_DIR=/var/vcap/packages/dea_next
-
-ln -sf ${LIBERTY_PACKAGE_DIR} ${DEA_NEXT_PACKAGE_DIR}/buildpacks/vendor
-
-
