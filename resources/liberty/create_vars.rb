@@ -19,22 +19,22 @@ require 'fileutils'
 require 'json'
 require 'rexml/document'
 
-def add_variable(element, name)
-  unless ENV[name].nil?
+def add_runtime_variable(element, name, value)
+    unless name.nil? || value.nil?
     new_element = REXML::Element.new('variable', element)
     new_element.add_attribute('name', name.downcase)
-    new_element.add_attribute('value', ENV[name].to_s)
+      new_element.add_attribute('value', value)
   end
+end
+
+def add_variable(element, name)
+    add_runtime_variable(element, name, ENV[name].to_s) unless ENV[name].nil?
 end
 
 def add_vcap_app_variable(element, name)
   unless ENV['VCAP_APPLICATION'].nil?
     json_app = JSON.parse(ENV['VCAP_APPLICATION'])
-    unless json_app[name].nil?
-      new_element = REXML::Element.new('variable', element)
-      new_element.add_attribute('name', name.downcase)
-      new_element.add_attribute('value', json_app[name])
-    end
+    add_runtime_variable(element, name, json_app[name])
   end
 end
 
@@ -53,6 +53,7 @@ add_vcap_app_variable(document.root, 'application_version')
 add_vcap_app_variable(document.root, 'host')
 add_vcap_app_variable(document.root, 'application_uris')
 add_vcap_app_variable(document.root, 'start')
+add_runtime_variable(document.root, 'application.log.dir', '../../../../../logs')
 
 File.open(filename, 'w') { |file| document.write(file) }
 
