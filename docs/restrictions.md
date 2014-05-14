@@ -14,10 +14,10 @@ continue to support include statements in server.xml files.
 
 3. When using a Liberty Profile server in a Cloud Foundry environment
 the supported features includes those listed under the categories: **Java
-EE Web Profile**, **Enterprise OSGi**, and **Operations** categories as
-described here, [Liberty features][]. Features listed under the categories:
-**Systems Management** and **z/OS** are not supported when running in a Cloud
-Foundry environment.
+EE Web Profile**, **Enterprise OSGi**, **Operations**, and **Extended
+Programming Models** as described here, [Liberty features][]. Features
+listed under the categories: **Systems Management** and **z/OS** are not
+supported when running in a Cloud Foundry environment.
 
 4. Support for two-phase commit global transactions is disabled for
 applications running on a Liberty Profile server running in a Cloud
