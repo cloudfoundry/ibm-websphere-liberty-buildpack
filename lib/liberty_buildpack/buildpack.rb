@@ -209,8 +209,8 @@ module LibertyBuildpack
       # become inaccessible to the buildpack at some point in the future, we find out before someone
       # happens to switch on debug logging.
       if system("git --git-dir=#{git_dir} status 2>/dev/null 1>/dev/null")
-       logger.debug("git remotes: #{`git --git-dir=#{git_dir} remote -v`}")
-       logger.debug("git HEAD commit: #{`git --git-dir=#{git_dir} log HEAD^!`}")
+        logger.debug("git remotes: #{`git --git-dir=#{git_dir} remote -v`}")
+        logger.debug("git HEAD commit: #{`git --git-dir=#{git_dir} log HEAD^! --`}")
       else
         logger.debug('Buildpack is not stored in a git repository')
       end
@@ -266,6 +266,20 @@ module LibertyBuildpack
       @frameworks = Buildpack.construct_components(components, 'frameworks', basic_context, @logger)
       @containers = Buildpack.construct_components(components, 'containers', basic_context, @logger)
     end
+
+    def self.initialize_env(dir)
+      blacklist = %w(PATH GIT_DIR CPATH CPPATH LD_PRELOAD LIBRARY_PATH)
+      if Dir.exists?(dir)
+        Dir.foreach(dir) do |name|
+          file = File.join(dir, name)
+          if File.file?(file) && !blacklist.include?(name)
+            value = File.read(file).strip
+            ENV[name] = value
+          end
+        end
+      end
+    end
+
   end
 
 end

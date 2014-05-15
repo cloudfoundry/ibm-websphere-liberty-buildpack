@@ -23,4 +23,6 @@ require 'liberty_buildpack/buildpack'
 
 build_dir = ARGV[0]
 
+LibertyBuildpack::Buildpack.initialize_env(ARGV[2]) unless ARGV[2].nil?
+
 LibertyBuildpack::Buildpack.drive_buildpack_with_logger(build_dir, 'Compile failed with exception %s') { |buildpack| buildpack.compile }
