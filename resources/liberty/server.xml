@@ -14,7 +14,13 @@
         <application name="myapp" context-root="/" location="myapp"
         type="war" />
         
+    <logging logDirectory="${application.log.dir}"/>
 
     <include location="runtime-vars.xml" />
-	
+
+    <webContainer trustHostHeaderPort="true" extractHostHeaderPort="true" />
+    
+    <httpDispatcher enableWelcomePage="false"/>
+
+    <logging consoleLogLevel="INFO"/>
 </server>

@@ -14,20 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'English'
 require 'fileutils'
 require 'liberty_buildpack/container'
 require 'liberty_buildpack/container/container_utils'
+require 'liberty_buildpack/container/feature_manager'
 require 'liberty_buildpack/container/install_components'
 require 'liberty_buildpack/container/optional_components'
 require 'liberty_buildpack/container/services_manager'
 require 'liberty_buildpack/diagnostics/logger_factory'
-require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/repository/component_index'
+require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/properties'
-require 'English'
 require 'liberty_buildpack/util/license_management'
 require 'open-uri'
 
@@ -41,9 +42,13 @@ module LibertyBuildpack::Container
     #
     # @param [Hash] context the context that is provided to the instance
     # @option context [String] :app_dir the directory that the application exists in
+    # @option context [Hash] :environment the environment variables available to the application
     # @option context [String] :java_home the directory that acts as +JAVA_HOME+
     # @option context [Array<String>] :java_opts an array that Java options can be added to
     # @option context [String] :lib_directory the directory that additional libraries are placed in
+    # @option context [Hash] :vcap_application the information about the deployed application provided by the Cloud Controller
+    # @option context [Hash] :vcap_services the bound services to the application provided by the Cloud Controller
+    # @option context [Hash] :license_ids the licenses accepted by the user
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
@@ -96,11 +101,11 @@ module LibertyBuildpack::Container
         print "\nYou have not accepted the IBM Liberty License.\n\nVisit the following uri:\n#{@liberty_license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n"
         raise
       end
-
       download_and_install_liberty
       update_server_xml
       link_application
       make_server_script_runnable
+      download_and_install_features
       # Need to do minify here to have server_xml updated and applications and libs linked.
       minify_liberty if minify?
       update_java
@@ -230,6 +235,7 @@ module LibertyBuildpack::Container
         server_xml_doc.context[:attribute_quote] = :quote
 
         update_http_endpoint(server_xml_doc)
+        update_web_container(server_xml_doc)
 
         include_file = REXML::Element.new('include', server_xml_doc.root)
         include_file.add_attribute('location', 'runtime-vars.xml')
@@ -278,6 +284,17 @@ module LibertyBuildpack::Container
       endpoint.add_attribute('host', '*')
       endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
       endpoint.delete_attribute('httpsPort')
+    end
+
+    def update_web_container(server_xml_doc)
+      webcontainers = REXML::XPath.match(server_xml_doc, '/server/webContainer')
+      if webcontainers.empty?
+        webcontainer = REXML::Element.new('webContainer', server_xml_doc.root)
+      else
+        webcontainer = webcontainers[0]
+      end
+      webcontainer.add_attribute('trustHostHeaderPort', 'true')
+      webcontainer.add_attribute('extractHostHeaderPort', 'true')
     end
 
     def disable_welcome_page(server_xml_doc)
@@ -338,13 +355,11 @@ module LibertyBuildpack::Container
     def make_server_script_runnable
       server_script = File.join liberty_home, 'bin', 'server'
       system "chmod +x #{server_script}"
-
       # scripts that need to be executable for the feature manager to work
       feature_manager_script = File.join liberty_home, 'bin', 'featureManager'
       system "chmod +x #{feature_manager_script}"
       product_info = File.join liberty_home, 'bin', 'productInfo'
       system "chmod +x #{product_info}"
-
     end
 
     def server_name
@@ -366,37 +381,41 @@ module LibertyBuildpack::Container
     COMPONENT_LIBERTY_EXT    = 'liberty_ext'.freeze
 
     def download_and_install_liberty
-      # create a temp dir where the downloaded files will be extracted to
+      # create a temporary directory where the downloaded files will be extracted to.
       Dir.mktmpdir do |root|
         FileUtils.rm_rf(liberty_home)
         FileUtils.mkdir_p(liberty_home)
 
-        # 1. download and extract the server to a temporary location.
+        # download and extract the server to a temporary location.
         uri = @liberty_components_and_uris[COMPONENT_LIBERTY_CORE]
         fail 'No Liberty download defined in buildpack.' if uri.nil?
         download_and_unpack_archive(uri, root)
         # read opt-out of service bindings information from env (manifest.yml) and create services manager.
         @services_manager = ServicesManager.new(@vcap_services, runtime_vars_dir(root), @environment['service_binding_excludes'])
 
-        # 2. download and extract the server extensions to the same temporary location.
-        if @services_manager.requires_liberty_extensions? || configured_feature_requires_component?(COMPONENT_LIBERTY_EXT)
-          download_and_unpack_archive(uri, root) if (uri = @liberty_components_and_uris.delete(COMPONENT_LIBERTY_EXT))
+        # if the liberty feature manager and repository are not being used to install server
+        # features, download the required files from the various configured locations. If the
+        # repository is being used it will install features later (after server.xml is updated).
+        unless FeatureManager.enabled?(@configuration)
+          # download and extract the extended server files to the same location, if required.
+          if @services_manager.requires_liberty_extensions? || configured_feature_requires_component?(COMPONENT_LIBERTY_EXT)
+            download_and_unpack_archive(uri, root) if (uri = @liberty_components_and_uris.delete(COMPONENT_LIBERTY_EXT))
+          end
+          # services may provide zips or esas or both. Query services to see what's needed
+          # and download and install.
+          install_list = InstallComponents.new
+          @services_manager.get_required_esas(@liberty_components_and_uris, install_list)
+          install_list.zips.each { |zip_uri| download_and_unpack_archive(zip_uri, root) }
+          download_and_install_esas(install_list.esas, root)
         end
 
-        # Services may provide zips or esas or both. Query services to see what's needed.
-        install_list = InstallComponents.new
-        @services_manager.get_required_esas(@liberty_components_and_uris, install_list)
-        # 3. Perform all unzips before moving the server to its proper location.
-        install_list.zips.each { |zip_uri| download_and_unpack_archive(zip_uri, root) }
-
-        # 4. move the server to it's proper location.
+        # move the server to it's proper location.
         system "mv #{root}/wlp/* #{liberty_home}/"
 
-        # 5. configure icap extension, if required.
+        # configure icap extension, if required.
         system "sed -i -e 's|productInstall=wlp/|productInstall=#{LIBERTY_HOME}/|' #{icap_extension}" if File.file? icap_extension
 
-        # 6. Install esas and services client jars
-        download_and_install_esas(install_list.esas)
+        # install any services client jars required.
         @services_manager.install_client_jars(@liberty_components_and_uris, current_server_dir)
       end
     end
@@ -418,6 +437,16 @@ module LibertyBuildpack::Container
         # component is optional, but no server.xml supplied, so no optional features are requested.
         false
       end
+    end
+
+    # download and install any features configured in server.xml that are not already
+    # present in the liberty server by invoking featureManager with the list of all
+    # features, and letting it download and install the missing features from the
+    # liberty repository.
+    def download_and_install_features
+      server_xml = File.join(current_server_dir, SERVER_XML)
+      feature_manager = FeatureManager.new(@app_dir, @java_home, @configuration)
+      feature_manager.download_and_install_features(server_xml, liberty_home)
     end
 
     # This method unpacks an archive file. Supported archive types are .zip, .jar, tar.gz and tgz.
@@ -454,7 +483,7 @@ module LibertyBuildpack::Container
       puts "(#{(Time.now - install_start_time).duration}).\n"
     end
 
-    def download_and_install_esas(esas)
+    def download_and_install_esas(esas, root)
       esas.each do |esa|
         # each esa is an array of two entries, uri and options string
         uri = esa[0]
@@ -464,16 +493,16 @@ module LibertyBuildpack::Container
         # for each downloaded file, there is a corresponding cached, etag, last_modified, and lock extension
         LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
           print "(#{(Time.now - download_start_time).duration}).\n"
-          install_esa(file, options)
+          install_esa(file, options, root)
         end
       end
     end
 
-    def install_esa(file, options)
+    def install_esa(file, options, root)
       print 'Installing feature ... '
       install_start_time = Time.now
       # setup the command and options
-      cmd = File.join(liberty_home, 'bin', 'featureManager')
+      cmd = File.join(root, 'wlp', 'bin', 'featureManager')
       script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" #{cmd} install #{file.path} #{options}"
       output = `#{script_string}`
       if  $CHILD_STATUS.to_i != 0

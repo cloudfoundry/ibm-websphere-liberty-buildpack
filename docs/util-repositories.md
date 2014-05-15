@@ -77,14 +77,14 @@ Besides declaring a specific version to use, you can also specify a bounded rang
 
 Prerequisites: Download the Liberty Profile runtime and IBM JRE for Java 7.0.
 
-1. Copy the wlp-developers-runtime-8.5.5.1.jar into the `<docroot>/buildpack/wlp` directory.
+1. Copy the wlp-developers-runtime-8.5.5.2.jar into the `<docroot>/buildpack/wlp` directory.
 2. Create `<docroot>/buildpack/wlp/index.yml` which contains  
 	
 	`# version: uri`  
 	`---`  
-	`8.5.5_0:` 
-	    `uri: http://myhost/buildpack/wlp/wlp-developers-runtime-8.5.5.1.jar` 
-	    `license: http://myhost/buildpack/wlp/wlp-developers-runtime-8.5.5.1-License.html` 
+	`8.5.5_2:` 
+	    `uri: http://myhost/buildpack/wlp/wlp-developers-runtime-8.5.5.2.jar` 
+	    `license: http://myhost/buildpack/wlp/wlp-developers-runtime-8.5.5.2-License.html` 
 	
 3. Copy the the ibm-java-jre-7.0-5.0-x86_64-archive.bin into the `<docroot>/buildpack/jre` directory.
 4. Create `<docroot>/buildpack/jre/index.yml` which contains  

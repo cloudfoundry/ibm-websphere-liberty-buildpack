@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# this script will write to a file, set-up the filename.
+OUTPUT_FILE=$0.txt
+
+# delete file just in case it's already present.
+rm -f $OUTPUT_FILE
+
+# write out the command that the buildpack invoked this featureManager script
+# with, this will be analysed in the test code to ensure we called this script
+# and that it was correctly invoked.
+echo 'parameters are ('"$@"')' > $OUTPUT_FILE
+
+# write out the environment variables that should have been set (java home) and
+# might have been set, depending on options (jvm args), these will also be 
+# analysed in test code when necessary.
+echo 'java home is ('$JAVA_HOME')' >> $OUTPUT_FILE
+echo 'jvm args is ('$JVM_ARGS')' >> $OUTPUT_FILE
+
+# pretend the features requested were already present so we avoid throwing an
+# exception from buildpack code (before the test code analyzes the command).
+echo "CWWKF1216I"

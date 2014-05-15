@@ -54,7 +54,8 @@ task :package, [:zipfile, :hosts] do |t, args|
   source = File.dirname(__FILE__)
   basename = File.basename(source)
   if args.zipfile.nil?
-    zipfile = File.expand_path(File.join('..', "#{basename}.zip"), source)
+    hash = `git rev-parse --short HEAD`.chomp
+    zipfile = File.expand_path(File.join('..', "#{basename}-#{hash}.zip"), source)
   else
     zipfile = File.expand_path(args.zipfile)
     zipfile << ".zip" unless zipfile.end_with? (".zip")
@@ -93,7 +94,7 @@ task :package, [:zipfile, :hosts] do |t, args|
     system("find #{dest} -type f -exec chmod a+r {} \\;")
     system("find #{dest} -type d -exec chmod a+rx {} \\;")
     system("chmod a+rx #{dest}/bin/*")
-    system("cd #{dest} && zip -r #{zipfile} .")
+    system("cd #{dest} && zip -r #{zipfile} -x@.package-exclude .")
   end
 end
 
