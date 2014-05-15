@@ -16,9 +16,8 @@ As a Cloud Foundry administrator, you can install the Liberty Buildpack as an `a
 
    ```yaml
    ---
-   env:
-     IBM_JVM_LICENSE: <jvm license code>
-     IBM_LIBERTY_LICENSE: <liberty license code>
+   IBM_JVM_LICENSE: <jvm license code>
+   IBM_LIBERTY_LICENSE: <liberty license code>
    ```
 
    By adding the license to the buildpack package, individual applications will not be required to accept the license terms via environment variables.
