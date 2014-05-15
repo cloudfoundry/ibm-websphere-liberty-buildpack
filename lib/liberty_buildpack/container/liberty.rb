@@ -108,7 +108,7 @@ module LibertyBuildpack::Container
       download_and_install_features
       # Need to do minify here to have server_xml updated and applications and libs linked.
       minify_liberty if minify?
-      update_java
+      overlay_java
       set_liberty_system_properties
     end
 
@@ -223,8 +223,6 @@ module LibertyBuildpack::Container
     RESOURCES_DIR = 'resources'.freeze
 
     JAVA_DIR = '.java'.freeze
-
-    JAVA_REPLACEMENT_DIR  = '.java-replacement'.freeze
 
     JAVA_OVERLAY_DIR  = '.java-overlay'.freeze
 
@@ -572,21 +570,15 @@ module LibertyBuildpack::Container
       end
     end
 
-    def update_java
+    def overlay_java
       server_xml_path =  Liberty.liberty_directory(@app_dir)
       if server_xml_path # server package (zip) push
         path_start = File.dirname(server_xml_path)
         overlay_src = File.join(path_start, RESOURCES_DIR, JAVA_OVERLAY_DIR, JAVA_DIR)
-        replacement_src = File.join(path_start, RESOURCES_DIR, JAVA_REPLACEMENT_DIR, JAVA_DIR)
       else # WAR or server directory push
         overlay_src = File.join(@app_dir, RESOURCES_DIR, JAVA_OVERLAY_DIR, JAVA_DIR)
-        replacement_src = File.join(@app_dir, RESOURCES_DIR, JAVA_REPLACEMENT_DIR, JAVA_DIR)
       end
-      if File.exists?(replacement_src)
-        print "Replacing java from #{replacement_src}\n"
-        FileUtils.rm_rf(File.join(@app_dir, JAVA_DIR))
-        FileUtils.cp_r(replacement_src, @app_dir)
-      elsif File.exists?(overlay_src)
+      if File.exists?(overlay_src)
         print "Overlaying java from #{overlay_src}\n"
         FileUtils.cp_r(overlay_src, @app_dir)
       end

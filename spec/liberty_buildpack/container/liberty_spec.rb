@@ -337,7 +337,7 @@ module LibertyBuildpack::Container
             file.write('overlay file')
           end
           File.open(File.join(root, '.java', 'test.txt'), 'w') do |file|
-            file.write('test file that should still exist for overlay and should not exist for replacement')
+            file.write('test file that should still exist after overlay')
           end
 
           LIBERTY_OS_DETAILS = [LIBERTY_VERSION, 'wlp-developers.jar', 'spec/fixtures/license.html']
@@ -361,18 +361,18 @@ module LibertyBuildpack::Container
         end
       end
 
-      it 'should find and copy.java-replacement included in server zip package during push' do
+      it 'should find and copy .java-overlay included in server zip package during push' do
         Dir.mktmpdir do |root|
           FileUtils.mkdir_p File.join(root, '.java')
-          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'server1', 'resources', '.java-replacement', '.java')
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'server1', 'resources', '.java-overlay', '.java')
           File.open(File.join(root, 'wlp', 'usr', 'servers', 'server1', 'server.xml'), 'w') do |file|
             file.write('<httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="9080" httpsPort="9443" />')
           end
-          File.open(File.join(root, 'wlp', 'usr', 'servers', 'server1', 'resources', '.java-replacement', '.java', 'replacement.txt'), 'w') do |file|
-            file.write('replacement file')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'server1', 'resources', '.java-overlay', '.java', 'overlay.txt'), 'w') do |file|
+            file.write('overlay file')
           end
           File.open(File.join(root, '.java', 'test.txt'), 'w') do |file|
-            file.write('test file that should still exist for overlay and should not exist for replacement')
+            file.write('test file that should still exist after overlay')
           end
 
           LIBERTY_OS_DETAILS = [LIBERTY_VERSION, 'wlp-developers.jar', 'spec/fixtures/license.html']
@@ -391,8 +391,8 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
-          expect(File.exists?(File.join root, '.java', 'replacement.txt')).to be_true
-          expect(File.exists?(File.join root, '.java', 'test.txt')).to be_false
+          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to be_true
+          expect(File.exists?(File.join root, '.java', 'test.txt')).to be_true
         end
       end
 
