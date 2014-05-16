@@ -56,10 +56,10 @@ module LibertyBuildpack
     #                         (+[]+).
     def detect
       jre_detections = Buildpack.component_detections @jres
-      raise "Application can be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
+      raise "Application cannot be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
       framework_detections = Buildpack.component_detections @frameworks
       container_detections = Buildpack.component_detections @containers
-      raise "Application can be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
+      raise "Application cannot be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
       tags = container_detections.empty? ? [] : jre_detections.concat(framework_detections).concat(container_detections).flatten.compact
       tags
     end
