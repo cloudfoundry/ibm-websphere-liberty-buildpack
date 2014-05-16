@@ -31,6 +31,7 @@ module LibertyBuildpack::Container
 
     def initialize(vcap_services, server_dir, opt_out_string)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
+      @logger.info("JWS opt_out encoding is #{opt_out_string.encoding.name}")
       @logger.debug("init: server dir is #{server_dir}, vcap_services is #{vcap_services} and opt_out is #{opt_out_string}")
       @opt_out = parse_opt_out(opt_out_string)
       FileUtils.mkdir_p(server_dir)
@@ -221,6 +222,7 @@ module LibertyBuildpack::Container
       unless vcap_services.nil?
         vcap_services.each do |service_type, service_data|
           @logger.debug("processing service type #{service_type} and data #{service_data}")
+          @logger.info("JWS service key encoding is #{service_type.encoding.name}")
           process_service_type(runtime_vars_doc.root, service_type, service_data)
         end
       end

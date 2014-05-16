@@ -62,6 +62,11 @@ module LibertyBuildpack::Container
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
       @environment = context[:environment]
       @apps = apps
+      @logger.info("JWS app dir encoding is #{@app_dir.encoding.name}")
+      out = `locale -a`
+      @logger.info("JWS locales is #{out}")
+      out = `locale`
+      @logger.info("JWS locale is #{out}")
     end
 
     # Get a list of web applications that are in the server directory
