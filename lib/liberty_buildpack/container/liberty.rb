@@ -108,6 +108,7 @@ module LibertyBuildpack::Container
       download_and_install_features
       # Need to do minify here to have server_xml updated and applications and libs linked.
       minify_liberty if minify?
+      overlay_java
       set_liberty_system_properties
     end
 
@@ -218,6 +219,12 @@ module LibertyBuildpack::Container
     WEB_INF = 'WEB-INF'.freeze
 
     META_INF = 'META-INF'.freeze
+
+    RESOURCES_DIR = 'resources'.freeze
+
+    JAVA_DIR = '.java'.freeze
+
+    JAVA_OVERLAY_DIR  = '.java-overlay'.freeze
 
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
@@ -560,6 +567,20 @@ module LibertyBuildpack::Container
         Pathname.glob(File.join(@app_dir, '*')) do |file|
           FileUtils.ln_sf(file.relative_path_from(myapp_pathname), myapp_dir)
         end
+      end
+    end
+
+    def overlay_java
+      server_xml_path =  Liberty.liberty_directory(@app_dir)
+      if server_xml_path # server package (zip) push
+        path_start = File.dirname(server_xml_path)
+        overlay_src = File.join(path_start, RESOURCES_DIR, JAVA_OVERLAY_DIR, JAVA_DIR)
+      else # WAR or server directory push
+        overlay_src = File.join(@app_dir, RESOURCES_DIR, JAVA_OVERLAY_DIR, JAVA_DIR)
+      end
+      if File.exists?(overlay_src)
+        print "Overlaying java from #{overlay_src}\n"
+        FileUtils.cp_r(overlay_src, @app_dir)
       end
     end
 

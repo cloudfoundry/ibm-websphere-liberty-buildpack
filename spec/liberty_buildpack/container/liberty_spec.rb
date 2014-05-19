@@ -327,6 +327,75 @@ module LibertyBuildpack::Container
           expect(File.exists?(rest_connector)).to be_true
         end
       end
+
+      it 'should find and copy .java-overlay included in WAR file or server directory during push' do
+        Dir.mktmpdir do |root|
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
+          FileUtils.mkdir_p File.join(root, '.java')
+          FileUtils.mkdir_p File.join(root, 'resources', '.java-overlay', '.java')
+          File.open(File.join(root, 'resources', '.java-overlay', '.java', 'overlay.txt'), 'w') do |file|
+            file.write('overlay file')
+          end
+          File.open(File.join(root, '.java', 'test.txt'), 'w') do |file|
+            file.write('test file that should still exist after overlay')
+          end
+
+          LIBERTY_OS_DETAILS = [LIBERTY_VERSION, 'wlp-developers.jar', 'spec/fixtures/license.html']
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+           .and_return(LIBERTY_OS_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+           application_cache.stub(:get).with('wlp-developers.jar').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+          Liberty.new(
+          app_dir: root,
+          lib_directory: '',
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to be_true
+          expect(File.exists?(File.join root, '.java', 'test.txt')).to be_true
+        end
+      end
+
+      it 'should find and copy .java-overlay included in server zip package during push' do
+        Dir.mktmpdir do |root|
+          FileUtils.mkdir_p File.join(root, '.java')
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'server1', 'resources', '.java-overlay', '.java')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'server1', 'server.xml'), 'w') do |file|
+            file.write('<httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="9080" httpsPort="9443" />')
+          end
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'server1', 'resources', '.java-overlay', '.java', 'overlay.txt'), 'w') do |file|
+            file.write('overlay file')
+          end
+          File.open(File.join(root, '.java', 'test.txt'), 'w') do |file|
+            file.write('test file that should still exist after overlay')
+          end
+
+          LIBERTY_OS_DETAILS = [LIBERTY_VERSION, 'wlp-developers.jar', 'spec/fixtures/license.html']
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+           .and_return(LIBERTY_OS_DETAILS)
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+           application_cache.stub(:get).with('wlp-developers.jar').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+          Liberty.new(
+          app_dir: root,
+          lib_directory: '',
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to be_true
+          expect(File.exists?(File.join root, '.java', 'test.txt')).to be_true
+        end
+      end
+
       it 'should make the ./bin/server script runnable for the zipped up server case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_DETAILS)
