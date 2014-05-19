@@ -23,6 +23,9 @@ describe 'compile script', :integration do
   before(:all) do
     @cache = File.join(Dir.tmpdir, 'compile_cache')
     FileUtils.rm_rf(@cache)
+  end
+
+  before(:each) do
     ENV.update({ 'IBM_JVM_LICENSE' => 'L-AWON-8GALN9', 'IBM_LIBERTY_LICENSE' => 'L-JTHS-95XRL8' })
   end
 
@@ -44,7 +47,12 @@ describe 'compile script', :integration do
       FileUtils.cp_r'spec/fixtures/container_liberty/.', root
       with_memory_limit('1G') do
         Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
-          expect(wait_thr.value).to be_success
+          result = wait_thr.value
+          if result != 0
+            puts "stdout: #{stdout.read}"
+            puts "stderr: #{stderr.read}"
+          end
+          expect(result).to be_success
         end # popen3
       end # with
     end # dir
@@ -56,7 +64,33 @@ describe 'compile script', :integration do
 
       with_memory_limit('1G') do
         Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
-          expect(wait_thr.value).to be_success
+          result = wait_thr.value
+          if result != 0
+            puts "stdout: #{stdout.read}"
+            puts "stderr: #{stderr.read}"
+          end
+          expect(result).to be_success
+        end # popen3
+      end # with
+    end # dir
+  end # it
+
+  it 'pass environment variable directory' do
+    Dir.mktmpdir do |root|
+      # environment variables passed as files
+      ENV.delete('IBM_JVM_LICENSE')
+      ENV.delete('IBM_LIBERTY_LICENSE')
+
+      FileUtils.cp_r 'spec/fixtures/container_liberty_server/.', root
+
+      with_memory_limit('1G') do
+        Open3.popen3("bin/compile #{root} #{@cache} spec/fixtures/env") do |stdin, stdout, stderr, wait_thr|
+          result = wait_thr.value
+          if result != 0
+            puts "stdout: #{stdout.read}"
+            puts "stderr: #{stderr.read}"
+          end
+          expect(result).to be_success
         end # popen3
       end # with
     end # dir
