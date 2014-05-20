@@ -21,7 +21,7 @@ the `manifest.yml` file refer to the [manifest documentation][].
 After you have set the license acceptance environment variables, use the following command to deploy the application with the IBM WebSphere Application Server Liberty Buildpack:
 
 ```bash
-cf push <APP-NAME> -p <ARTIFACT> -b https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
+cf push <APP-NAME> -p <ARCHIVE> -b https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
 ```
 
 * For further details on the options available for deploying your applications see [options][].
@@ -52,7 +52,7 @@ To fork the Buildpack and host your own binaries, then complete the following:
 9. You should now be able to deploy applications to your forked buildpack with the following command:
 
 ```bash
-cf push <APP-NAME> -p <ARTIFACT> -b <URL to forked repository>
+cf push <APP-NAME> -p <ARCHIVE> -b <URL to forked repository>
 ```
     
 ## Running Tests
@@ -90,4 +90,4 @@ bundle install --gemfile Gemfile.rubymine-debug
 [developerWorks Java site]: https://www.ibm.com/developerworks/java/jdk/
 [Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.2/lafiles/runtime//en.html
 [JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-AWON-8GALN9&title=IBM%C2%AE+SDK%2C+Java-+Technology+Edition%2C+Version+7.0&l=en
-[manifest documentation]: http://docs.cloudfoundry.com/docs/using/deploying-apps/manifest.html
+[manifest documentation]: http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html
