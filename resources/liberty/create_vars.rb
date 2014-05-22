@@ -38,6 +38,14 @@ def add_vcap_app_variable(element, name)
   end
 end
 
+def log_directory
+  if ENV['DYNO'].nil?
+    return '../../../../../logs'
+  else
+    return '../../../../logs'
+  end
+end
+
 raise 'Please pass me a place to store the xml output' if ARGV[0].nil?
 
 filename = ARGV[0]
@@ -53,7 +61,7 @@ add_vcap_app_variable(document.root, 'application_version')
 add_vcap_app_variable(document.root, 'host')
 add_vcap_app_variable(document.root, 'application_uris')
 add_vcap_app_variable(document.root, 'start')
-add_runtime_variable(document.root, 'application.log.dir', '../../../../../logs')
+add_runtime_variable(document.root, 'application.log.dir', log_directory)
 
-File.open(filename, 'w') { |file| document.write(file) }
+File.open(filename, 'w') { |file| document.write(file, 2) }
 
