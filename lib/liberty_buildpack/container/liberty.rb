@@ -388,8 +388,10 @@ module LibertyBuildpack::Container
         uri = @liberty_components_and_uris[COMPONENT_LIBERTY_CORE]
         fail 'No Liberty download defined in buildpack.' if uri.nil?
         download_and_unpack_archive(uri, root)
-        # read opt-out of service bindings information from env (manifest.yml) and create services manager.
-        @services_manager = ServicesManager.new(@vcap_services, runtime_vars_dir(root), @environment['service_binding_excludes'])
+
+        # read opt-out of service bindings information from env (manifest.yml), and initialise
+        # services manager, which will be used to list dependencies for any bound services.
+        @services_manager = ServicesManager.new(@vcap_services, runtime_vars_dir(root), @environment['services_autoconfig_excludes'])
 
         # if the liberty feature manager and repository are not being used to install server
         # features, download the required files from the various configured locations. If the
@@ -550,6 +552,9 @@ module LibertyBuildpack::Container
 
     def link_application
       if Liberty.liberty_directory(@app_dir)
+        # Server package. We will delete the .liberty/usr directory and link in the wlp/usr directory from the server package as the usr directory. Copy user esas from
+        # .liberty/usr over to wlp/usr before the delete.
+        copy_user_features
         FileUtils.rm_rf(usr)
         FileUtils.mkdir_p(liberty_home)
         FileUtils.ln_sf(Pathname.new(File.join(@app_dir, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home)
@@ -568,6 +573,15 @@ module LibertyBuildpack::Container
           FileUtils.ln_sf(file.relative_path_from(myapp_pathname), myapp_dir)
         end
       end
+    end
+
+    def copy_user_features
+      return unless Dir.exists?(File.join(usr, 'extension', 'lib', 'features'))
+      FileUtils.mkdir_p(File.join(@app_dir, 'wlp', 'usr', 'extension', 'lib', 'features'))
+      output = `cp #{usr}/extension/lib/features/*.mf #{@app_dir}/wlp/usr/extension/lib/features`
+      @logger.warn("copy_user_features copy manifests returned #{output}") if  $CHILD_STATUS.to_i != 0
+      output = `cp #{usr}/extension/lib/*.jar #{@app_dir}/wlp/usr/extension/lib`
+      @logger.warn("copy_user_features copy jars returned #{output}") if  $CHILD_STATUS.to_i != 0
     end
 
     def overlay_java

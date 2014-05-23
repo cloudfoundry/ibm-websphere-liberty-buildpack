@@ -658,6 +658,88 @@ module LibertyBuildpack::Container
 
       end
 
+      it 'should copy internal user esa files for a pushed server scenario' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
+            file.write('your text')
+          end
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub-dummy-user-esa.tgz'))
+
+          Liberty.new(
+          app_dir: root,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          feature_lib_dir = File.join(root, '.liberty', 'usr', 'extension', 'lib')
+          expect(Dir.exists?(feature_lib_dir)).to be_true
+          jar_file = File.join(feature_lib_dir, 'dummy_feature.jar')
+          expect(File.exists?(jar_file)).to be_true
+          mf_dir = File.join(feature_lib_dir, 'features')
+          expect(Dir.exists?(mf_dir)).to be_true
+          mf_file = File.join(mf_dir, 'dummy_feature.mf')
+          expect(File.exists?(mf_file)).to be_true
+        end
+      end
+
+      it 'should copy internal user esa files for a pushed server scenario when pushed server contains another user esa' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
+            file.write('your text')
+          end
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'extension', 'lib')
+          File.open(File.join(root, 'wlp', 'usr', 'extension', 'lib', 'existing.jar'), 'w') do |file|
+            file.write('some text')
+          end
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'extension', 'lib', 'features')
+          File.open(File.join(root, 'wlp', 'usr', 'extension', 'lib', 'features', 'existing.mf'), 'w') do |file|
+            file.write('other text')
+          end
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub-dummy-user-esa.tgz'))
+
+          Liberty.new(
+          app_dir: root,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          feature_lib_dir = File.join(root, '.liberty', 'usr', 'extension', 'lib')
+          expect(Dir.exists?(feature_lib_dir)).to be_true
+          jar_file = File.join(feature_lib_dir, 'dummy_feature.jar')
+          expect(File.exists?(jar_file)).to be_true
+          jar_file = File.join(feature_lib_dir, 'existing.jar')
+          expect(File.exists?(jar_file)).to be_true
+          mf_dir = File.join(feature_lib_dir, 'features')
+          expect(Dir.exists?(mf_dir)).to be_true
+          mf_file = File.join(mf_dir, 'dummy_feature.mf')
+          expect(File.exists?(mf_file)).to be_true
+          mf_file = File.join(mf_dir, 'existing.mf')
+          expect(File.exists?(mf_file)).to be_true
+        end
+      end
+
       it 'should produce the correct results for single server configuration' do
         Dir.mktmpdir do |root|
           root = File.join(root, 'app')
