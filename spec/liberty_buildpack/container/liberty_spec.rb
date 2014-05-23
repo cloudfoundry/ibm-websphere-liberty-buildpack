@@ -1021,7 +1021,7 @@ module LibertyBuildpack::Container
           lib_directory: library_directory,
           configuration: {},
           environment: {},
-          java_opts: %w(test-opt-2 test-opt-1),
+          java_opts: %w(test-opt-2 test-opt-1), # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).release
 
@@ -1032,6 +1032,11 @@ module LibertyBuildpack::Container
           expect(file_contents).to match(/test-opt-1/)
           expect(file_contents).to match(/test-opt-2/)
           expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
+          # default options before user options to allow overriding, each on it's own line.
+          # skip options in the regex by allowing multiple or zero collections of : any
+          # normal character zero or more times followed by a newline.
+          expect(file_contents).to match(/test-opt-1\n(.*\n)*provided-opt-1\n/)
+          expect(file_contents).to match(/test-opt-2\n(.*\n)*provided-opt-1\n/)
         end
       end
 
@@ -1059,7 +1064,7 @@ module LibertyBuildpack::Container
           lib_directory: library_directory,
           configuration: {},
           environment: {},
-          java_opts: %w(test-opt-2 test-opt-1),
+          java_opts: %w(test-opt-2 test-opt-1), # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).release
 
@@ -1075,6 +1080,11 @@ module LibertyBuildpack::Container
           expect(file_contents).to match(/test-opt-1/)
           expect(file_contents).to match(/test-opt-2/)
           expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
+          # default options before user options to allow overriding, each on it's own line.
+          # skip options in the regex by allowing multiple or zero collections of : any
+          # normal character zero or more times followed by a newline.
+          expect(file_contents).to match(/test-opt-1\n(.*\n)*provided-opt-1\n/)
+          expect(file_contents).to match(/test-opt-2\n(.*\n)*provided-opt-1\n/)
         end
       end
 
