@@ -225,7 +225,7 @@ module LibertyBuildpack::Container
         end
       end
       runtime_vars = File.join(server_dir, 'runtime-vars.xml')
-      File.open(runtime_vars, 'w') { |file| runtime_vars_doc.write(file) }
+      File.open(runtime_vars, 'w') { |file| runtime_vars_doc.write(file, 2) }
       @logger.debug("runtime-vars file is is #{runtime_vars}")
       contents = File.readlines(runtime_vars)
       @logger.debug("runtime vars contents is #{contents}")
