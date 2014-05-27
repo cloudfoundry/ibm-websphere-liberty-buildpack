@@ -307,6 +307,25 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
       end
     end
 
+    it 'should use the buildpack cache if start request fails' do
+      begin
+        # Make sure 'start' method is not an empty code.
+        WebMock.allow_net_connect!(net_http_connect_on_start: true)
+        # Mock it into raising an exception
+        Net::HTTP.stub(:start).and_raise(SocketError)
+
+        touch java_buildpack_cache_dir, 'cached', 'foo-stashed'
+
+        download_cache.get('http://foo-uri/') do |file|
+          expect(file.read).to eq('foo-stashed')
+        end
+      ensure
+        # Reset both Net:HTTP and net_http_connect_on_start to default values
+        RSpec::Mocks.proxy_for(Net::HTTP).reset
+        WebMock.allow_net_connect!(net_http_connect_on_start: false)
+      end
+    end
+
     it 'should not use the buildpack cache if the download cannot be completed but a retry succeeds' do
       stub_request(:get, 'http://foo-uri/').to_raise(SocketError).then
       .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })

@@ -173,12 +173,6 @@ module LibertyBuildpack::Util::Cache
       options.merge(use_ssl: use_ssl?(rich_uri))
     end
 
-    def issue_http_request(request, uri, &block)
-      Net::HTTP.start(*start_parameters(uri)) do |http|
-        retry_http_request(http, request, &block)
-      end
-    end
-
     # Obtains the file for the given URI by downloading it or, if the internet is deemed to be unavailable, by copying
     # it from the buildpack cache.
     #
@@ -194,17 +188,19 @@ module LibertyBuildpack::Util::Cache
       end
     end
 
-    def retry_http_request(http, request, &block)
+    def issue_http_request(request, uri, &block)
       1.upto(retry_limit) do |try|
         begin
-          http.request request do |response|
-            response_code = response.code
-            if response_code == HTTP_OK || response_code == HTTP_NOT_MODIFIED
-              InternetAvailability.internet_available
-              yield response, response_code
-              return
-            else
-              fail(InferredNetworkFailure, "Bad HTTP response: #{response_code}")
+          Net::HTTP.start(*start_parameters(uri)) do |http|
+            http.request request do |response|
+              response_code = response.code
+              if response_code == HTTP_OK || response_code == HTTP_NOT_MODIFIED
+                InternetAvailability.internet_available
+                yield response, response_code
+                return
+              else
+                fail(InferredNetworkFailure, "Bad HTTP response: #{response_code}")
+              end
             end
           end
         rescue InferredNetworkFailure, *HTTP_ERRORS => ex
