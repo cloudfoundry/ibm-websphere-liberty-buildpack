@@ -43,7 +43,6 @@ module LibertyBuildpack::Jre
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
-      @version, @uri = OpenJdk.find_openjdk(@configuration)
       @jvm_type = context[:jvm_type]
       context[:java_home].concat JAVA_HOME unless context[:java_home].include? JAVA_HOME
     end
@@ -53,6 +52,7 @@ module LibertyBuildpack::Jre
     #
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
+      @version = OpenJdk.find_openjdk(@configuration)[0]
       id @version if @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
     end
 
@@ -60,6 +60,7 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def compile
+      @version, @uri = OpenJdk.find_openjdk(@configuration)
       download_start_time = Time.now
 
       print "-----> Downloading OpenJdk #{@version} from #{@uri} "
@@ -75,6 +76,7 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def release
+      @version = OpenJdk.find_openjdk(@configuration)[0]
       @java_opts << "-XX:OnOutOfMemoryError=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{KILLJAVA_FILE_NAME}"
       @java_opts.concat memory(@configuration)
     end

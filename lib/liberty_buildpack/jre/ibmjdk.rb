@@ -48,7 +48,6 @@ module LibertyBuildpack::Jre
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
-      @version, @uri, @license = IBMJdk.find_ibmjdk(@configuration)
       @license_id = context[:license_ids]['IBM_JVM_LICENSE']
       @jvm_type = context[:jvm_type]
       context[:java_home].concat JAVA_HOME unless context[:java_home].include? JAVA_HOME
@@ -59,6 +58,7 @@ module LibertyBuildpack::Jre
     #
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
+      @version = IBMJdk.find_ibmjdk(@configuration)[0]
       id @version if @jvm_type == '' || @jvm_type == nil || 'ibmjre'.casecmp(@jvm_type) == 0
     end
 
@@ -66,6 +66,7 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def compile
+      @version, @uri, @license = IBMJdk.find_ibmjdk(@configuration)
       unless LibertyBuildpack::Util.check_license(@license, @license_id)
         print "\nYou have not accepted the IBM JVM License.\n\nVisit the following uri:\n#{@license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
         raise
