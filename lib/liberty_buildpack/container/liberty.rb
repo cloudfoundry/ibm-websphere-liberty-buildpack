@@ -229,7 +229,7 @@ module LibertyBuildpack::Container
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
       if server_xml
-        server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
+        server_xml_doc = File.open(server_xml, 'r:utf-8') { |file| REXML::Document.new(file) }
         server_xml_doc.context[:attribute_quote] = :quote
 
         update_http_endpoint(server_xml_doc)
@@ -249,7 +249,7 @@ module LibertyBuildpack::Container
         appstate_available = check_appstate_feature(server_xml_doc)
         @services_manager.update_configuration(server_xml_doc, false, current_server_dir)
 
-        File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
+        write_formatted_xml_file(server_xml_doc, server_xml)
       elsif Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
         # rubocop does not allow methods longer than 25 lines, so following is factored out
         update_server_xml_app(create_server_xml)
@@ -262,12 +262,12 @@ module LibertyBuildpack::Container
     end
 
     def update_server_xml_app(filename)
-      server_xml_doc = File.open(filename, 'r') { |file| REXML::Document.new(file) }
+      server_xml_doc = File.open(filename, 'r:utf-8') { |file| REXML::Document.new(file) }
       server_xml_doc.context[:attribute_quote] = :quote
       @services_manager.update_configuration(server_xml_doc, true, current_server_dir)
       application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
       Liberty.web_inf(@app_dir) ? application.attributes['type'] = 'war' : application.attributes['type'] = 'ear'
-      File.open(filename, 'w') { |file| server_xml_doc.write(file) }
+      write_formatted_xml_file(server_xml_doc, filename)
     end
 
     def update_http_endpoint(server_xml_doc)

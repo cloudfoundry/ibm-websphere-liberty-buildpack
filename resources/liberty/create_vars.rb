@@ -49,7 +49,7 @@ end
 raise 'Please pass me a place to store the xml output' if ARGV[0].nil?
 
 filename = ARGV[0]
-document = File.open(filename, 'r') { |file| REXML::Document.new(file) }
+document = File.open(filename, 'r:utf-8') { |file| REXML::Document.new(file) }
 
 add_variable(document.root, 'PORT')
 add_variable(document.root, 'HOME')
@@ -63,5 +63,7 @@ add_vcap_app_variable(document.root, 'application_uris')
 add_vcap_app_variable(document.root, 'start')
 add_runtime_variable(document.root, 'application.log.dir', log_directory)
 
-File.open(filename, 'w') { |file| document.write(file, 2) }
+formatter = REXML::Formatters::Pretty.new(2)
+formatter.compact = true
+File.open(filename, 'w:utf-8') { |file| formatter.write(document, file) }
 
