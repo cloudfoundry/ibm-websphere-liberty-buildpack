@@ -55,12 +55,11 @@ module LibertyBuildpack
     #                         this application.  If no container can run the application, the array will be empty
     #                         (+[]+).
     def detect
-      jre_detections = Buildpack.component_detections @jres
-      raise "Application cannot be run using more than one JRE: #{jre_detections.join(', ')}" if jre_detections.size > 1
+      # jre detections performed during initialization of components
       framework_detections = Buildpack.component_detections @frameworks
       container_detections = Buildpack.component_detections @containers
-      raise "Application cannot be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
-      tags = container_detections.empty? ? [] : jre_detections.concat(framework_detections).concat(container_detections).flatten.compact
+      raise "Application can not be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
+      tags = container_detections.empty? ? [] : [@jre_version].concat(framework_detections).concat(container_detections).flatten.compact
       tags
     end
 
@@ -75,7 +74,7 @@ module LibertyBuildpack
       version_file = Pathname.new(File.expand_path(BUILDPACK_VERSION, __FILE__))
       version_file.each_line { |line| print line } if version_file.file?
 
-      jre.compile
+      @jre.compile
       frameworks.each { |framework| framework.compile }
       the_container.compile
     end
@@ -86,7 +85,7 @@ module LibertyBuildpack
     # @return [String] The payload required to run the application.
     def release
       the_container = container # diagnose detect failure early
-      jre.release
+      @jre.release
       frameworks.each { |framework| framework.release }
       command = the_container.release
 
@@ -111,6 +110,10 @@ module LibertyBuildpack
 
     LICENSE_CONFIG = '../../config/licenses.yml'.freeze
     BUILDPACK_VERSION = '../../../version.txt'.freeze
+
+    JRE_TYPE = 'jres'.freeze
+    FRAMEWORK_TYPE = 'frameworks'.freeze
+    CONTAINER_TYPE = 'containers'.freeze
 
     LIB_DIRECTORY = '.lib'
 
@@ -244,10 +247,6 @@ module LibertyBuildpack
       @frameworks.select { |framework| framework.detect }
     end
 
-    def jre
-      @jres.find { |jre| jre.detect }
-    end
-
     def get_license_hash
       jvm_license = 'IBM_JVM_LICENSE'
       liberty_license = 'IBM_LIBERTY_LICENSE'
@@ -262,9 +261,19 @@ module LibertyBuildpack
     end
 
     def initialize_components(components, basic_context)
-      @jres = Buildpack.construct_components(components, 'jres', basic_context, @logger)
-      @frameworks = Buildpack.construct_components(components, 'frameworks', basic_context, @logger)
-      @containers = Buildpack.construct_components(components, 'containers', basic_context, @logger)
+      # raise an error when the components.yml file doesn't have at least one Container
+      raise "No components of type #{CONTAINER_TYPE} defined in components configuration. At least one must be defined" if components[CONTAINER_TYPE].nil?
+
+      # raise an error when the components.yml doesn't have at least one JRE
+      raise "No components of type #{JRE_TYPE} defined in components configuration.  At least one must be defined" if components[JRE_TYPE].nil?
+
+      # finds the first jre component and its version that doesn't return false.  Just need one jre component.
+      jres = Buildpack.construct_components(components, JRE_TYPE, basic_context, @logger)
+      @jre = jres.find { |jre| @jre_version = jre.detect }
+      @logger.error("JRE component did not detect a valid version. It's possible that the JVM environment variable needs to be set or its value needs to be corrected.") if @jre.nil?
+
+      @frameworks = Buildpack.construct_components(components, FRAMEWORK_TYPE, basic_context, @logger)
+      @containers = Buildpack.construct_components(components, CONTAINER_TYPE, basic_context, @logger)
     end
 
     def self.initialize_env(dir)

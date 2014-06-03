@@ -61,7 +61,7 @@ module LibertyBuildpack
       $stderr = STDERR
     end
 
-    it 'should call detect on all components' do
+    it 'should call detect on all non-JRE components and only one JRE component' do
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_container1.stub(:apps).and_return(['root/app1', 'root/app2'])
       stub_framework1.stub(:detect).and_return('stub-framework-1')
@@ -73,7 +73,6 @@ module LibertyBuildpack
       stub_framework1.should_receive(:detect)
       stub_framework2.should_receive(:detect)
       stub_jre1.should_receive(:detect)
-      stub_jre2.should_receive(:detect)
 
       detected = with_buildpack { |buildpack| buildpack.detect }
       expect(detected).to match_array(%w(stub-jre-1 stub-framework-1 stub-framework-2 stub-container-1))
@@ -99,12 +98,32 @@ module LibertyBuildpack
       with_buildpack { |buildpack| expect { buildpack.release }.to raise_error(/No supported application type/) }
     end
 
-    it 'should raise an error if more than one JRE can run an application' do
+    it 'should detect first JRE with non-null detect when more than one JRE can run an application' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
       stub_jre1.stub(:detect).and_return('stub-jre-1')
       stub_jre2.stub(:detect).and_return('stub-jre-2')
 
-      with_buildpack { |buildpack| expect { buildpack.detect }.to raise_error(/stub-jre-1, stub-jre-2/) }
+      detected = with_buildpack { |buildpack| buildpack.detect }
+      expect(detected).to match_array(%w(stub-jre-1 stub-container-1))
     end
+
+    it 'should detect first JRE with non-null detect when more than one JRE can run an application' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      stub_jre1.stub(:detect).and_return(nil)
+      stub_jre2.stub(:detect).and_return('stub-jre-2')
+
+      detected = with_buildpack { |buildpack| buildpack.detect }
+      expect(detected).to match_array(%w(stub-jre-2 stub-container-1))
+    end
+
+#    it 'should raise an error when none of the JREs return a non-null version for detect' do
+#      stub_container1.stub(:detect).and_return('stub-container-1')
+#      stub_jre1.stub(:detect).and_return(nil)
+#      stub_jre2.stub(:detect).and_return(nil)
+
+#      expect { with_buildpack { |buildpack| buildpack.detect}}.to raise_error SystemExit
+#      expect($stderr.string).to match(/JRE component did not return a valid version/)
+#    end
 
     it 'should call compile on matched components' do
       stub_container1.stub(:detect).and_return('stub-container-1')
@@ -154,6 +173,28 @@ module LibertyBuildpack
       YAML.stub(:load_file).with(File.expand_path('config/stubjre1.yml')).and_return('x' => 'y')
 
       with_buildpack { |buildpack| buildpack.detect }
+    end
+
+    it 'should raise error for bad configuration file that is missing container components' do
+      stub_jre1.stub(:detect).and_return('stub-jre-1')
+      YAML.stub(:load_file).with(File.expand_path('config/components.yml')).and_return(
+          'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
+          'jres' => ['Test::StubJre1', 'Test::StubJre2']
+      )
+
+      expect { with_buildpack { |buildpack| buildpack.detect } }.to raise_error SystemExit
+      expect($stderr.string).to match(/No components of type containers defined in components configuration/)
+    end
+
+    it 'should raise error for bad configuration file that is missing jre components' do
+      stub_jre1.stub(:detect).and_return('stub-jre-1')
+      YAML.stub(:load_file).with(File.expand_path('config/components.yml')).and_return(
+          'containers' => ['Test::StubContainer1', 'Test::StubContainer2'],
+          'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
+      )
+
+      expect { with_buildpack { |buildpack| buildpack.detect } }.to raise_error SystemExit
+      expect($stderr.string).to match(/No components of type jres defined in components configuration/)
     end
 
     it 'logs information about the git repository of a buildpack' do
