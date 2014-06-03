@@ -3,7 +3,7 @@
 
 | Error message  | Problem       | Solution  |
 | -------------  |:-------------:| --------- |
-| Pushed a wrongly packaged server please use 'server package --include=usr' to package a server | You attempted to push a server that contains binaries.   | Please package the server without the binaries.<br>Run the server package command with the '--include=usr' option to achieve this.     |
+| The pushed server is incorrectly packaged. Use the command 'server package --include=usr' to package a server. | The pushed server contains binaries which are not allowed. | Package the server without the binaries. To do this, use the server package command with the '--include=usr' option.   |
 | You have not accepted the IBM Liberty License. | To use the Liberty buildpack you are required to read the Licenses for Liberty Profile and IBM JVM.|   <br>Visit the following uri: <br>IBM [Liberty-License][] and the current IBM [JVM-License][].<br>Extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. <code><br>ENV: <br>  IBM_LIBERTY_LICENSE: {License Number}.</code>      |
 
 
