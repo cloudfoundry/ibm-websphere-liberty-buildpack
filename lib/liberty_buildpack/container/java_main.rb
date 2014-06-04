@@ -46,7 +46,7 @@ module LibertyBuildpack::Container
     #
     # @return [String] returns +Java-Main+ if the MANIFEST.MF of the application contains the Java-Main tag.
     def detect
-      main_class ? JavaMain.to_s.dash_case : nil
+      main_class ? 'Liberty-JAR:' << JavaMain.to_s.dash_case : nil
     end
 
     # Nothing to compile for Java-Main

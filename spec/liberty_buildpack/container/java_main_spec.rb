@@ -40,7 +40,7 @@ module LibertyBuildpack::Container
             configuration: {}
           ).detect
 
-          expect(detected).to eq('java-main')
+          expect(detected).to eq('Liberty-JAR:java-main')
         end
       end
 
@@ -51,7 +51,7 @@ module LibertyBuildpack::Container
             configuration: { 'java_main_class' => 'java-main' }
           ).detect
 
-          expect(detected).to eq('java-main')
+          expect(detected).to eq('Liberty-JAR:java-main')
         end
       end
 

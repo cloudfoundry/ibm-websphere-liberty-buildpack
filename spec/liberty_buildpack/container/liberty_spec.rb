@@ -72,7 +72,7 @@ module LibertyBuildpack::Container
         license_ids: {}
         ).detect
 
-        expect(detected).to include('liberty-8.5.5')
+        expect(detected).to include('Liberty-WAR:liberty-8.5.5')
       end
 
       it 'should detect META-INF' do
@@ -86,7 +86,7 @@ module LibertyBuildpack::Container
         license_ids: {}
         ).detect
 
-        expect(detected).to include('liberty-8.5.5')
+        expect(detected).to include('Liberty-EAR:liberty-8.5.5')
       end
 
       it 'should detect server.xml for a zipped up server configuration' do
@@ -100,7 +100,7 @@ module LibertyBuildpack::Container
         license_ids: {}
         ).detect
 
-        expect(detected).to include('liberty-8.5.5')
+        expect(detected).to include('Liberty-SVR-PKG:liberty-8.5.5')
       end
 
       it 'should detect server.xml for a single server push' do
@@ -114,7 +114,7 @@ module LibertyBuildpack::Container
         license_ids: {}
         ).detect
 
-        expect(detected).to include('liberty-8.5.5')
+        expect(detected).to include('Liberty-SVR-DIR:liberty-8.5.5')
       end
 
       it 'should throw an error when a server including binaries was pushed' do
