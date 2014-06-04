@@ -515,7 +515,7 @@ module LibertyBuildpack::Container
 
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application context-root="/" location="myapp" name="myapp"').to be_true
+          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp"').to be_true
           expect(server_xml_contents.include? 'type="war"').to be_true
           expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
           expect(server_xml_contents.include? '<httpDispatcher enableWelcomePage="false"/>').to be_true
@@ -612,7 +612,7 @@ module LibertyBuildpack::Container
 
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application context-root="/" location="myapp" name="myapp"').to be_true
+          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp"').to be_true
           expect(server_xml_contents.include? 'type="ear"').to be_true
           expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
         end
@@ -900,7 +900,7 @@ module LibertyBuildpack::Container
           expect(server_xml_contents.include? 'host="*"').to be_true
           expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
           expect(server_xml_contents.include? 'httpsPort=').to be_false
-          expect(server_xml_contents).to match(/<webContainer extractHostHeaderPort='true' trustHostHeaderPort='true'\/>/)
+          expect(server_xml_contents).to match(/<webContainer trustHostHeaderPort='true' extractHostHeaderPort='true'\/>/)
           expect(File.exists?(droplet_yaml_file)).to be_false
         end
       end
@@ -934,7 +934,7 @@ module LibertyBuildpack::Container
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read server_xml_file
-          expect(server_xml_contents).to match(/<webContainer extractHostHeaderPort="true" trustHostHeaderPort="true" trusted="false"\/>/)
+          expect(server_xml_contents).to match(/<webContainer extractHostHeaderPort="true" trusted="false" trustHostHeaderPort="true"\/>/)
         end
       end
 

@@ -202,7 +202,7 @@ module LibertyBuildpack::Container
       Dir.glob("#{services_config_path}/*.yml").each do |file|
         key = File.basename(file, '.yml')
         @logger.debug("loading service config for #{key} from #{file}")
-        config[key] = YAML.load_file(file)
+        config[key] = File.open(file, 'r:utf-8') { |yf| YAML.load(yf) }
       end
       @logger.debug("config is #{config}")
       config
@@ -225,10 +225,11 @@ module LibertyBuildpack::Container
         end
       end
       runtime_vars = File.join(server_dir, 'runtime-vars.xml')
-      File.open(runtime_vars, 'w') { |file| runtime_vars_doc.write(file, 2) }
-      @logger.debug("runtime-vars file is is #{runtime_vars}")
-      contents = File.readlines(runtime_vars)
-      @logger.debug("runtime vars contents is #{contents}")
+      formatter = REXML::Formatters::Pretty.new(2)
+      formatter.compact = true
+      File.open(runtime_vars, 'w:utf-8') { |file| formatter.write(runtime_vars_doc, file) }
+      @logger.debug("runtime-vars file is #{runtime_vars}")
+      @logger.debug("runtime vars contents is #{File.readlines(runtime_vars)}")
     end
 
     #------------------------------------------------------
