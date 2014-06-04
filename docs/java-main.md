@@ -4,12 +4,11 @@ Java Main Push
 The Java Main container allows a Java application (jar) that contains a class with a main() method to be run.
 
 ## Usage
-To deploy Java Main applications using the IBM WebSphere Application Server Liberty Buildpack, you are required to accept the IBM JRE license by following the instructions below:
+To deploy Java Main applications using the IBM WebSphere Application Server Liberty Buildpack, you are required to accept the IBM JRE license by following these instructions: 
 
 1. Read the current IBM [JVM-License][].
 2. Extract the `D/N: <License code>` from the JVM-License.
-3. Add the following environment variable and extracted license code to the `manifest.yml` file in the directory from which you push your application. For further information on the format of
-the `manifest.yml` file refer to the [manifest documentation][].
+3. Add the environment variable in the code example, and the extracted license code, to the manifest.yml file in the directory from which you push your application. For more information on the format of the manifest.yml file, see [manifest documentation][]. 
 
     ```
       env:
