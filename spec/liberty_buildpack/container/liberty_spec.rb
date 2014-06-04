@@ -129,7 +129,7 @@ module LibertyBuildpack::Container
           java_opts: [],
           license_ids: {}
           ).detect
-        end.to raise_error(/Pushed\ a\ wrongly\ packaged\ server\ please\ use\ 'server\ package --include=usr'\ to\ package\ a\ server/)
+        end.to raise_error(/The\ pushed\ server\ is\ incorrectly\ packaged.\ Use\ the\ command\ 'server\ package\ --include=usr'\ to\ package\ a\ server/)
       end
 
       it 'should throw an error when there are multiple server.xmls' do

@@ -685,8 +685,8 @@ module LibertyBuildpack::Container
       bin = File.join(app_dir, 'wlp', 'bin')
       dir = File.exist? bin
       if dir
-        print "\nPushed a wrongly packaged server please use 'server package --include=usr' to package a server\n"
-        raise "Pushed a wrongly packaged server please use 'server package --include=usr' to package a server"
+        print "\nThe pushed server is incorrectly packaged. Use the command 'server package --include=usr' to package a server.\n"
+        raise "The pushed server is incorrectly packaged. Use the command 'server package --include=usr' to package a server."
       end
       dir
     end
