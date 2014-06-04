@@ -61,7 +61,7 @@ module LibertyBuildpack::Container
     def release
       [
         "#{java_home}/jre/bin/java",
-        manifest_class_path.join(':'),
+        manifest_class_path,
         @java_opts.join(' '),
         main_class,
         arguments,
@@ -89,7 +89,7 @@ module LibertyBuildpack::Container
 
     def manifest_class_path
       values = LibertyBuildpack::Util::JavaMainUtils.manifest(@app_dir)[CLASS_PATH_PROPERTY]
-      values.nil? ? [] : "-cp #{values.split(' ').map { |value| File.join('$PWD', value) }}"
+      values.nil? ? [] : "-cp #{values.split(' ').map { |value| File.join('$PWD', value) }.join(':')}"
     end
 
     def port
