@@ -14,14 +14,20 @@ with Cloud Foundry.  That server.xml will look something like this:
 
     <!-- Enable features -->
     <featureManager>
-        <feature>webProfile-6.0</feature>
+        <feature>jsf-2.0</feature>
+        <feature>jsp-2.2</feature>
+        <feature>servlet-3.0</feature>
+        <feature>ejbLite-3.1</feature>
+        <feature>cdi-1.0</feature>
+        <feature>jpa-2.0</feature>
+        <feature>jdbc-4.0</feature>
+        <feature>transaction-1.1</feature>
+        <feature>jndi-1.0</feature>
+        <feature>managedBeans-1.0</feature>
         <feature>jaxrs-1.1</feature>
     </featureManager>
 
-    <httpEndpoint id="defaultHttpEndpoint"
-                  host="*"
-                  httpPort="${port}"
-                   />
+    <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${port}"/>
 </server>
 ```
 
