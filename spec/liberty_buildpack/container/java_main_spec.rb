@@ -68,6 +68,31 @@ module LibertyBuildpack::Container
       end
     end
 
+    describe 'compile' do
+      it 'should find and copy .java-overlay included in JAR file during push' do
+        Dir.mktmpdir do |root|
+          FileUtils.mkdir_p File.join(root, '.java')
+          FileUtils.mkdir_p File.join(root, 'resources', '.java-overlay', '.java')
+          File.open(File.join(root, 'resources', '.java-overlay', '.java', 'overlay.txt'), 'w') do |file|
+            file.write('overlay file')
+          end
+          File.open(File.join(root, '.java', 'test.txt'), 'w') do |file|
+            file.write('test file that should still exist after overlay')
+          end
+
+          JavaMain.new(
+          app_dir: root,
+          java_home: '.java',
+          java_opts: [],
+          configuration: { 'java_main_class' => 'com.ibm.rspec.test' }
+          ).compile
+
+          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to be_true
+          expect(File.exists?(File.join root, '.java', 'test.txt')).to be_true
+        end
+      end
+    end
+
     describe 'release' do
       it 'should return the java command' do
         Dir.mktmpdir do |root|

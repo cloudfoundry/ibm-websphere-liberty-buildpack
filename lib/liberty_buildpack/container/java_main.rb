@@ -49,10 +49,11 @@ module LibertyBuildpack::Container
       main_class ? 'Liberty-JAR:' << JavaMain.to_s.dash_case : nil
     end
 
-    # Nothing to compile for Java-Main
+    # Prepares the application to run.
     #
     # @return [void]
     def compile
+      overlay_java
     end
 
     # Creates the command to run the Java application.
@@ -75,6 +76,12 @@ module LibertyBuildpack::Container
 
     CLASS_PATH_PROPERTY = 'Class-Path'.freeze
 
+    RESOURCES_DIR = 'resources'.freeze
+
+    JAVA_DIR = '.java'.freeze
+
+    JAVA_OVERLAY_DIR  = '.java-overlay'.freeze
+
     def java_home
       File.join('$PWD', @java_home)
     end
@@ -94,6 +101,14 @@ module LibertyBuildpack::Container
 
     def port
       main_class =~ /^org\.springframework\.boot\.loader\.(?:[JW]ar|Properties)Launcher$/ ? '--server.port=$PORT' : nil
+    end
+
+    def overlay_java
+      overlay_src = File.join(@app_dir, RESOURCES_DIR, JAVA_OVERLAY_DIR, JAVA_DIR)
+      if File.exists?(overlay_src)
+        print "Overlaying java from #{overlay_src}\n"
+        FileUtils.cp_r(overlay_src, @app_dir)
+      end
     end
 
   end
