@@ -1,5 +1,5 @@
 # Encoding: utf-8
-# Cloud Foundry Java Buildpack
+# IBM Websphere Application Server Liberty Buildpack
 # Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'java_buildpack/framework'
+require 'liberty_buildpack/framework'
 require 'rexml/document'
 require 'rexml/formatters/pretty'
 
-module JavaBuildpack
-  module Framework
+module LibertyBuildpack::Framework
 
     # A class that encapsulates the modification of a +web.xml+ Servlet configuration file for the Auto-reconfiguration
     # framework.  The modifications of +web.xml+ consist of augmenting +contextInitializerClasses+.  The function starts
