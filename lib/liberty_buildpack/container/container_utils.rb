@@ -57,6 +57,24 @@ module LibertyBuildpack::Container
       libs
     end
 
+    # Unpacks the given zip file to the specified directory. It uses the +unzip+ or +jar+ command depending
+    # of the runtime environment.
+    #
+    # @param [String] file - the zip file to unpack
+    # @param [String] dir - the directory to unpack the zip contents into.
+    # @return [void]
+    def self.unzip(file, dir)
+      file = File.expand_path(file)
+      FileUtils.mkdir_p (dir)
+      Dir.chdir (dir) do
+        if File.exists? '/usr/bin/unzip'
+          system "unzip -qqo '#{file}'"
+        else
+          system "jar xf '#{file}'"
+        end
+      end
+    end
+
   end
 
 end
