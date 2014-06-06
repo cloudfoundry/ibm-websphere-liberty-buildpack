@@ -547,7 +547,19 @@ module LibertyBuildpack::Container
     end
 
     def liberty_id(version)
-      "liberty-#{version}"
+      id = 'Liberty-'
+      if Liberty.web_inf(@app_dir)
+         id << 'WAR:'
+      elsif Liberty.meta_inf(@app_dir)
+         id << 'EAR:'
+      elsif Liberty.liberty_directory(@app_dir)
+         id << 'SVR-PKG:'
+      elsif Liberty.server_directory(@app_dir)
+         id << 'SVR-DIR:'
+      else
+         id = ''
+      end
+      id << "liberty-#{version}"
     end
 
     def link_application
