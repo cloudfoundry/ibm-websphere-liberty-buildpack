@@ -242,7 +242,8 @@ module LibertyBuildpack::Container
     #------------------------------------------------------
     def process_service_type(element, service_type, service_data)
       # all instances of a given type share the same config data. We have a default type for services that don't have a plugin.
-      type = get_service_type(service_type)
+      type = get_service_type(service_type, service_data)
+      @logger.debug("matched service #{service_type} to plugin #{type}")
       config = @config[type]
       xml_element = config[XML_STANZA_TYPE]
       if xml_element.nil?
@@ -266,11 +267,34 @@ module LibertyBuildpack::Container
     end
 
     #-----------------------------------
+    # find the service type by checking the vcap_services name, label and tags
+    # against filter defined by the plugin
+    #-----------------------------------
+    def find_service_plugin(service_name, service_data)
+      candidates =  []
+      @config.each do | key, value |
+        filter = value['service_filter']
+        unless filter.nil?
+          filter = Regexp.new(filter) unless filter.kind_of?(Regexp)
+          service_data.each do | service |
+            if service['name'] =~ filter ||
+                service['label'] =~ filter ||
+                (!service['tags'].nil? && service['tags'].any? { |tag| tag =~ filter })
+              candidates.push(key)
+            end
+          end
+        end
+      end
+      candidates
+    end
+
+    #-----------------------------------
     # find the service type using the vcap_services name
     #-----------------------------------
-    def get_service_type(name)
+    def get_service_type(name, service_data)
       candidates =  []
       @config.each_key { |key| candidates.push(key) if name.include?(key) }
+      candidates = find_service_plugin(name, service_data) if candidates.empty?
       return 'default' if candidates.empty?
       return candidates[0] if candidates.length == 1
       # Services typically have a name+version. Plugin yml file names are the name, without the version. Suppose I have two services named monitor-1.0 and appmonitor-2.0

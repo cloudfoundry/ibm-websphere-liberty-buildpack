@@ -30,6 +30,7 @@ require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/properties'
 require 'liberty_buildpack/util/license_management'
+require 'liberty_buildpack/util/heroku'
 require 'open-uri'
 
 module LibertyBuildpack::Container
@@ -57,7 +58,7 @@ module LibertyBuildpack::Container
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
       @configuration = context[:configuration]
-      @vcap_services = context[:vcap_services]
+      @vcap_services = Heroku.heroku? ? Heroku.new.generate_vcap_services(ENV) : context[:vcap_services]
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
       @environment = context[:environment]
@@ -173,7 +174,7 @@ module LibertyBuildpack::Container
         system(minify_script_string)
         # Update with minified version only if the generated file exists and not empty.
         if File.size? minified_zip
-          Liberty.unzip(minified_zip, root)
+          ContainerUtils.unzip(minified_zip, root)
           if File.exists? icap_extension
             extensions_dir = File.join(root, 'wlp', 'etc', 'extensions')
             system("mkdir -p #{extensions_dir} && cp #{icap_extension} #{extensions_dir}")
@@ -473,7 +474,7 @@ module LibertyBuildpack::Container
       print 'Installing archive ... '
       install_start_time = Time.now
       if uri.end_with?('.zip', 'jar')
-        Liberty.unzip(file.path, root)
+        ContainerUtils.unzip(file.path, root)
       elsif uri.end_with?('tar.gz', '.tgz')
         system "tar -zxf #{file.path} -C #{root} 2>&1"
       else
@@ -547,7 +548,19 @@ module LibertyBuildpack::Container
     end
 
     def liberty_id(version)
-      "liberty-#{version}"
+      id = 'Liberty-'
+      if Liberty.web_inf(@app_dir)
+         id << 'WAR:'
+      elsif Liberty.meta_inf(@app_dir)
+         id << 'EAR:'
+      elsif Liberty.liberty_directory(@app_dir)
+         id << 'SVR-PKG:'
+      elsif Liberty.server_directory(@app_dir)
+         id << 'SVR-DIR:'
+      else
+         id = ''
+      end
+      id << "liberty-#{version}"
     end
 
     def link_application
@@ -627,10 +640,10 @@ module LibertyBuildpack::Container
     end
 
     def log_directory
-      if ENV['DYNO'].nil?
-        return '../../../../../logs'
-      else
+      if Heroku.heroku?
         return '../../../../logs'
+      else
+        return '../../../../../logs'
       end
     end
 
@@ -742,7 +755,7 @@ module LibertyBuildpack::Container
       apps.each do |app|
         if File.file? app
           temp_directory = "#{app}.tmp"
-          Liberty.unzip(app, temp_directory)
+          ContainerUtils.unzip(app, temp_directory)
           File.delete(app)
           File.rename(temp_directory, app)
         end
@@ -752,7 +765,7 @@ module LibertyBuildpack::Container
     def self.splat_expand(apps)
       apps.each do |app|
         if File.file? app
-          Liberty.unzip(app, './app')
+          ContainerUtils.unzip(app, './app')
           FileUtils.rm_rf("#{app}")
         end
       end
@@ -764,18 +777,6 @@ module LibertyBuildpack::Container
           state = false if File.file?(file)
       end
       state
-    end
-
-    def self.unzip(file, dir)
-      file = File.expand_path(file)
-      FileUtils.mkdir_p (dir)
-      Dir.chdir (dir) do
-        if File.exists? '/usr/bin/unzip'
-          system "unzip -qqo '#{file}'"
-        else
-          system "jar xf '#{file}'"
-        end
-      end
     end
 
   end
