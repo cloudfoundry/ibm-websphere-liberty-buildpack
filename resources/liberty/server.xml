@@ -9,7 +9,6 @@
         <feature>cdi-1.0</feature>
         <feature>jpa-2.0</feature>
         <feature>jdbc-4.0</feature>
-        <feature>transaction-1.1</feature>
         <feature>jndi-1.0</feature>
         <feature>managedBeans-1.0</feature>
         <feature>jaxrs-1.1</feature>
