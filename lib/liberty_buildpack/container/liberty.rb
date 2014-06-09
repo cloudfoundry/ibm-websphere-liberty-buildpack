@@ -30,6 +30,7 @@ require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/properties'
 require 'liberty_buildpack/util/license_management'
+require 'liberty_buildpack/util/location_resolver'
 require 'liberty_buildpack/util/heroku'
 require 'open-uri'
 
@@ -103,8 +104,8 @@ module LibertyBuildpack::Container
         raise
       end
       download_and_install_liberty
-      update_server_xml
       link_application
+      update_server_xml
       make_server_script_runnable
       download_and_install_features
       # Need to do minify here to have server_xml updated and applications and libs linked.
@@ -230,8 +231,15 @@ module LibertyBuildpack::Container
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
       if server_xml
+        # Preserve the original configuration before we start modifying it
+        FileUtils.cp "#{server_xml}", "#{server_xml}.org"
+
         server_xml_doc = File.open(server_xml, 'r:utf-8') { |file| REXML::Document.new(file) }
         server_xml_doc.context[:attribute_quote] = :quote
+
+        # Perform inlining of includes prior to adding include for runtime-vars.xml
+        # as the file may not exist yet.
+        inline_includes(server_xml_doc, File.dirname(server_xml), LocationResolver.new(liberty_home, server_name))
 
         update_http_endpoint(server_xml_doc)
         update_web_container(server_xml_doc)
@@ -244,7 +252,7 @@ module LibertyBuildpack::Container
         include_file = REXML::Element.new('logging', server_xml_doc.root)
         include_file.add_attribute('logDirectory', log_directory)
 
-        # Disable default Liberty Welcome page to avoid returning 200 repsponse before app is ready.
+        # Disable default Liberty Welcome page to avoid returning 200 response before app is ready.
         disable_welcome_page(server_xml_doc)
         # Check if appstate ICAP feature can be used
         appstate_available = check_appstate_feature(server_xml_doc)
@@ -512,6 +520,28 @@ module LibertyBuildpack::Container
         puts "(#{(Time.now - install_start_time).duration}).\n"
       end
       print("\n")
+    end
+
+    def inline_includes(server_xml_doc, server_xml_dir, location_resolver)
+      REXML::XPath.each(server_xml_doc, '/server/include') do |element|
+        location = element.attributes['location']
+        optional = element.attributes['optional']
+        if location.start_with? 'http:'
+          fail 'Configuration files accessible via HTTP are not supported.'
+        else
+          location = location_resolver.absolute_path(location, server_xml_dir)
+          if File.exist? location
+            included_xml_doc = nil
+            File.open(location, 'r:utf-8') { |file| included_xml_doc = REXML::Document.new file }
+            included_xml_doc.context[:attribute_quote] = :quote
+            inline_includes included_xml_doc, File.dirname(location), location_resolver
+            included_xml_doc.root.elements.each { |nested| server_xml_doc.root.insert_after element, nested }
+            server_xml_doc.root.delete_element element
+          elsif optional !~ /^true$/i
+            fail "Configuration file could not be located: #{location}"
+          end
+        end
+      end
     end
 
     # Liberty, features and driver jars are downloaded as a number of separate archives and .esa files.

@@ -1,0 +1,4 @@
+<server>
+  <variable name='port' value='62147'/>
+  <include location='moreVariables.xml'/>
+</server>
