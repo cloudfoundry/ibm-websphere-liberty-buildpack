@@ -31,8 +31,6 @@ module LibertyBuildpack::Jre
       $stdout = StringIO.new
       $stderr = StringIO.new
 
-      FileUtils.rm_rf('/tmp/jre_temp')
-      Dir.mkdir('/tmp/jre_temp')
       # return license file by default
       application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
     end
