@@ -518,5 +518,44 @@ module LibertyBuildpack::Services
         end
       end # it
     end # describe test add_library_to_app_classloader
+
+    describe 'get_urls_for_client_jars' do
+
+      it 'via client_jar_key' do
+        config = {}
+        config['client_jar_key'] = 'myKey'
+        urls = {}
+        urls['myKey'] = 'http://myHost/myPath'
+
+        result = Utils.get_urls_for_client_jars(config, urls)
+        expect(result).to include(urls['myKey'])
+      end
+
+      it 'via client_jar_url' do
+        config = {}
+        config['client_jar_url'] = 'http://myHost/myPath'
+        urls = {}
+
+        result = Utils.get_urls_for_client_jars(config, urls)
+        expect(result).to include(config['client_jar_url'])
+      end
+
+      it 'via driver' do
+        data = [LibertyBuildpack::Util::TokenizedVersion.new('1.5.0'), 'http://myHost/myPath']
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(data)
+
+        driver = {}
+        driver['repository_root'] = 'file://doesnotmatter'
+        driver['version'] = '1.+'
+        config = {}
+        config['driver'] = driver
+        urls = {}
+
+        result = Utils.get_urls_for_client_jars(config, urls)
+        expect(result).to include('http://myHost/myPath')
+      end
+
+    end # describe
+
   end # describe DataCache
 end

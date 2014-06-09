@@ -18,7 +18,6 @@ require 'rexml/document'
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/services/client_jar_utils'
 require 'liberty_buildpack/services/utils'
-require 'liberty_buildpack/repository/configured_item'
 
 module LibertyBuildpack::Services
 
@@ -111,14 +110,8 @@ module LibertyBuildpack::Services
         @logger.debug("user supplied client jars for #{@type}")
         return []
       end
-      repository = @config['driver']
-      if repository.nil?
-        @logger.debug("no repository supplied jars for #{@type}")
-        return []
-      end
-      version, driver_uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(repository)
-      @logger.debug("driver version: #{version}, url: #{driver_uri}")
-      [driver_uri]
+
+      Utils.get_urls_for_client_jars(@config, urls)
     end
 
     #-------------------------------------------
