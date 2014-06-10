@@ -1,5 +1,5 @@
 # Encoding: utf-8
-# IBM WebSphere Application Server Liberty Buildpack
+# Cloud Foundry Java Buildpack
 # Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,68 +15,37 @@
 # limitations under the License.
 
 require 'spec_helper'
-require 'liberty_buildpack/framework/spring_auto_reconfiguration/web_xml_modifier'
-require 'rexml/document'
+require 'java_buildpack/framework/spring_auto_reconfiguration/web_xml_modifier'
 
-module LibertyBuildpack::Framework
+describe JavaBuildpack::Framework::WebXmlModifier do
 
-  describe WebXmlModifier do
+  it 'should not modify root if there is no ContextLoaderListener' do
+    assert_equality('web_root_no_contextLoaderListener') { |modifier| modifier.augment_root_context }
+  end
 
-    it 'should not modify root if there is no ContextLoaderListener' do
-      assert_equality('web_root_no_contextLoaderListener') do |modifier|
-        modifier.augment_root_context
-      end
-    end
+  it 'should not modify a servlet if is not a DispatcherServlet' do
+    assert_equality('web_servlet_no_DispatcherServlet') { |modifier| modifier.augment_root_context }
+  end
 
-    it 'should not modify a servlet if is not a DispatcherServlet' do
-      assert_equality('web_servlet_no_DispatcherServlet') do |modifier|
-        modifier.augment_root_context
-      end
-    end
+  it 'should add a new contextInitializerClasses if it does not exist' do
+    assert_equality('web_root_no_params') { |modifier| modifier.augment_root_context }
+    assert_equality('web_servlet_no_params') { |modifier| modifier.augment_servlet_contexts }
+  end
 
-    it 'should add a new contextConfigLocation and contextInitializerClasses if they do not exist' do
-      assert_equality('web_root_no_params') do |modifier|
-        modifier.augment_root_context
-      end
+  it 'should update existing contextInitializerClasses if it does exist' do
+    assert_equality('web_root_existing_params') { |modifier| modifier.augment_root_context }
+    assert_equality('web_servlet_existing_params') { |modifier| modifier.augment_servlet_contexts }
+  end
 
-      assert_equality('web_servlet_no_params') do |modifier|
-        modifier.augment_servlet_contexts
-      end
-    end
+  def assert_equality(fixture)
+    modifier = described_class.new(Pathname.new("spec/fixtures/#{fixture}_before.xml").read)
 
-    it 'should update existing contextConfigLocation and contextInitializerClasses if they do exist' do
-      assert_equality('web_root_existing_params') do |modifier|
-        modifier.augment_root_context
-      end
+    yield modifier
 
-      assert_equality('web_servlet_existing_params') do |modifier|
-        modifier.augment_servlet_contexts
-      end
-    end
+    actual   = modifier.to_s
+    expected = Pathname.new("spec/fixtures/#{fixture}_after.xml").read
 
-    it 'should use annotation-based contextConfigLocation if contextClass is annotation-based' do
-      assert_equality('web_root_annotation') do |modifier|
-        modifier.augment_root_context
-      end
-
-      assert_equality('web_servlet_annotation') do |modifier|
-        modifier.augment_servlet_contexts
-      end
-    end
-
-    def assert_equality(fixture, &block)
-      modifier = File.open("spec/fixtures/#{fixture}_before.xml") do |file|
-        WebXmlModifier.new(file)
-      end
-
-      block.call modifier
-
-      expected = File.open("spec/fixtures/#{fixture}_after.xml") { |file| file.read }
-      actual = modifier.to_s
-
-      expect(actual).to eq(expected)
-    end
-
+    expect(actual).to eq(expected)
   end
 
 end
