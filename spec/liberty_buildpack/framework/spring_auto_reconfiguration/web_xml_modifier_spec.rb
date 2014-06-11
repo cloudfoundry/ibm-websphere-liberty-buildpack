@@ -15,9 +15,9 @@
 # limitations under the License.
 
 require 'spec_helper'
-require 'java_buildpack/framework/spring_auto_reconfiguration/web_xml_modifier'
+require 'liberty_buildpack/framework/spring_auto_reconfiguration/web_xml_modifier'
 
-describe JavaBuildpack::Framework::WebXmlModifier do
+describe LibertyBuildpack::Framework::WebXmlModifier do
 
   it 'should not modify root if there is no ContextLoaderListener' do
     assert_equality('web_root_no_contextLoaderListener') { |modifier| modifier.augment_root_context }
