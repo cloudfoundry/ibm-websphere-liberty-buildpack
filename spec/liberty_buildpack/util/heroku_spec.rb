@@ -63,11 +63,8 @@ module LibertyBuildpack::Util
       expect(services).to have(1).items
       expect(services[0]['name']).to match(expected_name)
       credentials = services[0]['credentials']
-      expect(credentials).to have(4).items
-      expect(credentials['host']).to match('doesnotexist.xyz')
-      expect(credentials['hostname']).to match('doesnotexist.xyz')
+      expect(credentials).to have(1).items
       expect(credentials['uri']).to match('postgre://doesnotexist.xyz')
-      expect(credentials['url']).to match('postgre://doesnotexist.xyz')
       tags = services[0]['tags']
       expect(tags).to include('postgresql')
     end
@@ -77,22 +74,31 @@ module LibertyBuildpack::Util
       expect(services).to have(1).items
       expect(services[0]['name']).to match(expected_name)
       credentials = services[0]['credentials']
-      expect(credentials).to have(8).items
-      expect(credentials['host']).to match('nnn.com')
-      expect(credentials['hostname']).to match('nnn.com')
-      expect(credentials['user']).to match('ggg')
-      expect(credentials['username']).to match('ggg')
-      expect(credentials['password']).to match('hhh')
-      expect(credentials['name']).to match('mmmm')
+      expect(credentials).to have(1).items
       expect(credentials['uri']).to match('mysql://ggg:hhh@nnn.com/mmmm')
-      expect(credentials['url']).to match('mysql://ggg:hhh@nnn.com/mmmm')
       tags = services[0]['tags']
       expect(tags).to include('mysql')
     end
 
-    def check_bad(vcap_services)
+    def check_bad(vcap_services, expected_name)
       services = vcap_services['BAD_URL']
-      expect(services).to be_nil
+      expect(services).to have(1).items
+      expect(services[0]['name']).to match(expected_name)
+      credentials = services[0]['credentials']
+      expect(credentials).to have(2).items
+      expect(credentials['uri']).to match('://badurl.xyz')
+      expect(credentials['url']).to match('://badurl.xyz')
+    end
+
+    def check_mongo(vcap_services, label, expected_name, expected_url)
+      services = vcap_services[label]
+      expect(services).to have(1).items
+      expect(services[0]['name']).to match(expected_name)
+      credentials = services[0]['credentials']
+      expect(credentials).to have(1).items
+      expect(credentials['url']).to match(expected_url)
+      tags = services[0]['tags']
+      expect(tags).to include('mongodb')
     end
 
     it 'generate without service mappings' do
@@ -101,7 +107,9 @@ module LibertyBuildpack::Util
       env['HEROKU_POSTGRESQL_RED_URL'] = 'postgre://doesnotexist.xyz'
       env['CLEARDB_DATABASE_URL'] = 'mysql://ggg:hhh@nnn.com/mmmm'
       env['BAD_URL'] = '://badurl.xyz'
-
+      env['MONGOHQ_URL'] = 'mongodb://myUser:myPassword@myHost.com/myDb'
+      env['MONGOLAB_URI'] = 'mongodb://myUser:myPassword@myHost.com:5432/myDb'
+      env['MONGOSOUP_URL'] = 'mongodb://myUser:myPassword@myHost1.com,myHost2.com,myHost3.net:5432/myDb'
       vcap_services = Heroku.new.generate_vcap_services(env)
 
       # verify DATABASE_URL
@@ -114,7 +122,16 @@ module LibertyBuildpack::Util
       check_mysql(vcap_services, 'cleardb')
 
       # verify BAD_URL
-      check_bad(vcap_services)
+      check_bad(vcap_services, 'bad')
+
+      # verify MONGOHQ_URL
+      check_mongo(vcap_services, 'MONGOHQ_URL', 'mongohq', env['MONGOHQ_URL'])
+
+      # verify MONGOLAB_URI
+      check_mongo(vcap_services, 'MONGOLAB_URI', 'mongolab', env['MONGOLAB_URI'])
+
+      # verify MONGOSOUP_URL
+      check_mongo(vcap_services, 'MONGOSOUP_URL', 'mongosoup', env['MONGOSOUP_URL'])
     end
 
     it 'generate with service mappings' do
@@ -123,8 +140,13 @@ module LibertyBuildpack::Util
       env['HEROKU_POSTGRESQL_RED_URL'] = 'postgre://doesnotexist.xyz'
       env['CLEARDB_DATABASE_URL'] = 'mysql://ggg:hhh@nnn.com/mmmm'
       env['BAD_URL'] = '://badurl.xyz'
+      env['MONGOHQ_URL'] = 'mongodb://myUser:myPassword@myHost.com/myDb'
+      env['MONGOLAB_URI'] = 'mongodb://myUser:myPassword@myHost.com:5432/myDb'
+      env['MONGOSOUP_URL'] = 'mongodb://myUser:myPassword@myHost1.com,myHost2.com,myHost3.net:5432/myDb'
 
-      env['SERVICE_NAME_MAP'] = 'HEROKU_POSTGRESQL_RED_URL=myDatabase; CLEARDB_DATABASE_URL = mysqlDb'
+      m1 = 'HEROKU_POSTGRESQL_RED_URL=myDatabase, CLEARDB_DATABASE_URL = mysqlDb, BAD_URL = myBad'
+      m2 = 'MONGOHQ_URL=hq, MONGOLAB_URI=lab, MONGOSOUP_URL=soup'
+      env['SERVICE_NAME_MAP'] = m1 + ',' + m2
 
       vcap_services = Heroku.new.generate_vcap_services(env)
 
@@ -138,9 +160,18 @@ module LibertyBuildpack::Util
       check_mysql(vcap_services, 'mysqlDb')
 
       # verify BAD_URL
-      check_bad(vcap_services)
+      check_bad(vcap_services, 'myBad')
+
+      # verify MONGOHQ_URL
+      check_mongo(vcap_services, 'MONGOHQ_URL', 'hq', env['MONGOHQ_URL'])
+
+      # verify MONGOLAB_URI
+      check_mongo(vcap_services, 'MONGOLAB_URI', 'lab', env['MONGOLAB_URI'])
+
+      # verify MONGOSOUP_URL
+      check_mongo(vcap_services, 'MONGOSOUP_URL', 'soup', env['MONGOSOUP_URL'])
     end
 
-  end
+  end # describe
 
-end
+end # module

@@ -219,7 +219,7 @@ module LibertyBuildpack::Services
       it 'on Heroku' do
         env = {}
         env['HEROKU_POSTGRESQL_RED_URL'] = 'postgres://myUser:myPassword@myHost.com:5432/myDb'
-        env['SERVICE_NAME_MAP'] = 'HEROKU_POSTGRESQL_RED_URL=myDatabase;foo=bar'
+        env['SERVICE_NAME_MAP'] = 'HEROKU_POSTGRESQL_RED_URL=myDatabase'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
         run_test(vcap_services)

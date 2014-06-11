@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/util'
 
 module LibertyBuildpack::Util
@@ -28,6 +29,11 @@ module LibertyBuildpack::Util
       ENV['DYNO'].nil? ? false : true
     end
 
+    # Initialize
+    def initialize
+      @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
+    end
+
     # Generates VCAP_SERVICES style map from a map that represents the environment variables
     # as set on Heroku. Each bound service on Heroku sets one or more environment variables that
     # specifies the location (in the form of a URL) of the service.
@@ -38,22 +44,22 @@ module LibertyBuildpack::Util
       vcap_services = {}
       service_name_map = parse_service_name_map(env)
       env.each do | key, value |
-        if key.end_with?(URL_SUFFIX)
-          begin
-            uri = URI.parse(value)
-          rescue URI::InvalidURIError
-            next
-          end
-
+        if key.end_with?(URL_SUFFIX) || key.end_with?(URI_SUFFIX)
           if key.start_with?(POSTGRESQL_PREFIX)
-            type, service = handle_postgresql(key, uri, service_name_map)
+            type, service = handle_postgresql(key, value, service_name_map)
           elsif key.start_with?(CLEARDB_PREFIX)
-            type, service = handle_cleardb(key, uri, service_name_map)
+            type, service = handle_cleardb(key, value, service_name_map)
+          elsif key.start_with?(MONGOLAB_PREFIX)
+            type, service = handle_mongodb(key, value, service_name_map, 'mongolab')
+          elsif key.start_with?(MONGOHQ_PREFIX)
+            type, service = handle_mongodb(key, value, service_name_map, 'mongohq')
+          elsif key.start_with?(MONGOSOUP_PREFIX)
+            type, service = handle_mongodb(key, value, service_name_map, 'mongosoup')
           else
             type = key
             service = {}
             service['name'] = service_name_map[key] || generate_name(key)
-            service['credentials'] = create_default_credentials(uri)
+            service['credentials'] = create_default_credentials(value)
           end
 
           vcap_services[type] = [service]
@@ -65,35 +71,58 @@ module LibertyBuildpack::Util
     private
 
     URL_SUFFIX = '_URL'.freeze
+    URI_SUFFIX = '_URI'.freeze
     POSTGRESQL_PREFIX = 'HEROKU_POSTGRESQL_'.freeze
     CLEARDB_PREFIX = 'CLEARDB_DATABASE_'.freeze
+    MONGOHQ_PREFIX = 'MONGOHQ_'.freeze
+    MONGOLAB_PREFIX = 'MONGOLAB_'.freeze
+    MONGOSOUP_PREFIX = 'MONGOSOUP_'.freeze
 
-    def handle_postgresql(key, uri, service_name_map)
+    def handle_postgresql(key, value, service_name_map)
       type = 'postgresql'
       service = {}
       service['name'] = service_name_map[key] || type + '.' + key[POSTGRESQL_PREFIX.size..-URL_SUFFIX.size - 1].downcase
       service['tags'] = ['postgresql']
-      service['credentials'] = create_default_credentials(uri)
+      credentials = {}
+      credentials['uri'] = value
+      service['credentials'] = credentials
       [key, service]
     end
 
-    def handle_cleardb(key, uri, service_name_map)
+    def handle_cleardb(key, value, service_name_map)
       type = 'cleardb'
       service = {}
       service['name'] = service_name_map[key] || type
       service['tags'] = ['mysql']
-      service['credentials'] = create_default_credentials(uri)
+      credentials = {}
+      credentials['uri'] = value
+      service['credentials'] = credentials
       [key, service]
     end
 
-    def create_default_credentials(uri)
+    def handle_mongodb(key, value, service_name_map, type)
+      service = {}
+      service['name'] = service_name_map[key] || type
+      service['tags'] = ['mongodb']
       credentials = {}
-      credentials['host'] = credentials['hostname'] = uri.host
-      credentials['port'] = uri.port unless uri.port.nil?
-      credentials['user'] = credentials['username'] = uri.user unless uri.user.nil?
-      credentials['password'] = uri.password unless uri.password.nil?
-      credentials['name'] = uri.path[1..-1]  unless uri.path[1..-1].nil?
-      credentials['uri'] = credentials['url'] = uri.to_s
+      credentials['url'] = value
+      service['credentials'] = credentials
+      [key, service]
+    end
+
+    def create_default_credentials(value)
+      credentials = {}
+      begin
+        uri = URI.parse(value)
+        credentials['host'] = credentials['hostname'] = uri.host
+        credentials['port'] = uri.port unless uri.port.nil?
+        credentials['user'] = credentials['username'] = uri.user unless uri.user.nil?
+        credentials['password'] = uri.password unless uri.password.nil?
+        credentials['name'] = uri.path[1..-1]  unless uri.path[1..-1].nil?
+      rescue URI::InvalidURIError
+        @logger.debug("unable to parse #{value}")
+      end
+      credentials['uri'] = credentials['url'] = value
       credentials
     end
 
@@ -107,7 +136,7 @@ module LibertyBuildpack::Util
       name_map = env['SERVICE_NAME_MAP']
       map = {}
       unless name_map.nil?
-        name_map.split(';').each do | value |
+        name_map.split(',').each do | value |
           key_value = value.split('=')
           map[key_value[0].strip] = key_value[1].strip if key_value.size == 2
         end

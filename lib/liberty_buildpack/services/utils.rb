@@ -13,7 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License
+
 require 'liberty_buildpack/diagnostics/logger_factory'
+require 'liberty_buildpack/repository/configured_item'
 
 module LibertyBuildpack::Services
 
@@ -263,5 +265,46 @@ module LibertyBuildpack::Services
       new_element.add_attribute('value', value)
       instance_hash[name] = value
     end
+
+    #----------------------------------------------------------------------------------------
+    # Determine which client jars need to be downloaded for this service to function properly.
+    # Look up the client jars based on the 'client_jar_key', 'client_jar_url', or 'driver' information in the plugin configuration.
+    #
+    # @param config - plugin configuration.
+    # @param urls - an array containing the available download urls for client jars
+    # return - a non-null array of urls. Will be empty if nothing needs to be downloaded.
+    #-----------------------------------------------------------------------------------------
+    def self.get_urls_for_client_jars(config, urls)
+      logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
+      client_jar_key = config['client_jar_key']
+      if client_jar_key.nil? || urls[client_jar_key].nil?
+        # client_jar_key not found - check for client_jar_url
+        client_jar_url = config['client_jar_url']
+        if client_jar_url.nil?
+          # client_jar_url not found - check for driver
+          repository = config['driver']
+          if repository.nil?
+            # driver not found
+            logger.debug('No client_jar_key, client_jar_url, or driver defined.')
+            return []
+          else
+            # driver found
+            version, driver_uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(repository)
+            logger.debug("Found driver: version: #{version}, url: #{driver_uri}")
+            return [driver_uri]
+          end
+        else
+          # client_jar_url found
+          logger.debug("Found client_jar_url: #{client_jar_url}")
+          return [client_jar_url]
+        end
+      else
+        # client_jar_key found
+        logger.debug("Found client_jar_key: #{urls[client_jar_key]}")
+        return [urls[client_jar_key]]
+      end
+    end
+
   end
+
 end

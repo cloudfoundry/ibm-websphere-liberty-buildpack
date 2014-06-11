@@ -229,7 +229,7 @@ module LibertyBuildpack::Services
       it 'on Heroku' do
         env = {}
         env['CLEARDB_DATABASE_URL'] = 'mysql://myUser:myPassword@myHost.com:5432/myDb'
-        env['SERVICE_NAME_MAP'] = 'CLEARDB_DATABASE_URL=myDatabase;foo=bar'
+        env['SERVICE_NAME_MAP'] = 'CLEARDB_DATABASE_URL=myDatabase'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
         run_test(vcap_services)
@@ -241,7 +241,7 @@ module LibertyBuildpack::Services
       it 'on Heroku, no port' do
         env = {}
         env['CLEARDB_DATABASE_URL'] = 'mysql://myUser:myPassword@myHost.com/myDb'
-        env['SERVICE_NAME_MAP'] = 'CLEARDB_DATABASE_URL=myDatabase;foo=bar'
+        env['SERVICE_NAME_MAP'] = 'CLEARDB_DATABASE_URL=myDatabase'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
         Dir.mktmpdir do |root|
