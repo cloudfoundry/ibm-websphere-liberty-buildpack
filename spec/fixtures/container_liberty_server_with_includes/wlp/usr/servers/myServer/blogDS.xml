@@ -1,0 +1,10 @@
+<server>
+  <dataSource id="blogDS" jndiName="jdbc/blogDS" jdbcDriverRef="derbyEmbedded">
+    <properties createDatabase="create" databaseName="C:/liberty/basics/derby/data/blogDB" />
+  </dataSource>
+  <jdbcDriver id="derbyEmbedded">
+    <library>
+      <fileset dir="C:/liberty/basics/derby" includes="derby.jar" />
+    </library>
+  </jdbcDriver>
+</server>

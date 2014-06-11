@@ -1000,6 +1000,155 @@ module LibertyBuildpack::Container
           end.to raise_error(RuntimeError, 'Failed to locate a repository containing a component_index and installable components using uri test-liberty-uri.tar.gz.')
         end
       end
+
+      it 'should inline the contents of the included files' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty_server_with_includes', root)
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          Liberty.new(
+            app_dir: File.join(root, 'container_liberty_server_with_includes'),
+            configuration: {},
+            environment: {},
+            license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          original_xml_file = File.join(root, 'container_liberty_server_with_includes', 'wlp', 'usr', 'servers', 'myServer', 'server.xml.org')
+          expect(File.file?(original_xml_file)).to be_true
+
+          server_xml_file = File.join(root, 'container_liberty_server_with_includes', 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents.include? '<featureManager>').to be_true
+          expect(server_xml_contents.include? '<application id="blog" location="blog.war" name="blog" type="war"/>').to be_true
+          expect(server_xml_contents.include? '<include location="variables.xml"/>').to be_false
+          expect(server_xml_contents.include? '<variable name="port" value="62147"/>').to be_true
+          expect(server_xml_contents.include? '<include location="moreVariables.xml"/>').to be_false
+          expect(server_xml_contents.include? '<variable name="home" value="/home/vcap/app"/>').to be_true
+          expect(server_xml_contents.include? '<include location="blogDS.xml"').to be_false
+          expect(server_xml_contents.include? '<jdbcDriver id="derbyEmbedded">').to be_true
+          expect(server_xml_contents.include? '<dataSource id="blogDS" jndiName="jdbc/blogDS" jdbcDriverRef="derbyEmbedded">').to be_true
+        end
+      end
+
+      it 'should inline the contents of the included file located via property' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty_server_with_includes_property', root)
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          Liberty.new(
+            app_dir: File.join(root, 'container_liberty_server_with_includes_property'),
+            configuration: {},
+            environment: {},
+            license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          original_xml_file = File.join(root, 'container_liberty_server_with_includes_property', 'wlp', 'usr', 'servers', 'myServer', 'server.xml.org')
+          expect(File.file?(original_xml_file)).to be_true
+
+          server_xml_file = File.join(root, 'container_liberty_server_with_includes_property', 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents.include? '<featureManager>').to be_true
+          expect(server_xml_contents.include? '<application id="blog" location="blog.war" name="blog" type="war"/>').to be_true
+          expect(server_xml_contents.include? '<include location="blogDS.xml" optional="true"/>').to be_false
+          expect(server_xml_contents.include? '<jdbcDriver id="derbyEmbedded">').to be_true
+          expect(server_xml_contents.include? '<dataSource id="blogDS" jndiName="jdbc/blogDS" jdbcDriverRef="derbyEmbedded">').to be_true
+        end
+      end
+
+      it 'should ignore the include element if the optional attribute is true and the included file is not found' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty_server_with_includes_ignored', root)
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          Liberty.new(
+            app_dir: File.join(root, 'container_liberty_server_with_includes_ignored'),
+            configuration: {},
+            environment: {},
+            license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          original_xml_file = File.join(root, 'container_liberty_server_with_includes_ignored', 'wlp', 'usr', 'servers', 'myServer', 'server.xml.org')
+          expect(File.file?(original_xml_file)).to be_true
+
+          server_xml_file = File.join(root, 'container_liberty_server_with_includes_ignored', 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents.include? '<featureManager>').to be_true
+          expect(server_xml_contents.include? '<application id="blog" location="blog.war" name="blog" type="war"/>').to be_true
+          expect(server_xml_contents.include? '<include location="blogDS.xml" optional="true"/>').to be_true
+        end
+      end
+
+      it 'should fail if the optional attribute is false and the included file is not found' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty_server_with_includes_not_found', root)
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          expect do
+            Liberty.new(
+              app_dir: File.join(root, 'container_liberty_server_with_includes_not_found'),
+              configuration: {},
+              environment: {},
+              license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+            ).compile
+          end.to raise_error
+        end
+      end
+
+      it 'should fail if the included file location uses http' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty_server_with_includes_http', root)
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          expect do
+            Liberty.new(
+              app_dir: File.join(root, 'container_liberty_server_with_includes_http'),
+              configuration: {},
+              environment: {},
+              license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+            ).compile
+          end.to raise_error
+        end
+      end
     end
 
     describe 'release' do

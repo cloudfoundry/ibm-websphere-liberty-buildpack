@@ -6,11 +6,10 @@ However, you can push a server package containing a
 preinstalled EBA application.
 
 2. Using server.xml files that contain include statements
-is not supported. The include statements are ignored
-by the buildpack. This impacts the processing
-performed during staging, such as service plugin processing.
-The Liberty profile server itself is unaffected and continues 
-to support include statements in server.xml files.
+is now supported by the buildpack. However, remote configuration
+files, accessible via HTTP, are not supported. The Liberty
+profile server itself is unaffected and continues to support
+include statements in server.xml files.
 
 3. If you use a Liberty Profile server in a Cloud Foundry environment
 the supported features include those listed under the categories: **Java

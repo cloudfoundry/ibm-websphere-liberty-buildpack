@@ -1,0 +1,3 @@
+<server>
+  <variable name='home' value='/home/vcap/app'/>
+</server>
