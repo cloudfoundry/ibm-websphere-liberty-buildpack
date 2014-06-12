@@ -20,7 +20,6 @@ To configure the framework, you can modify the [`config/javaopts.yml`][] file.
 | Name | Description
 | ---- | -----------
 | `from_environment` | Whether to append the value of the JAVA_OPTS environment variable to the collection of Java options
-| ---- | -----------
 | `java_opts` | The Java options that can be used when running the application.  All values are used without modification when invoking the JVM. The options are specified as a single YAML scalar in plain style or enclosed in single or double quotes.
 
 ## Example
