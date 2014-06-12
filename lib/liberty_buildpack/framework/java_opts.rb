@@ -15,6 +15,7 @@
 # limitations under the License.
 
 require 'liberty_buildpack/framework'
+require 'liberty_buildpack/util/dash_case'
 require 'shellwords'
 
 module LibertyBuildpack::Framework
@@ -31,14 +32,16 @@ module LibertyBuildpack::Framework
     def initialize(context = {})
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
+      @jvm_type = context[:jvm_type]
       @app_dir = context[:app_dir]
+      @environment = context[:environment]
     end
 
     # Detects whether this application contributes Java options.
     #
     # @return [String] returns +java-opts+ if Java options have been set by the user
     def detect
-      @configuration.has_key?(CONFIGURATION_PROPERTY) ? CONTAINER_NAME : nil
+      supports_configuration? || supports_environment? ? JavaOpts.to_s.dash_case : nil
     end
 
     # Ensures that none of the Java options specify memory configurations
@@ -59,20 +62,33 @@ module LibertyBuildpack::Framework
 
     private
 
-      CONFIGURATION_PROPERTY = 'java_opts'.freeze
+    JAVA_OPTS_PROPERTY = 'java_opts'.freeze
 
-      CONTAINER_NAME = 'java-opts'.freeze
+    ENVIRONMENT_PROPERTY = 'from_environment'.freeze
 
-      def memory_option?(option)
-        option =~ /-Xms/ || option =~ /-Xmx/ || option =~ /-XX:MaxMetaspaceSize/ || option =~ /-XX:MaxPermSize/ ||
-          option =~ /-Xss/
-      end
+    private_constant :JAVA_OPTS_PROPERTY, :ENVIRONMENT_PROPERTY, :JAVA_OPTS_PROPERTY
 
-      def parsed_java_opts
-        @configuration[CONFIGURATION_PROPERTY].shellsplit.map do |java_opt|
-          java_opt.gsub(/([\s])/, '\\\\\1')
-        end
-      end
+    def memory_option?(option)
+      option =~ /-Xms/ || option =~ /-Xmx/ || option =~ /-XX:MaxMetaspaceSize/ || option =~ /-XX:MaxPermSize/ ||
+        option =~ /-Xss/ || option =~ /-XX:MetaspaceSize/ || option =~ /-XX:PermSize/ if @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
+    end
+
+    def parsed_java_opts
+      parsed_java_opts = []
+
+      parsed_java_opts.concat @configuration[JAVA_OPTS_PROPERTY].shellsplit if supports_configuration?
+      parsed_java_opts.concat @environment[JAVA_OPTS_PROPERTY].shellsplit if supports_environment?
+
+      parsed_java_opts.map { |java_opt| java_opt.gsub(/([\s])/, '\\\\\1') }
+    end
+
+    def supports_configuration?
+      @configuration.key? JAVA_OPTS_PROPERTY
+    end
+
+    def supports_environment?
+      @configuration[ENVIRONMENT_PROPERTY] && @environment.key?(JAVA_OPTS_PROPERTY)
+    end
 
   end
 
