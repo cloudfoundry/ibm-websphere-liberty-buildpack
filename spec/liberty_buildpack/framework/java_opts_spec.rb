@@ -33,11 +33,33 @@ module LibertyBuildpack::Framework
       expect(detected).to eq('java-opts')
     end
 
+    it 'should detect with java_opts ENV and configuration' do
+      detected = JavaOpts.new(
+        java_opts: java_opts,
+        app_dir: 'root',
+        configuration: { 'java_opts' => '-Xmx1024M' },
+        environment: { 'java_opts' => '-Xms1024M' }
+      ).detect
+
+      expect(detected).to eq('java-opts')
+    end
+
     it 'should not detect without java_opts configuration' do
       detected = JavaOpts.new(
         java_opts: java_opts,
         app_dir: 'root',
         configuration: {}
+      ).detect
+
+      expect(detected).to be_nil
+    end
+
+    it 'should not detect with ENV and without java_opts configuration' do
+      detected = JavaOpts.new(
+        java_opts: java_opts,
+        app_dir: 'root',
+        configuration: {},
+        environment: { 'java_opts' => '-Xms1024M' }
       ).detect
 
       expect(detected).to be_nil
@@ -56,12 +78,34 @@ module LibertyBuildpack::Framework
       expect(java_opts).to include('-XX:OnOutOfMemoryError=kill\ -9\ %p')
     end
 
-    it 'should raise an error if a memory region is configured' do
-      expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-Xms1024M', app_dir: 'root' }).compile }.to raise_error(/-Xms/)
-      expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-Xmx1024M', app_dir: 'root' }).compile }.to raise_error(/-Xmx/)
-      expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-XX:MaxMetaspaceSize=128M', app_dir: 'root' }).compile }.to raise_error(/-XX:MaxMetaspaceSize/)
-      expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-XX:MaxPermSize=128M', app_dir: 'root' }).compile }.to raise_error(/-XX:MaxPermSize/)
-      expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-Xss1M', app_dir: 'root' }).compile }.to raise_error(/-Xss/)
+    it 'should include ENV options if configuration contains from_environment key' do
+      JavaOpts.new(
+        java_opts: java_opts,
+        app_dir: 'root',
+        configuration: { 'from_environment' => true },
+        environment: { 'java_opts' => '-Xms1024M' }
+      ).release
+
+      expect(java_opts).to include('-Xms1024M')
+    end
+
+    it 'should not include ENV options if configuration does not contain form_environment key' do
+      JavaOpts.new(
+        java_opts: java_opts,
+        app_dir: 'root',
+        configuration: {},
+        environment: { 'java_opts' => '-Xms1024M' }
+      ).release
+
+      expect(java_opts).not_to include('-Xms1024M')
+    end
+
+    it 'should raise an error if a memory region is configured using openjdk' do
+      expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-Xms1024M', app_dir: 'root' }, jvm_type: 'openjdk').compile }.to raise_error(/-Xms/)
+      expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-Xmx1024M', app_dir: 'root' }, jvm_type: 'openjdk').compile }.to raise_error(/-Xmx/)
+      expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-XX:MaxMetaspaceSize=128M', app_dir: 'root' }, jvm_type: 'openjdk').compile }.to raise_error(/-XX:MaxMetaspaceSize/)
+      expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-XX:MaxPermSize=128M', app_dir: 'root' }, jvm_type: 'openjdk').compile }.to raise_error(/-XX:MaxPermSize/)
+      expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-Xss1M', app_dir: 'root' }, jvm_type: 'openjdk').compile }.to raise_error(/-Xss/)
     end
 
   end

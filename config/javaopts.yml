@@ -15,3 +15,5 @@
 
 # Configuration for the +JAVA_OPTS+ framework
 ---
+from_environment: true
+# java_opts:
