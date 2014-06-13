@@ -66,8 +66,6 @@ module LibertyBuildpack::Framework
 
     ENVIRONMENT_PROPERTY = 'from_environment'.freeze
 
-    private_constant :JAVA_OPTS_PROPERTY, :ENVIRONMENT_PROPERTY, :JAVA_OPTS_PROPERTY
-
     def memory_option?(option)
       option =~ /-Xms/ || option =~ /-Xmx/ || option =~ /-XX:MaxMetaspaceSize/ || option =~ /-XX:MaxPermSize/ ||
         option =~ /-Xss/ || option =~ /-XX:MetaspaceSize/ || option =~ /-XX:PermSize/ if @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
