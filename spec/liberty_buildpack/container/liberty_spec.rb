@@ -519,6 +519,8 @@ module LibertyBuildpack::Container
           expect(server_xml_contents.include? 'type="war"').to be_true
           expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
           expect(server_xml_contents.include? '<httpDispatcher enableWelcomePage="false"/>').to be_true
+          expect(server_xml_contents.include? '<config updateTrigger="mbean"/>').to be_true
+          expect(server_xml_contents.include? '<applicationMonitor dropinsEnabled="false" updateTrigger="mbean"/>').to be_true
         end
       end
 
@@ -615,6 +617,8 @@ module LibertyBuildpack::Container
           expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp"').to be_true
           expect(server_xml_contents.include? 'type="ear"').to be_true
           expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
+          expect(server_xml_contents.include? '<config updateTrigger="mbean"/>').to be_true
+          expect(server_xml_contents.include? '<applicationMonitor dropinsEnabled="false" updateTrigger="mbean"/>').to be_true
         end
       end
 
@@ -938,6 +942,79 @@ module LibertyBuildpack::Container
         end
       end
 
+      it 'should not update config or applcationMonitor element if server.xml already contains them' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
+            file.write("<server><config onError='WARN'/><applicationMonitor pollingRate='600ms'/></server>")
+          end
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          Liberty.new(
+             app_dir: root,
+             configuration: {},
+             environment: {},
+             license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          liberty_directory = File.join(root, '.liberty')
+          expect(Dir.exists?(liberty_directory)).to be_true
+
+          server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read server_xml_file
+          expect(server_xml_contents).to match(/<config onError="WARN"\/>/)
+          expect(server_xml_contents).to match(/<applicationMonitor pollingRate="600ms"\/>/)
+        end
+      end
+
+      it 'should not disable dropins if dropins directory contains files' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
+            file.write('<server></server>')
+          end
+          dropins = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'dropins')
+          FileUtils.mkdir_p dropins
+          File.open(File.join(dropins, 'foo.jar'), 'w') do |file|
+            file.write("i'm a jar")
+          end
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          Liberty.new(
+             app_dir: root,
+             configuration: {},
+             environment: {},
+             license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+
+          liberty_directory = File.join(root, '.liberty')
+          expect(Dir.exists?(liberty_directory)).to be_true
+
+          server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read server_xml_file
+          expect(server_xml_contents).to match(/<config updateTrigger='mbean'\/>/)
+          expect(server_xml_contents).to match(/<applicationMonitor dropinsEnabled='true' updateTrigger='mbean'\/>/)
+        end
+      end
+
       it 'should add droplet.yaml when server xml contains myapp application' do
         Dir.mktmpdir do |root|
           droplet_yaml_file = File.join root, 'droplet.yaml'
@@ -971,6 +1048,8 @@ module LibertyBuildpack::Container
           expect(server_xml_contents.include? '<feature>icap:appstate-1.0</feature>').to be_true
           expect(server_xml_contents.include? "<icap_appstate appName='myapp' markerPath='${home}/.liberty.state'").to be_true
           expect(server_xml_contents.include? "<httpDispatcher enableWelcomePage='false'/>").to be_true
+          expect(server_xml_contents.include? "<config updateTrigger='mbean'/>").to be_true
+          expect(server_xml_contents.include? "<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>").to be_true
 
           expect(File.exists?(droplet_yaml_file)).to be_true
         end
