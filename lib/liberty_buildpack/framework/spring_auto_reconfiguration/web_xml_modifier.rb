@@ -76,7 +76,7 @@ module LibertyBuildpack::Framework
 
       DISPATCHER_SERVLET = 'DispatcherServlet'.freeze
 
-      private_constant :CONTEXT_INITIALIZER_CLASSES, :CONTEXT_LOADER_LISTENER, :DISPATCHER_SERVLET
+      # private_constant :CONTEXT_INITIALIZER_CLASSES, :CONTEXT_LOADER_LISTENER, :DISPATCHER_SERVLET
 
       def augment(root, param_type)
         classes_string = xpath(root, "#{param_type}[param-name[contains(text(), '#{CONTEXT_INITIALIZER_CLASSES}')]]/param-value/text()").first
