@@ -40,7 +40,8 @@ module LibertyBuildpack::Framework
               apps.concat(match)
               break
             elsif app_type == "\/WEB-INF"
-              match = [path.scan(/.*\w+#{Regexp.quote(app_type)}/)[0].gsub('/WEB-INF', '')]
+              match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
+              match = match.length > 0 ? [match[0].gsub('/WEB-INF', '')] : [app_dir]
               apps.concat(match)
               break
             else
