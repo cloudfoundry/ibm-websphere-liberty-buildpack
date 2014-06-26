@@ -267,19 +267,16 @@ module LibertyBuildpack::Container
     end
 
     #-----------------------------------
-    # find the service type by checking the vcap_services name, label and tags
-    # against filter defined by the plugin
+    # find the service type by checking the tags against filter defined by the plugin
     #-----------------------------------
-    def find_service_plugin(service_name, service_data)
+    def find_service_plugin_by_tags(service_data)
       candidates =  Set.new
       @config.each do | key, value |
         filter = value['service_filter']
         unless filter.nil?
           filter = Regexp.new(filter) unless filter.kind_of?(Regexp)
           service_data.each do | service |
-            if service['name'] =~ filter ||
-                service['label'] =~ filter ||
-                (!service['tags'].nil? && service['tags'].any? { |tag| tag =~ filter })
+            if !service['tags'].nil? && service['tags'].any? { |tag| tag =~ filter }
               candidates.add(key)
             end
           end
@@ -300,9 +297,9 @@ module LibertyBuildpack::Container
       type = find_service_plugin_by_filename(name)
       return type unless type.nil?
       candidates =  []
-      # Use filters to find the plugin. Again, at present we trust the label and not the tags. Use tags as a last resort.
+      # Use filters to find the plugin. Give precedence to a search against the label. If no matches using the label search against the tags.
       candidates = find_service_plugin_by_label(name)
-      candidates = find_service_plugin(name, service_data) if candidates.empty?
+      candidates = find_service_plugin_by_tags(service_data) if candidates.empty?
       return 'default' if candidates.empty?
       return candidates[0] if candidates.length == 1
       # If we reach this point, then the plugin name or filter is ambiguous and a plugin issue exists. There is no way to resolve the plugin satisfactorily. No matter the
