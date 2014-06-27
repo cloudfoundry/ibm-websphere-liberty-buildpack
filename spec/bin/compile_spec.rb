@@ -96,6 +96,23 @@ describe 'compile script', :integration do
     end # dir
   end # it
 
+  it 'should also work with standalone spring-boot jar' do
+    Dir.mktmpdir do |root|
+      FileUtils.cp_r 'spec/fixtures/container_main_spring_boot_jar_launcher/.', root
+
+      with_memory_limit('1G') do
+        Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
+          result = wait_thr.value
+          if result != 0
+            puts "stdout: #{stdout.read}"
+            puts "stderr: #{stderr.read}"
+          end
+          expect(result).to be_success
+        end # popen3
+      end # with
+    end # dir
+  end # it
+
   def with_memory_limit(memory_limit)
     previous_value = ENV['MEMORY_LIMIT']
     begin
