@@ -46,7 +46,8 @@ module LibertyBuildpack::Framework
               break
             else
               match = path.scan(%r{^(.*)\/.*\w+\/})
-              apps.concat(match)
+              # capturing group value is array itself
+              apps.concat(match[0])
               break
             end
           end
