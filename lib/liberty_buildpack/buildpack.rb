@@ -153,7 +153,8 @@ module LibertyBuildpack
     end
 
     def self.component_detections(components)
-      components.map { |component| component.detect }.compact
+      compacted_tags = components.map { |component| component.detect }.compact
+      compacted_tags.select { |tag| tag != '' }
     end
 
     def self.components(logger)
