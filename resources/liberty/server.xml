@@ -16,8 +16,7 @@
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${port}"/>
 
-        <application name="myapp" context-root="/" location="myapp"
-        type="war" />
+    <application name="myapp" context-root="/" location="myapp" type="war" />
         
     <logging logDirectory="${application.log.dir}"/>
 
@@ -28,4 +27,8 @@
     <httpDispatcher enableWelcomePage="false"/>
 
     <logging consoleLogLevel="INFO"/>
+
+    <applicationMonitor dropinsEnabled="false" updateTrigger="mbean"/>
+
+    <config updateTrigger="mbean"/>
 </server>

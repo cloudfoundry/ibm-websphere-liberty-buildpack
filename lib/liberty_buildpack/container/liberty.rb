@@ -244,16 +244,18 @@ module LibertyBuildpack::Container
         update_http_endpoint(server_xml_doc)
         update_web_container(server_xml_doc)
 
-        include_file = REXML::Element.new('include', server_xml_doc.root)
-        include_file.add_attribute('location', 'runtime-vars.xml')
+        # add runtime-vars.xml include to server.xml.
+        add_runtime_vars(server_xml_doc)
 
         # Liberty logs must go into cf logs directory so cf logs command displays them.
-        # This is done by modifying server.xml (if it exists)
-        include_file = REXML::Element.new('logging', server_xml_doc.root)
-        include_file.add_attribute('logDirectory', log_directory)
+        update_logs_dir(server_xml_doc)
 
         # Disable default Liberty Welcome page to avoid returning 200 response before app is ready.
         disable_welcome_page(server_xml_doc)
+        # Disable application monitoring
+        disable_application_monitoring(server_xml_doc)
+        # Disable configuration (server.xml) monitoring
+        disable_config_monitoring(server_xml_doc)
         # Check if appstate ICAP feature can be used
         appstate_available = check_appstate_feature(server_xml_doc)
         @services_manager.update_configuration(server_xml_doc, false, current_server_dir)
@@ -302,6 +304,35 @@ module LibertyBuildpack::Container
       end
       webcontainer.add_attribute('trustHostHeaderPort', 'true')
       webcontainer.add_attribute('extractHostHeaderPort', 'true')
+    end
+
+    def add_runtime_vars(server_xml_doc)
+      include_file = REXML::Element.new('include', server_xml_doc.root)
+      include_file.add_attribute('location', 'runtime-vars.xml')
+    end
+
+    def update_logs_dir(server_xml_doc)
+      include_file = REXML::Element.new('logging', server_xml_doc.root)
+      include_file.add_attribute('logDirectory', log_directory)
+    end
+
+    def disable_config_monitoring(server_xml_doc)
+      configs = REXML::XPath.match(server_xml_doc, '/server/config')
+      if configs.empty?
+        config = REXML::Element.new('config', server_xml_doc.root)
+        config.add_attribute('updateTrigger', 'mbean')
+      end
+    end
+
+    def disable_application_monitoring(server_xml_doc)
+      application_monitors = REXML::XPath.match(server_xml_doc, '/server/applicationMonitor')
+      if application_monitors.empty?
+        application_monitor = REXML::Element.new('applicationMonitor', server_xml_doc.root)
+        dropins_dir = File.join(current_server_dir, 'dropins')
+        dropins_dir_populated = Dir.exists?(dropins_dir) && Dir.entries(dropins_dir).size > 2
+        application_monitor.add_attribute('dropinsEnabled', dropins_dir_populated ? 'true' : 'false')
+        application_monitor.add_attribute('updateTrigger', 'mbean')
+      end
     end
 
     def disable_welcome_page(server_xml_doc)
