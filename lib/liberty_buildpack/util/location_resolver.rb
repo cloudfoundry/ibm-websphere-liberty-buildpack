@@ -26,8 +26,9 @@ module LibertyBuildpack::Util
     #
     # @param wlp_install_dir [String] :the WLP installation directory
     # @param server_name [String] :the name of the server
-    def initialize(wlp_install_dir, server_name)
+    def initialize(app_dir, wlp_install_dir, server_name)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
+      @app_dir = app_dir
       @properties = {
         wlp_install_dir: wlp_install_dir,
         wlp_user_dir: wlp_install_dir + '/usr',
@@ -47,7 +48,11 @@ module LibertyBuildpack::Util
         variable = symbol.to_s.gsub "\_", '.'
         result.gsub! "\$\{#{variable}\}", mapping
       end
-      File.expand_path(result, server_xml_dir)
+      result = File.expand_path(result, server_xml_dir)
+      unless result.start_with?(@app_dir)
+        fail "Absolute path must start with #{@app_dir} directory: #{result}"
+      end
+      result
     end
   end
 end

@@ -1105,15 +1105,15 @@ module LibertyBuildpack::Container
 
           server_xml_file = File.join(root, 'container_liberty_server_with_includes', 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
-          expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application id="blog" location="blog.war" name="blog" type="war"/>').to be_true
-          expect(server_xml_contents.include? '<include location="variables.xml"/>').to be_false
-          expect(server_xml_contents.include? '<variable name="port" value="62147"/>').to be_true
-          expect(server_xml_contents.include? '<include location="moreVariables.xml"/>').to be_false
-          expect(server_xml_contents.include? '<variable name="home" value="/home/vcap/app"/>').to be_true
-          expect(server_xml_contents.include? '<include location="blogDS.xml"').to be_false
-          expect(server_xml_contents.include? '<jdbcDriver id="derbyEmbedded">').to be_true
-          expect(server_xml_contents.include? '<dataSource id="blogDS" jndiName="jdbc/blogDS" jdbcDriverRef="derbyEmbedded">').to be_true
+          expect(server_xml_contents).to match(/<featureManager>/)
+          expect(server_xml_contents).to match(/<application id="blog" location="blog.war" name="blog" type="war"\/>/)
+          expect(server_xml_contents).not_to match(/<include location="variables.xml"\/>/)
+          expect(server_xml_contents).to match(/<variable name="port" value="62147"\/>/)
+          expect(server_xml_contents).not_to match(/<include location="moreVariables.xml"\/>/)
+          expect(server_xml_contents).to match(%r{<variable name="home" value="\/home\/vcap\/app"\/>})
+          expect(server_xml_contents).not_to match(/<include location="blogDS.xml"\/>/)
+          expect(server_xml_contents).to match(/<jdbcDriver id="derbyEmbedded">/)
+          expect(server_xml_contents).to match(/<dataSource id="blogDS" jndiName="jdbc\/blogDS" jdbcDriverRef="derbyEmbedded">/)
         end
       end
 
@@ -1142,11 +1142,11 @@ module LibertyBuildpack::Container
 
           server_xml_file = File.join(root, 'container_liberty_server_with_includes_property', 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
-          expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application id="blog" location="blog.war" name="blog" type="war"/>').to be_true
-          expect(server_xml_contents.include? '<include location="blogDS.xml" optional="true"/>').to be_false
-          expect(server_xml_contents.include? '<jdbcDriver id="derbyEmbedded">').to be_true
-          expect(server_xml_contents.include? '<dataSource id="blogDS" jndiName="jdbc/blogDS" jdbcDriverRef="derbyEmbedded">').to be_true
+          expect(server_xml_contents).to match(/<featureManager>/)
+          expect(server_xml_contents).to match(/<application id="blog" location="blog.war" name="blog" type="war"\/>/)
+          expect(server_xml_contents).not_to match(/<include location="blogDS.xml" optional="true"\/>/)
+          expect(server_xml_contents).to match(/<jdbcDriver id="derbyEmbedded">/)
+          expect(server_xml_contents).to match(/<dataSource id="blogDS" jndiName="jdbc\/blogDS" jdbcDriverRef="derbyEmbedded">/)
         end
       end
 
@@ -1175,9 +1175,9 @@ module LibertyBuildpack::Container
 
           server_xml_file = File.join(root, 'container_liberty_server_with_includes_ignored', 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
-          expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application id="blog" location="blog.war" name="blog" type="war"/>').to be_true
-          expect(server_xml_contents.include? '<include location="blogDS.xml" optional="true"/>').to be_true
+          expect(server_xml_contents).to match(/<featureManager>/)
+          expect(server_xml_contents).to match(/<application id="blog" location="blog.war" name="blog" type="war"\/>/)
+          expect(server_xml_contents).to match(/<include location="blogDS.xml" optional="true"\/>/)
         end
       end
 
