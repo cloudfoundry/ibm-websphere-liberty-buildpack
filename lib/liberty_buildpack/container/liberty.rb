@@ -239,7 +239,7 @@ module LibertyBuildpack::Container
 
         # Perform inlining of includes prior to adding include for runtime-vars.xml
         # as the file may not exist yet.
-        inline_includes(server_xml_doc, File.dirname(server_xml), LocationResolver.new(liberty_home, server_name))
+        inline_includes(server_xml_doc, File.dirname(server_xml), LocationResolver.new(@app_dir, liberty_home, server_name))
 
         update_http_endpoint(server_xml_doc)
         update_web_container(server_xml_doc)
