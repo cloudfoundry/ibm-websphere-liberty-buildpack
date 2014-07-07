@@ -120,16 +120,28 @@ module LibertyBuildpack::Container
     def release
       server_dir = ' .liberty/usr/servers/' << server_name << '/'
       runtime_vars_file =  server_dir + 'runtime-vars.xml'
-      create_vars_string = File.join(LIBERTY_HOME, 'create_vars.rb') << runtime_vars_file << ' && '
-      java_home_string = "JAVA_HOME=\"$PWD/#{@java_home}\""
+      create_vars_string = File.join(LIBERTY_HOME, 'create_vars.rb') << runtime_vars_file << ' &&'
+      env_var_string = ContainerUtils.space(env_yml_contents)
+      java_home_string = ContainerUtils.space("JAVA_HOME=\"$PWD/#{@java_home}\"")
       start_script_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'bin', 'server'))
       start_script_string << ContainerUtils.space('run')
       jvm_options
       server_name_string = ContainerUtils.space(server_name)
-      "#{create_vars_string}#{java_home_string}#{start_script_string}#{server_name_string}"
+      "#{create_vars_string}#{env_var_string}#{java_home_string}#{start_script_string}#{server_name_string}"
     end
 
     private
+
+    def env_yml_contents
+      env_contents = ''
+      env_file = File.expand_path('../../../config/env.yml', File.dirname(__FILE__))
+      if File.exists? env_file
+        env_contents = YAML.load_file(env_file)
+        @logger.debug { "#{env_file} contents: #{env_contents}" }
+      end
+      # Converts {"foo"=>"bar"} to foo=bar so it can be part of the command string
+      env_contents.to_s.gsub(/[{}>",]/, '')
+    end
 
     def jvm_options
       # disable 2-phase (XA) transactions via a -D option, as they are unsupported in
@@ -352,7 +364,7 @@ module LibertyBuildpack::Container
       myapp_apps = REXML::XPath.match(server_xml_doc, '/server/application[@name="myapp"]')
       if File.file?(icap_extension) && ! myapp_apps.empty?
 
-        # Add icap:appstate-1.0 feature
+        # Add appstate-1.0 feature
         feature_managers = REXML::XPath.match(server_xml_doc, '/server/featureManager')
         if feature_managers.empty?
           feature_manager = REXML::Element.new('featureManager', server_xml_doc.root)
@@ -360,10 +372,10 @@ module LibertyBuildpack::Container
           feature_manager = feature_managers[0]
         end
         appstate_feature = REXML::Element.new('feature', feature_manager)
-        appstate_feature.text = 'icap:appstate-1.0'
+        appstate_feature.text = 'appstate-1.0'
 
-        # Turn on marker file using icap_appstate element
-        appstate = REXML::Element.new('icap_appstate', server_xml_doc.root)
+        # Turn on marker file using appstate element
+        appstate = REXML::Element.new('appstate', server_xml_doc.root)
         appstate.add_attribute('appName', 'myapp')
         appstate.add_attribute('markerPath', '${home}/.liberty.state')
 
