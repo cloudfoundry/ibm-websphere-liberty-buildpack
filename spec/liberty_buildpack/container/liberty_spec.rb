@@ -1460,6 +1460,26 @@ module LibertyBuildpack::Container
         end
       end
 
+      it 'should return correct output for empty env_yml_contents (older Ruby)' do
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        .and_return(LIBERTY_VERSION)
+
+        YAML.stub(:load_file).and_return('---')
+
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty', root)
+          contents = Liberty.new(
+            app_dir: File.join(root, 'container_liberty'),
+            java_home: 'test-java-home',
+            java_opts: '',
+            configuration: {},
+            license_ids: {}
+          ).release
+
+          expect(contents).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+        end
+      end
+
       it 'should return correct output for populated env_yml_contents' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)

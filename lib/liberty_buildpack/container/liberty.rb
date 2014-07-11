@@ -138,9 +138,14 @@ module LibertyBuildpack::Container
       if File.exists? env_file
         env_contents = YAML.load_file(env_file)
         @logger.debug { "#{env_file} contents: #{env_contents}" }
+        if env_contents.nil? || '---'.eql?(env_contents)
+          env_contents = ''
+        else
+          # Converts {"foo"=>"bar"} to foo=bar so it can be part of the command string
+          env_contents = env_contents.to_s.gsub(/[{}>",]/, '')
+        end
       end
-      # Converts {"foo"=>"bar"} to foo=bar so it can be part of the command string
-      env_contents.to_s.gsub(/[{}>",]/, '')
+      env_contents
     end
 
     def jvm_options
