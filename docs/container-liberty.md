@@ -21,8 +21,8 @@ You can modify the [`config/liberty.yml`][liberty.yml] file to configure the con
 
 | Name | Description
 | ---- | -----------
-|`repository_root`| The URL of the Liberty repository index ([details][repositories])  
-|`version`| The version of the Liberty profile. You can find the candidate versions [here][liberty.yml].
+|`repository_root`| The URL of the Liberty repository index ([details][repositories]).
+|`version`| The version of the Liberty profile. You can find the candidate versions [here][index.yml].
 |`minify`| Boolean indicating whether the Liberty server should be minified. Minification potentially reduces the size of the deployed Liberty server because only the requested features are included, but it might result in longer push times. The default value is `false`.
 
 The `minify` option can be overridden on a per-application basis by specifying a `minify` environment variable in the `manifest.yml` for the application. For example:
@@ -38,3 +38,5 @@ The `minify` option can be overridden on a per-application basis by specifying a
 [Spring profiles]:http://blog.springsource.com/2011/02/14/spring-3-1-m1-introducing-profile/
 [SPRING_PROFILES_ACTIVE]: http://static.springsource.org/spring/docs/3.1.x/javadoc-api/org/springframework/core/env/AbstractEnvironment.html#ACTIVE_PROFILES_PROPERTY_NAME
 [version_syntax]: util-repositories.md#version-syntax-and-ordering
+[index.yml]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml
+
