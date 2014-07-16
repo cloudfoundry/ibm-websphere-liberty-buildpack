@@ -15,14 +15,14 @@
 # limitations under the License.
 
 require 'simplecov'
-
+require 'simplecov-rcov'
+SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
 SimpleCov.start do
   add_filter 'spec'
 end
 
 require 'tmpdir'
 require 'webmock/rspec'
-# Ensure a logger exists for any class under test that needs one.
 require 'fileutils'
 require 'liberty_buildpack/diagnostics/common'
 require 'liberty_buildpack/diagnostics/logger_factory'
@@ -31,22 +31,18 @@ RSpec.configure do |config|
   config.treat_symbols_as_metadata_keys_with_true_values = true
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
+  # Ensure a logger exists for any class under test that needs one.
   config.before(:all) do
     LibertyBuildpack::Diagnostics::LoggerFactory.send :close
-    tmpdir = Dir.tmpdir
-    diagnostics_directory = File.join(tmpdir, LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY)
+    diagnostics_directory = LibertyBuildpack::Diagnostics.get_diagnostic_directory(Dir.tmpdir)
     FileUtils.rm_rf diagnostics_directory
-    raise 'Failed to create logger' if LibertyBuildpack::Diagnostics::LoggerFactory.create_logger(tmpdir).nil?
+    raise 'Failed to create logger' if LibertyBuildpack::Diagnostics::LoggerFactory.create_logger(Dir.tmpdir).nil?
   end
 
   config.after(:all) do
-    tmpdir = Dir.tmpdir
-    diagnostics_directory = File.join(tmpdir, LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY)
+    LibertyBuildpack::Diagnostics::LoggerFactory.send :close
+    diagnostics_directory = LibertyBuildpack::Diagnostics.get_diagnostic_directory(Dir.tmpdir)
     FileUtils.rm_rf diagnostics_directory
   end
 
-  config.after(:suite) do
-    LibertyBuildpack::Diagnostics::LoggerFactory.send :close
-    FileUtils.rm_rf File.join(Dir.tmpdir, LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY)
-  end
 end
