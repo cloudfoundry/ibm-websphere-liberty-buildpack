@@ -532,7 +532,7 @@ module LibertyBuildpack::Container
       if uri.end_with?('.zip')
         ContainerUtils.unzip(file.path, root)
       elsif uri.end_with?('jar')
-		system "java -jar #{file.path}"
+        system "java -jar #{file.path}"
       elsif uri.end_with?('tar.gz', '.tgz')
         system "tar -zxf #{file.path} -C #{root} 2>&1"
       else
