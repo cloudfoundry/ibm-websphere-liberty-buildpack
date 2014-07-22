@@ -69,9 +69,9 @@ module LibertyBuildpack::Container
           jvm_args = get_jvm_args
           cmd = File.join(liberty_home, 'bin', 'featureManager')
           if jvm_args.empty?
-            script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" #{cmd} install --acceptLicense #{features}"
+            script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" #{cmd} install --acceptLicense #{features} --when-file-exists=replace"
           else
-            script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS=#{jvm_args} #{cmd} install --acceptLicense #{features}"
+            script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS=#{jvm_args} #{cmd} install --acceptLicense #{features} --when-file-exists=replace"
           end
           @logger.debug("script invocation string is #{script_string}")
           output = `#{script_string}`
