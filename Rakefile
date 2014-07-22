@@ -54,7 +54,7 @@ task :package, [:zipfile, :hosts] do |t, args|
   source = File.dirname(__FILE__)
   basename = File.basename(source)
   if args.zipfile.nil?
-    hash = `git rev-parse --short HEAD`.chomp
+    hash = `git describe --tags`.chomp
     zipfile = File.expand_path(File.join('..', "#{basename}-#{hash}.zip"), source)
   else
     zipfile = File.expand_path(args.zipfile)
