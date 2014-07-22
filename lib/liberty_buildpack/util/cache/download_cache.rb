@@ -221,7 +221,7 @@ module LibertyBuildpack::Util::Cache
       @logger.debug { "should_use_cache for #{uri}, inputs: use_internet? = #{use_internet}, cached? = #{cached}, has_etag? = #{has_etag}, has_last_modified? = #{has_last_modified}" }
 
       use_cache = false
-      if cached && !has_etag && !has_last_modified
+      if cached && (!has_etag || !has_last_modified)
         @logger.debug { "Using cache version of #{uri} without up-to-date check since it has no etag or last modified timestamp" }
         use_cache = true
       elsif use_internet && cached && (has_etag || has_last_modified)
