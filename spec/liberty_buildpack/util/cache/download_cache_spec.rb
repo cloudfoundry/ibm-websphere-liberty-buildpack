@@ -73,6 +73,26 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     end
   end
 
+  it 'should not perform update check if etag is missing' do
+    stub_request(:get, 'http://foo-uri/')
+    .to_return(status: 200, body: 'foo-cached', headers: { 'Last-Modified' => 'foo-last-modified' })
+
+    download_cache.get('http://foo-uri/') do |data_file|
+      expect(data_file.read).to eq('foo-cached')
+    end
+
+  end
+
+  it 'should not perform update check if last-modified is missing' do
+    stub_request(:get, 'http://foo-uri/')
+    .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag' })
+
+    download_cache.get('http://foo-uri/') do |data_file|
+      expect(data_file.read).to eq('foo-cached')
+    end
+
+  end
+
   it 'should not raise error if download cannot be completed but retrying succeeds' do
     stub_request(:get, 'http://foo-uri/').to_raise(SocketError).then
     .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
