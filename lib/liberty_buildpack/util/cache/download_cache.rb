@@ -224,7 +224,7 @@ module LibertyBuildpack::Util::Cache
       if cached && (!has_etag || !has_last_modified)
         @logger.debug { "Using cache version of #{uri} without up-to-date check since it has no etag or last modified timestamp" }
         use_cache = true
-      elsif use_internet && cached && (has_etag || has_last_modified)
+      elsif use_internet && cached
         use_cache = up_to_date_check(immutable_file_cache, uri)
       elsif !use_internet && cached
         @logger.debug { "Internet unavailable, so using cached version of #{uri}" }
