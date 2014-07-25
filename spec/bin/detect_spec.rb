@@ -46,20 +46,15 @@ describe 'detect script', :integration do
   end
 
   describe 'around Spring current directory test' do
-    curr_dir = FileUtils.pwd
-    before(:each) do |example|
-      FileUtils.chdir 'spec/fixtures/framework_auto_reconfiguration_servlet_2' # , root
-    end
-    after(:each) do |example|
-      FileUtils.chdir curr_dir
-    end
     it 'should succeed when Spring is present and detect is applied in the current directory' do
-      root = '.'
-      with_memory_limit('1G') do
-         Open3.popen3("../../../bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
-           expect(wait_thr.value).to be_success
-           expect(stderr.read).not_to include('undefined method')
-         end
+      Dir.mktmpdir do |root|
+        FileUtils.cp_r 'spec/fixtures/framework_auto_reconfiguration_servlet_2/.', root
+        with_memory_limit('1G') do
+          Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
+            expect(wait_thr.value).to be_success
+            expect(stderr.read).not_to include('undefined method')
+          end
+        end
       end
     end
   end

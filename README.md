@@ -2,7 +2,7 @@
 
 # IBM WebSphere Application Server Liberty Buildpack
 
-The `liberty-buildpack` is a [Cloud Foundry][] Buildpack for running applications on IBM's WebSphere Application Server Liberty Profile. It is designed to run most "packaged" servers.
+The `liberty-buildpack` is a [Cloud Foundry][] Buildpack for running applications on IBM's WebSphere Application Server [Liberty Profile][]. It is designed to run most "packaged" servers.
 
 ## Usage
 To deploy applications using the IBM WebSphere Application Server Liberty Buildpack, you are required to accept the IBM Liberty license and IBM JRE license by following the instructions below:
@@ -28,33 +28,38 @@ cf push <APP-NAME> -p <ARCHIVE> -b https://github.com/cloudfoundry/ibm-websphere
 * For further details on tuning the applications JVM see [tuning options][].
 * For further details on pushing a Java Main application see [java main push][].
 
-## Forking the buildpack   
-To fork the Buildpack and host your own binaries, then complete the following:
+## Documentation
+All Documentation is available in the Docs folder of the buildpack.
 
-1. Fork the [ibm-websphere-liberty-buildpack](https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack).
-
-2. Clone the forked repository to your local machine.
-
-3. Download the wlp-developers-runtime-8.5.5.2.jar from [wasdev.net][].
-
-4. Download the latest IBM JRE for Linux from the [developerWorks Java site][].
-  The download will be in an archive .bin format.
-   
-5. Copy the binaries to a location that the buildpack will be able to access via HTTP. For details see
-  [Repositories][]. For an example see [Setting up your Web Server][example]
-
-6. Modify the code in [`config/ibmjdk.yml`][ibmjdk.yml] to point to the JRE.
-
-7. Modify the code in [`config/liberty.yml`][liberty.yml] to point to Liberty.
-
-8. Commit and push the changes
-
-9. You should now be able to deploy applications to your forked buildpack with the following command:
-
-```bash
-cf push <APP-NAME> -p <ARCHIVE> -b <URL to forked repository>
-```
-    
+* [Liberty Buildpack Design Overview](docs/design.md)
+* Container
+    * [Liberty Container](docs/container-liberty.md)
+    * [Java Main (for jars with a main() class)](docs/java-main.md)
+* Frameworks
+	* [Java Opts Framework](docs/framework-java_opts.md)
+	* [Spring Auto Reconfiguration Framework](docs/framework-spring-auto-reconfiguration.md)
+* JREs
+    * [IBM JDK](docs/ibm-jdk.md)
+    * [Open JDK](docs/open-jdk.md)
+* Service Plugins
+    * Work in progress
+* [Server Behavior xml Options](docs/server-xml-options.md)
+* [Forking the buildpack](docs/forking.md)
+* [Setting Environment Variables](docs/env.md)
+* [Installation (admin buildpack into CF)](docs/installation.md)
+* [Tuning](docs/tuning.md)
+* [Logging](docs/logging.md)
+* [Debugging the buildpack](https://github.com/cloudfoundry/java-buildpack/blob/master/docs/debugging-the-buildpack.md)
+* [Troubleshooting](docs/troubleshooting.md)
+* [Security](docs/security.md)
+* [Restrictions](docs/restrictions.md)
+* [Configuring Liberty with bootstrap.properties](docs/bootstrap-properties.md)
+* Utilities
+	* [Utility: Caches](docs/util-caches.md)
+	* [Utility: Repositories](docs/util-repositories.md)
+	* [Utility: Repository Builder](docs/util-repository-builder.md)
+	* [Utility: Test Applications](docs/util-test-applications.md)
+	    
 ## Running Tests
 To run the tests, do the following:
 
@@ -72,8 +77,10 @@ bundle install --gemfile Gemfile.rubymine-debug
 ## Contributing
 [Pull requests][] are welcome; see the [contributor guidelines][] for details.
 
+
 [Apache License]: http://www.apache.org/licenses/LICENSE-2.0
 [Cloud Foundry]: http://www.cloudfoundry.com
+[Liberty Profile]: https://developer.ibm.com/wasdev/docs/introducing_the_liberty_profile/
 [contributor guidelines]: CONTRIBUTING.md
 [GitHub's forking functionality]: https://help.github.com/articles/fork-a-repo
 [install additional gems]: http://stackoverflow.com/questions/11732715/how-do-i-install-ruby-debug-base19x-on-mountain-lion-for-intellij
