@@ -292,10 +292,6 @@ module LibertyBuildpack::Container
     # @param service_data - the array holding the instances data
     #-----------------------------------
     def get_service_type(name, service_data)
-      # Initial design was to find the service type by matching the service label against a service plugin file name. That continues to be the primary search criteria for now.
-      # Once services have properly cleaned up their tags and filters added to all plugins, we can remove this and move exclusively to a filter-based search.
-      type = find_service_plugin_by_filename(name)
-      return type unless type.nil?
       candidates =  []
       # Use filters to find the plugin. Give precedence to a search against the label. If no matches using the label search against the tags.
       candidates = find_service_plugin_by_label(name)
@@ -304,29 +300,6 @@ module LibertyBuildpack::Container
       return candidates[0] if candidates.length == 1
       # If we reach this point, then the plugin name or filter is ambiguous and a plugin issue exists. There is no way to resolve the plugin satisfactorily. No matter the
       # algorithm we use, we can find a counter-example that we do not handle. Fail fast. This type of issue should be found in development.
-      @logger.error("Unable to resolve a single service plugin for service #{name}. Found potential matches of #{candidates}.")
-      raise "Unable to resolve a single service plugin for service #{name}. Multiple inexact matches exist."
-    end
-
-    #---------------------------------------
-    # Legacy plugin resolution mechanism that relies on the plugin's config file matching the services label
-    #---------------------------------------
-    def find_service_plugin_by_filename(name)
-      # V1 and V2 service broker names differ. V1 style names include a "-major.minor" suffix. For a given service named "abc", the V1-style name may be abc-1.0 and the
-      # V2 style name will be abc. Need to consider both possibilities in our search for an exact match.
-      candidates =  []
-      @config.each_key do |key|
-        return key if name == key
-        unless name.rindex('-').nil?
-          v1_name = name.slice(0, name.rindex('-'))
-          return key if v1_name == key
-        end
-        candidates.push(key) if name.include?(key)
-      end
-      # no "exact" match was found, check candidates.
-      return nil if candidates.empty?
-      return candidates[0] if candidates.length == 1
-      # If more than one candidate exists, then the plugin name or filter is ambiguous and a plugin issue exists. There is no way to resolve the plugin satisfactorily.
       @logger.error("Unable to resolve a single service plugin for service #{name}. Found potential matches of #{candidates}.")
       raise "Unable to resolve a single service plugin for service #{name}. Multiple inexact matches exist."
     end
