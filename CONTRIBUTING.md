@@ -1,4 +1,4 @@
-_Have something you’d like to contribute to the buildpack? We welcome pull requests, but ask that you carefully read this document first to understand how best to submit them; what kind of changes are likely to be accepted; and what to expect from the Cloud Foundry Java Experience team when evaluating your submission._
+_Have something you’d like to contribute to the buildpack? We welcome pull requests, but ask that you carefully read this document first to understand how best to submit them; what kind of changes are likely to be accepted; and what to expect from the team when evaluating your submission._
 
 _Please refer back to this document as a checklist before issuing any pull request; this will save time for everyone!_
 
@@ -10,7 +10,7 @@ Not sure what a pull request is, or how to submit one?  Take a look at GitHub's 
 ## Search GitHub Issues first; create an issue if necessary
 Is there already an issue that addresses your concern?  Do a bit of searching in our [GitHub issue tracker][] to see if you can find something similar. If not, please create a new issue before submitting a pull request unless the change is truly trivial, e.g. typo fixes, removing compiler warnings, etc.
 
-[GitHub issue tracker]: https://github.com/cloudfoundry/java-buildpack/issues
+[GitHub issue tracker]: https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack/issues
 
 ## Discuss non-trivial contribution ideas with committers
 
@@ -98,10 +98,10 @@ git config --global user.name "First Last"
 git config --global user.email user@mail.com
 ```
 
-or locally for the `java-buildpack` repository only by omitting the `--global` flag:
+or locally for the `ibm-websphere-liberty-buildpack` repository only by omitting the `--global` flag:
 
 ```bash
-cd java-buildpack
+cd ibm-websphere-liberty-buildpack
 git config user.name "First Last"
 git config user.email user@mail.com
 ```
