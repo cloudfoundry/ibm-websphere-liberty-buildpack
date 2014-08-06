@@ -51,11 +51,13 @@ containing your packaged server (e.g. `/usr/servers/myServer`) then that
 will push the packaged server to the cloud. The buildpack will detect
 the server.xml contained within the package and proceed to modify it.
 
-You can also use this method to package and install your own Liberty features.
+You can also use this method to install your own Liberty features.
 By placing your feature manifest in the `${wlp.user.dir}/extension/lib/features` 
-directory and the related .esa feature bundles in the `${wlp.user.dir}/extension/lib` directory,
-when you package and push that server these features will be installed to that
-instance.
+directory and the feature bundle .jar in the `${wlp.user.dir}/extension/lib` directory,
+your feature will be installed to that Liberty instance. When you package Liberty using 
+`./bin/server package myServer --include=usr`, those features are also packaged, as they
+are present in the `usr` directory. This means that when you push that packaged
+server, these features will still be present in the `usr` directory and installed to that instance.
 [More information on Packaging and installing Liberty features can be found here.](http://www-01.ibm.com/support/knowledgecenter/SSAW57_8.5.5/com.ibm.websphere.wlp.nd.iseries.doc/ae/twlp_feat_install.html?lang=en)
 
 
