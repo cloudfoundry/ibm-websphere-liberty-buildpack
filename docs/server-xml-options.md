@@ -51,6 +51,14 @@ containing your packaged server (e.g. `/usr/servers/myServer`) then that
 will push the packaged server to the cloud. The buildpack will detect
 the server.xml contained within the package and proceed to modify it.
 
+You can also use this method to package and install your own Liberty features.
+By placing your feature manifest in the `${wlp.user.dir}/extension/lib/features` 
+directory and the related .esa feature bundles in the `${wlp.user.dir}/extension/lib` directory,
+when you package and push that server these features will be installed to that
+instance.
+[More information on Packaging and installing Liberty features can be found here.](http://www-01.ibm.com/support/knowledgecenter/SSAW57_8.5.5/com.ibm.websphere.wlp.nd.iseries.doc/ae/twlp_feat_install.html?lang=en)
+
+
 ### Server Directory Push
 If you execute `cf push` from the server directory of your application
 (e.g. `/usr/servers/myServer`) then that will push the contents of that
