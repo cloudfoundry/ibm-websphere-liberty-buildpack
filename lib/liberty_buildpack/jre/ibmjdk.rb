@@ -89,6 +89,7 @@ module LibertyBuildpack::Jre
     # @return [void]
     def release
       @java_opts.concat memory(@configuration)
+      @java_opts.concat default_opts_gc
     end
 
     # Prints a warning message if a memory limit of less than 512M has been chosen when using the IBM JDK.
@@ -104,6 +105,8 @@ module LibertyBuildpack::Jre
     private
 
     JAVA_HOME = '.java'.freeze
+
+    DUMP_HOME = '../../../../../dumps'.freeze
 
     KEY_MEMORY_HEURISTICS = 'memory_heuristics'
 
@@ -182,6 +185,15 @@ module LibertyBuildpack::Jre
 
         java_memory_opts
       end
+    end
+
+    # enable verbose gc logging to stderr and the dumps directory with historical
+    # number of logs of 10 with 1000 gc cycles
+    def default_opts_gc
+      default_options = []
+      default_options.push('-verbose:gc')
+      default_options.push("-Xverbosegclog:#{DUMP_HOME}/verbosegc#.log,10,1000")
+      default_options
     end
 
     def pre_8

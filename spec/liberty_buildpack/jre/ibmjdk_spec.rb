@@ -236,6 +236,23 @@ module LibertyBuildpack::Jre
       end
     end
 
+    it 'should add default garbage collection options that output data to the common dumps directory' do
+          Dir.mktmpdir do |root|
+            LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+
+            released = IBMJdk.new(
+                app_dir: '/application-directory',
+                java_home: '',
+                java_opts: [],
+                configuration: {},
+                license_ids: {}
+            ).release
+
+            expect(released).to include('-verbose:gc')
+            expect(released).to include('-Xverbosegclog:../../../../../dumps/verbosegc#.log,10,1000')
+          end
+    end
+
   end
 
 end
