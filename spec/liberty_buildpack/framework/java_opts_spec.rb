@@ -38,7 +38,7 @@ module LibertyBuildpack::Framework
         java_opts: java_opts,
         app_dir: 'root',
         configuration: { 'java_opts' => '-Xmx1024M' },
-        environment: { 'java_opts' => '-Xms1024M' }
+        environment: { 'JAVA_OPTS' => '-Xms1024M' }
       ).detect
 
       expect(detected).to eq('java-opts')
@@ -59,7 +59,7 @@ module LibertyBuildpack::Framework
         java_opts: java_opts,
         app_dir: 'root',
         configuration: {},
-        environment: { 'java_opts' => '-Xms1024M' }
+        environment: { 'JAVA_OPTS' => '-Xms1024M' }
       ).detect
 
       expect(detected).to be_nil
@@ -83,7 +83,7 @@ module LibertyBuildpack::Framework
         java_opts: java_opts,
         app_dir: 'root',
         configuration: { 'from_environment' => true },
-        environment: { 'java_opts' => '-Xms1024M' }
+        environment: { 'JAVA_OPTS' => '-Xms1024M' }
       ).release
 
       expect(java_opts).to include('-Xms1024M')
@@ -94,7 +94,7 @@ module LibertyBuildpack::Framework
         java_opts: java_opts,
         app_dir: 'root',
         configuration: {},
-        environment: { 'java_opts' => '-Xms1024M' }
+        environment: { 'JAVA_OPTS' => '-Xms1024M' }
       ).release
 
       expect(java_opts).not_to include('-Xms1024M')
