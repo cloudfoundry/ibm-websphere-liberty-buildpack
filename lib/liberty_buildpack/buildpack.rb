@@ -17,6 +17,7 @@
 require 'fileutils'
 require 'liberty_buildpack'
 require 'liberty_buildpack/util/constantize'
+require 'liberty_buildpack/util/heroku'
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/diagnostics/common'
 require 'pathname'
@@ -120,8 +121,7 @@ module LibertyBuildpack
     # Instances should only be constructed by this class.
     def initialize(app_dir)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
-      Buildpack.log_git_data @logger
-      Buildpack.dump_environment_variables @logger
+      Buildpack.log_debug_data @logger
       Buildpack.require_component_files
       components = Buildpack.components @logger
 
@@ -140,16 +140,13 @@ module LibertyBuildpack
           java_home: java_home,
           java_opts: java_opts,
           lib_directory: @lib_directory,
+          logs_directory: Buildpack.logs_directory,
           vcap_application: vcap_application ? YAML.load(vcap_application) : {},
           vcap_services: vcap_services ? YAML.load(vcap_services) : {},
           license_ids: license_ids ? license_ids : {},
           jvm_type: jvm_type
       }
       initialize_components(components, basic_context)
-    end
-
-    def self.dump_environment_variables(logger)
-      logger.debug { "Environment Variables: #{ENV.to_hash}" }
     end
 
     def self.component_detections(components)
@@ -207,7 +204,9 @@ module LibertyBuildpack
       Pathname.new(File.expand_path('jre', File.dirname(__FILE__)))
     end
 
-    def self.log_git_data(logger)
+    def self.log_debug_data(logger)
+      logger.debug { "Environment Variables: #{ENV.to_hash}" }
+
       # Log information about the buildpack's git repository to enable stale forks to be spotted.
       # Call the debug method passing a parameter rather than a block so that, should the git command
       # become inaccessible to the buildpack at some point in the future, we find out before someone
@@ -222,6 +221,14 @@ module LibertyBuildpack
 
     def self.lib_directory(app_dir)
       File.join app_dir, LIB_DIRECTORY
+    end
+
+    def self.logs_directory
+      if LibertyBuildpack::Util::Heroku.heroku?
+         '../../../../logs'
+      else
+         '../../../../../logs'
+      end
     end
 
     def self.require_component_files
