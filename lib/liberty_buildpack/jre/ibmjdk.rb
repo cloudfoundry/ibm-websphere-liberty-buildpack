@@ -40,6 +40,7 @@ module LibertyBuildpack::Jre
     # @option context [String] :app_dir the directory that the application exists in
     # @option context [String] :java_home the directory that acts as +JAVA_HOME+
     # @option context [Array<String>] :java_opts an array that Java options can be added to
+    # @option context [String] :logs_directory the directory that log files should be routed to
     # @option context [Hash] :license_ids the licenses accepted by the user
     # @option contect [String] :jvm_type the type of jvm the user wants to use e.g ibmjre or openjdk
     # @option context [Hash] :configuration the properties provided by the user
@@ -47,6 +48,7 @@ module LibertyBuildpack::Jre
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
+      @logs_directory = context[:logs_directory]
       @configuration = context[:configuration]
       @license_id = context[:license_ids]['IBM_JVM_LICENSE']
       @jvm_type = context[:jvm_type]
@@ -192,7 +194,7 @@ module LibertyBuildpack::Jre
     def default_opts_gc
       default_options = []
       default_options.push('-verbose:gc')
-      default_options.push("-Xverbosegclog:#{DUMP_HOME}/verbosegc#.log,10,1000")
+      default_options.push("-Xverbosegclog:#{@logs_directory}/verbosegc#.log,10,1000")
       default_options
     end
 

@@ -245,11 +245,12 @@ module LibertyBuildpack::Jre
                 java_home: '',
                 java_opts: [],
                 configuration: {},
+                logs_directory: '../../../../../logs',
                 license_ids: {}
             ).release
 
             expect(released).to include('-verbose:gc')
-            expect(released).to include('-Xverbosegclog:../../../../../dumps/verbosegc#.log,10,1000')
+            expect(released).to include('-Xverbosegclog:../../../../../logs/verbosegc#.log,10,1000')
           end
     end
 
