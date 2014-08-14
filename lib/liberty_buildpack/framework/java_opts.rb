@@ -66,6 +66,8 @@ module LibertyBuildpack::Framework
 
     ENVIRONMENT_PROPERTY = 'from_environment'.freeze
 
+    ENVIRONMENT_VARIABLE = 'JAVA_OPTS'.freeze
+
     def memory_option?(option)
       option =~ /-Xms/ || option =~ /-Xmx/ || option =~ /-XX:MaxMetaspaceSize/ || option =~ /-XX:MaxPermSize/ ||
         option =~ /-Xss/ || option =~ /-XX:MetaspaceSize/ || option =~ /-XX:PermSize/ if @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
@@ -75,7 +77,7 @@ module LibertyBuildpack::Framework
       parsed_java_opts = []
 
       parsed_java_opts.concat @configuration[JAVA_OPTS_PROPERTY].shellsplit if supports_configuration?
-      parsed_java_opts.concat @environment[JAVA_OPTS_PROPERTY].shellsplit if supports_environment?
+      parsed_java_opts.concat @environment[ENVIRONMENT_VARIABLE].shellsplit if supports_environment?
 
       parsed_java_opts.map { |java_opt| java_opt.gsub(/([\s])/, '\\\\\1') }
     end
@@ -85,7 +87,7 @@ module LibertyBuildpack::Framework
     end
 
     def supports_environment?
-      @configuration[ENVIRONMENT_PROPERTY] && @environment.key?(JAVA_OPTS_PROPERTY)
+      @configuration[ENVIRONMENT_PROPERTY] && @environment.key?(ENVIRONMENT_VARIABLE)
     end
 
   end
