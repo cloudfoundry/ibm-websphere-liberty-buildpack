@@ -729,7 +729,18 @@ module LibertyBuildpack::Container
 
     def self.web_inf(app_dir)
       web_inf = File.join(app_dir, WEB_INF)
-      File.directory?(File.join(app_dir, WEB_INF)) ? web_inf : nil
+      File.directory?(File.join(app_dir, WEB_INF)) && !main_class?(app_dir) ? web_inf : nil
+    end
+
+    def self.main_class?(app_dir)
+      manifest_file = File.join(app_dir, 'META-INF/MANIFEST.MF')
+      if File.exist?(manifest_file)
+        props = LibertyBuildpack::Util::Properties.new(manifest_file)
+        main_class = props['Main-Class']
+        main_class != nil
+      else
+        false
+      end
     end
 
     def self.meta_inf(app_dir)

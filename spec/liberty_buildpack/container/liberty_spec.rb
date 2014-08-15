@@ -89,6 +89,20 @@ module LibertyBuildpack::Container
         expect(detected).to include('Liberty-EAR:liberty-8.5.5')
       end
 
+      it 'should not detect when WEB-INF is present in a Java main application' do
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        .and_return(LIBERTY_DETAILS)
+        detected = Liberty.new(
+        app_dir: 'spec/fixtures/container_main_with_web_inf',
+        configuration: {},
+        java_home: '',
+        java_opts: [],
+        license_ids: {}
+        ).detect
+
+        expect(detected).to be_nil
+      end
+
       it 'should detect server.xml for a zipped up server configuration' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_DETAILS)
