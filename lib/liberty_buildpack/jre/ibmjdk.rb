@@ -91,7 +91,6 @@ module LibertyBuildpack::Jre
     # @return [void]
     def release
       @java_opts.concat memory(@configuration)
-      @java_opts.concat default_opts_gc
     end
 
     # Prints a warning message if a memory limit of less than 512M has been chosen when using the IBM JDK.
