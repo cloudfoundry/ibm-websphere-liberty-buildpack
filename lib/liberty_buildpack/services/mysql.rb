@@ -38,6 +38,17 @@ module LibertyBuildpack::Services
     end
 
     #------------------------------------------------------------------------------------
+    # Method to add a connectionManager to the dataSource. This subclass overrides empty method in base class.
+    #
+    # @param ds - the REXML element for the dataSource
+    #------------------------------------------------------------------------------------
+    def create_connection_manager(ds)
+      cm = REXML::Element.new('connectionManager', ds)
+      cm.add_attribute('id', @connection_manager_id)
+      cm.add_attribute('maxPoolSize', '10')
+    end
+
+    #------------------------------------------------------------------------------------
     # Method to create a jdbc driver.
     # This method will also create the library associated with the jdbc driver.
     #
