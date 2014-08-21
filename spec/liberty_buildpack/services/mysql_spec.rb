@@ -117,9 +117,8 @@ module LibertyBuildpack::Services
         expected_config << '<feature>jdbc-4.0</feature>'
         t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='#{get_driver_id}' jndiName='#{get_jndi}' transactional='true' type='javax.sql.ConnectionPoolDataSource'>"
         t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' user='#{get_user}'/>"
-        t3 = "<connectionManager id='mysql-myDatabase-conMgr' maxPoolSize='10'/>"
-        t4 = '</dataSource>'
-        expected_config << t1 + t2 + t3 + t4
+        t3 = '</dataSource>'
+        expected_config << t1 + t2 + t3
         driver_info = "javax.sql.ConnectionPoolDataSource='org.mariadb.jdbc.MySQLDataSource' javax.sql.XADataSource='org.mariadb.jdbc.MySQLDataSource'"
         expected_config << "<jdbcDriver id='#{get_driver_id}' #{driver_info} libraryRef='#{get_lib_id}'/>"
         expected_config << "<library id='#{get_lib_id}'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}'/></library>"
@@ -272,9 +271,8 @@ module LibertyBuildpack::Services
           expected_config << '<feature>jdbc-4.0</feature>'
           t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='#{get_driver_id}' jndiName='#{get_jndi}' transactional='true' type='javax.sql.ConnectionPoolDataSource'>"
           t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' password='#{get_password}' serverName='#{get_host}' user='#{get_user}'/>"
-          t3 = "<connectionManager id='mysql-myDatabase-conMgr' maxPoolSize='10'/>"
-          t4 = '</dataSource>'
-          expected_config << t1 + t2 + t3 + t4
+          t3 = '</dataSource>'
+          expected_config << t1 + t2 + t3
           driver_info = "javax.sql.ConnectionPoolDataSource='org.mariadb.jdbc.MySQLDataSource' javax.sql.XADataSource='org.mariadb.jdbc.MySQLDataSource'"
           expected_config << "<jdbcDriver id='#{get_driver_id}' #{driver_info} libraryRef='#{get_lib_id}'/>"
           expected_config << "<library id='#{get_lib_id}'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}'/></library>"

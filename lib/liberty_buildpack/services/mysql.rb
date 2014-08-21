@@ -43,9 +43,12 @@ module LibertyBuildpack::Services
     # @param ds - the REXML element for the dataSource
     #------------------------------------------------------------------------------------
     def create_connection_manager(ds)
+      # add nothing if connection_pool_size attribute is not set in the config.
+      cp_size = @config['connection_pool_size']
+      return if cp_size.nil?
       cm = REXML::Element.new('connectionManager', ds)
       cm.add_attribute('id', @connection_manager_id)
-      cm.add_attribute('maxPoolSize', '10')
+      cm.add_attribute('maxPoolSize', cp_size)
     end
 
     #------------------------------------------------------------------------------------
