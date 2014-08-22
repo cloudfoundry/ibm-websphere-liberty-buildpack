@@ -124,11 +124,18 @@ module LibertyBuildpack::Container
       driver_dir = '${server.config.dir}/lib'
       @services_full_autoconfig.each do |service|
         begin
+          configured_service_type = (service[INSTANCE].instance_variable_get(:@type) if service[INSTANCE].instance_variable_defined?(:@type)) || 'unknown'
+          configured_service_name = (service[INSTANCE].instance_variable_get(:@service_name) if service[INSTANCE].instance_variable_defined?(:@service_name)) || 'unknown'
+          original_server_xml = document.to_s
           if create
+            puts "-----> Auto-configuration is creating config for service instance '#{configured_service_name}' of type '#{configured_service_type}'" unless configured_service_type == 'default'
             service[INSTANCE].create(document.root, server_dir, driver_dir, driver_jars)
           else
+            puts "-----> Auto-configuration is updating config for service instance '#{configured_service_name}' of type '#{configured_service_type}'" unless configured_service_type == 'default'
             service[INSTANCE].update(document.root, server_dir, driver_dir, driver_jars, get_number_instances(service[CONFIG]))
           end
+          modified_server_xml = document.to_s
+          log_diff(original_server_xml, modified_server_xml, configured_service_type, configured_service_name)
         rescue => e
           @logger.warn("Failed to update the configuration for a service. Details are  #{e.message}")
         end
@@ -157,6 +164,37 @@ module LibertyBuildpack::Container
       @logger.debug("opt-out string after split is #{parts}")
       parts.each { |part|  process_opt_out(part, retval) }
       retval
+    end
+
+    #-----------------------------------------------
+    # Logs the difference between original and modified server.xml in the server.xml directory
+    #
+    # @param original - string of original server.xml
+    # @param modified - string of modified server.xml
+    # @param service_type - type of service configured
+    # @param service_name - name of service configured
+    #----------------------------------------------
+    def log_diff(original, modified, service_type, service_name)
+      return unless @logger.debug?
+      original_s = ''
+      modified_s = ''
+      begin
+        formatter = REXML::Formatters::Pretty.new(4)
+        formatter.compact = true
+        formatter.write(REXML::Document.new(original), original_s)
+        formatter.write(REXML::Document.new(modified), modified_s)
+        original_s = original_s.split(/\n/)
+        modified_s = modified_s.split(/\n/)
+        # If a line exists in the original server.xml, delete first occurrence of
+        # it in the modified server.xml to get the effective diff
+        original_s.each do |x|
+          modified_s.delete_at(modified_s.index(x)) if modified_s.index(x)
+        end
+        @logger.debug("Auto-Configuration for instance '#{service_name}' of type '#{service_type}' added/modified the following lines in server.xml:")
+        modified_s.each { |ele| @logger.debug(ele) }
+      rescue => e
+        @logger.warn("Failed to log auto-config diff. Details are  #{e.message}")
+      end
     end
 
     #-----------------------------------------------------
