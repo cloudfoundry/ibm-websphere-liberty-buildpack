@@ -1,7 +1,7 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ require 'buildpack_cache_helper'
 require 'internet_availability_helper'
 require 'logging_helper'
 require 'fileutils'
+require 'constants'
 require 'liberty_buildpack/util/cache/download_cache'
 require 'liberty_buildpack/util/cache/internet_availability'
 
@@ -28,6 +29,8 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
   include_context 'application_helper'
   include_context 'internet_availability_helper'
   include_context 'logging_helper'
+  
+  let(:default_user_agent) { Constants::DEFAULT_USER_AGENT }
 
   let(:download_cache) { described_class.new(app_dir) }
 
@@ -37,12 +40,22 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     stub_request(:get, 'http://foo-uri/')
     .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 304, body: '', headers: {})
 
     trigger
 
     expect_complete_cache
+  end
+  
+  it 'should set a User-Agent header for a GET' do
+    stub_request(:any, 'http://foo-uri/')
+    
+    trigger
+    
+    a_request(:get, 'http://foo-uri/')
+      .with(:headers => { 'Accept' => '*/*', 'User-Agent' => default_user_agent })
+      .should have_been_made
   end
 
   it 'should download (after internet availability checking) from a uri if the cached file does not exist',
@@ -51,7 +64,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     stub_request(:get, 'http://foo-uri/')
     .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 304, body: '', headers: {})
 
     download_cache.get('http://foo-uri/') {}
@@ -65,7 +78,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     stub_request(:get, 'http://foo-uri/')
     .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 304, body: '', headers: {})
 
     download_cache.get('http://foo-uri/') do |data_file|
@@ -97,7 +110,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     stub_request(:get, 'http://foo-uri/').to_raise(SocketError).then
     .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 304, body: '', headers: {})
 
     trigger
@@ -109,7 +122,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     stub_request(:get, 'http://foo-uri/')
     .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_raise(SocketError).then
     .to_return(status: 304, body: '', headers: {})
 
@@ -176,7 +189,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     stub_request(:get, 'http://foo-uri/')
     .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 304, body: '', headers: {})
 
     touch app_dir, 'etag', 'foo-etag'
@@ -228,12 +241,12 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
      :skip_availability_check do
 
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 200, body: '', headers: {})
     stub_request(:get, 'http://foo-uri/')
     .to_return(status: 200, body: 'bar-cached', headers: { Etag: 'bar-etag', 'Last-Modified' => 'bar-last-modified' })
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'bar-last-modified', 'If-None-Match' => 'bar-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'bar-last-modified', 'If-None-Match' => 'bar-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 304, body: '', headers: {})
 
     touch app_dir, 'cached', 'foo-cached'
@@ -251,7 +264,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
      :skip_availability_check do
 
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 200, body: '', headers: {})
     stub_request(:get, 'http://foo-uri/')
     .to_raise(SocketError)
@@ -271,7 +284,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
      :skip_availability_check do
 
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_raise(SocketError)
 
     touch app_dir, 'cached', 'foo-cached'
@@ -289,7 +302,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     stub_request(:get, 'http://foo-uri/')
     .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 304, body: '', headers: {})
 
     download_cache.get('http://foo-uri/') do |file|
@@ -350,7 +363,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
       stub_request(:get, 'http://foo-uri/').to_raise(SocketError).then
       .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
       stub_request(:head, 'http://foo-uri/')
-      .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+      .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
       .to_return(status: 304, body: '', headers: {})
 
       touch java_buildpack_cache_dir, 'cached', 'foo-stashed'
@@ -364,7 +377,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
       stub_request(:get, 'http://foo-uri/')
       .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
       stub_request(:head, 'http://foo-uri/')
-      .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+      .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
       .to_raise(SocketError).then
       .to_return(status: 304, body: '', headers: {})
 
@@ -389,7 +402,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
 
     it 'should use the buildpack cache if the download is truncated' do
       stub_request(:head, 'http://foo-uri/')
-      .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+      .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
       .to_return(status: 200, body: '', headers: {})
       stub_request(:get, 'http://foo-uri/')
       .to_return(status: 200, body: 'foo-cac', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified', 'Content-Length' => 10 })
@@ -445,7 +458,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     stub_request(:get, 'https://foo-uri/')
     .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
     stub_request(:head, 'https://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 304, body: '', headers: {})
 
     download_cache.get('https://foo-uri/') {}
