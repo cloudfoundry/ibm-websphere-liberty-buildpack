@@ -117,7 +117,7 @@ module LibertyBuildpack::Services
 
         expected_config = []
         expected_config << '<feature>jdbc-4.0</feature>'
-        t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='#{get_driver_id}' jndiName='#{get_jndi}' transactional='true'>"
+        t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='#{get_driver_id}' jndiName='#{get_jndi}' transactional='true' type='javax.sql.ConnectionPoolDataSource'>"
         t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' user='#{get_user}'/>"
         t3 = '</dataSource>'
         expected_config << t1 + t2 + t3
