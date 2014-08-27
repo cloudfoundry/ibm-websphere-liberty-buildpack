@@ -179,7 +179,7 @@ module LibertyBuildpack::Jre
         if mem < MemorySize.new('512M')
           java_memory_opts.push '-Xnocompressedrefs'
         end
- 
+
         new_heap_size = mem * HEAP_SIZE_RATIO
 
         java_memory_opts.push '-Xtune:virtualized'
