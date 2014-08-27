@@ -17,6 +17,7 @@
 require 'English'
 require 'fileutils'
 require 'liberty_buildpack/container'
+require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/container/container_utils'
 require 'liberty_buildpack/container/feature_manager'
 require 'liberty_buildpack/container/install_components'
@@ -48,7 +49,7 @@ module LibertyBuildpack::Container
     # @option context [String] :java_home the directory that acts as +JAVA_HOME+
     # @option context [Array<String>] :java_opts an array that Java options can be added to
     # @option context [String] :lib_directory the directory that additional libraries are placed in
-    # @option context [String] :logs_directory the directory that log files should be routed to
+    # @option context [CommonPaths] :common_paths the set of paths common across components that components should reference
     # @option context [Hash] :vcap_application the information about the deployed application provided by the Cloud Controller
     # @option context [Hash] :vcap_services the bound services to the application provided by the Cloud Controller
     # @option context [Hash] :license_ids the licenses accepted by the user
@@ -59,7 +60,7 @@ module LibertyBuildpack::Container
       @java_home = context[:java_home]
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
-      @logs_directory = context[:logs_directory]
+      @common_paths = context[:common_paths] || CommonPaths.new
       @configuration = context[:configuration]
       @vcap_services = Heroku.heroku? ? Heroku.new.generate_vcap_services(ENV) : context[:vcap_services]
       @vcap_application = context[:vcap_application]
@@ -93,7 +94,10 @@ module LibertyBuildpack::Container
     #                  returns +nil+
     def detect
       liberty_version = Liberty.find_liberty_item(@app_dir, @configuration)[0]
-      liberty_version ? [liberty_id(liberty_version)] : nil
+      if liberty_version
+        @common_paths.relative_location = relative_directory
+        [liberty_id(liberty_version)]
+      end
     end
 
     # Downloads and unpacks a Liberty instance
@@ -130,6 +134,15 @@ module LibertyBuildpack::Container
       jvm_options
       server_name_string = ContainerUtils.space(server_name)
       "#{create_vars_string}#{env_var_string}#{java_home_string}#{start_script_string}#{server_name_string}"
+    end
+
+    # relative location of the execution directory
+    def relative_directory
+      if Heroku.heroku?
+        '../../../..'
+      else
+        '../../../../..'
+      end
     end
 
     private
@@ -332,7 +345,7 @@ module LibertyBuildpack::Container
 
     def update_logs_dir(server_xml_doc)
       include_file = REXML::Element.new('logging', server_xml_doc.root)
-      include_file.add_attribute('logDirectory', @logs_directory)
+      include_file.add_attribute('logDirectory', '${application.log.dir}')
     end
 
     def disable_config_monitoring(server_xml_doc)

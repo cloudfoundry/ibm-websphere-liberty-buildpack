@@ -66,6 +66,35 @@ module LibertyBuildpack::Container
           expect(detected).to be_nil
         end
       end
+
+      it 'should update the common_paths provided by the buildpack to include the Standalone Java container path' do
+        Dir.mktmpdir do |root|
+
+          java_main = JavaMain.new(
+           app_dir: root,
+           common_paths: CommonPaths.new,
+           configuration: { 'java_main_class' => 'java-main' }
+          )
+          java_main.detect
+
+          actual_common_paths = java_main.instance_variable_get(:@common_paths)
+          expect(actual_common_paths.instance_variable_get(:@relative_location)).to eq('../')
+        end
+      end
+
+      it 'should result with default path when the common_paths is not provided in its context' do
+        Dir.mktmpdir do |root|
+
+          java_main = JavaMain.new(
+           app_dir: root,
+           configuration: {}
+          )
+          java_main.detect
+
+          actual_common_paths = java_main.instance_variable_get(:@common_paths)
+          expect(actual_common_paths.instance_variable_get(:@relative_location)).to eq('.')
+        end
+      end
     end
 
     describe 'compile' do
