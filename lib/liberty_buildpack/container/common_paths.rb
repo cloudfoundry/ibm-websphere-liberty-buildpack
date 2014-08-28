@@ -27,6 +27,9 @@ module LibertyBuildpack::Container
        @relative_location = '.'
     end
 
+    # The relative location that should be updated when the execution path occurs in the non-default working directory
+    #
+    # @param new_relative_location new relative_location value
     def relative_location=(new_relative_location)
        raise 'relative_location provided to common_paths must have a valid path value' if new_relative_location.nil? || new_relative_location.empty? || (new_relative_location.include? ' ')
        @relative_location = new_relative_location

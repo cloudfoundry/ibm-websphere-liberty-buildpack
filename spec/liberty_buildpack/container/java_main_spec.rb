@@ -82,17 +82,17 @@ module LibertyBuildpack::Container
         end
       end
 
-      it 'should result with default path when the common_paths is not provided in its context' do
+      it 'should result with Java Standalone path when the common_paths is not provided in its context' do
         Dir.mktmpdir do |root|
 
           java_main = JavaMain.new(
            app_dir: root,
-           configuration: {}
+           configuration: { 'java_main_class' => 'java-main' }
           )
           java_main.detect
 
           actual_common_paths = java_main.instance_variable_get(:@common_paths)
-          expect(actual_common_paths.instance_variable_get(:@relative_location)).to eq('.')
+          expect(actual_common_paths.instance_variable_get(:@relative_location)).to eq('../')
         end
       end
     end
