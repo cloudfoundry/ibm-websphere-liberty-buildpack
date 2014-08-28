@@ -35,5 +35,9 @@ there is no support for external JMX connections.
 This means that features such as `<restConnector-1.0>` do not work in a
 Cloud Foundry environment.
 
+7. As the use of Liberty collectives is not supported in a Cloud Foundry
+environment, the use of the `<collectiveMember-1.0>` feature is not supported
+in that environment either.
+
 
 [Liberty features]: http://pic.dhe.ibm.com/infocenter/wasinfo/v8r5/index.jsp?topic=%2Fcom.ibm.websphere.wlp.nd.doc%2Fae%2Frwlp_feat.html
