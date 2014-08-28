@@ -16,8 +16,8 @@
 
 require 'fileutils'
 require 'liberty_buildpack'
+require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/util/constantize'
-require 'liberty_buildpack/util/heroku'
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/diagnostics/common'
 require 'pathname'
@@ -125,9 +125,8 @@ module LibertyBuildpack
       Buildpack.require_component_files
       components = Buildpack.components @logger
 
-      java_home = ''
-      java_opts = []
       @lib_directory = Buildpack.lib_directory app_dir
+      @common_paths = LibertyBuildpack::Container::CommonPaths.new
       environment = ENV.to_hash
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
@@ -137,10 +136,10 @@ module LibertyBuildpack
       basic_context = {
           app_dir: app_dir,
           environment: environment,
-          java_home: java_home,
-          java_opts: java_opts,
+          java_home: '',
+          java_opts: [],
           lib_directory: @lib_directory,
-          logs_directory: Buildpack.logs_directory,
+          common_paths: @common_paths,
           vcap_application: vcap_application ? YAML.load(vcap_application) : {},
           vcap_services: vcap_services ? YAML.load(vcap_services) : {},
           license_ids: license_ids ? license_ids : {},
@@ -221,14 +220,6 @@ module LibertyBuildpack
 
     def self.lib_directory(app_dir)
       File.join app_dir, LIB_DIRECTORY
-    end
-
-    def self.logs_directory
-      if LibertyBuildpack::Util::Heroku.heroku?
-         '../../../../logs'
-      else
-         '../../../../../logs'
-      end
     end
 
     def self.require_component_files
