@@ -6,7 +6,7 @@ To fork the Buildpack and host your own binaries, then complete the following:
 
 2. Clone the forked repository to your local machine.
 
-3. Download the wlp-developers-runtime-8.5.5.2.jar from [wasdev.net][].
+3. Download the wlp-developers-runtime-8.5.5.3.jar from [wasdev.net][].
 
 4. Download the latest IBM JRE for Linux from the [developerWorks Java site][].
   The download will be in an archive .bin format.

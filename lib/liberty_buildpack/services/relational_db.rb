@@ -75,6 +75,7 @@ module LibertyBuildpack::Services
       @jndi_name = "jdbc/#{@service_name}"
       # create standard configuration ids.
       @datasource_id = "#{@config_type}-#{@service_name}"
+      @connection_manager_id = "#{@config_type}-#{@service_name}-conMgr"
       @properties_id = "#{@config_type}-#{@service_name}-props"
       @jdbc_driver_id = "#{@config_type}-driver"
       @lib_id = "#{@config_type}-library"
@@ -170,11 +171,11 @@ module LibertyBuildpack::Services
         # Do not update datasource attributes. Specifically, do not update the jndi name. We do need to update the properties attributes though.
         # find the instance that contains the properties. Liberty only allows one instance of properties.
         properties_element = find_datasource_properties(datasources)
-        update_datasource_attribute(properties_element, 'databaseName', @db_name)
-        update_datasource_attribute(properties_element, 'user', @user)
-        update_datasource_attribute(properties_element, 'password', @password)
-        update_datasource_attribute(properties_element, 'serverName', @host)
-        update_datasource_attribute(properties_element, 'portNumber', @port)
+        update_element_attribute(properties_element, 'databaseName', @db_name)
+        update_element_attribute(properties_element, 'user', @user)
+        update_element_attribute(properties_element, 'password', @password)
+        update_element_attribute(properties_element, 'serverName', @host)
+        update_element_attribute(properties_element, 'portNumber', @port)
         Utils.add_features(doc, @features)
       end
     end
@@ -222,20 +223,15 @@ module LibertyBuildpack::Services
     end
 
     #------------------------------------------------------------------------------------
-    # A private worker method for the create_or_update_datasource method.
-    # This method will only be called when a datasource does not exist.
+    # A utility method that can be used to update an attribute for an element.
     #
-    # @param prop - the properties Element for the datasource
+    # @param element - the Element containing the attribute
     # @param attrName - the String name of attribute to update
     # @param value - the String value of the attribute
     #------------------------------------------------------------------------------------
-    def update_datasource_attribute(prop, attrName, value)
-      if prop.attribute(attrName).nil? || prop.attribute(attrName).value != value
-        # puts "datasource #{attrName} being updated"
-        prop.delete_attribute(attrName)
-        prop.add_attribute(attrName, value)
-        return
-      end
+    def update_element_attribute(element, attrName, value)
+      # Simply overwrite the attribute if it exists.
+      element.add_attribute(attrName, value)
     end
 
     #------------------------------------------------------------------------------------
@@ -253,6 +249,9 @@ module LibertyBuildpack::Services
       ds.add_attribute('jdbcDriverRef', @jdbc_driver_id)
       ds.add_attribute('jndiName', @jndi_name)
       ds.add_attribute('transactional', 'true')
+      # We don't presently support XA in the cloud. Although Liberty defaults to connection pooled, we need to explicitly specify ConnectionPooledDataSource as some
+      # vendors use a single class to implement all datasource types, in which case Liberty will use an XA connection. Avoid this.
+      ds.add_attribute('type', 'javax.sql.ConnectionPoolDataSource')
       # add properties element and standard set of attributes.
       props = REXML::Element.new(@properties_type, ds)
       props.add_attribute('id', @properties_id)
@@ -261,9 +260,19 @@ module LibertyBuildpack::Services
       props.add_attribute('password', @password)
       props.add_attribute('portNumber', @port)
       props.add_attribute('serverName', @host)
+      # allow types that need it to add a ConnectionManager
+      create_connection_manager(ds)
       # create the JDBC driver. The JDBC driver will create the shared library.
       create_jdbcdriver(doc, @jdbc_driver_id, @lib_id, @fileset_id, lib_dir)
       Utils.add_features(doc, @features)
+    end
+
+    #------------------------------------------------------------------------------------
+    # Method to add a connectionManager to the dataSource. Overridden by subclasses that require a connectionManager
+    #
+    # @param ds - the REXML element for the dataSource
+    #------------------------------------------------------------------------------------
+    def create_connection_manager(ds)
     end
 
     #------------------------------------------------------------------------------------
