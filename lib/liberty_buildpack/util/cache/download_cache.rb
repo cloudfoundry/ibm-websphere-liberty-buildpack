@@ -42,9 +42,8 @@ module LibertyBuildpack::Util::Cache
     # Creates an instance of the cache that is backed by the filesystem rooted at +cache_root+
     #
     # @param [String] cache_root the filesystem directory in which to cache downloaded files
-    def initialize(cache_root = Pathname.new(Dir.tmpdir), user_agent = 'IBM-WebSphere-Liberty-Buildpack')
+    def initialize(cache_root = Pathname.new(Dir.tmpdir))
       @cache_root      = cache_root
-      @user_agent      = user_agent
       @buildpack_stash = BuildpackStash.new
       @logger          = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
     end
@@ -142,7 +141,8 @@ module LibertyBuildpack::Util::Cache
     end
     
     def add_user_agent_header(request)
-       request['User-Agent'] = @user_agent 
+      user_agent = ['UA-IBM-WebSphere-Liberty-Buildpack', ENV['USER_AGENT'] || 'Default'].reject(&:empty?).join('-')
+      request['User-Agent'] = user_agent
     end
 
     def download(mutable_file_cache, uri)

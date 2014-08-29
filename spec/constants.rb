@@ -16,6 +16,7 @@
 
 module Constants
 
-  DEFAULT_USER_AGENT = 'IBM-WebSphere-Liberty-Buildpack'
+  DEFAULT_USER_AGENT_BASE = 'UA-IBM-WebSphere-Liberty-Buildpack'
+  DEFAULT_USER_AGENT = "#{DEFAULT_USER_AGENT_BASE}-Default"
 
 end

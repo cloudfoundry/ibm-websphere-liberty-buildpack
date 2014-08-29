@@ -31,6 +31,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
   include_context 'logging_helper'
   
   let(:default_user_agent) { Constants::DEFAULT_USER_AGENT }
+  let(:default_user_agent_base) { Constants::DEFAULT_USER_AGENT_BASE }
 
   let(:download_cache) { described_class.new(app_dir) }
 
@@ -47,14 +48,27 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
 
     expect_complete_cache
   end
-  
+
   it 'should set a User-Agent header for a GET' do
     stub_request(:any, 'http://foo-uri/')
-    
+
     trigger
-    
+
     a_request(:get, 'http://foo-uri/')
       .with(:headers => { 'Accept' => '*/*', 'User-Agent' => default_user_agent })
+      .should have_been_made
+  end
+
+  it 'should use the User-Agent environment variable when given' do
+    ENV['USER_AGENT'] = 'test'
+    stub_request(:any, 'http://foo-uri/')
+
+    trigger
+
+    ENV.delete('USER_AGENT')
+
+    a_request(:get, 'http://foo-uri/')
+      .with(:headers => { 'Accept' => '*/*', 'User-Agent' => default_user_agent_base + '-test' })
       .should have_been_made
   end
 
