@@ -56,11 +56,13 @@ module LibertyBuildpack
     #                         this application.  If no container can run the application, the array will be empty
     #                         (+[]+).
     def detect
+      @logger.debug { 'Liberty Buildpack starting detect' }
       # jre detections performed during initialization of components
       framework_detections = Buildpack.component_detections @frameworks
       container_detections = Buildpack.component_detections @containers
       raise "Application can not be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
       tags = container_detections.empty? ? [] : [@jre_version].concat(framework_detections).concat(container_detections).flatten.compact
+      @logger.debug { 'Liberty Buildpack detect complete' }
       tags
     end
 
@@ -68,6 +70,8 @@ module LibertyBuildpack
     #
     # @return [void]
     def compile
+      @logger.debug { 'Liberty Buildpack starting compile' }
+      puts 'Liberty buildpack is starting to compile the droplet'
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
 
@@ -78,6 +82,8 @@ module LibertyBuildpack
       @jre.compile
       frameworks.each { |framework| framework.compile }
       the_container.compile
+      puts 'Liberty buildpack has completed the compile step'
+      @logger.debug { 'Liberty Buildpack compile complete' }
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
@@ -85,6 +91,7 @@ module LibertyBuildpack
     #
     # @return [String] The payload required to run the application.
     def release
+      @logger.debug { 'Liberty Buildpack starting release' }
       the_container = container # diagnose detect failure early
       @jre.release
       frameworks.each { |framework| framework.release }
@@ -98,8 +105,7 @@ module LibertyBuildpack
           }
       }.to_yaml
 
-      @logger.debug { "Release Payload #{payload}" }
-
+      @logger.debug { "Liberty Buildpack release complete. Release Payload #{payload}" }
       payload
     end
 
