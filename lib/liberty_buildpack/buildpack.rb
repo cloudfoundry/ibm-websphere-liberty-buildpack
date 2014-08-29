@@ -56,13 +56,11 @@ module LibertyBuildpack
     #                         this application.  If no container can run the application, the array will be empty
     #                         (+[]+).
     def detect
-      @logger.debug { 'Liberty Buildpack starting detect' }
       # jre detections performed during initialization of components
       framework_detections = Buildpack.component_detections @frameworks
       container_detections = Buildpack.component_detections @containers
       raise "Application can not be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
       tags = container_detections.empty? ? [] : [@jre_version].concat(framework_detections).concat(container_detections).flatten.compact
-      @logger.debug { 'Liberty Buildpack detect complete' }
       tags
     end
 
