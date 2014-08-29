@@ -28,4 +28,4 @@ service_filter : 'mysql|cleardb'
 
 driver:
   version: 1.1.+
-  repository_root: "http://download.run.pivotal.io/mariadb-jdbc"
+  repository_root: "https://download.run.pivotal.io/mariadb-jdbc"
