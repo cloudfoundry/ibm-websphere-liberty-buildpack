@@ -29,7 +29,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
   include_context 'application_helper'
   include_context 'internet_availability_helper'
   include_context 'logging_helper'
-  
+
   let(:default_user_agent) { Constants::DEFAULT_USER_AGENT }
   let(:default_user_agent_base) { Constants::DEFAULT_USER_AGENT_BASE }
 
@@ -55,7 +55,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     trigger
 
     a_request(:get, 'http://foo-uri/')
-      .with(:headers => { 'Accept' => '*/*', 'User-Agent' => default_user_agent })
+      .with('headers' => { 'Accept' => '*/*', 'User-Agent' => default_user_agent })
       .should have_been_made
   end
 
@@ -68,7 +68,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     ENV.delete('USER_AGENT')
 
     a_request(:get, 'http://foo-uri/')
-      .with(:headers => { 'Accept' => '*/*', 'User-Agent' => default_user_agent_base + '-test' })
+      .with('headers' => { 'Accept' => '*/*', 'User-Agent' => default_user_agent_base + '-test' })
       .should have_been_made
   end
 

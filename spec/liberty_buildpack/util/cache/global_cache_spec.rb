@@ -25,7 +25,7 @@ require 'liberty_buildpack/util/cache/global_cache'
 describe LibertyBuildpack::Util::Cache::GlobalCache do
   include_context 'internet_availability_helper'
   include_context 'logging_helper'
-  
+
   let(:default_user_agent) { Constants::DEFAULT_USER_AGENT }
 
   it 'should raise an error if BUILDPACK_CACHE is not defined' do

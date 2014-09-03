@@ -139,7 +139,7 @@ module LibertyBuildpack::Util::Cache
         request['If-Modified-Since'] = last_modified_content
       end
     end
-    
+
     def add_user_agent_header(request)
       user_agent = ['UA-IBM-WebSphere-Liberty-Buildpack', ENV['USER_AGENT'] || 'Default'].reject(&:empty?).join('-')
       request['User-Agent'] = user_agent

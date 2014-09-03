@@ -26,7 +26,7 @@ describe LibertyBuildpack::Util::ApplicationCache do
   include_context 'application_helper'
   include_context 'internet_availability_helper'
   include_context 'logging_helper'
-  
+
   let(:default_user_agent) { Constants::DEFAULT_USER_AGENT }
 
   previous_arg_value = ARGV[1]
