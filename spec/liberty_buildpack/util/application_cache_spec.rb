@@ -1,7 +1,7 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ require 'spec_helper'
 require 'application_helper'
 require 'internet_availability_helper'
 require 'logging_helper'
+require 'constants'
 require 'liberty_buildpack/util/application_cache'
 
 describe LibertyBuildpack::Util::ApplicationCache do
@@ -26,16 +27,18 @@ describe LibertyBuildpack::Util::ApplicationCache do
   include_context 'internet_availability_helper'
   include_context 'logging_helper'
 
+  let(:default_user_agent) { Constants::DEFAULT_USER_AGENT }
+
   previous_arg_value = ARGV[1]
 
   before do
     ARGV[1] = nil
 
-    stub_request(:get, 'http://foo-uri/').with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
+    stub_request(:get, 'http://foo-uri/').with(headers: { 'Accept' => '*/*', 'User-Agent' => default_user_agent })
     .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
 
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => 'Ruby' })
+    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
     .to_return(status: 304, body: '', headers: {})
   end
 

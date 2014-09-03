@@ -1,7 +1,7 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@ module LibertyBuildpack::Util::Cache
         Timeout::Error
     ].freeze
 
-    def add_headers(request, immutable_file_cache)
+    def add_etag_headers(request, immutable_file_cache)
       immutable_file_cache.any_etag do |etag_content|
         request['If-None-Match'] = etag_content
       end
@@ -138,6 +138,11 @@ module LibertyBuildpack::Util::Cache
       immutable_file_cache.any_last_modified do |last_modified_content|
         request['If-Modified-Since'] = last_modified_content
       end
+    end
+
+    def add_user_agent_header(request)
+      user_agent = ['UA-IBM-WebSphere-Liberty-Buildpack', ENV['USER_AGENT'] || 'Default'].reject(&:empty?).join('-')
+      request['User-Agent'] = user_agent
     end
 
     def download(mutable_file_cache, uri)
@@ -189,6 +194,7 @@ module LibertyBuildpack::Util::Cache
     end
 
     def issue_http_request(request, uri, &block)
+      add_user_agent_header(request)
       1.upto(retry_limit) do |try|
         begin
           Net::HTTP.start(*start_parameters(uri)) do |http|
@@ -245,7 +251,7 @@ module LibertyBuildpack::Util::Cache
 
       # use 'request_uri' to have correct value in presence of a proxy
       request = Net::HTTP::Head.new(URI(uri).request_uri)
-      add_headers(request, immutable_file_cache)
+      add_etag_headers(request, immutable_file_cache)
 
       issue_http_request(request, uri) do |_, response_code|
         @logger.debug { "Up-to-date check on cached version of #{uri} returned #{response_code}" }
