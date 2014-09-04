@@ -221,10 +221,10 @@ module LibertyBuildpack::Container
       spec = parts[-1]
       if spec.casecmp('all') == 0
         hash[service] = 'all'
-        @logger.info("opting out of all auto-configuration for service #{service}")
+        puts "-----> Opting out of all auto-configuration for service #{service}"
       elsif spec.casecmp('config') == 0
         hash[service] = 'config'
-        @logger.info("opting out of auto-configuration configuration updates for service #{service}")
+        puts "-----> Opting out of auto-configuration configuration updates for service #{service}"
       else
         @logger.warn("#{string} is not a legal opt-out specification for service #{service}. The opt-out request will be ignored and the service will be configured normally.")
       end
