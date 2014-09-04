@@ -69,18 +69,18 @@ module LibertyBuildpack
     # @return [void]
     def compile
       @logger.debug { 'Liberty Buildpack starting compile' }
-      puts 'Liberty buildpack is starting to compile the droplet'
+      puts "\r-----> Liberty buildpack is starting to compile the droplet"
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
 
       # Report buildpack build version if it's available
       version_file = Pathname.new(File.expand_path(BUILDPACK_VERSION, __FILE__))
-      version_file.each_line { |line| print line } if version_file.file?
+      version_file.each_line { |line| print "-----> #{line}" } if version_file.file?
 
       @jre.compile
       frameworks.each { |framework| framework.compile }
       the_container.compile
-      puts 'Liberty buildpack has completed the compile step'
+      puts '-----> Liberty buildpack has completed the compile step'
       @logger.debug { 'Liberty Buildpack compile complete' }
     end
 

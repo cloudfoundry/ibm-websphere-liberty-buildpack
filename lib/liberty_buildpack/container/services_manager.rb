@@ -221,10 +221,10 @@ module LibertyBuildpack::Container
       spec = parts[-1]
       if spec.casecmp('all') == 0
         hash[service] = 'all'
-        @logger.info("opting out of all auto-configuration for service #{service}")
+        puts "-----> Opting out of all auto-configuration for service #{service}"
       elsif spec.casecmp('config') == 0
         hash[service] = 'config'
-        @logger.info("opting out of auto-configuration configuration updates for service #{service}")
+        puts "-----> Opting out of auto-configuration configuration updates for service #{service}"
       else
         @logger.warn("#{string} is not a legal opt-out specification for service #{service}. The opt-out request will be ignored and the service will be configured normally.")
       end
@@ -439,7 +439,12 @@ module LibertyBuildpack::Container
     #----------------------------------------------------
     def install_jar(root, lib_dir, uri)
       download_start_time = Time.now
-      print "-----> Installing client jar(s) from #{uri} "
+      if uri.include? '://'
+        print "-----> Downloading and installing client jar(s) from #{uri} "
+      else
+        filename = File.basename(uri)
+        print "-----> Retrieving and installing client jar(s) from #{filename} "
+      end
       LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
         if file.path.end_with?('zip.cached')
           system "unzip -oq -d #{root} #{file.path} 2>&1"

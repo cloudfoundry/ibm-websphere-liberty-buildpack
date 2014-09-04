@@ -79,8 +79,12 @@ module LibertyBuildpack::Jre
       check_memory
 
       download_start_time = Time.now
-      print "-----> Downloading IBM #{@version} JRE from #{@uri} "
-
+      if @uri.include? '://'
+        print "-----> Downloading IBM #{@version} JRE from #{@uri} ... "
+      else
+        filename = File.basename(@uri)
+        print "-----> Retrieving IBM #{@version} JRE (#{filename}) ... "
+      end
       LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
         puts "(#{(Time.now - download_start_time).duration})"
         expand file
@@ -99,7 +103,7 @@ module LibertyBuildpack::Jre
       mem_limit = MemoryLimit.memory_limit
       unless mem_limit.nil?
         if mem_limit < MemorySize.new('512M')
-          puts '       Avoid Trouble: Specify a minimum of 512M as the Memory Limit for your apps when using IBM JDK.'
+          puts '-----> Avoid Trouble: Specify a minimum of 512M as the Memory Limit for your apps when using IBM JDK.'
         end
       end
     end
@@ -116,7 +120,7 @@ module LibertyBuildpack::Jre
 
     def expand(file)
       expand_start_time = Time.now
-      print "       Expanding JRE to #{JAVA_HOME} "
+      print "         Expanding JRE to #{JAVA_HOME} ... "
 
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
