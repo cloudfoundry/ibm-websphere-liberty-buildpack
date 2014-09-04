@@ -527,8 +527,12 @@ module LibertyBuildpack::Container
     def download_and_unpack_archive(uri, root)
       # all file types filtered here should be handled inside block.
       if uri.end_with?('.tgz', '.tar.gz', '.zip', 'jar')
-        filename = File.basename(uri)
-        print "-----> Downloading #{filename} ... "
+        if uri.include? '://'
+          print "-----> Downloading from #{uri} ... "
+        else
+          filename = File.basename(uri)
+          print "-----> Retrieving #{filename} ... "
+        end
         download_start_time = Time.now
         LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
           puts "(#{(Time.now - download_start_time).duration})"
@@ -553,7 +557,7 @@ module LibertyBuildpack::Container
         # shouldn't really happen
         print("Unknown file type, not installed, at #{uri}.\n")
       end
-      puts "(#{(Time.now - install_start_time).duration}).\n"
+      puts "(#{(Time.now - install_start_time).duration})\n"
     end
 
     def download_and_install_esas(esas, root)
@@ -561,7 +565,12 @@ module LibertyBuildpack::Container
         # each esa is an array of two entries, uri and options string
         uri = esa[0]
         options = esa[1]
-        puts "-----> Downloading from #{uri} ... "
+        if uri.include? '://'
+          puts "-----> Downloading from #{uri} ... "
+        else
+          filename = File.basename(uri)
+          puts "-----> Retrieving #{filename} ... "
+        end
         download_start_time = Time.now
         # for each downloaded file, there is a corresponding cached, etag, last_modified, and lock extension
         LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|

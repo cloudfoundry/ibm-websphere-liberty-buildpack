@@ -79,9 +79,12 @@ module LibertyBuildpack::Jre
       check_memory
 
       download_start_time = Time.now
-      filename = File.basename(@uri)
-      print "-----> Downloading IBM #{@version} JRE (#{filename}) ... "
-
+      if @uri.include? '://'
+        print "-----> Downloading IBM #{@version} JRE from #{@uri} ... "
+      else
+        filename = File.basename(@uri)
+        print "-----> Retrieving IBM #{@version} JRE (#{filename}) ... "
+      end
       LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
         puts "(#{(Time.now - download_start_time).duration})"
         expand file

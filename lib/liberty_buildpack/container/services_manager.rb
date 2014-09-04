@@ -439,7 +439,12 @@ module LibertyBuildpack::Container
     #----------------------------------------------------
     def install_jar(root, lib_dir, uri)
       download_start_time = Time.now
-      print "-----> Installing client jar(s) from #{uri} "
+      if uri.include? '://'
+        print "-----> Downloading and installing client jar(s) from #{uri} "
+      else
+        filename = File.basename(uri)
+        print "-----> Retrieving and installing client jar(s) from #{filename} "
+      end
       LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
         if file.path.end_with?('zip.cached')
           system "unzip -oq -d #{root} #{file.path} 2>&1"
