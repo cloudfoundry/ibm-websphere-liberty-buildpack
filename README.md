@@ -95,6 +95,6 @@ bundle install --gemfile Gemfile.rubymine-debug
 [liberty.yml]: config/liberty.yml
 [wasdev.net]: http://wasdev.net
 [developerWorks Java site]: https://www.ibm.com/developerworks/java/jdk/
-[Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.2/lafiles/runtime//en.html
-[JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-AWON-8GALN9&title=IBM%C2%AE+SDK%2C+Java-+Technology+Edition%2C+Version+7.0&l=en
+[Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.3/lafiles/runtime//en.html
+[JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-EWOD-99YA4J&title=IBM%C2%AE+SDK%2C+Java+Technology+Edition%2C+Version+7+Release+1&l=en
 [manifest documentation]: http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html

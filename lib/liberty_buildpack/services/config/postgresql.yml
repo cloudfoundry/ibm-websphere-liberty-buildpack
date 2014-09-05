@@ -28,4 +28,4 @@ service_filter : 'postgresql|elephantsql'
 
 driver:
   version: 9.3.+
-  repository_root: "http://download.run.pivotal.io/postgresql-jdbc"
+  repository_root: "https://download.run.pivotal.io/postgresql-jdbc"

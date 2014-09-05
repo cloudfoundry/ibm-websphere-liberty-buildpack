@@ -17,6 +17,7 @@
 require 'English'
 require 'fileutils'
 require 'liberty_buildpack/container'
+require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/container/container_utils'
 require 'liberty_buildpack/container/feature_manager'
 require 'liberty_buildpack/container/install_components'
@@ -48,7 +49,7 @@ module LibertyBuildpack::Container
     # @option context [String] :java_home the directory that acts as +JAVA_HOME+
     # @option context [Array<String>] :java_opts an array that Java options can be added to
     # @option context [String] :lib_directory the directory that additional libraries are placed in
-    # @option context [String] :logs_directory the directory that log files should be routed to
+    # @option context [CommonPaths] :common_paths the set of paths common across components that components should reference
     # @option context [Hash] :vcap_application the information about the deployed application provided by the Cloud Controller
     # @option context [Hash] :vcap_services the bound services to the application provided by the Cloud Controller
     # @option context [Hash] :license_ids the licenses accepted by the user
@@ -59,7 +60,7 @@ module LibertyBuildpack::Container
       @java_home = context[:java_home]
       @java_opts = context[:java_opts]
       @lib_directory = context[:lib_directory]
-      @logs_directory = context[:logs_directory]
+      @common_paths = context[:common_paths] || CommonPaths.new
       @configuration = context[:configuration]
       @vcap_services = Heroku.heroku? ? Heroku.new.generate_vcap_services(ENV) : context[:vcap_services]
       @vcap_application = context[:vcap_application]
@@ -93,7 +94,10 @@ module LibertyBuildpack::Container
     #                  returns +nil+
     def detect
       liberty_version = Liberty.find_liberty_item(@app_dir, @configuration)[0]
-      liberty_version ? [liberty_id(liberty_version)] : nil
+      if liberty_version
+        @common_paths.relative_location = relative_directory
+        [liberty_id(liberty_version)]
+      end
     end
 
     # Downloads and unpacks a Liberty instance
@@ -130,6 +134,15 @@ module LibertyBuildpack::Container
       jvm_options
       server_name_string = ContainerUtils.space(server_name)
       "#{create_vars_string}#{env_var_string}#{java_home_string}#{start_script_string}#{server_name_string}"
+    end
+
+    # relative location of the execution directory
+    def relative_directory
+      if Heroku.heroku?
+        '../../../..'
+      else
+        '../../../../..'
+      end
     end
 
     private
@@ -184,7 +197,7 @@ module LibertyBuildpack::Container
     end
 
     def minify_liberty
-      print 'Minifying Liberty ... '
+      print '-----> Minifying Liberty ... '
       minify_start_time = Time.now
       Dir.mktmpdir do |root|
         minified_zip = File.join(root, 'minified.zip')
@@ -332,7 +345,7 @@ module LibertyBuildpack::Container
 
     def update_logs_dir(server_xml_doc)
       include_file = REXML::Element.new('logging', server_xml_doc.root)
-      include_file.add_attribute('logDirectory', @logs_directory)
+      include_file.add_attribute('logDirectory', '${application.log.dir}')
     end
 
     def disable_config_monitoring(server_xml_doc)
@@ -514,10 +527,15 @@ module LibertyBuildpack::Container
     def download_and_unpack_archive(uri, root)
       # all file types filtered here should be handled inside block.
       if uri.end_with?('.tgz', '.tar.gz', '.zip', 'jar')
-        print "Downloading from #{uri} ... "
+        if uri.include? '://'
+          print "-----> Downloading from #{uri} ... "
+        else
+          filename = File.basename(uri)
+          print "-----> Retrieving #{filename} ... "
+        end
         download_start_time = Time.now
         LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
-          print "(#{(Time.now - download_start_time).duration}).\n"
+          puts "(#{(Time.now - download_start_time).duration})"
           install_archive(file, uri, root)
         end
       else
@@ -529,7 +547,7 @@ module LibertyBuildpack::Container
     end
 
     def install_archive(file, uri, root)
-      print 'Installing archive ... '
+      print '         Installing archive ... '
       install_start_time = Time.now
       if uri.end_with?('.zip', 'jar')
         ContainerUtils.unzip(file.path, root)
@@ -539,7 +557,7 @@ module LibertyBuildpack::Container
         # shouldn't really happen
         print("Unknown file type, not installed, at #{uri}.\n")
       end
-      puts "(#{(Time.now - install_start_time).duration}).\n"
+      puts "(#{(Time.now - install_start_time).duration})\n"
     end
 
     def download_and_install_esas(esas, root)
@@ -547,7 +565,12 @@ module LibertyBuildpack::Container
         # each esa is an array of two entries, uri and options string
         uri = esa[0]
         options = esa[1]
-        print "Downloading from #{uri} ... "
+        if uri.include? '://'
+          puts "-----> Downloading from #{uri} ... "
+        else
+          filename = File.basename(uri)
+          puts "-----> Retrieving #{filename} ... "
+        end
         download_start_time = Time.now
         # for each downloaded file, there is a corresponding cached, etag, last_modified, and lock extension
         LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|

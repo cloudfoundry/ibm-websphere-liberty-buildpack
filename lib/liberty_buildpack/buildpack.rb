@@ -16,8 +16,8 @@
 
 require 'fileutils'
 require 'liberty_buildpack'
+require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/util/constantize'
-require 'liberty_buildpack/util/heroku'
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/diagnostics/common'
 require 'pathname'
@@ -68,16 +68,20 @@ module LibertyBuildpack
     #
     # @return [void]
     def compile
+      @logger.debug { 'Liberty Buildpack starting compile' }
+      puts "\r-----> Liberty buildpack is starting to compile the droplet"
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
 
       # Report buildpack build version if it's available
       version_file = Pathname.new(File.expand_path(BUILDPACK_VERSION, __FILE__))
-      version_file.each_line { |line| print line } if version_file.file?
+      version_file.each_line { |line| print "-----> #{line}" } if version_file.file?
 
       @jre.compile
       frameworks.each { |framework| framework.compile }
       the_container.compile
+      puts '-----> Liberty buildpack has completed the compile step'
+      @logger.debug { 'Liberty Buildpack compile complete' }
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
@@ -85,6 +89,7 @@ module LibertyBuildpack
     #
     # @return [String] The payload required to run the application.
     def release
+      @logger.debug { 'Liberty Buildpack starting release' }
       the_container = container # diagnose detect failure early
       @jre.release
       frameworks.each { |framework| framework.release }
@@ -98,8 +103,7 @@ module LibertyBuildpack
           }
       }.to_yaml
 
-      @logger.debug { "Release Payload #{payload}" }
-
+      @logger.debug { "Liberty Buildpack release complete. Release Payload #{payload}" }
       payload
     end
 
@@ -125,9 +129,8 @@ module LibertyBuildpack
       Buildpack.require_component_files
       components = Buildpack.components @logger
 
-      java_home = ''
-      java_opts = []
       @lib_directory = Buildpack.lib_directory app_dir
+      @common_paths = LibertyBuildpack::Container::CommonPaths.new
       environment = ENV.to_hash
       vcap_application = environment.delete 'VCAP_APPLICATION'
       vcap_services = environment.delete 'VCAP_SERVICES'
@@ -137,10 +140,10 @@ module LibertyBuildpack
       basic_context = {
           app_dir: app_dir,
           environment: environment,
-          java_home: java_home,
-          java_opts: java_opts,
+          java_home: '',
+          java_opts: [],
           lib_directory: @lib_directory,
-          logs_directory: Buildpack.logs_directory,
+          common_paths: @common_paths,
           vcap_application: vcap_application ? YAML.load(vcap_application) : {},
           vcap_services: vcap_services ? YAML.load(vcap_services) : {},
           license_ids: license_ids ? license_ids : {},
@@ -221,14 +224,6 @@ module LibertyBuildpack
 
     def self.lib_directory(app_dir)
       File.join app_dir, LIB_DIRECTORY
-    end
-
-    def self.logs_directory
-      if LibertyBuildpack::Util::Heroku.heroku?
-         '../../../../logs'
-      else
-         '../../../../../logs'
-      end
     end
 
     def self.require_component_files

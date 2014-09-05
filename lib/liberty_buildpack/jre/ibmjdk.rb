@@ -17,6 +17,7 @@
 require 'fileutils'
 require 'liberty_buildpack/diagnostics/common'
 require 'liberty_buildpack/jre'
+require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
@@ -40,7 +41,7 @@ module LibertyBuildpack::Jre
     # @option context [String] :app_dir the directory that the application exists in
     # @option context [String] :java_home the directory that acts as +JAVA_HOME+
     # @option context [Array<String>] :java_opts an array that Java options can be added to
-    # @option context [String] :logs_directory the directory that log files should be routed to
+    # @option context [CommonPaths] :common_paths the set of paths common across components that components should reference
     # @option context [Hash] :license_ids the licenses accepted by the user
     # @option contect [String] :jvm_type the type of jvm the user wants to use e.g ibmjre or openjdk
     # @option context [Hash] :configuration the properties provided by the user
@@ -48,7 +49,7 @@ module LibertyBuildpack::Jre
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
-      @logs_directory = context[:logs_directory]
+      @common_paths = context[:common_paths] || LibertyBuildpack::Container::CommonPaths.new
       @configuration = context[:configuration]
       @license_id = context[:license_ids]['IBM_JVM_LICENSE']
       @jvm_type = context[:jvm_type]
@@ -78,8 +79,12 @@ module LibertyBuildpack::Jre
       check_memory
 
       download_start_time = Time.now
-      print "-----> Downloading IBM #{@version} JRE from #{@uri} "
-
+      if @uri.include? '://'
+        print "-----> Downloading IBM #{@version} JRE from #{@uri} ... "
+      else
+        filename = File.basename(@uri)
+        print "-----> Retrieving IBM #{@version} JRE (#{filename}) ... "
+      end
       LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
         puts "(#{(Time.now - download_start_time).duration})"
         expand file
@@ -98,7 +103,7 @@ module LibertyBuildpack::Jre
       mem_limit = MemoryLimit.memory_limit
       unless mem_limit.nil?
         if mem_limit < MemorySize.new('512M')
-          puts '       Avoid Trouble: Specify a minimum of 512M as the Memory Limit for your apps when using IBM JDK.'
+          puts '-----> Avoid Trouble: Specify a minimum of 512M as the Memory Limit for your apps when using IBM JDK.'
         end
       end
     end
@@ -115,7 +120,7 @@ module LibertyBuildpack::Jre
 
     def expand(file)
       expand_start_time = Time.now
-      print "       Expanding JRE to #{JAVA_HOME} "
+      print "         Expanding JRE to #{JAVA_HOME} ... "
 
       system "rm -rf #{java_home}"
       system "mkdir -p #{java_home}"
@@ -193,7 +198,7 @@ module LibertyBuildpack::Jre
     def default_opts_gc
       default_options = []
       default_options.push('-verbose:gc')
-      default_options.push("-Xverbosegclog:#{@logs_directory}/verbosegc#.log,10,1000")
+      default_options.push("-Xverbosegclog:#{@common_paths.log_directory}/verbosegc#.log,10,1000")
       default_options
     end
 
