@@ -9,7 +9,7 @@ group :development do
 end
 
 group :development, :test do
-  gem 'rspec', '~> 2.14'
+  gem 'rspec'
 end
 
 group :test do

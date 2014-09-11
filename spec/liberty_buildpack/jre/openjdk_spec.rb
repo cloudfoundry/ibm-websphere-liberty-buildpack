@@ -70,7 +70,7 @@ module LibertyBuildpack::Jre
         ).compile
 
         java = File.join(root, '.java', 'jre', 'bin', 'java')
-        expect(File.exists?(java)).to be_true
+        expect(File.exists?(java)).to eq(true)
       end
     end
 

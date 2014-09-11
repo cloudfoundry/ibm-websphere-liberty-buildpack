@@ -85,10 +85,10 @@ module LibertyBuildpack::Framework
           configuration: {}
         ).compile
 
-        expect(File.exists? File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar')).to be_true
-        expect(File.directory? File.join(root, 'no_spring_app.war', 'WEB-INF', 'lib')).to be_false
-        expect(File.symlink?(File.join(root, 'spring_app.ear', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to be_true
-        expect(File.symlink?(File.join(root, 'spring_app.war', 'WEB-INF', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to be_true
+        expect(File.exists? File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar')).to eq(true)
+        expect(File.directory? File.join(root, 'no_spring_app.war', 'WEB-INF', 'lib')).to eq(false)
+        expect(File.symlink?(File.join(root, 'spring_app.ear', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to eq(true)
+        expect(File.symlink?(File.join(root, 'spring_app.war', 'WEB-INF', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to eq(true)
       end
     end
 
@@ -108,7 +108,7 @@ module LibertyBuildpack::Framework
           configuration: {}
         ).compile
 
-        expect(File.exists? File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar')).to be_true
+        expect(File.exists? File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar')).to eq(true)
       end
     end
 
@@ -179,15 +179,15 @@ module LibertyBuildpack::Framework
           test_jar_1 = File.join lib, 'test-jar-1.jar'
           test_jar_2 = File.join lib, 'test-jar-2.jar'
           test_text = File.join lib, 'test-text.txt'
-          expect(File.exists?(test_jar_1)).to be_true
-          expect(File.symlink?(test_jar_1)).to be_true
+          expect(File.exists?(test_jar_1)).to eq(true)
+          expect(File.symlink?(test_jar_1)).to eq(true)
           expect(File.readlink(test_jar_1)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-1.jar')).relative_path_from(Pathname.new(lib)).to_s)
 
-          expect(File.exists?(test_jar_2)).to be_true
-          expect(File.symlink?(test_jar_2)).to be_true
+          expect(File.exists?(test_jar_2)).to eq(true)
+          expect(File.symlink?(test_jar_2)).to eq(true)
           expect(File.readlink(test_jar_2)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-2.jar')).relative_path_from(Pathname.new(lib)).to_s)
 
-          expect(File.exists?(test_text)).to be_false
+          expect(File.exists?(test_text)).to eq(false)
         end
       end
     end
@@ -230,15 +230,15 @@ module LibertyBuildpack::Framework
           test_jar_2 = File.join lib, 'test-jar-2.jar'
           test_text = File.join lib, 'test-text.txt'
 
-          expect(File.exists?(test_jar_1)).to be_true
-          expect(File.symlink?(test_jar_1)).to be_true
+          expect(File.exists?(test_jar_1)).to eq(true)
+          expect(File.symlink?(test_jar_1)).to eq(true)
           expect(File.readlink(test_jar_1)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-1.jar')).relative_path_from(Pathname.new(lib)).to_s)
 
-          expect(File.exists?(test_jar_2)).to be_true
-          expect(File.symlink?(test_jar_2)).to be_true
+          expect(File.exists?(test_jar_2)).to eq(true)
+          expect(File.symlink?(test_jar_2)).to eq(true)
           expect(File.readlink(test_jar_2)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-2.jar')).relative_path_from(Pathname.new(lib)).to_s)
 
-          expect(File.exists?(test_text)).to be_false
+          expect(File.exists?(test_text)).to eq(false)
         end
       end
     end

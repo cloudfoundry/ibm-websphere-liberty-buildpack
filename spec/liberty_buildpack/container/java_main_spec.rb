@@ -116,8 +116,8 @@ module LibertyBuildpack::Container
           configuration: { 'java_main_class' => 'com.ibm.rspec.test' }
           ).compile
 
-          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to be_true
-          expect(File.exists?(File.join root, '.java', 'test.txt')).to be_true
+          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to eq(true)
+          expect(File.exists?(File.join root, '.java', 'test.txt')).to eq(true)
         end
       end
     end

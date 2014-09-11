@@ -21,7 +21,7 @@ require 'liberty_buildpack/util/cache/internet_availability'
 shared_context 'internet_availability_helper' do
 
   # Reset cache and honour example metadata for cache.
-  before do
+  before do |example|
     LibertyBuildpack::Util::Cache::InternetAvailability.clear_internet_availability
     LibertyBuildpack::Util::Cache::InternetAvailability.store_internet_availability true if example.metadata[:skip_availability_check]
   end

@@ -27,12 +27,12 @@ module LibertyBuildpack::Util
 
     it 'Heroku environment' do
       ENV['DYNO'] = 'web.1'
-      expect(Heroku.heroku?).to be_true
+      expect(Heroku.heroku?).to eq(true)
     end
 
     it 'Non Heroku environment' do
       ENV.delete('DYNO')
-      expect(Heroku.heroku?).to be_false
+      expect(Heroku.heroku?).to eq(false)
     end
 
   end
@@ -41,10 +41,10 @@ module LibertyBuildpack::Util
 
     def check_database_url(vcap_services)
       services = vcap_services['DATABASE_URL']
-      expect(services).to have(1).items
+      expect(services.length).to eql(1)
       expect(services[0]['name']).to match('database')
       credentials = services[0]['credentials']
-      expect(credentials).to have(9).items
+      expect(credentials.length).to eql(9)
       expect(credentials['host']).to match('foo')
       expect(credentials['hostname']).to match('foo')
       expect(credentials['port']).to eq(500)
@@ -60,10 +60,10 @@ module LibertyBuildpack::Util
 
     def check_postgresql(vcap_services, expected_name)
       services = vcap_services['HEROKU_POSTGRESQL_RED_URL']
-      expect(services).to have(1).items
+      expect(services.length).to eql(1)
       expect(services[0]['name']).to match(expected_name)
       credentials = services[0]['credentials']
-      expect(credentials).to have(1).items
+      expect(credentials.length).to eql(1)
       expect(credentials['uri']).to match('postgre://doesnotexist.xyz')
       tags = services[0]['tags']
       expect(tags).to include('postgresql')
@@ -71,10 +71,10 @@ module LibertyBuildpack::Util
 
     def check_mysql(vcap_services, expected_name)
       services = vcap_services['CLEARDB_DATABASE_URL']
-      expect(services).to have(1).items
+      expect(services.length).to eql(1)
       expect(services[0]['name']).to match(expected_name)
       credentials = services[0]['credentials']
-      expect(credentials).to have(1).items
+      expect(credentials.length).to eql(1)
       expect(credentials['uri']).to match('mysql://ggg:hhh@nnn.com/mmmm')
       tags = services[0]['tags']
       expect(tags).to include('mysql')
@@ -82,20 +82,20 @@ module LibertyBuildpack::Util
 
     def check_bad(vcap_services, expected_name)
       services = vcap_services['BAD_URL']
-      expect(services).to have(1).items
+      expect(services.length).to eql(1)
       expect(services[0]['name']).to match(expected_name)
       credentials = services[0]['credentials']
-      expect(credentials).to have(2).items
+      expect(credentials.length).to eql(2)
       expect(credentials['uri']).to match('://badurl.xyz')
       expect(credentials['url']).to match('://badurl.xyz')
     end
 
     def check_mongo(vcap_services, label, expected_name, expected_url)
       services = vcap_services[label]
-      expect(services).to have(1).items
+      expect(services.length).to eql(1)
       expect(services[0]['name']).to match(expected_name)
       credentials = services[0]['credentials']
-      expect(credentials).to have(1).items
+      expect(credentials.length).to eql(1)
       expect(credentials['url']).to match(expected_url)
       tags = services[0]['tags']
       expect(tags).to include('mongodb')

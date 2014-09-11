@@ -135,14 +135,14 @@ module LibertyBuildpack::Services
       it 'should handle single element with no config ids' do
         doc = REXML::Document.new('<server></server>')
         e1 = REXML::Element.new('stanza', doc.root)
-        expect(Utils.is_logical_singleton?([e1])).to be_true
+        expect(Utils.is_logical_singleton?([e1])).to eq(true)
       end # it
 
       it 'should handle partitioned element with no config ids' do
         doc = REXML::Document.new('<server></server>')
         e1 = REXML::Element.new('stanza', doc.root)
         e2 = REXML::Element.new('stanza', doc.root)
-        expect(Utils.is_logical_singleton?([e1, e2])).to be_true
+        expect(Utils.is_logical_singleton?([e1, e2])).to eq(true)
       end # it
 
       it 'should handle partitioned element with config ids' do
@@ -151,7 +151,7 @@ module LibertyBuildpack::Services
         e1.add_attribute('id', 'someid')
         e2 = REXML::Element.new('stanza', doc.root)
         e2.add_attribute('id', 'someid')
-        expect(Utils.is_logical_singleton?([e1, e2])).to be_true
+        expect(Utils.is_logical_singleton?([e1, e2])).to eq(true)
       end # it
 
       it 'should handle partitioned element with mismatched config ids' do
@@ -160,7 +160,7 @@ module LibertyBuildpack::Services
         e1.add_attribute('id', 'someid')
         e2 = REXML::Element.new('stanza', doc.root)
         e2.add_attribute('id', 'otherid')
-        expect(Utils.is_logical_singleton?([e1, e2])).to be_false
+        expect(Utils.is_logical_singleton?([e1, e2])).to eq(false)
       end # it
 
       it 'should handle partitioned element where first has id and second does not' do
@@ -168,7 +168,7 @@ module LibertyBuildpack::Services
         e1 = REXML::Element.new('stanza', doc.root)
         e1.add_attribute('id', 'someid')
         e2 = REXML::Element.new('stanza', doc.root)
-        expect(Utils.is_logical_singleton?([e1, e2])).to be_false
+        expect(Utils.is_logical_singleton?([e1, e2])).to eq(false)
       end # it
 
       it 'should handle partitioned element where second has id and first does not' do
@@ -176,7 +176,7 @@ module LibertyBuildpack::Services
         e1 = REXML::Element.new('stanza', doc.root)
         e2 = REXML::Element.new('stanza', doc.root)
         e2.add_attribute('id', 'someid')
-        expect(Utils.is_logical_singleton?([e1, e2])).to be_false
+        expect(Utils.is_logical_singleton?([e1, e2])).to eq(false)
       end # it
     end # describe test is_logical_singleton?
 
