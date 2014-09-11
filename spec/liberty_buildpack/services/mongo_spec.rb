@@ -288,11 +288,11 @@ module LibertyBuildpack::Services
         else
           expect(map['password']).to match(expected_password)
         end
-        expect(map['ports']).to have(expected_ports.size).items
+        expect(map['ports'].length).to eql(expected_ports.size)
         expected_ports.each_with_index do | value, index |
           expect(map['ports'][index]).to match(value)
         end
-        expect(map['hosts']).to have(expected_hosts.size).items
+        expect(map['hosts'].length).to eql(expected_hosts.size)
         expected_hosts.each_with_index do | value, index |
           expect(map['hosts'][index]).to match(value)
         end

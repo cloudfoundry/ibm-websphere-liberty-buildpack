@@ -368,7 +368,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
         end
       ensure
         # Reset both Net:HTTP and net_http_connect_on_start to default values
-        RSpec::Mocks.proxy_for(Net::HTTP).reset
+        RSpec::Mocks.space.proxy_for(Net::HTTP).reset
         WebMock.allow_net_connect!(net_http_connect_on_start: false)
       end
     end

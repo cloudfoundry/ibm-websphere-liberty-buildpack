@@ -31,7 +31,7 @@ describe LibertyBuildpack::Util::ApplicationCache do
 
   previous_arg_value = ARGV[1]
 
-  before do
+  before do |example|
     ARGV[1] = nil
 
     stub_request(:get, 'http://foo-uri/').with(headers: { 'Accept' => '*/*', 'User-Agent' => default_user_agent })

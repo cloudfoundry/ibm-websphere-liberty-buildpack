@@ -56,7 +56,7 @@ module LibertyBuildpack::Container
           )
 
           apps = Dir.glob(File.join(app_dir, '*'))
-          apps.each { |file| expect(File.directory? file).to be_true }
+          apps.each { |file| expect(File.directory? file).to eq(true) }
         end
       end
     end
@@ -316,17 +316,17 @@ module LibertyBuildpack::Container
           default_server_xml = File.join liberty_dir, 'templates', 'servers', 'defaultServer', 'server.xml'
           rest_connector = File.join liberty_dir, 'clients', 'restConnector.jar'
 
-          expect(File.exists?(File.join bin_dir, 'server')).to be_true
-          expect(File.exists?(File.join bin_dir, 'featureManager')).to be_true
-          expect(File.exists?(File.join bin_dir, 'securityUtility')).to be_true
-          expect(File.exists?(File.join bin_dir, 'productInfo')).to be_true
-          expect(File.exists?(default_server_xml)).to be_true
-          expect(File.exists?(rest_connector)).to be_true
+          expect(File.exists?(File.join bin_dir, 'server')).to eq(true)
+          expect(File.exists?(File.join bin_dir, 'featureManager')).to eq(true)
+          expect(File.exists?(File.join bin_dir, 'securityUtility')).to eq(true)
+          expect(File.exists?(File.join bin_dir, 'productInfo')).to eq(true)
+          expect(File.exists?(default_server_xml)).to eq(true)
+          expect(File.exists?(rest_connector)).to eq(true)
 
           icap_properties = File.join liberty_dir, 'etc', 'extensions', 'icap.properties'
-          expect(File.exists?(icap_properties)).to be_true
+          expect(File.exists?(icap_properties)).to eq(true)
           icap_properties_content = File.read icap_properties
-          expect(icap_properties_content.include? 'productInstall=.liberty/icap').to be_true
+          expect(icap_properties_content.include? 'productInstall=.liberty/icap').to eq(true)
         end
       end
 
@@ -358,12 +358,12 @@ module LibertyBuildpack::Container
           default_server_xml = File.join liberty_dir, 'templates', 'servers', 'defaultServer', 'server.xml'
           rest_connector = File.join liberty_dir, 'clients', 'restConnector.jar'
 
-          expect(File.exists?(File.join bin_dir, 'server')).to be_true
-          expect(File.exists?(File.join bin_dir, 'featureManager')).to be_true
-          expect(File.exists?(File.join bin_dir, 'securityUtility')).to be_true
-          expect(File.exists?(File.join bin_dir, 'productInfo')).to be_true
-          expect(File.exists?(default_server_xml)).to be_true
-          expect(File.exists?(rest_connector)).to be_true
+          expect(File.exists?(File.join bin_dir, 'server')).to eq(true)
+          expect(File.exists?(File.join bin_dir, 'featureManager')).to eq(true)
+          expect(File.exists?(File.join bin_dir, 'securityUtility')).to eq(true)
+          expect(File.exists?(File.join bin_dir, 'productInfo')).to eq(true)
+          expect(File.exists?(default_server_xml)).to eq(true)
+          expect(File.exists?(rest_connector)).to eq(true)
         end
       end
 
@@ -394,12 +394,12 @@ module LibertyBuildpack::Container
           default_server_xml = File.join liberty_dir, 'templates', 'servers', 'defaultServer', 'server.xml'
           rest_connector = File.join liberty_dir, 'clients', 'restConnector.jar'
 
-          expect(File.exists?(File.join bin_dir, 'server')).to be_true
-          expect(File.exists?(File.join bin_dir, 'featureManager')).to be_true
-          expect(File.exists?(File.join bin_dir, 'securityUtility')).to be_true
-          expect(File.exists?(File.join bin_dir, 'productInfo')).to be_true
-          expect(File.exists?(default_server_xml)).to be_true
-          expect(File.exists?(rest_connector)).to be_true
+          expect(File.exists?(File.join bin_dir, 'server')).to eq(true)
+          expect(File.exists?(File.join bin_dir, 'featureManager')).to eq(true)
+          expect(File.exists?(File.join bin_dir, 'securityUtility')).to eq(true)
+          expect(File.exists?(File.join bin_dir, 'productInfo')).to eq(true)
+          expect(File.exists?(default_server_xml)).to eq(true)
+          expect(File.exists?(rest_connector)).to eq(true)
         end
       end
 
@@ -431,8 +431,8 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
-          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to be_true
-          expect(File.exists?(File.join root, '.java', 'test.txt')).to be_true
+          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to eq(true)
+          expect(File.exists?(File.join root, '.java', 'test.txt')).to eq(true)
         end
       end
 
@@ -466,8 +466,8 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
-          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to be_true
-          expect(File.exists?(File.join root, '.java', 'test.txt')).to be_true
+          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to eq(true)
+          expect(File.exists?(File.join root, '.java', 'test.txt')).to eq(true)
         end
       end
 
@@ -502,9 +502,9 @@ module LibertyBuildpack::Container
           ).compile
 
           server_script = File.join(root, '.liberty', 'bin', 'server')
-          expect(File.exists?(server_script)).to be_true
-          expect(File.executable?(server_script)).to be_true
-          expect(File.directory? war_file).to be_true
+          expect(File.exists?(server_script)).to eq(true)
+          expect(File.executable?(server_script)).to eq(true)
+          expect(File.directory? war_file).to eq(true)
         end
       end
 
@@ -531,7 +531,7 @@ module LibertyBuildpack::Container
           ).compile
 
           server_script = File.join(root, '.liberty', 'bin', 'server')
-          expect(File.executable?(server_script)).to be_true
+          expect(File.executable?(server_script)).to eq(true)
         end
       end
 
@@ -558,7 +558,7 @@ module LibertyBuildpack::Container
           ).compile
 
           server_script = File.join(root, '.liberty', 'bin', 'server')
-          expect(File.executable?(server_script)).to be_true
+          expect(File.executable?(server_script)).to eq(true)
         end
       end
 
@@ -586,16 +586,16 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
-          expect(File.exists?(server_xml_file)).to be_true
+          expect(File.exists?(server_xml_file)).to eq(true)
 
           server_xml_contents = File.read(server_xml_file)
-          expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp"').to be_true
-          expect(server_xml_contents.include? 'type="war"').to be_true
-          expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
-          expect(server_xml_contents.include? '<httpDispatcher enableWelcomePage="false"/>').to be_true
-          expect(server_xml_contents.include? '<config updateTrigger="mbean"/>').to be_true
-          expect(server_xml_contents.include? '<applicationMonitor dropinsEnabled="false" updateTrigger="mbean"/>').to be_true
+          expect(server_xml_contents.include? '<featureManager>').to eq(true)
+          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp"').to eq(true)
+          expect(server_xml_contents.include? 'type="war"').to eq(true)
+          expect(server_xml_contents.include? 'httpPort="${port}"').to eq(true)
+          expect(server_xml_contents.include? '<httpDispatcher enableWelcomePage="false"/>').to eq(true)
+          expect(server_xml_contents.include? '<config updateTrigger="mbean"/>').to eq(true)
+          expect(server_xml_contents.include? '<applicationMonitor dropinsEnabled="false" updateTrigger="mbean"/>').to eq(true)
         end
       end
 
@@ -624,7 +624,7 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
-          expect(File.exists?(droplet_yaml_file)).to be_true
+          expect(File.exists?(droplet_yaml_file)).to eq(true)
 
           droplet_yaml_content = YAML.load(File.read droplet_yaml_file)
           expect(droplet_yaml_content).to have_key('state_file')
@@ -657,7 +657,7 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
 
-          expect(File.exists?(droplet_yaml_file)).to be_false
+          expect(File.exists?(droplet_yaml_file)).to eq(false)
         end
       end
 
@@ -685,15 +685,15 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
-          expect(File.exists?(server_xml_file)).to be_true
+          expect(File.exists?(server_xml_file)).to eq(true)
 
           server_xml_contents = File.read(server_xml_file)
-          expect(server_xml_contents.include? '<featureManager>').to be_true
-          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp"').to be_true
-          expect(server_xml_contents.include? 'type="ear"').to be_true
-          expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
-          expect(server_xml_contents.include? '<config updateTrigger="mbean"/>').to be_true
-          expect(server_xml_contents.include? '<applicationMonitor dropinsEnabled="false" updateTrigger="mbean"/>').to be_true
+          expect(server_xml_contents.include? '<featureManager>').to eq(true)
+          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp"').to eq(true)
+          expect(server_xml_contents.include? 'type="ear"').to eq(true)
+          expect(server_xml_contents.include? 'httpPort="${port}"').to eq(true)
+          expect(server_xml_contents.include? '<config updateTrigger="mbean"/>').to eq(true)
+          expect(server_xml_contents.include? '<applicationMonitor dropinsEnabled="false" updateTrigger="mbean"/>').to eq(true)
         end
       end
 
@@ -722,16 +722,16 @@ module LibertyBuildpack::Container
           ).compile
 
           liberty_directory = File.join(root, '.liberty')
-          expect(Dir.exists?(liberty_directory)).to be_true
+          expect(Dir.exists?(liberty_directory)).to eq(true)
 
           server_command = File.join(root, '.liberty', 'bin', 'server')
-          expect(File.exists?(server_command)).to be_true
+          expect(File.exists?(server_command)).to eq(true)
 
           license_files = File.join(root, '.liberty', 'lafiles')
-          expect(Dir.exists?(license_files)).to be_true
+          expect(Dir.exists?(license_files)).to eq(true)
 
           usr_directory = File.join(root, '.liberty', 'usr')
-          expect(File.symlink?(usr_directory)).to be_true
+          expect(File.symlink?(usr_directory)).to eq(true)
           expect(File.readlink(usr_directory)).to eq('../wlp/usr')
         end
 
@@ -762,13 +762,13 @@ module LibertyBuildpack::Container
           ).compile
 
           feature_lib_dir = File.join(root, '.liberty', 'usr', 'extension', 'lib')
-          expect(Dir.exists?(feature_lib_dir)).to be_true
+          expect(Dir.exists?(feature_lib_dir)).to eq(true)
           jar_file = File.join(feature_lib_dir, 'dummy_feature.jar')
-          expect(File.exists?(jar_file)).to be_true
+          expect(File.exists?(jar_file)).to eq(true)
           mf_dir = File.join(feature_lib_dir, 'features')
-          expect(Dir.exists?(mf_dir)).to be_true
+          expect(Dir.exists?(mf_dir)).to eq(true)
           mf_file = File.join(mf_dir, 'dummy_feature.mf')
-          expect(File.exists?(mf_file)).to be_true
+          expect(File.exists?(mf_file)).to eq(true)
         end
       end
 
@@ -805,17 +805,17 @@ module LibertyBuildpack::Container
           ).compile
 
           feature_lib_dir = File.join(root, '.liberty', 'usr', 'extension', 'lib')
-          expect(Dir.exists?(feature_lib_dir)).to be_true
+          expect(Dir.exists?(feature_lib_dir)).to eq(true)
           jar_file = File.join(feature_lib_dir, 'dummy_feature.jar')
-          expect(File.exists?(jar_file)).to be_true
+          expect(File.exists?(jar_file)).to eq(true)
           jar_file = File.join(feature_lib_dir, 'existing.jar')
-          expect(File.exists?(jar_file)).to be_true
+          expect(File.exists?(jar_file)).to eq(true)
           mf_dir = File.join(feature_lib_dir, 'features')
-          expect(Dir.exists?(mf_dir)).to be_true
+          expect(Dir.exists?(mf_dir)).to eq(true)
           mf_file = File.join(mf_dir, 'dummy_feature.mf')
-          expect(File.exists?(mf_file)).to be_true
+          expect(File.exists?(mf_file)).to eq(true)
           mf_file = File.join(mf_dir, 'existing.mf')
-          expect(File.exists?(mf_file)).to be_true
+          expect(File.exists?(mf_file)).to eq(true)
         end
       end
 
@@ -844,23 +844,23 @@ module LibertyBuildpack::Container
           ).compile
 
           liberty_directory = File.join(root, '.liberty')
-          expect(Dir.exists?(liberty_directory)).to be_true
+          expect(Dir.exists?(liberty_directory)).to eq(true)
 
           server_command = File.join(root, '.liberty', 'bin', 'server')
-          expect(File.exists?(server_command)).to be_true
+          expect(File.exists?(server_command)).to eq(true)
 
           license_files = File.join(root, '.liberty', 'lafiles')
-          expect(Dir.exists?(license_files)).to be_true
+          expect(Dir.exists?(license_files)).to eq(true)
 
           default_server_directory = File.join(root, '.liberty', 'usr', 'servers', 'defaultServers')
           expect(Dir.exists?(default_server_directory))
 
           usr_symlink = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml')
-          expect(File.symlink?(usr_symlink)).to be_true
+          expect(File.symlink?(usr_symlink)).to eq(true)
           expect(File.readlink(usr_symlink)).to eq(Pathname.new(File.join(root, 'server.xml')).relative_path_from(Pathname.new(default_server_directory)).to_s)
 
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
-          expect(File.exists?(server_xml_file)).to be_true
+          expect(File.exists?(server_xml_file)).to eq(true)
 
           server_xml_contents = File.read(server_xml_file)
           endpoints = REXML::XPath.match(REXML::Document.new(server_xml_contents), '/server/httpEndpoint')
@@ -972,15 +972,15 @@ module LibertyBuildpack::Container
           ).compile
 
           liberty_directory = File.join(root, '.liberty')
-          expect(Dir.exists?(liberty_directory)).to be_true
+          expect(Dir.exists?(liberty_directory)).to eq(true)
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read server_xml_file
-          expect(server_xml_contents.include? 'host="*"').to be_true
-          expect(server_xml_contents.include? 'httpPort="${port}"').to be_true
-          expect(server_xml_contents.include? 'httpsPort=').to be_false
+          expect(server_xml_contents.include? 'host="*"').to eq(true)
+          expect(server_xml_contents.include? 'httpPort="${port}"').to eq(true)
+          expect(server_xml_contents.include? 'httpsPort=').to eq(false)
           expect(server_xml_contents).to match(/<webContainer trustHostHeaderPort='true' extractHostHeaderPort='true'\/>/)
-          expect(File.exists?(droplet_yaml_file)).to be_false
+          expect(File.exists?(droplet_yaml_file)).to eq(false)
         end
       end
 
@@ -1009,7 +1009,7 @@ module LibertyBuildpack::Container
           ).compile
 
           liberty_directory = File.join(root, '.liberty')
-          expect(Dir.exists?(liberty_directory)).to be_true
+          expect(Dir.exists?(liberty_directory)).to eq(true)
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read server_xml_file
@@ -1042,7 +1042,7 @@ module LibertyBuildpack::Container
           ).compile
 
           liberty_directory = File.join(root, '.liberty')
-          expect(Dir.exists?(liberty_directory)).to be_true
+          expect(Dir.exists?(liberty_directory)).to eq(true)
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read server_xml_file
@@ -1081,7 +1081,7 @@ module LibertyBuildpack::Container
           ).compile
 
           liberty_directory = File.join(root, '.liberty')
-          expect(Dir.exists?(liberty_directory)).to be_true
+          expect(Dir.exists?(liberty_directory)).to eq(true)
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read server_xml_file
@@ -1116,15 +1116,15 @@ module LibertyBuildpack::Container
           ).compile
 
           liberty_directory = File.join root, '.liberty'
-          expect(Dir.exists?(liberty_directory)).to be_true
+          expect(Dir.exists?(liberty_directory)).to eq(true)
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
-          expect(server_xml_contents.include? "<httpDispatcher enableWelcomePage='false'/>").to be_true
-          expect(server_xml_contents.include? "<config updateTrigger='mbean'/>").to be_true
-          expect(server_xml_contents.include? "<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>").to be_true
+          expect(server_xml_contents.include? "<httpDispatcher enableWelcomePage='false'/>").to eq(true)
+          expect(server_xml_contents.include? "<config updateTrigger='mbean'/>").to eq(true)
+          expect(server_xml_contents.include? "<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>").to eq(true)
 
-          expect(File.exists?(droplet_yaml_file)).to be_true
+          expect(File.exists?(droplet_yaml_file)).to eq(true)
         end
       end
 
@@ -1174,7 +1174,7 @@ module LibertyBuildpack::Container
           ).compile
 
           original_xml_file = File.join(root, 'container_liberty_server_with_includes', 'wlp', 'usr', 'servers', 'myServer', 'server.xml.org')
-          expect(File.file?(original_xml_file)).to be_true
+          expect(File.file?(original_xml_file)).to eq(true)
 
           server_xml_file = File.join(root, 'container_liberty_server_with_includes', 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
@@ -1211,7 +1211,7 @@ module LibertyBuildpack::Container
           ).compile
 
           original_xml_file = File.join(root, 'container_liberty_server_with_includes_property', 'wlp', 'usr', 'servers', 'myServer', 'server.xml.org')
-          expect(File.file?(original_xml_file)).to be_true
+          expect(File.file?(original_xml_file)).to eq(true)
 
           server_xml_file = File.join(root, 'container_liberty_server_with_includes_property', 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
@@ -1244,7 +1244,7 @@ module LibertyBuildpack::Container
           ).compile
 
           original_xml_file = File.join(root, 'container_liberty_server_with_includes_ignored', 'wlp', 'usr', 'servers', 'myServer', 'server.xml.org')
-          expect(File.file?(original_xml_file)).to be_true
+          expect(File.file?(original_xml_file)).to eq(true)
 
           server_xml_file = File.join(root, 'container_liberty_server_with_includes_ignored', 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
@@ -1332,7 +1332,7 @@ module LibertyBuildpack::Container
           ).release
 
           jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'anyServer', 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.exists?(jvm_options_file)).to eq(true)
           file_contents = File.read(jvm_options_file)
           expect(file_contents).to match(/test-opt-1/)
           expect(file_contents).to match(/test-opt-2/)
@@ -1365,11 +1365,11 @@ module LibertyBuildpack::Container
           ).release
 
           jvm_options_file = File.join(root, 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.exists?(jvm_options_file)).to eq(true)
           expect(File.read(jvm_options_file)).to match(/test-opt-1/)
 
           jvm_options_file = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.exists?(jvm_options_file)).to eq(true)
           file_contents = File.read(jvm_options_file)
           expect(file_contents).to match(/test-opt-1/)
           expect(file_contents).to match(/test-opt-2/)
@@ -1409,7 +1409,7 @@ module LibertyBuildpack::Container
           ).release
 
           jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.exists?(jvm_options_file)).to eq(true)
           file_contents = File.read(jvm_options_file)
           expect(file_contents).to match(/provided-opt-1/)
           expect(file_contents).to match(/test-opt-1/)
@@ -1452,12 +1452,12 @@ module LibertyBuildpack::Container
           ).release
 
           jvm_options_file = File.join(root, 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.exists?(jvm_options_file)).to eq(true)
           expect(File.read(jvm_options_file)).to match(/provided-opt-1/)
           expect(File.read(jvm_options_file)).to match(/test-opt-1/)
 
           jvm_options_file = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.exists?(jvm_options_file)).to eq(true)
           file_contents = File.read(jvm_options_file)
           expect(file_contents).to match(/provided-opt-1/)
           expect(file_contents).to match(/test-opt-1/)
@@ -1506,7 +1506,7 @@ module LibertyBuildpack::Container
           ).release
 
           jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to be_true
+          expect(File.exists?(jvm_options_file)).to eq(true)
           file_contents = File.read(jvm_options_file)
           expect(file_contents).to match(/good-opt-1/)
           expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
@@ -1788,7 +1788,7 @@ module LibertyBuildpack::Container
 
         apps = liberty_container.apps
         expect(apps).to match_array([spring_dir])
-        expect(File.directory?(spring_dir)).to be_true
+        expect(File.directory?(spring_dir)).to eq(true)
       end
     end
 
@@ -1807,7 +1807,7 @@ module LibertyBuildpack::Container
 
         apps = liberty_container.apps
         expect(apps).to match_array([spring_dir])
-        expect(File.directory?(spring_dir)).to be_true
+        expect(File.directory?(spring_dir)).to eq(true)
       end
     end
 
@@ -1826,7 +1826,7 @@ module LibertyBuildpack::Container
 
         apps = liberty_container.apps
         expect(apps).to match_array([spring1_war])
-        expect(File.directory?(spring1_war)).to be_true
+        expect(File.directory?(spring1_war)).to eq(true)
       end
     end
 
@@ -1845,7 +1845,7 @@ module LibertyBuildpack::Container
 
         apps = liberty_container.apps
         expect(apps).to match_array([spring1_ear])
-        expect(File.directory?(spring1_ear)).to be_true
+        expect(File.directory?(spring1_ear)).to eq(true)
       end
     end
 
@@ -1872,10 +1872,10 @@ module LibertyBuildpack::Container
 
         apps = liberty_container.apps
         expect(apps).to match_array([spring1_war, spring2_war, spring1_ear, spring2_ear])
-        expect(File.directory?(spring1_war)).to be_true
-        expect(File.directory?(spring2_war)).to be_true
-        expect(File.directory?(spring1_ear)).to be_true
-        expect(File.directory?(spring2_ear)).to be_true
+        expect(File.directory?(spring1_war)).to eq(true)
+        expect(File.directory?(spring2_war)).to eq(true)
+        expect(File.directory?(spring1_ear)).to eq(true)
+        expect(File.directory?(spring2_ear)).to eq(true)
       end
     end
   end
