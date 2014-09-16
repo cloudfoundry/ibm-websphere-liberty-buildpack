@@ -1,5 +1,5 @@
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright (c) 2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ CLOBBER.include %w(doc pkg)
 task :default => [ :rubocop, :check_api_doc, :yard, :spec ]
 
 desc "Package buildpack together with admin cache"
-task :package, [:zipfile, :hosts] do |t, args|
+task :package, [:zipfile, :hosts, :version] do |t, args|
   source = File.dirname(__FILE__)
   basename = File.basename(source)
   if args.zipfile.nil?
@@ -86,6 +86,14 @@ task :package, [:zipfile, :hosts] do |t, args|
 
     FileUtils.cp_r(source, root)
     dest = File.join(root, basename)
+
+    # Create version.yml when :version is specified
+    File.open(File.join(dest, 'config', 'version.yml'), 'w') do |file|
+      file.puts "version: #{args.version}"
+      file.puts "remote: ''"
+      file.puts "hash: ''"
+    end unless args.version.nil?
+
     bc = BuildpackCache.new(File.join(dest, 'admin_cache'))
     # Collect all remote content using all config files
     configs = bc.collect_configs nil, cache_hosts 
