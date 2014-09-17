@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 require 'fileutils'
 require 'liberty_buildpack'
+require 'liberty_buildpack/buildpack_version'
 require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/util/constantize'
 require 'liberty_buildpack/diagnostics/logger_factory'
@@ -68,14 +69,12 @@ module LibertyBuildpack
     #
     # @return [void]
     def compile
+      # Report buildpack build version
+      puts BUILDPACK_MESSAGE % @buildpack_version
       @logger.debug { 'Liberty Buildpack starting compile' }
-      puts "\r-----> Liberty buildpack is starting to compile the droplet"
+
       the_container = container # diagnose detect failure early
       FileUtils.mkdir_p @lib_directory
-
-      # Report buildpack build version if it's available
-      version_file = Pathname.new(File.expand_path(BUILDPACK_VERSION, __FILE__))
-      version_file.each_line { |line| print "-----> #{line}" } if version_file.file?
 
       @jre.compile
       frameworks.each { |framework| framework.compile }
@@ -114,7 +113,7 @@ module LibertyBuildpack
     COMPONENTS_CONFIG = '../../config/components.yml'.freeze
 
     LICENSE_CONFIG = '../../config/licenses.yml'.freeze
-    BUILDPACK_VERSION = '../../../version.txt'.freeze
+    BUILDPACK_MESSAGE = '-----> Liberty Buildpack Version: %s'.freeze
 
     JRE_TYPE = 'jres'.freeze
     FRAMEWORK_TYPE = 'frameworks'.freeze
@@ -125,6 +124,7 @@ module LibertyBuildpack
     # Instances should only be constructed by this class.
     def initialize(app_dir)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
+      @buildpack_version = BuildpackVersion.new
       Buildpack.log_debug_data @logger
       Buildpack.require_component_files
       components = Buildpack.components @logger

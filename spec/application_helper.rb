@@ -1,7 +1,7 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ shared_context 'application_helper' do
 
   let(:app_dir) { Pathname.new Dir.mktmpdir }
 
+  previous_environment = ENV.to_hash
+
   let(:environment) do
     { 'test-key'      => 'test-value', 'VCAP_APPLICATION' => vcap_application.to_yaml,
       'VCAP_SERVICES' => vcap_services.to_yaml }
@@ -36,10 +38,12 @@ shared_context 'application_helper' do
   end
 
   before do
+    ENV.update environment
     FileUtils.mkdir_p app_dir
   end
 
   after do
+    ENV.replace previous_environment
     FileUtils.rm_rf app_dir
   end
 

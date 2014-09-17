@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,14 +24,17 @@ module LibertyBuildpack
 
   describe Buildpack do
 
-    let(:stub_container1) { double('StubContainer1', detect: nil) }
-    let(:stub_container2) { double('StubContainer2', detect: nil) }
+    let(:stub_container1) { double('StubContainer1', detect: nil, compile: nil) }
+    let(:stub_container2) { double('StubContainer2', detect: nil, compile: nil) }
     let(:stub_framework1) { double('StubFramework1', detect: nil) }
     let(:stub_framework2) { double('StubFramework2', detect: nil) }
-    let(:stub_jre1) { double('StubJre1', detect: nil) }
-    let(:stub_jre2) { double('StubJre2', detect: nil) }
+    let(:stub_jre1) { double('StubJre1', detect: nil, compile: nil) }
+    let(:stub_jre2) { double('StubJre2', detect: nil, compile: nil) }
 
     before do
+      VERSION_CONFIG_PATH = Pathname.new(File.expand_path('../../config/version.yml', File.dirname(__FILE__))).freeze
+      YAML.stub(:load_file).with(VERSION_CONFIG_PATH).and_return({})
+
       YAML.stub(:load_file).with(File.expand_path('config/logging.yml')).and_return(
           'default_log_level' => 'DEBUG'
       )
@@ -140,6 +143,56 @@ module LibertyBuildpack
 
       with_buildpack { |buildpack| buildpack.compile }
     end
+
+    describe 'Version Information' do
+
+       it 'should display version info from git when the version.yml does not exist' do
+         stub_container1.stub(:detect).and_return('stub-container-1')
+         stub_container1.stub(:apps).and_return(['root/app1'])
+         stub_jre1.stub(:detect).and_return('stub-jre-1')
+         stub_jre1.stub(:compile).and_return(' ')
+
+         git_dir = Pathname.new('.git').expand_path
+         allow_any_instance_of(BuildpackVersion).to receive(:`)
+                                                 .with("git --git-dir=#{git_dir} rev-parse --short HEAD")
+                                                 .and_return('test-hash')
+         allow_any_instance_of(BuildpackVersion).to receive(:`)
+                                                 .with("git --git-dir=#{git_dir} config --get remote.origin.url")
+                                                 .and_return('test-remote')
+
+         expect { with_buildpack { |buildpack| buildpack.compile } }.to output(/^-----> Liberty Buildpack Version: test-hash \| test-remote\#test-hash\n/).to_stdout
+       end
+
+       it 'should hide remote info and display version info from the version config file when version.yml exists' do
+          Dir.mktmpdir do |root|
+            File.stub(:exists?).with(anything).and_return(true)
+            allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).with('version', true).and_return({ 'version' => '1234', 'remote' => '', 'hash' => '' })
+
+            stub_container1.stub(:detect).and_return('stub-container-1')
+            stub_container1.stub(:apps).and_return(['root/app1'])
+            stub_jre1.stub(:detect).and_return('stub-jre-1')
+            YAML.stub(:load_file).with(File.expand_path('config/stubjre1.yml')).and_return(nil)
+            YAML.stub(:load_file).with(File.expand_path('config/stubjre2.yml')).and_return(nil)
+            YAML.stub(:load_file).with(File.expand_path('config/stubframework1.yml')).and_return(nil)
+            YAML.stub(:load_file).with(File.expand_path('config/stubframework2.yml')).and_return(nil)
+            YAML.stub(:load_file).with(File.expand_path('config/stubcontainer1.yml')).and_return(nil)
+            YAML.stub(:load_file).with(File.expand_path('config/stubcontainer2.yml')).and_return(nil)
+            stub_jre1.stub(:compile).and_return(' ')
+
+            git_dir = Pathname.new('.git').expand_path
+            allow_any_instance_of(BuildpackVersion).to receive(:system).with('which git > /dev/null').and_return(true)
+            allow_any_instance_of(BuildpackVersion).to receive(:`)
+                                                    .with("git --git-dir=#{git_dir} rev-parse --short HEAD")
+                                                    .and_return('test-hash')
+            allow_any_instance_of(BuildpackVersion).to receive(:`)
+                                                    .with("git --git-dir=#{git_dir} config --get remote.origin.url")
+                                                    .and_return('test-remote')
+
+            expect { with_buildpack { |buildpack| buildpack.compile } }.to output(/^-----> Liberty Buildpack Version: 1234\n/).to_stdout
+          end
+       end
+
+    end # end of Version Info describe
 
     it 'should call release on matched components' do
       stub_container1.stub(:detect).and_return('stub-container-1')
