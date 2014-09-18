@@ -79,7 +79,7 @@ module LibertyBuildpack
       @jre.compile
       frameworks.each { |framework| framework.compile }
       the_container.compile
-      puts '-----> Liberty buildpack has completed the compile step'
+      puts '-----> Liberty buildpack is done creating the droplet'
       @logger.debug { 'Liberty Buildpack compile complete' }
     end
 
