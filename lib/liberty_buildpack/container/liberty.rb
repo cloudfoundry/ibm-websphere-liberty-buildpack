@@ -209,7 +209,7 @@ module LibertyBuildpack::Container
         if File.size? minified_zip
           ContainerUtils.unzip(minified_zip, root)
           if File.exists? icap_extension
-            extensions_dir = File.join(root, 'wlp', 'etc', 'extensions')
+            extensions_dir = File.join(root, WLP_PATH, 'etc', 'extensions')
             system("mkdir -p #{extensions_dir} && cp #{icap_extension} #{extensions_dir}")
           end
           system("rm -rf #{liberty_home}/lib && mv #{root}/wlp/lib #{liberty_home}/lib")
@@ -242,7 +242,13 @@ module LibertyBuildpack::Container
 
     LIBERTY_HOME = '.liberty'.freeze
 
+    DEFAULT_SERVER = 'defaultServer'.freeze
+
+    WLP_PATH = 'wlp'.freeze
+
     USR_PATH = 'usr'.freeze
+
+    SERVERS_PATH = 'servers'.freeze
 
     SERVER_XML_GLOB = 'wlp/usr/servers/*/server.xml'.freeze
 
@@ -414,11 +420,10 @@ module LibertyBuildpack::Container
 
     # Copies the template server xml into the server directory structure and prepares it
     def create_server_xml
-      server_xml_dir = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer')
-      server_xml = File.join(server_xml_dir, 'server.xml')
-      FileUtils.mkdir_p(server_xml_dir)
+      server_xml = File.join(default_server_path, SERVER_XML)
+      FileUtils.mkdir_p(default_server_path)
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-      FileUtils.cp(File.join(resources, 'server.xml'), default_server_path)
+      FileUtils.cp(File.join(resources, SERVER_XML), server_xml)
       server_xml
     end
 
@@ -434,11 +439,11 @@ module LibertyBuildpack::Container
 
     def server_name
       if Liberty.liberty_directory @app_dir
-        candidates = Dir[File.join(@app_dir, 'wlp', 'usr', 'servers', '*')]
+        candidates = Dir[File.join(@app_dir, WLP_PATH, USR_PATH, SERVERS_PATH, '*')]
         raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}" if candidates.size != 1
         File.basename(candidates[0])
       elsif Liberty.server_directory(@app_dir) || Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
-        return 'defaultServer'
+        DEFAULT_SERVER
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
       end
@@ -584,7 +589,7 @@ module LibertyBuildpack::Container
       print 'Installing feature ... '
       install_start_time = Time.now
       # setup the command and options
-      cmd = File.join(root, 'wlp', 'bin', 'featureManager')
+      cmd = File.join(root, WLP_PATH, 'bin', 'featureManager')
       script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" #{cmd} install #{file.path} #{options}"
       output = `#{script_string}`
       if  $CHILD_STATUS.to_i != 0
@@ -671,9 +676,9 @@ module LibertyBuildpack::Container
         # Server package. We will delete the .liberty/usr directory and link in the wlp/usr directory from the server package as the usr directory. Copy user esas from
         # .liberty/usr over to wlp/usr before the delete.
         copy_user_features
-        FileUtils.rm_rf(usr)
+        FileUtils.rm_rf(usr_dir)
         FileUtils.mkdir_p(liberty_home)
-        FileUtils.ln_sf(Pathname.new(File.join(@app_dir, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home)
+        FileUtils.ln_sf(Pathname.new(File.join(@app_dir, WLP_PATH, USR_PATH)).relative_path_from(Pathname.new(liberty_home)), liberty_home)
       elsif Liberty.server_directory(@app_dir)
         FileUtils.rm_rf(default_server_path)
         FileUtils.mkdir_p(default_server_path)
@@ -692,11 +697,11 @@ module LibertyBuildpack::Container
     end
 
     def copy_user_features
-      return unless Dir.exists?(File.join(usr, 'extension', 'lib', 'features'))
-      FileUtils.mkdir_p(File.join(@app_dir, 'wlp', 'usr', 'extension', 'lib', 'features'))
-      output = `cp #{usr}/extension/lib/features/*.mf #{@app_dir}/wlp/usr/extension/lib/features`
+      return unless Dir.exists?(File.join(usr_dir, 'extension', 'lib', 'features'))
+      FileUtils.mkdir_p(File.join(@app_dir, WLP_PATH, USR_PATH, 'extension', 'lib', 'features'))
+      output = `cp #{usr_dir}/extension/lib/features/*.mf #{@app_dir}/wlp/usr/extension/lib/features`
       @logger.warn("copy_user_features copy manifests returned #{output}") if  $CHILD_STATUS.to_i != 0
-      output = `cp #{usr}/extension/lib/*.jar #{@app_dir}/wlp/usr/extension/lib`
+      output = `cp #{usr_dir}/extension/lib/*.jar #{@app_dir}/wlp/usr/extension/lib`
       @logger.warn("copy_user_features copy jars returned #{output}") if  $CHILD_STATUS.to_i != 0
     end
 
@@ -723,14 +728,22 @@ module LibertyBuildpack::Container
     end
 
     def servers_directory
-      File.join(liberty_home, 'usr', 'servers')
+      File.join(usr_dir, SERVERS_PATH)
+    end
+
+    def shared_dir
+      File.join(usr_dir, 'shared')
+    end
+
+    def shared_resources_dir
+      File.join(shared_dir, 'resources')
     end
 
     def default_server_path
-      File.join(servers_directory, 'defaultServer')
+      File.join(servers_directory, DEFAULT_SERVER)
     end
 
-    def usr
+    def usr_dir
       File.join(liberty_home, USR_PATH)
     end
 
@@ -743,7 +756,7 @@ module LibertyBuildpack::Container
     end
 
     def self.web_inf_lib(app_dir)
-      File.join app_dir, 'WEB-INF', 'lib'
+      File.join app_dir, WEB_INF, 'lib'
     end
 
     def self.ear_lib(app_dir)
@@ -801,7 +814,7 @@ module LibertyBuildpack::Container
     end
 
     def self.bin_dir?(app_dir)
-      bin = File.join(app_dir, 'wlp', 'bin')
+      bin = File.join(app_dir, WLP_PATH, 'bin')
       dir = File.exist? bin
       if dir
         print "\nThe pushed server is incorrectly packaged. Use the command 'server package --include=usr' to package a server.\n"
@@ -830,30 +843,28 @@ module LibertyBuildpack::Container
     end
 
     def current_server_dir
-      dir_name = nil
       if Liberty.liberty_directory @app_dir
         # packaged server use case. Push a server zip.
-        dir_name = File.join(@app_dir, 'wlp', 'usr', 'servers', server_name)
+        File.join(@app_dir, WLP_PATH, USR_PATH, SERVERS_PATH, server_name)
       elsif Liberty.server_directory @app_dir
         # unpackaged server.xml use case. Push from a server directory
-        dir_name = @app_dir
+        @app_dir
       else
         # push web app use case.
-        dir_name = File.join(@app_dir, '.liberty', 'usr', 'servers', 'defaultServer')
+        default_server_path
       end
-      dir_name
     end
 
     def runtime_vars_dir(root)
       if Liberty.liberty_directory @app_dir
         # packaged server use case. create runtime-vars in the server directory.
-        return File.join(@app_dir, 'wlp', 'usr', 'servers', server_name)
+        File.join(@app_dir, WLP_PATH, USR_PATH, SERVERS_PATH, server_name)
       elsif Liberty.server_directory @app_dir
         # unpackaged server.xml use case, push directory. create runtime-vars in the @app_dir
-        return @app_dir
+        @app_dir
       else
         # push web app use case. create runtime-vars in the temp staging area, will get copied at end of staging
-        return File.join(root, 'wlp', 'usr', 'servers', 'defaultServer')
+        File.join(root, WLP_PATH, USR_PATH, SERVERS_PATH, DEFAULT_SERVER)
       end
     end
 
