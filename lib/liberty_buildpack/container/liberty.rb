@@ -96,7 +96,7 @@ module LibertyBuildpack::Container
       liberty_version = Liberty.find_liberty_item(@app_dir, @configuration)[0]
       if liberty_version
         @common_paths.relative_location = relative_directory
-        [liberty_id(liberty_version)]
+        [liberty_type, liberty_id(liberty_version)]
       end
     end
 
@@ -655,20 +655,22 @@ module LibertyBuildpack::Container
       raise RuntimeError, "Liberty container error: #{e.message}", e.backtrace
     end
 
-    def liberty_id(version)
-      id = 'Liberty-'
+    def liberty_type
       if Liberty.web_inf(@app_dir)
-         id << 'WAR:'
+         type = 'WAR'
       elsif Liberty.meta_inf(@app_dir)
-         id << 'EAR:'
+         type = 'EAR'
       elsif Liberty.liberty_directory(@app_dir)
-         id << 'SVR-PKG:'
+         type = 'SVR-PKG'
       elsif Liberty.server_directory(@app_dir)
-         id << 'SVR-DIR:'
+         type = 'SVR-DIR'
       else
-         id = ''
+         type = 'unknown'
       end
-      id << "liberty-#{version}"
+    end
+
+    def liberty_id(version)
+      "liberty-#{version}"
     end
 
     def link_application
