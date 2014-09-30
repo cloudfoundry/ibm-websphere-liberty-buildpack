@@ -61,7 +61,7 @@ module LibertyBuildpack
       framework_detections = Buildpack.component_detections @frameworks
       container_detections = Buildpack.component_detections @containers
       raise "Application can not be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
-      tags = container_detections.empty? ? [] : [@jre_version].concat(framework_detections).concat(container_detections).flatten.compact
+      tags = container_detections.empty? ? [] : container_detections.concat([@jre_version]).concat(framework_detections).flatten.compact
       tags
     end
 

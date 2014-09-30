@@ -51,7 +51,7 @@ module LibertyBuildpack::Container
     def detect
       if main_class
         @common_paths.relative_location = '../'
-        'Liberty-JAR:' << JavaMain.to_s.dash_case
+        ['JAR', JavaMain.to_s.dash_case]
       end
     end
 
