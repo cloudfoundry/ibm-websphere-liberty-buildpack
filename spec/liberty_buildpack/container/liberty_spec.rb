@@ -77,7 +77,7 @@ module LibertyBuildpack::Container
         license_ids: {}
         ).detect
 
-        expect(detected).to include('Liberty-WAR:liberty-8.5.5')
+        expect(detected).to eq(%w(WAR liberty-8.5.5))
       end
 
       it 'should detect META-INF' do
@@ -91,7 +91,7 @@ module LibertyBuildpack::Container
         license_ids: {}
         ).detect
 
-        expect(detected).to include('Liberty-EAR:liberty-8.5.5')
+        expect(detected).to eq(%w(EAR liberty-8.5.5))
       end
 
       it 'should not detect when WEB-INF is present in a Java main application' do
@@ -119,7 +119,7 @@ module LibertyBuildpack::Container
         license_ids: {}
         ).detect
 
-        expect(detected).to include('Liberty-SVR-PKG:liberty-8.5.5')
+        expect(detected).to eq(%w(SVR-PKG liberty-8.5.5))
       end
 
       it 'should detect server.xml for a single server push' do
@@ -133,7 +133,7 @@ module LibertyBuildpack::Container
         license_ids: {}
         ).detect
 
-        expect(detected).to include('Liberty-SVR-DIR:liberty-8.5.5')
+        expect(detected).to eq(%w(SVR-DIR liberty-8.5.5))
       end
 
       it 'should throw an error when a server including binaries was pushed' do
