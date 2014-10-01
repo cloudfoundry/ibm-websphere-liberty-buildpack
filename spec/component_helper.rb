@@ -17,10 +17,12 @@
 require 'spec_helper'
 require 'application_helper'
 require 'console_helper'
+require 'logging_helper'
 
 shared_context 'component_helper' do
   include_context 'application_helper'
   include_context 'console_helper'
+  include_context 'logging_helper'
 
   let(:component) { described_class.new context }
 
@@ -31,9 +33,12 @@ shared_context 'component_helper' do
       common_paths:   example.metadata[:common_paths],
       license_ids:    example.metadata[:license_ids],
       configuration:  example.metadata[:configuration],
-      common_paths:   example.metadata[:common_paths] }
+      common_paths:   example.metadata[:common_paths],
+      vcap_application: example.metadata[:vcap_application_context],
+      vcap_services:  example.metadata[:vcap_services_context] }
   end
 
   let(:uri) { 'test-uri' }
+  let(:version) { '0.0.0' }
 
 end
