@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -1304,8 +1304,11 @@ module LibertyBuildpack::Container
     end
 
     describe 'release' do
+      let(:test_java_home) { 'test-java-home' }
+
       it 'should generate a jvm.options file if one is not provided in server package case' do
-        Dir.mktmpdir do |root|
+        jvm_opts_contents = jvm_opt_test(File.join('wlp', 'usr', 'servers', 'anyServer', 'jvm.options')) do |root, context|
+
           liberty_home = File.join(root, '.liberty')
           FileUtils.mkdir_p liberty_home
           FileUtils.ln_sf(Pathname.new(File.join(root, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home)
@@ -1320,28 +1323,18 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-          library_directory = File.join(root, '.lib')
-          FileUtils.mkdir_p(library_directory)
-          Liberty.new(
-          app_dir: root,
-          lib_directory: library_directory,
-          configuration: {},
-          environment: {},
-          java_opts: %w(test-opt-2 test-opt-1),
-          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
-          ).release
-
-          jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'anyServer', 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to eq(true)
-          file_contents = File.read(jvm_options_file)
-          expect(file_contents).to match(/test-opt-1/)
-          expect(file_contents).to match(/test-opt-2/)
-          expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
+          context[:java_opts] = %w(test-opt-2 test-opt-1),
+          context[:license_ids] = { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
         end
+
+        expect(jvm_opts_contents).to match(/test-opt-1/)
+        expect(jvm_opts_contents).to match(/test-opt-2/)
+        expect(jvm_opts_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
       end
 
       it 'should generate a jvm.options file if one is not provided in server directory case' do
-        Dir.mktmpdir do |root|
+        root_jvm_contents, server_jvm_contents = jvm_opt_test('jvm.options', File.join('.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context|
+
           FileUtils.mkdir_p File.join(root, '.liberty', 'usr', 'servers', 'defaultServer')
           File.open(File.join(root, 'server.xml'), 'w') do |file|
             file.write('your text')
@@ -1353,32 +1346,19 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-          library_directory = File.join(root, '.lib')
-          FileUtils.mkdir_p(library_directory)
-          Liberty.new(
-          app_dir: root,
-          lib_directory: library_directory,
-          configuration: {},
-          environment: {},
-          java_opts: %w(test-opt-2 test-opt-1),
-          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
-          ).release
-
-          jvm_options_file = File.join(root, 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to eq(true)
-          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
-
-          jvm_options_file = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to eq(true)
-          file_contents = File.read(jvm_options_file)
-          expect(file_contents).to match(/test-opt-1/)
-          expect(file_contents).to match(/test-opt-2/)
-          expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
+          context[:java_opts] = %w(test-opt-2 test-opt-1)
+          context[:license_ids] = { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
         end
+
+        expect(root_jvm_contents).to match(/test-opt-1/)
+
+        expect(server_jvm_contents).to match(/test-opt-1/)
+        expect(server_jvm_contents).to match(/test-opt-2/)
+        expect(server_jvm_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
       end
 
       it 'should use jvm.options file if one is provided in server package case.' do
-        Dir.mktmpdir do |root|
+        jvm_opts_contents = jvm_opt_test(File.join('wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context|
           Dir.mkdir File.join(root, 'WEB-INF')
           liberty_home = File.join(root, '.liberty')
           FileUtils.mkdir_p liberty_home
@@ -1397,34 +1377,23 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-          library_directory = File.join(root, '.lib')
-          FileUtils.mkdir_p(library_directory)
-          Liberty.new(
-          app_dir: root,
-          lib_directory: library_directory,
-          configuration: {},
-          environment: {},
-          java_opts: %w(test-opt-2 test-opt-1), # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
-          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
-          ).release
-
-          jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to eq(true)
-          file_contents = File.read(jvm_options_file)
-          expect(file_contents).to match(/provided-opt-1/)
-          expect(file_contents).to match(/test-opt-1/)
-          expect(file_contents).to match(/test-opt-2/)
-          expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
-          # default options before user options to allow overriding, each on it's own line.
-          # skip options in the regex by allowing multiple or zero collections of : any
-          # normal character zero or more times followed by a newline.
-          expect(file_contents).to match(/test-opt-1\n(.*\n)*provided-opt-1\n/)
-          expect(file_contents).to match(/test-opt-2\n(.*\n)*provided-opt-1\n/)
+          context[:java_opts] = %w(test-opt-2 test-opt-1) # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
+          context[:license_ids] = { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
         end
+
+        expect(jvm_opts_contents).to match(/provided-opt-1/)
+        expect(jvm_opts_contents).to match(/test-opt-1/)
+        expect(jvm_opts_contents).to match(/test-opt-2/)
+        expect(jvm_opts_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
+        # default options before user options to allow overriding, each on it's own line.
+        # skip options in the regex by allowing multiple or zero collections of : any
+        # normal character zero or more times followed by a newline.
+        expect(jvm_opts_contents).to match(/test-opt-1\n(.*\n)*provided-opt-1\n/)
+        expect(jvm_opts_contents).to match(/test-opt-2\n(.*\n)*provided-opt-1\n/)
       end
 
       it 'should use jvm.options file if one is provided in server directory case.' do
-        Dir.mktmpdir do |root|
+        root_jvm_contents, server_jvm_contents = jvm_opt_test('jvm.options', File.join('.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context|
           Dir.mkdir File.join(root, 'WEB-INF')
           FileUtils.mkdir_p File.join(root, '.liberty', 'usr', 'servers', 'defaultServer')
           File.open(File.join(root, 'server.xml'), 'w') do |file|
@@ -1440,39 +1409,27 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-          library_directory = File.join(root, '.lib')
-          FileUtils.mkdir_p(library_directory)
-          Liberty.new(
-          app_dir: root,
-          lib_directory: library_directory,
-          configuration: {},
-          environment: {},
-          java_opts: %w(test-opt-2 test-opt-1), # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
-          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
-          ).release
-
-          jvm_options_file = File.join(root, 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to eq(true)
-          expect(File.read(jvm_options_file)).to match(/provided-opt-1/)
-          expect(File.read(jvm_options_file)).to match(/test-opt-1/)
-
-          jvm_options_file = File.join(root, '.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to eq(true)
-          file_contents = File.read(jvm_options_file)
-          expect(file_contents).to match(/provided-opt-1/)
-          expect(file_contents).to match(/test-opt-1/)
-          expect(file_contents).to match(/test-opt-2/)
-          expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
-          # default options before user options to allow overriding, each on it's own line.
-          # skip options in the regex by allowing multiple or zero collections of : any
-          # normal character zero or more times followed by a newline.
-          expect(file_contents).to match(/test-opt-1\n(.*\n)*provided-opt-1\n/)
-          expect(file_contents).to match(/test-opt-2\n(.*\n)*provided-opt-1\n/)
+          context[:java_opts] = %w(test-opt-2 test-opt-1) # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
+          context[:license_ids] = { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
         end
+
+        expect(root_jvm_contents).to match(/provided-opt-1/)
+        expect(root_jvm_contents).to match(/test-opt-1/)
+
+        expect(server_jvm_contents).to match(/provided-opt-1/)
+        expect(server_jvm_contents).to match(/test-opt-1/)
+        expect(server_jvm_contents).to match(/test-opt-2/)
+        expect(server_jvm_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
+        # default options before user options to allow overriding, each on it's own line.
+        # skip options in the regex by allowing multiple or zero collections of : any
+        # normal character zero or more times followed by a newline.
+        expect(server_jvm_contents).to match(/test-opt-1\n(.*\n)*provided-opt-1\n/)
+        expect(server_jvm_contents).to match(/test-opt-2\n(.*\n)*provided-opt-1\n/)
       end
 
       it 'should use server jvm.options file instead of the root one if both are provided.' do
-        Dir.mktmpdir do |root|
+        jvm_opts_contents = jvm_opt_test(File.join('wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context|
+
           Dir.mkdir File.join(root, 'WEB-INF')
           liberty_home = File.join(root, '.liberty')
           FileUtils.mkdir_p liberty_home
@@ -1494,24 +1451,14 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
-          library_directory = File.join(root, '.lib')
-          FileUtils.mkdir_p(library_directory)
-          Liberty.new(
-          app_dir: root,
-          lib_directory: library_directory,
-          configuration: {},
-          environment: {},
-          java_opts: '',
-          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
-          ).release
+          context[:java_opts] = ''
+          context[:license_ids] = { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
 
-          jvm_options_file = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')
-          expect(File.exists?(jvm_options_file)).to eq(true)
-          file_contents = File.read(jvm_options_file)
-          expect(file_contents).to match(/good-opt-1/)
-          expect(file_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
-          expect(file_contents).not_to match(/bad-opt-1/)
         end
+
+        expect(jvm_opts_contents).to match(/good-opt-1/)
+        expect(jvm_opts_contents).to match(DISABLE_2PC_JAVA_OPT_REGEX)
+        expect(jvm_opts_contents).not_to match(/bad-opt-1/)
       end
 
       it 'should return correct output for empty env_yml_contents' do
@@ -1525,13 +1472,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty', root)
           contents = Liberty.new(
             app_dir: File.join(root, 'container_liberty'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(contents).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(contents).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1545,13 +1492,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty', root)
           contents = Liberty.new(
             app_dir: File.join(root, 'container_liberty'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(contents).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(contents).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1566,13 +1513,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty', root)
           contents = Liberty.new(
             app_dir: File.join(root, 'container_liberty'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(contents).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && testURL=http://exampleurl.ibm.com JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(contents).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && testURL=http://exampleurl.ibm.com JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1585,13 +1532,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty', root)
           command = Liberty.new(
             app_dir: File.join(root, 'container_liberty'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1605,13 +1552,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty', root)
           command = Liberty.new(
             app_dir: File.join(root, 'container_liberty'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1624,13 +1571,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty_ear', root)
           command = Liberty.new(
             app_dir: File.join(root, 'container_liberty_ear'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1644,13 +1591,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty_ear', root)
           command = Liberty.new(
             app_dir: File.join(root, 'container_liberty_ear'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1663,13 +1610,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty_server', root)
           command = Liberty.new(
             app_dir: File.join(root, 'container_liberty_server'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run myServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run myServer")
         end
       end
 
@@ -1683,13 +1630,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty_server', root)
           command = Liberty.new(
             app_dir: File.join(root, 'container_liberty_server'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run myServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run myServer")
         end
       end
 
@@ -1702,13 +1649,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty_single_server', root)
           command = Liberty.new(
             app_dir: File.join(root, 'container_liberty_single_server'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1722,13 +1669,13 @@ module LibertyBuildpack::Container
           FileUtils.cp_r('spec/fixtures/container_liberty_single_server', root)
           command = Liberty.new(
             app_dir: File.join(root, 'container_liberty_single_server'),
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: '',
             configuration: {},
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/test-java-home\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1756,12 +1703,53 @@ module LibertyBuildpack::Container
           expect do
             Liberty.new(
             app_dir: root,
-            java_home: 'test-java-home',
+            java_home: test_java_home,
             java_opts: %w(test-opt-2 test-opt-1),
             configuration: {},
             license_ids: {}
             ).release
           end.to raise_error(/Incorrect\ number\ of\ servers\ to\ deploy/)
+        end
+      end
+    end
+
+    # Helper method for setting up the tests that check for the jvm options file contents during the release
+    # stage. It will return the contents of the expected jvm options file as specified in the parameters,
+    # relative to the root of the application directory, after the release stage has executed.
+    #
+    # @param [String]   name and path of the jvm options file relative to the application directory to be tested
+    # @param [String]   name and path of an optional jvm options file relative to the application directory to be tested
+    def jvm_opt_test(jvmfile1, jvmfile2 = nil)
+      # basic context that test cases can customize
+      context = { configuration: {}, environment: {} }
+
+      Dir.mktmpdir do |root|
+        # create the common context keys that each test can use
+        context[:app_dir] = root
+        library_directory = File.join(root, '.lib')
+        FileUtils.mkdir_p(library_directory)
+        context[:lib_directory] = library_directory
+
+        # provide the unit tests with the application root directory and basic context to customize
+        yield root, context
+
+        # Invoke the Liberty release stage
+        Liberty.new(context).release
+
+        # read the resulting jvm.options file(s) and return its contents for test validation
+        if jvmfile1
+          jvm_options_file = File.join(root, jvmfile1)
+          expect(File.exists?(jvm_options_file)).to eq(true)
+          file_contents1 = File.read(jvm_options_file)
+        end
+
+        if jvmfile2
+          jvm_options_file = File.join(root, jvmfile2)
+          expect(File.exists?(jvm_options_file)).to eq(true)
+          file_contents2 = File.read(jvm_options_file)
+          [file_contents1, file_contents2]
+        else
+          file_contents1
         end
       end
     end
