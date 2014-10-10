@@ -41,8 +41,6 @@ All Documentation is available in the Docs folder of the buildpack.
 * JREs
     * [IBM JDK](docs/ibm-jdk.md)
     * [Open JDK](docs/open-jdk.md)
-* Service Plugins
-    * Work in progress
 * [Server Behavior xml Options](docs/server-xml-options.md)
 * [Forking the buildpack](docs/forking.md)
 * [Setting Environment Variables](docs/env.md)
