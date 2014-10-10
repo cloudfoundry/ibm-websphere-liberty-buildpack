@@ -67,7 +67,7 @@ module LibertyBuildpack::Container
     # @return [String] the command to run the application.
     def release
       [
-        "#{java_home}/jre/bin/java",
+        "#{java_bin}",
         manifest_class_path,
         @java_opts.join(' '),
         main_class,
@@ -114,6 +114,17 @@ module LibertyBuildpack::Container
       if File.exists?(overlay_src)
         print "Overlaying java from #{overlay_src}\n"
         FileUtils.cp_r(overlay_src, @app_dir)
+      end
+    end
+
+    def java_bin
+      default_java_path = File.join('jre', 'bin', 'java')
+      alt_java_path = File.join('bin', 'java')
+
+      if File.exists?(File.join(@java_home, default_java_path))
+        File.join(java_home, default_java_path)
+      else
+        File.join(java_home, alt_java_path)
       end
     end
 

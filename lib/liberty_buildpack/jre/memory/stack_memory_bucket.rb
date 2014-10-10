@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,48 +18,36 @@ require 'liberty_buildpack/jre'
 require 'liberty_buildpack/jre/memory/memory_bucket'
 require 'liberty_buildpack/jre/memory/memory_size'
 
-module LibertyBuildpack::Jre
+module LibertyBuildpack
+  module Jre
 
-  # This class represents a memory bucket for stack memory. This is treated differently to other memory buckets
-  # which have absolute sizes since stack memory is specified in terms of the size of an individual stack with no
-  # definition of how many stacks may exist.
-  class StackMemoryBucket < MemoryBucket
+    # This class represents a memory bucket for stack memory. This is treated differently to other memory buckets
+    # which have absolute sizes since stack memory is specified in terms of the size of an individual stack with no
+    # definition of how many stacks may exist.
+    class StackMemoryBucket < MemoryBucket
 
-    # Constructs a stack memory bucket.
-    #
-    # @param [Numeric] weighting a number between 0 and 1 corresponding to the proportion of total memory which this
-    #                            memory bucket should consume by default
-    # @param [Numeric, nil] size a user-specified size of the memory bucket in KB or nil if the user did not specify a
-    #                            size
-    # @param [Numeric] total_memory the total virtual memory size of the operating system process in KB
-    def initialize(weighting, size, total_memory)
-      super('stack', weighting, size, false, total_memory)
-      @weighting = weighting
-      @total_memory = total_memory
-    end
-
-    # Returns the excess memory in this memory bucket.
-    #
-    # @return [Numeric] the excess memory in KB
-    def excess
-      if @total_memory
-        size ? @total_memory * @weighting * ((size - DEFAULT_STACK_SIZE) / DEFAULT_STACK_SIZE) : 0
-      else
-        MemorySize::ZERO
+      # Constructs a stack memory bucket.
+      #
+      # @param [Numeric] weighting a number between 0 and 1 corresponding to the proportion of total memory which this
+      #                            memory bucket should consume by default
+      # @param [MemoryRange, nil] range a user-specified range for the memory bucket or nil if the user did not specify a
+      #                            range
+      def initialize(weighting, range)
+        super('stack', weighting, range)
       end
+
+      # Returns the default stack size.
+      #
+      # @return [MemorySize] the default stack size
+      def default_size
+        range.floor == 0 ? JVM_DEFAULT_STACK_SIZE : range.floor
+      end
+
+      JVM_DEFAULT_STACK_SIZE = MemorySize.new('1M').freeze
+
+      private_constant :JVM_DEFAULT_STACK_SIZE
+
     end
-
-    # Returns the default stack size.
-    #
-    # @return [MemorySize, nil] the default memory size or nil if there is no default
-    def default_size
-      DEFAULT_STACK_SIZE
-    end
-
-    private
-
-    DEFAULT_STACK_SIZE = MemorySize.new('1024K') # 1 MB
 
   end
-
 end
