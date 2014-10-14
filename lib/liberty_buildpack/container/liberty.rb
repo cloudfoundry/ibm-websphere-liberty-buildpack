@@ -699,11 +699,11 @@ module LibertyBuildpack::Container
     end
 
     def copy_user_features
-      return unless Dir.exists?(File.join(usr_dir, 'extension', 'lib', 'features'))
+      return unless Dir.exists?(features_dir)
       FileUtils.mkdir_p(File.join(@app_dir, WLP_PATH, USR_PATH, 'extension', 'lib', 'features'))
-      output = `cp #{usr_dir}/extension/lib/features/*.mf #{@app_dir}/wlp/usr/extension/lib/features`
+      output = `cp #{features_dir}/*.mf #{@app_dir}/wlp/usr/extension/lib/features`
       @logger.warn("copy_user_features copy manifests returned #{output}") if  $CHILD_STATUS.to_i != 0
-      output = `cp #{usr_dir}/extension/lib/*.jar #{@app_dir}/wlp/usr/extension/lib`
+      output = `cp #{extension_lib_dir}/*.jar #{@app_dir}/wlp/usr/extension/lib`
       @logger.warn("copy_user_features copy jars returned #{output}") if  $CHILD_STATUS.to_i != 0
     end
 
@@ -739,6 +739,14 @@ module LibertyBuildpack::Container
 
     def shared_resources_dir
       File.join(shared_dir, 'resources')
+    end
+
+    def extension_lib_dir
+      File.join(usr_dir, 'extension', 'lib')
+    end
+
+    def features_dir
+      File.join(extension_lib_dir, 'features')
     end
 
     def default_server_path
