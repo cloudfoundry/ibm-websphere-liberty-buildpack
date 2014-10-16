@@ -1,6 +1,7 @@
 # Encoding: utf-8
+# Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,68 +16,65 @@
 # limitations under the License.
 
 require 'spec_helper'
+require 'memory_limit_helper'
 require 'liberty_buildpack/jre/memory/memory_limit'
 require 'liberty_buildpack/jre/memory/memory_size'
 
-module LibertyBuildpack::Jre
+describe LibertyBuildpack::Jre::MemoryLimit do
+  include_context 'memory_limit_helper'
 
-  describe MemoryLimit do
+  it 'should accept memory with an uppercase G',
+     memory_limit: '1G' do
 
-    it 'should accept a memory limit in megabytes or gigabytes' do
-      with_memory_limit('1G') do
-        expect(MemoryLimit.memory_limit).to eq(MemorySize.new('1048576K'))
-      end
-      with_memory_limit('1g') do
-        expect(MemoryLimit.memory_limit).to eq(MemorySize.new('1048576K'))
-      end
-      with_memory_limit('1M') do
-        expect(MemoryLimit.memory_limit).to eq(MemorySize.new('1024K'))
-      end
-      with_memory_limit('1m') do
-        expect(MemoryLimit.memory_limit).to eq(MemorySize.new('1024K'))
-      end
-    end
+    expect(described_class.memory_limit).to eq(LibertyBuildpack::Jre::MemorySize.new('1048576K'))
+  end
 
-    it 'should return nil if a memory limit is not specified' do
-      with_memory_limit(nil) do
-        expect(MemoryLimit.memory_limit).to be_nil
-      end
-    end
+  it 'should accept memory with an lowercase G',
+     memory_limit: '1g' do
 
-    it 'should fail if a memory limit does not have a unit' do
-      with_memory_limit('1') do
-        expect { MemoryLimit.memory_limit }.to raise_error(/Invalid/)
-      end
-    end
+    expect(described_class.memory_limit).to eq(LibertyBuildpack::Jre::MemorySize.new('1048576K'))
+  end
 
-    it 'should fail if a memory limit is not an number' do
-      with_memory_limit('xm') do
-        expect { MemoryLimit.memory_limit }.to raise_error(/Invalid/)
-      end
-    end
+  it 'should accept memory with an uppercase M',
+     memory_limit: '1M' do
 
-    it 'should fail if a memory limit is not an integer' do
-      with_memory_limit('1.1m') do
-        expect { MemoryLimit.memory_limit }.to raise_error(/Invalid/)
-      end
-    end
+    expect(described_class.memory_limit).to eq(LibertyBuildpack::Jre::MemorySize.new('1024K'))
+  end
 
-    it 'should fail if a memory limit is negative' do
-      with_memory_limit('-1m') do
-        expect { MemoryLimit.memory_limit }.to raise_error(/Invalid/)
-      end
-    end
+  it 'should accept memory with an lowercase M',
+     memory_limit: '1m' do
 
-    def with_memory_limit(memory_limit)
-      previous_value = ENV['MEMORY_LIMIT']
-      begin
-        ENV['MEMORY_LIMIT'] = memory_limit
-        yield
-      ensure
-        ENV['MEMORY_LIMIT'] = previous_value
-      end
-    end
+    expect(described_class.memory_limit).to eq(LibertyBuildpack::Jre::MemorySize.new('1024K'))
+  end
 
+  it 'should return nil if a memory limit is not specified',
+     memory_limit: nil do
+
+    expect(described_class.memory_limit).to be_nil
+  end
+
+  it 'should fail if a memory limit does not have a unit',
+     memory_limit: '-1' do
+
+    expect { described_class.memory_limit }.to raise_error(/Invalid/)
+  end
+
+  it 'should fail if a memory limit is not an number',
+     memory_limit: 'xm' do
+
+    expect { described_class.memory_limit }.to raise_error(/Invalid/)
+  end
+
+  it 'should fail if a memory limit is not an integer',
+     memory_limit: '-1.1m' do
+
+    expect { described_class.memory_limit }.to raise_error(/Invalid/)
+  end
+
+  it 'should fail if a memory limit is negative',
+     memory_limit: '-1m' do
+
+    expect { described_class.memory_limit }.to raise_error(/Invalid/)
   end
 
 end

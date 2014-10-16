@@ -1,6 +1,7 @@
 # Encoding: utf-8
+# Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,46 +16,23 @@
 # limitations under the License.
 
 require 'spec_helper'
+require 'logging_helper'
 require 'liberty_buildpack/jre/memory/stack_memory_bucket'
 require 'liberty_buildpack/jre/memory/memory_bucket'
+require 'liberty_buildpack/jre/memory/memory_range'
 require 'liberty_buildpack/jre/memory/memory_size'
 
-module LibertyBuildpack::Jre
+describe LibertyBuildpack::Jre::StackMemoryBucket do
+  include_context 'logging_helper'
 
-  describe StackMemoryBucket do
+  let(:test_stack_bucket_weighting) { 0.05 }
+  let(:test_stack_size) { LibertyBuildpack::Jre::MemorySize.new('2M') }
+  let(:test_stack_size_range) { LibertyBuildpack::Jre::MemoryRange.new(test_stack_size, test_stack_size) }
 
-    TEST_STACK_BUCKET_NAME = 'stack-bucket'
-    TEST_STACK_BUCKET_WEIGHTING = 0.05
-    TEST_STACK_SIZE = MemorySize.new('2M')
-    TEST_STACK_MEMORY_BUCKET_TOTAL_MEMORY = MemorySize.new('1G')
-    DEFAULT_STACK_SIZE = MemorySize.new('1M')
-
-    it 'should call the superclass constructor correctly' do
-      # since we can't easily stub the superclass, test the superclass behaves as expected
-      stack_memory_bucket = StackMemoryBucket.new(TEST_STACK_BUCKET_WEIGHTING, TEST_STACK_SIZE, TEST_STACK_MEMORY_BUCKET_TOTAL_MEMORY)
-      expect(stack_memory_bucket.size).to eq(TEST_STACK_SIZE)
-    end
-
-    it 'should calculate the excess memory correctly' do
-      stack_memory_bucket = StackMemoryBucket.new(TEST_STACK_BUCKET_WEIGHTING, TEST_STACK_SIZE, TEST_STACK_MEMORY_BUCKET_TOTAL_MEMORY)
-      expect(stack_memory_bucket.excess).to eq(TEST_STACK_MEMORY_BUCKET_TOTAL_MEMORY * ((TEST_STACK_SIZE - DEFAULT_STACK_SIZE) / DEFAULT_STACK_SIZE) * TEST_STACK_BUCKET_WEIGHTING)
-    end
-
-    it 'should use the correct default size if size has not been set' do
-      stack_memory_bucket = StackMemoryBucket.new(TEST_STACK_BUCKET_WEIGHTING, nil, TEST_STACK_MEMORY_BUCKET_TOTAL_MEMORY)
-      expect(stack_memory_bucket.size).to eq(DEFAULT_STACK_SIZE)
-    end
-
-    it 'should use the correct default size if size has not been set and total memory is nil' do
-      stack_memory_bucket = StackMemoryBucket.new(TEST_STACK_BUCKET_WEIGHTING, nil, nil)
-      expect(stack_memory_bucket.size).to eq(DEFAULT_STACK_SIZE)
-    end
-
-    it 'should return excess of 0 if size has been set and total memory is nil' do
-      stack_memory_bucket = StackMemoryBucket.new(TEST_STACK_BUCKET_WEIGHTING, TEST_STACK_SIZE, nil)
-      expect(stack_memory_bucket.excess).to eq(MemorySize::ZERO)
-    end
-
+  it 'should call the superclass constructor correctly' do
+    # since we can't easily stub the superclass, test the superclass behaves as expected
+    stack_memory_bucket = described_class.new(test_stack_bucket_weighting, test_stack_size_range)
+    expect(stack_memory_bucket.range).to eq(test_stack_size_range)
   end
 
 end

@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,20 +17,29 @@
 require 'liberty_buildpack/jre'
 require 'liberty_buildpack/jre/memory/memory_size'
 
-module LibertyBuildpack::Jre
+module LibertyBuildpack
+  module Jre
 
-  # A utility for handling Java memory settings.
-  class MemoryLimit
+    # A utility for handling Java memory settings.
+    class MemoryLimit
 
-    # Returns the application's memory limit.
-    #
-    # @return [MemorySize, nil] the application's memory limit or nil if no memory limit has been provided
-    def self.memory_limit
-      memory_limit = ENV['MEMORY_LIMIT']
-      return nil unless memory_limit
-      memory_limit_size = MemorySize.new(memory_limit)
-      raise "Invalid negative $MEMORY_LIMIT #{memory_limit}" if memory_limit_size < MemorySize::ZERO
-      memory_limit_size
+      private_class_method :new
+
+      class << self
+
+        # Returns the application's memory limit.
+        #
+        # @return [MemorySize, nil] the application's memory limit or nil if no memory limit has been provided
+        def memory_limit
+          memory_limit = ENV['MEMORY_LIMIT']
+          return nil unless memory_limit
+          memory_limit_size = MemorySize.new(memory_limit)
+          fail "Invalid negative $MEMORY_LIMIT #{memory_limit}" if memory_limit_size < 0
+          memory_limit_size
+        end
+
+      end
+
     end
 
   end

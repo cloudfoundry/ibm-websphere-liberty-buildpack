@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+# Encoding: utf-8
+# Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright 2013-2014 the original author or authors.
 #
@@ -13,15 +16,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for OpenJdk repository
----
-repository_root: "https://download.run.pivotal.io/openjdk/lucid/x86_64"
-version: 1.7.0_+
-memory_sizes:
-  permgen: 64m..
-memory_heuristics:
-  heap: 75
-  permgen: 10
-  stack: 5
-  native: 10
-  
+# Kill script for use as the parameter of OpenJDK's -XX:OnOutOfMemoryError
+
+set -e
+
+echo "
+Process Status (Before)
+=======================
+$(ps -ef)
+
+ulimit (Before)
+===============
+$(ulimit -a)
+
+Free Disk Space (Before)
+========================
+$(df -h)
+"
+
+pkill -9 -f .*-XX:OnOutOfMemoryError=.*killjava.*
+
+echo "
+Process Status (After)
+======================
+$(ps -ef)
+
+ulimit (After)
+==============
+$(ulimit -a)
+
+Free Disk Space (After)
+=======================
+$(df -h)
+"

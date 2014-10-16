@@ -1,3 +1,5 @@
+# Encoding: utf-8
+# Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright 2013-2014 the original author or authors.
 #
@@ -13,15 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for OpenJdk repository
----
-repository_root: "https://download.run.pivotal.io/openjdk/lucid/x86_64"
-version: 1.7.0_+
-memory_sizes:
-  permgen: 64m..
-memory_heuristics:
-  heap: 75
-  permgen: 10
-  stack: 5
-  native: 10
-  
+require 'spec_helper'
+
+shared_context 'memory_limit_helper' do
+
+  previous_memory_limit = ENV['MEMORY_LIMIT']
+
+  before do |example|
+    memory_limit        = example.metadata[:memory_limit]
+    ENV['MEMORY_LIMIT'] = memory_limit if memory_limit
+  end
+
+  after do
+    ENV['MEMORY_LIMIT'] = previous_memory_limit
+  end
+
+end

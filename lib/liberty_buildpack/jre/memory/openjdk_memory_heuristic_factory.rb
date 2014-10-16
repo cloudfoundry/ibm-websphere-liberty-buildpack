@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,39 +18,47 @@ require 'liberty_buildpack/jre'
 require 'liberty_buildpack/jre/memory/weight_balancing_memory_heuristic'
 require 'liberty_buildpack/util/tokenized_version'
 
-module LibertyBuildpack::Jre
+module LibertyBuildpack
+  module Jre
 
-  # A MemoryBucket is used to calculate default sizes for various type of memory
-  class OpenJDKMemoryHeuristicFactory
+    # A MemoryBucket is used to calculate default sizes for various type of memory
+    class OpenJDKMemoryHeuristicFactory
 
-    # Returns a memory heuristics instance for the given version of OpenJDK.
-    #
-    # @param [Hash<String, Numeric>] sizes any sizes specified by the user
-    # @param [Hash<String, Numeric>] heuristics the memory heuristics specified by the user
-    # @param [JavaBuildpack::Util::TokenizedVersion] version the version of OpenJDK
-    # @return [WeightBalancingMemoryHeuristic] the memory heuristics instance
-    def self.create_memory_heuristic(sizes, heuristics, version)
-      extra = permgen_or_metaspace(version)
-      WeightBalancingMemoryHeuristic.new(sizes, heuristics, VALID_SIZES.dup << extra, VALID_HEURISTICS.dup << extra, JAVA_OPTS)
+      private_class_method :new
+
+      class << self
+
+        # Returns a memory heuristics instance for the given version of OpenJDK.
+        #
+        # @param [Hash<String, String>] sizes any sizes specified by the user
+        # @param [Hash<String, Numeric>] heuristics the memory heuristics specified by the user
+        # @param [LibertyBuildpack::Util::TokenizedVersion] version the version of OpenJDK
+        # @return [WeightBalancingMemoryHeuristic] the memory heuristics instance
+        def create_memory_heuristic(sizes, heuristics, version)
+          extra = permgen_or_metaspace(version)
+          WeightBalancingMemoryHeuristic.new(sizes, heuristics, VALID_TYPES.dup << extra, JAVA_OPTS)
+        end
+
+        private
+
+        VALID_TYPES = %w(heap stack native).freeze
+
+        private_constant :VALID_TYPES
+
+        JAVA_OPTS = {
+          'heap'      => ->(v) { %W(-Xmx#{v} -Xms#{v}) },
+          'metaspace' => ->(v) { %W(-XX:MaxMetaspaceSize=#{v} -XX:MetaspaceSize=#{v}) },
+          'permgen'   => ->(v) { %W(-XX:MaxPermSize=#{v} -XX:PermSize=#{v}) },
+          'stack'     => ->(v) { ["-Xss#{v}"] }
+        }.freeze
+
+        def permgen_or_metaspace(version)
+          version < LibertyBuildpack::Util::TokenizedVersion.new('1.8.0') ? 'permgen' : 'metaspace'
+        end
+
+      end
+
     end
-
-    private
-
-    def self.permgen_or_metaspace(version)
-      version < LibertyBuildpack::Util::TokenizedVersion.new('1.8.0') ? 'permgen' : 'metaspace'
-    end
-
-    VALID_SIZES = %w(heap stack).freeze
-
-    VALID_HEURISTICS = (VALID_SIZES.dup << 'native').freeze
-
-    JAVA_OPTS = {
-        'heap' => '-Xmx',
-        'metaspace' => '-XX:MaxMetaspaceSize=',
-        'permgen' => '-XX:MaxPermSize=',
-        'stack' => '-Xss',
-    }.freeze
 
   end
-
 end

@@ -32,7 +32,7 @@ module LibertyBuildpack::Container
       $stderr = STDERR
     end
 
-    describe 'Common Paths' do
+    describe 'logs and dumps' do
       it 'should default to the root' do
          common_paths =  CommonPaths.new
 
@@ -59,15 +59,53 @@ module LibertyBuildpack::Container
          expect(common_paths.dump_directory).to eq('../dumps')
       end
 
-      it 'should raise an error for invalid relative_location' do
-        INVALID_PATH_ERROR = 'relative_location provided to common_paths must have a valid path value'.freeze
-        common_paths =  CommonPaths.new
-
-        expect { common_paths.relative_location = nil }.to raise_error(INVALID_PATH_ERROR)
-        expect { common_paths.relative_location = '' }.to raise_error(INVALID_PATH_ERROR)
-        expect { common_paths.relative_location = ' ' }.to raise_error(INVALID_PATH_ERROR)
-      end
     end
+
+    describe 'buildpack diagnostics directory' do
+      context 'when app subdir exists' do
+        it 'should provide the diagnostics directory based off the app dir as a default' do
+           common_paths =  CommonPaths.new
+
+           expect(common_paths.diagnostics_directory).to eq('./app/.buildpack-diagnostics')
+        end
+
+        it 'should provide the diagnostics directory based off the appdir of a customized relatived dir' do
+           common_paths =  CommonPaths.new
+           common_paths.relative_location = '..'
+           expect(common_paths.diagnostics_directory).to eq('../app/.buildpack-diagnostics')
+        end
+      end
+
+      context 'when app subdir does not exist' do
+        before do
+          allow(LibertyBuildpack::Util::Heroku).to receive(:heroku?).and_return(true)
+        end
+
+        it 'should provide the diagnostics directory based off the default directory' do
+           common_paths =  CommonPaths.new
+
+           expect(common_paths.diagnostics_directory).to eq('./.buildpack-diagnostics')
+        end
+
+        it 'should provide the diagnostics directory based off the customized relatived dir' do
+           common_paths =  CommonPaths.new
+           common_paths.relative_location = '..'
+
+           expect(common_paths.diagnostics_directory).to eq('../.buildpack-diagnostics')
+        end
+      end
+
+    end # end of buildpack diagnostic
+
+    it 'should raise an error for invalid relative_location' do
+      INVALID_PATH_ERROR = 'relative_location provided to common_paths must have a valid path value'.freeze
+      common_paths =  CommonPaths.new
+
+      expect { common_paths.relative_location = nil }.to raise_error(INVALID_PATH_ERROR)
+      expect { common_paths.relative_location = '' }.to raise_error(INVALID_PATH_ERROR)
+      expect { common_paths.relative_location = ' ' }.to raise_error(INVALID_PATH_ERROR)
+    end
+
   end
 
 end
