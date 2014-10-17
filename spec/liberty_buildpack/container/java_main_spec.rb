@@ -125,8 +125,8 @@ module LibertyBuildpack::Container
     describe 'release' do
       context 'default jre' do
         before do
-          allow(File).to receive(:exists?).with('.java/jre/bin/java').and_return(true)
-          allow(File).to receive(:exists?).with('.java/bin/java').and_return(false)
+          allow(File).to receive(:exists?).with(%r{.java/jre/bin/java}).and_return(true)
+          allow(File).to receive(:exists?).with(%r{.java/bin/java}).and_return(true)
         end
 
         it 'should return the java command' do
@@ -273,8 +273,8 @@ module LibertyBuildpack::Container
 
       context 'non jre' do
         it 'should return the java command adjusted for a nondefault java bin location' do
-          allow(File).to receive(:exists?).with('.java/jre/bin/java').and_return(false)
-          allow(File).to receive(:exists?).with('.java/bin/java').and_return(true)
+          allow(File).to receive(:exists?).with(%r{.java/jre/bin/java}).and_return(false)
+          allow(File).to receive(:exists?).with(%r{.java/bin/java}).and_return(true)
 
           Dir.mktmpdir do |root|
             released = JavaMain.new(
