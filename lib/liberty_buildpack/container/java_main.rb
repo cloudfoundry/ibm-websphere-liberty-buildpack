@@ -121,7 +121,7 @@ module LibertyBuildpack::Container
       default_java_path = File.join('jre', 'bin', 'java')
       alt_java_path = File.join('bin', 'java')
 
-      if File.exists?(File.join(@java_home, default_java_path))
+      if File.exists?(File.join(@app_dir, @java_home, default_java_path))
         File.join(java_home, default_java_path)
       else
         File.join(java_home, alt_java_path)
