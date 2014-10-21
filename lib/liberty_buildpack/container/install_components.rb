@@ -20,7 +20,10 @@ module LibertyBuildpack::Container
     attr_reader :zips, :esas
 
     def initialize
-      # zips array will contain urls for anything that needs to be unzipped (.tgz, .zip). This array is ordered by insert or arrival order.
+      # zips array. Each entry is an array of [url, directory]. The url is for anything that needs
+      # to be unzipped (.tgz, .zip). The optional directory is the directory name where the
+      # contents of the zip file will be unpacked under the app_dir directory.
+      # This array is ordered by insert or arrival order.
       @zips = []
       # esas will also be contained in an array, but each array entry is an array of [url, string]. Again, ordering is important.
       @esas = []
@@ -31,13 +34,14 @@ module LibertyBuildpack::Container
     # Add a zip or tar file to the list of zips that need to be downloaded/unzipped to create Liberty
     #
     # @param url - the download url
+    # @param directory - the optional directory to unzip/untar the contents into under the app_dir directory.
     #----------------------------------------------------------------------------------
-    def add_zip(url)
+    def add_zip(url, directory = nil)
       # deal with null url (user errors or repository issues) and avoid runtime failures
       return if url.nil? == true
       # if another service has already added the url to the list, ignore.
       return if @pending.key?(url)
-      @zips.push(url)
+      @zips.push([url, directory])
       @pending[url] = 1
     end
 

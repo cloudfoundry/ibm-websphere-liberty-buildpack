@@ -482,7 +482,7 @@ module LibertyBuildpack::Container
           # and download and install.
           install_list = InstallComponents.new
           @services_manager.get_required_esas(@liberty_components_and_uris, install_list)
-          install_list.zips.each { |zip_uri| download_and_unpack_archive(zip_uri, root) }
+          download_and_unpack_archives(install_list.zips, root)
           download_and_install_esas(install_list.esas, root)
         end
 
@@ -524,6 +524,21 @@ module LibertyBuildpack::Container
       server_xml = File.join(current_server_dir, SERVER_XML)
       feature_manager = FeatureManager.new(@app_dir, @java_home, @configuration)
       feature_manager.download_and_install_features(server_xml, liberty_home)
+    end
+
+    def download_and_unpack_archives(zips, root)
+      zips.each do |entry|
+        # each entry is an array of two entries, uri and optional directory string
+        uri = entry[0]
+        dir = entry[1]
+        if dir.nil?
+          dir = root
+        else
+          dir = File.join(@app_dir, dir) unless Pathname.new(dir).absolute?
+          FileUtils.mkdir_p(dir)
+        end
+        download_and_unpack_archive(uri, dir)
+      end
     end
 
     # This method unpacks an archive file. Supported archive types are .zip, .jar, tar.gz and tgz.
