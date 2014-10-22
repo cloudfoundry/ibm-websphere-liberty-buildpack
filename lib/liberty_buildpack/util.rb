@@ -54,6 +54,7 @@ module LibertyBuildpack::Util
   def write_formatted_xml_file(doc, filename)
     formatter = REXML::Formatters::Pretty.new(4)
     formatter.compact = true
+    formatter.width = 256
     File.open(filename, 'w:utf-8') { |file| formatter.write(doc, file) }
   end
 end

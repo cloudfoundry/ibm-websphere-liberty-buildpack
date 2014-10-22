@@ -181,6 +181,7 @@ module LibertyBuildpack::Container
       begin
         formatter = REXML::Formatters::Pretty.new(4)
         formatter.compact = true
+        formatter.width = 256
         formatter.write(REXML::Document.new(original), original_s)
         formatter.write(REXML::Document.new(modified), modified_s)
         original_s = original_s.split(/\n/)
