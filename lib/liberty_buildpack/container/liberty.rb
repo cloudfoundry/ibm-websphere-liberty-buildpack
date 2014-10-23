@@ -507,7 +507,7 @@ module LibertyBuildpack::Container
         true
       elsif (server_xml = Liberty.server_xml(@app_dir))
         # component is optional and server.xml is supplied, so check requested features.
-        server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
+        server_xml_doc = File.open(server_xml, 'r:utf-8') { |file| REXML::Document.new(file) }
         server_features = REXML::XPath.match(server_xml_doc, features_xpath)
         server_features.length > 0 ? true : false
       else

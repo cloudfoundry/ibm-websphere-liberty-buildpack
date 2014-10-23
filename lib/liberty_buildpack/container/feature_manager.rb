@@ -164,7 +164,7 @@ module LibertyBuildpack::Container
       # feature on disk, the default is to specify "usr").
       def get_features(server_xml)
         @logger.debug('entry')
-        server_xml_doc = File.open(server_xml, 'r') { |file| REXML::Document.new(file) }
+        server_xml_doc = File.open(server_xml, 'r:utf-8') { |file| REXML::Document.new(file) }
         features = REXML::XPath.match(server_xml_doc, '/server/featureManager/feature/text()[not(contains(., ":"))]')
         features = features.join(',')
         @logger.debug("exit (#{features})")

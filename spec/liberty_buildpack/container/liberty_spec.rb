@@ -1303,6 +1303,28 @@ module LibertyBuildpack::Container
       end
     end
 
+    it 'should work with a server.xml file that contains non-ASCII characters' do
+      Dir.mktmpdir do |root|
+        FileUtils.cp_r('spec/fixtures/container_liberty_server_non_ascii_chars', root)
+
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        .and_return(LIBERTY_DETAILS)
+
+        LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+        component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+        Liberty.new(
+          app_dir: File.join(root, 'container_liberty_server_non_ascii_chars'),
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+        ).compile
+      end
+    end
+
     describe 'release' do
       let(:test_java_home) { 'test-java-home' }
 
