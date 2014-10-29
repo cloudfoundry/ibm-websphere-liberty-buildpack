@@ -180,6 +180,61 @@ module LibertyBuildpack::Container
       end
     end
 
+    context 'when JVM_ARGS is set by the user' do
+
+      JVM_ARGS_KEY = 'JVM_ARGS'.freeze
+
+      let(:prev_jvm_args) { 'user_jvm_args' }
+
+      before do
+        @previous_value = ENV[JVM_ARGS_KEY]
+      end
+
+      after do
+        ENV[JVM_ARGS_KEY] = @previous_value
+      end
+
+      it 'should not process preexisting JVM_ARGS when using the liberty feature repository' do
+        ENV[JVM_ARGS_KEY] = prev_jvm_args
+
+        Dir.mktmpdir do |root_dir|
+          # fixture files to be used.
+          configuration_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'use_default_repo.yml')
+          feature_manager_script_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_feature_manager_good_script')
+          server_xml_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_server.xml')
+
+          # call feature manager using desired configuration and server.xml files.
+          app_dir, liberty_dir, liberty_bin_dir = set_up_feature_manager_script(root_dir, feature_manager_script_file)
+          call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
+
+          # check liberty's featureManager was called, with expected parameters.
+          feature_manager_command_file = File.join(liberty_bin_dir, 'featureManager.txt')
+          expect(File.exists?(feature_manager_command_file)).to eq(true)
+          feature_manager_command = File.read feature_manager_command_file
+          expect(feature_manager_command).to match(/jvm args is \(\)/)
+        end
+      end
+
+      it 'should restore JVM_ARGS value when using the liberty feature repository' do
+        ENV[JVM_ARGS_KEY] = prev_jvm_args
+
+        Dir.mktmpdir do |root_dir|
+          # fixture files to be used.
+          configuration_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'use_default_repo.yml')
+          feature_manager_script_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_feature_manager_good_script')
+          server_xml_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_server.xml')
+
+          # call feature manager using desired configuration and server.xml files.
+          app_dir, liberty_dir  = set_up_feature_manager_script(root_dir, feature_manager_script_file)
+          call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
+
+          # check that the JVM_ARGS has the same value from prior to running feature manager
+          expect(ENV['JVM_ARGS']).to match(prev_jvm_args)
+        end
+      end
+
+    end # end of JVM_ARGS context
+
   end # describe
 
 end # module

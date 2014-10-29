@@ -68,11 +68,8 @@ module LibertyBuildpack::Container
           features = get_features(server_xml)
           jvm_args = get_jvm_args
           cmd = File.join(liberty_home, 'bin', 'featureManager')
-          if jvm_args.empty?
-            script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" #{cmd} install --acceptLicense #{features} --when-file-exists=replace"
-          else
-            script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS=#{jvm_args} #{cmd} install --acceptLicense #{features} --when-file-exists=replace"
-          end
+          script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS=#{jvm_args} #{cmd} install --acceptLicense #{features} --when-file-exists=replace"
+
           @logger.debug("script invocation string is #{script_string}")
           output = `#{script_string}`
           # if ($CHILD_STATUS.to_i == 0) doesn't seem to work, as $CHILD_STATUS is

@@ -201,7 +201,7 @@ module LibertyBuildpack::Container
       minify_start_time = Time.now
       Dir.mktmpdir do |root|
         minified_zip = File.join(root, 'minified.zip')
-        minify_script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" #{File.join(liberty_home, 'bin', 'server')} package #{server_name} --include=minify --archive=#{minified_zip} --os=-z/OS"
+        minify_script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS="" #{File.join(liberty_home, 'bin', 'server')} package #{server_name} --include=minify --archive=#{minified_zip} --os=-z/OS"
         # Make it quiet unless there're errors (redirect only stdout)
         minify_script_string << ContainerUtils.space('1>/dev/null')
         system(minify_script_string)
@@ -605,7 +605,7 @@ module LibertyBuildpack::Container
       install_start_time = Time.now
       # setup the command and options
       cmd = File.join(root, WLP_PATH, 'bin', 'featureManager')
-      script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" #{cmd} install #{file.path} #{options}"
+      script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS="" #{cmd} install #{file.path} #{options}"
       output = `#{script_string}`
       if  $CHILD_STATUS.to_i != 0
         puts "\n #{output}"
