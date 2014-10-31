@@ -216,6 +216,27 @@ module LibertyBuildpack::Jre
       end
     end
 
+    it 'should add default dump options that output data to the common dumps directory, if enabled' do
+       Dir.mktmpdir do |root|
+         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+         common_paths = LibertyBuildpack::Container::CommonPaths.new
+
+         released = IBMJdk.new(
+             app_dir: '/application-directory',
+             java_home: '',
+             java_opts: [],
+             common_paths: common_paths,
+             configuration: {},
+             license_ids: {}
+         ).release
+
+         expect(released).to include('-Xdump:heap:defaults:file=' + common_paths.dump_directory + '/heapdump.%Y%m%d.%H%M%S.%pid.%seq.phd')
+         expect(released).to include('-Xdump:java:defaults:file=' + common_paths.dump_directory + '/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt')
+         expect(released).to include('-Xdump:snap:defaults:file=' + common_paths.dump_directory + '/Snap.Y%m%d.%H%M%S.%pid.%seq.trc')
+         expect(released.last).to eq('-Xdump:none')
+       end
+    end
+
     it 'should used -Xnocompressedrefs when the memory limit is less than 256m' do
       Dir.mktmpdir do |root|
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)

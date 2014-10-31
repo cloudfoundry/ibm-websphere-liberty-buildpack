@@ -96,6 +96,7 @@ module LibertyBuildpack::Jre
     # @return [void]
     def release
       @java_opts.concat memory(@configuration)
+      @java_opts.concat default_dump_opts
     end
 
     # Prints a warning message if a memory limit of less than 512M has been chosen when using the IBM JDK.
@@ -111,8 +112,6 @@ module LibertyBuildpack::Jre
     private
 
     JAVA_HOME = '.java'.freeze
-
-    DUMP_HOME = '../../../../../dumps'.freeze
 
     KEY_MEMORY_HEURISTICS = 'memory_heuristics'
 
@@ -193,12 +192,14 @@ module LibertyBuildpack::Jre
       end
     end
 
-    # enable verbose gc logging to stderr and the dumps directory with historical
-    # number of logs of 10 with 1000 gc cycles
-    def default_opts_gc
+    # default options for -Xdump to disable dumps while routing to the default dumps location when it is enabled by the
+    # user
+    def default_dump_opts
       default_options = []
-      default_options.push('-verbose:gc')
-      default_options.push("-Xverbosegclog:#{@common_paths.log_directory}/verbosegc#.log,10,1000")
+      default_options.push "-Xdump:heap:defaults:file=#{@common_paths.dump_directory}/heapdump.%Y%m%d.%H%M%S.%pid.%seq.phd"
+      default_options.push "-Xdump:java:defaults:file=#{@common_paths.dump_directory}/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt"
+      default_options.push "-Xdump:snap:defaults:file=#{@common_paths.dump_directory}/Snap.Y%m%d.%H%M%S.%pid.%seq.trc"
+      default_options.push '-Xdump:none'
       default_options
     end
 

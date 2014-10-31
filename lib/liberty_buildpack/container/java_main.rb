@@ -66,10 +66,13 @@ module LibertyBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
+      java_opts = @java_opts.nil? || @java_opts.empty? ? nil : @java_opts
+
       [
         "#{java_bin}",
         manifest_class_path,
-        @java_opts.join(' '),
+        java_opts,
+        '$JVM_ARGS',
         main_class,
         arguments,
         port
