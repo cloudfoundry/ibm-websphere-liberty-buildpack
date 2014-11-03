@@ -233,7 +233,7 @@ module LibertyBuildpack::Jre
          expect(released).to include('-Xdump:heap:defaults:file=' + common_paths.dump_directory + '/heapdump.%Y%m%d.%H%M%S.%pid.%seq.phd')
          expect(released).to include('-Xdump:java:defaults:file=' + common_paths.dump_directory + '/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt')
          expect(released).to include('-Xdump:snap:defaults:file=' + common_paths.dump_directory + '/Snap.Y%m%d.%H%M%S.%pid.%seq.trc')
-         expect(released.last).to eq('-Xdump:none')
+         expect(released).to include('-Xdump:none')
        end
     end
 
@@ -254,6 +254,42 @@ module LibertyBuildpack::Jre
         expect(java_opts).to include('-Xtune:virtualized')
         expect(java_opts).to include('-Xmx48M')
         expect(java_opts).to include('-Xnocompressedrefs')
+      end
+    end
+
+    it 'should provide troubleshooting info for JVM shutdowns' do
+      Dir.mktmpdir do |root|
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+        ENV['MEMORY_LIMIT'] = '512m'
+
+        java_opts = []
+        IBMJdk.new(
+            app_dir: '/application-directory',
+            java_home: '',
+            java_opts: java_opts,
+            configuration: {},
+            license_ids: {}
+        ).release
+
+        expect(java_opts).to include("-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=./app/#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{IBMJdk::KILLJAVA_FILE_NAME}")
+      end
+    end
+
+    it 'places the killjava script (with appropriately substituted content) in the diagnostics directory' do
+      Dir.mktmpdir do |root|
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.bin'))
+
+        IBMJdk.new(
+            app_dir: root,
+            configuration: {},
+            java_home: '',
+            java_opts: [],
+            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
+        ).compile
+
+        expect(Pathname.new(File.join(LibertyBuildpack::Diagnostics.get_diagnostic_directory(root), IBMJdk::KILLJAVA_FILE_NAME))).to exist
       end
     end
 
