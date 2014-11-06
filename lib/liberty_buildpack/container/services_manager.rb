@@ -23,6 +23,7 @@ require 'liberty_buildpack/container/install_components'
 require 'liberty_buildpack/util/constantize'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
+require 'liberty_buildpack/util/xml_utils'
 require 'liberty_buildpack/diagnostics/logger_factory'
 
 module LibertyBuildpack::Container
@@ -179,9 +180,7 @@ module LibertyBuildpack::Container
       original_s = ''
       modified_s = ''
       begin
-        formatter = REXML::Formatters::Pretty.new(4)
-        formatter.compact = true
-        formatter.width = 256
+        formatter = LibertyBuildpack::Util::XmlUtils.xml_formatter
         formatter.write(REXML::Document.new(original), original_s)
         formatter.write(REXML::Document.new(modified), modified_s)
         original_s = original_s.split(/\n/)
@@ -264,9 +263,7 @@ module LibertyBuildpack::Container
         end
       end
       runtime_vars = File.join(server_dir, 'runtime-vars.xml')
-      formatter = REXML::Formatters::Pretty.new(2)
-      formatter.compact = true
-      File.open(runtime_vars, 'w:utf-8') { |file| formatter.write(runtime_vars_doc, file) }
+      LibertyBuildpack::Util::XmlUtils.write_formatted_xml_file(runtime_vars_doc, runtime_vars)
       @logger.debug("runtime-vars file is #{runtime_vars}")
       @logger.debug("runtime vars contents is #{File.readlines(runtime_vars)}")
     end

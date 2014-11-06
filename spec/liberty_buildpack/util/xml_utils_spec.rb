@@ -16,16 +16,9 @@
 
 require 'spec_helper'
 require 'rexml/document'
-require 'liberty_buildpack/util'
+require 'liberty_buildpack/util/xml_utils'
 
 describe LibertyBuildpack::Util do
-  class DummyClass
-  end
-
-  before(:each) do
-    @dummy_class = DummyClass.new
-    @dummy_class.extend(LibertyBuildpack::Util)
-  end
 
   describe 'write_formatted_xml_file' do
     #----------------
@@ -60,7 +53,7 @@ describe LibertyBuildpack::Util do
         element2 = REXML::Element.new('yourElement', element)
         text = "#{string1} ; #{string2}"
         element2.add_text(text)
-        @dummy_class.write_formatted_xml_file(server_xml_doc, server_xml_file)
+        LibertyBuildpack::Util::XmlUtils.write_formatted_xml_file(server_xml_doc, server_xml_file)
         # Assemble expected results to check against the xml file we just wrote.
         s1 = '<server>'
         s2 = "<myElement anAttribute='#{string1}' anotherAttribute='#{string2}'>"

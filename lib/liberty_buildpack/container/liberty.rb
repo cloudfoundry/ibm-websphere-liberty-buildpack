@@ -33,6 +33,7 @@ require 'liberty_buildpack/util/properties'
 require 'liberty_buildpack/util/license_management'
 require 'liberty_buildpack/util/location_resolver'
 require 'liberty_buildpack/util/heroku'
+require 'liberty_buildpack/util/xml_utils'
 require 'open-uri'
 
 module LibertyBuildpack::Container
@@ -272,8 +273,7 @@ module LibertyBuildpack::Container
         # Preserve the original configuration before we start modifying it
         FileUtils.cp "#{server_xml}", "#{server_xml}.org"
 
-        server_xml_doc = File.open(server_xml, 'r:utf-8') { |file| REXML::Document.new(file) }
-        server_xml_doc.context[:attribute_quote] = :quote
+        server_xml_doc = XmlUtils.read_xml_file(server_xml)
 
         # Perform inlining of includes prior to adding include for runtime-vars.xml
         # as the file may not exist yet.
@@ -298,7 +298,7 @@ module LibertyBuildpack::Container
         appstate_available = check_appstate_feature(server_xml_doc)
         @services_manager.update_configuration(server_xml_doc, false, current_server_dir)
 
-        write_formatted_xml_file(server_xml_doc, server_xml)
+        XmlUtils.write_formatted_xml_file(server_xml_doc, server_xml)
       elsif Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
         # rubocop does not allow methods longer than 25 lines, so following is factored out
         update_server_xml_app(create_server_xml)
@@ -311,12 +311,11 @@ module LibertyBuildpack::Container
     end
 
     def update_server_xml_app(filename)
-      server_xml_doc = File.open(filename, 'r:utf-8') { |file| REXML::Document.new(file) }
-      server_xml_doc.context[:attribute_quote] = :quote
+      server_xml_doc = XmlUtils.read_xml_file(filename)
       @services_manager.update_configuration(server_xml_doc, true, current_server_dir)
       application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
       Liberty.web_inf(@app_dir) ? application.attributes['type'] = 'war' : application.attributes['type'] = 'ear'
-      write_formatted_xml_file(server_xml_doc, filename)
+      XmlUtils.write_formatted_xml_file(server_xml_doc, filename)
     end
 
     def update_http_endpoint(server_xml_doc)
@@ -507,7 +506,7 @@ module LibertyBuildpack::Container
         true
       elsif (server_xml = Liberty.server_xml(@app_dir))
         # component is optional and server.xml is supplied, so check requested features.
-        server_xml_doc = File.open(server_xml, 'r:utf-8') { |file| REXML::Document.new(file) }
+        server_xml_doc = XmlUtils.read_xml_file(server_xml)
         server_features = REXML::XPath.match(server_xml_doc, features_xpath)
         server_features.length > 0 ? true : false
       else
@@ -624,9 +623,7 @@ module LibertyBuildpack::Container
         else
           location = location_resolver.absolute_path(location, server_xml_dir)
           if File.exist? location
-            included_xml_doc = nil
-            File.open(location, 'r:utf-8') { |file| included_xml_doc = REXML::Document.new file }
-            included_xml_doc.context[:attribute_quote] = :quote
+            included_xml_doc = XmlUtils.read_xml_file(location)
             inline_includes included_xml_doc, File.dirname(location), location_resolver
             included_xml_doc.root.elements.each { |nested| server_xml_doc.root.insert_after element, nested }
             server_xml_doc.root.delete_element element
