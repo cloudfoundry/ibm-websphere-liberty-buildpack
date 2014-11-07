@@ -128,13 +128,12 @@ module LibertyBuildpack::Container
       server_dir = ' .liberty/usr/servers/' << server_name << '/'
       runtime_vars_file =  server_dir + 'runtime-vars.xml'
       create_vars_string = File.join(LIBERTY_HOME, 'create_vars.rb') << runtime_vars_file << ' &&'
-      env_var_string = ContainerUtils.space(env_yml_contents)
       java_home_string = ContainerUtils.space("JAVA_HOME=\"$PWD/#{@java_home}\"")
       start_script_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'bin', 'server'))
       start_script_string << ContainerUtils.space('run')
       jvm_options
       server_name_string = ContainerUtils.space(server_name)
-      "#{create_vars_string}#{env_var_string}#{java_home_string}#{start_script_string}#{server_name_string}"
+      "#{create_vars_string}#{java_home_string}#{start_script_string}#{server_name_string}"
     end
 
     # relative location of the execution directory
@@ -147,22 +146,6 @@ module LibertyBuildpack::Container
     end
 
     private
-
-    def env_yml_contents
-      env_contents = ''
-      env_file = File.expand_path('../../../config/env.yml', File.dirname(__FILE__))
-      if File.exists? env_file
-        env_contents = YAML.load_file(env_file)
-        @logger.debug { "#{env_file} contents: #{env_contents}" }
-        if env_contents.nil? || '---'.eql?(env_contents)
-          env_contents = ''
-        else
-          # Converts {"foo"=>"bar"} to foo=bar so it can be part of the command string
-          env_contents = env_contents.to_s.gsub(/[{}>",]/, '')
-        end
-      end
-      env_contents
-    end
 
     def jvm_options
       # disable 2-phase (XA) transactions via a -D option, as they are unsupported in

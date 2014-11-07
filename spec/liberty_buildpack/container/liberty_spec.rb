@@ -1484,73 +1484,10 @@ module LibertyBuildpack::Container
 
       end # end of JVM Options Context
 
-      it 'should return correct output for empty env_yml_contents' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-        .and_return(LIBERTY_VERSION)
-
-        yaml = Hash.new
-        YAML.stub(:load_file).and_return(yaml)
-
-        Dir.mktmpdir do |root|
-          FileUtils.cp_r('spec/fixtures/container_liberty', root)
-          contents = Liberty.new(
-            app_dir: File.join(root, 'container_liberty'),
-            java_home: test_java_home,
-            java_opts: '',
-            configuration: {},
-            license_ids: {}
-          ).release
-
-          expect(contents).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
-        end
-      end
-
-      it 'should return correct output for empty env_yml_contents (older Ruby)' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-        .and_return(LIBERTY_VERSION)
-
-        YAML.stub(:load_file).and_return('---')
-
-        Dir.mktmpdir do |root|
-          FileUtils.cp_r('spec/fixtures/container_liberty', root)
-          contents = Liberty.new(
-            app_dir: File.join(root, 'container_liberty'),
-            java_home: test_java_home,
-            java_opts: '',
-            configuration: {},
-            license_ids: {}
-          ).release
-
-          expect(contents).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
-        end
-      end
-
-      it 'should return correct output for populated env_yml_contents' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-        .and_return(LIBERTY_VERSION)
-
-        yaml = YAML.load('testURL: http://exampleurl.ibm.com')
-        YAML.stub(:load_file).and_return(yaml)
-
-        Dir.mktmpdir do |root|
-          FileUtils.cp_r('spec/fixtures/container_liberty', root)
-          contents = Liberty.new(
-            app_dir: File.join(root, 'container_liberty'),
-            java_home: test_java_home,
-            java_opts: '',
-            configuration: {},
-            license_ids: {}
-          ).release
-
-          expect(contents).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && testURL=http://exampleurl.ibm.com JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
-        end
-      end
-
       it 'should return correct execution command for the WEB-INF case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
 
-        allow_any_instance_of(Liberty).to receive(:env_yml_contents).and_return('')
         Dir.mktmpdir do |root|
           FileUtils.cp_r('spec/fixtures/container_liberty', root)
           command = Liberty.new(
@@ -1562,26 +1499,6 @@ module LibertyBuildpack::Container
           ).release
 
           expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
-        end
-      end
-
-      it 'should return correct execution command for the WEB-INF case with env.yml' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-        .and_return(LIBERTY_VERSION)
-
-        allow_any_instance_of(Liberty).to receive(:env_yml_contents).and_return('foo=http://bar.com')
-
-        Dir.mktmpdir do |root|
-          FileUtils.cp_r('spec/fixtures/container_liberty', root)
-          command = Liberty.new(
-            app_dir: File.join(root, 'container_liberty'),
-            java_home: test_java_home,
-            java_opts: '',
-            configuration: {},
-            license_ids: {}
-          ).release
-
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1589,7 +1506,6 @@ module LibertyBuildpack::Container
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
 
-        allow_any_instance_of(Liberty).to receive(:env_yml_contents).and_return('')
         Dir.mktmpdir do |root|
           FileUtils.cp_r('spec/fixtures/container_liberty_ear', root)
           command = Liberty.new(
@@ -1604,31 +1520,10 @@ module LibertyBuildpack::Container
         end
       end
 
-      it 'should return correct execution command for the META-INF case with env.yml' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-        .and_return(LIBERTY_VERSION)
-
-        allow_any_instance_of(Liberty).to receive(:env_yml_contents).and_return('foo=http://bar.com')
-
-        Dir.mktmpdir do |root|
-          FileUtils.cp_r('spec/fixtures/container_liberty_ear', root)
-          command = Liberty.new(
-            app_dir: File.join(root, 'container_liberty_ear'),
-            java_home: test_java_home,
-            java_opts: '',
-            configuration: {},
-            license_ids: {}
-          ).release
-
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
-        end
-      end
-
       it 'should return correct execution command for the zipped-up server case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
 
-        allow_any_instance_of(Liberty).to receive(:env_yml_contents).and_return('')
         Dir.mktmpdir do |root|
           FileUtils.cp_r('spec/fixtures/container_liberty_server', root)
           command = Liberty.new(
@@ -1643,31 +1538,10 @@ module LibertyBuildpack::Container
         end
       end
 
-      it 'should return correct execution command for the zipped-up server case with env.yml' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-        .and_return(LIBERTY_VERSION)
-
-        allow_any_instance_of(Liberty).to receive(:env_yml_contents).and_return('foo=http://bar.com')
-
-        Dir.mktmpdir do |root|
-          FileUtils.cp_r('spec/fixtures/container_liberty_server', root)
-          command = Liberty.new(
-            app_dir: File.join(root, 'container_liberty_server'),
-            java_home: test_java_home,
-            java_opts: '',
-            configuration: {},
-            license_ids: {}
-          ).release
-
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run myServer")
-        end
-      end
-
       it 'should return correct execution command for single-server case' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
 
-        allow_any_instance_of(Liberty).to receive(:env_yml_contents).and_return('')
         Dir.mktmpdir do |root|
           FileUtils.cp_r('spec/fixtures/container_liberty_single_server', root)
           command = Liberty.new(
@@ -1679,26 +1553,6 @@ module LibertyBuildpack::Container
           ).release
 
           expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
-        end
-      end
-
-      it 'should return correct execution command for single-server case with env.yml' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-        .and_return(LIBERTY_VERSION)
-
-        allow_any_instance_of(Liberty).to receive(:env_yml_contents).and_return('foo=http://bar.com')
-
-        Dir.mktmpdir do |root|
-          FileUtils.cp_r('spec/fixtures/container_liberty_single_server', root)
-          command = Liberty.new(
-            app_dir: File.join(root, 'container_liberty_single_server'),
-            java_home: test_java_home,
-            java_opts: '',
-            configuration: {},
-            license_ids: {}
-          ).release
-
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && foo=http://bar.com JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
         end
       end
 
