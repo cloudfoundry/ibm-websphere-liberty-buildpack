@@ -45,16 +45,4 @@ module LibertyBuildpack::Util
     service
   end
 
-  #---------------------------------------------------------------------
-  # A utility method that can be used to write an REMXL::Document to a file with formatting.
-  #
-  # @param doc - the REXML::Document containing the document contents to write.
-  # @param filename - the name of the file to write to.
-  #-----------------------------------------------------------------------
-  def write_formatted_xml_file(doc, filename)
-    formatter = REXML::Formatters::Pretty.new(4)
-    formatter.compact = true
-    formatter.width = 256
-    File.open(filename, 'w:utf-8') { |file| formatter.write(doc, file) }
-  end
 end
