@@ -215,7 +215,7 @@ module LibertyBuildpack::Container
       resources_dir = File.expand_path(RESOURCES, File.dirname(__FILE__))
       create_vars_destination = File.join(liberty_home, 'create_vars.rb')
       FileUtils.cp(File.join(resources_dir, 'create_vars.rb'), create_vars_destination)
-      system("chmod +x #{create_vars_destination}")
+      File.chmod(0755, create_vars_destination)
     end
 
     KEY_HTTP_PORT = 'port'.freeze
@@ -411,12 +411,12 @@ module LibertyBuildpack::Container
 
     def make_server_script_runnable
       server_script = File.join liberty_home, 'bin', 'server'
-      system "chmod +x #{server_script}"
+      File.chmod(0755, server_script)
       # scripts that need to be executable for the feature manager to work
       feature_manager_script = File.join liberty_home, 'bin', 'featureManager'
-      system "chmod +x #{feature_manager_script}"
+      File.chmod(0755, feature_manager_script)
       product_info = File.join liberty_home, 'bin', 'productInfo'
-      system "chmod +x #{product_info}"
+      File.chmod(0755, product_info)
     end
 
     def server_name

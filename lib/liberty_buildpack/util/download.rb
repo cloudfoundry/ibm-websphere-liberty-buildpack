@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'fileutils'
 require 'liberty_buildpack/util'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
@@ -33,7 +34,7 @@ module LibertyBuildpack::Util
     print "-----> Downloading #{description} #{version} from #{uri} "
 
     LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file| # TODO: Use global cache #50175265
-      system "cp #{file.path} #{File.join(target_directory, jar_name)}"
+      FileUtils.cp(file.path, File.join(target_directory, jar_name))
       puts "(#{(Time.now - download_start_time).duration})"
     end
 
