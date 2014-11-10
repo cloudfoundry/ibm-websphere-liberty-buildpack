@@ -128,8 +128,8 @@ module LibertyBuildpack::Jre
       expand_start_time = Time.now
       print "         Expanding JRE to #{JAVA_HOME} ... "
 
-      system "rm -rf #{java_home}"
-      system "mkdir -p #{java_home}"
+      FileUtils.rm_rf(java_home)
+      FileUtils.mkdir_p(java_home)
 
       if File.basename(file.path).end_with?('.bin.cached', '.bin')
         Dir.mktmpdir do |temp|
@@ -142,7 +142,7 @@ module LibertyBuildpack::Jre
           copy = File.join(temp, File.basename(file.path))
           FileUtils.cp(file.path, copy)
 
-          system "chmod +x #{copy}"
+          File.chmod(0755, copy)
           system "#{copy} -i silent -f #{response_file.path} 2>&1"
 
           ## Move expanded JRE to JAVA_HOME as JRE installer ignoring USER_INSTALL_DIR
