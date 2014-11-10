@@ -26,7 +26,6 @@ module LibertyBuildpack::Container
     LIBERTY_SINGLE_DOWNLOAD_URI = 'test-liberty-uri.tar.gz'.freeze # end of URI (here ".tar.gz") is significant in liberty container code
     LIBERTY_DETAILS = [LIBERTY_VERSION, LIBERTY_SINGLE_DOWNLOAD_URI, 'spec/fixtures/license.html']
     DISABLE_2PC_JAVA_OPT_REGEX = '-Dcom.ibm.tx.jta.disable2PC=true'.freeze
-    HEROKU_ENV_VAR = 'DYNO'.freeze
 
     let(:application_cache) { double('ApplicationCache') }
     let(:component_index) { double('ComponentIndex') }
@@ -62,10 +61,6 @@ module LibertyBuildpack::Container
     end
 
     describe 'detect' do
-      before(:each) do
-         ENV[HEROKU_ENV_VAR] = nil
-      end
-
       it 'should detect WEB-INF' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_DETAILS)
@@ -210,34 +205,14 @@ module LibertyBuildpack::Container
         expect(detected).to be_nil
       end
 
-      it 'should update the common_paths provided by the buildpack to include the Liberty container path' do
+      it 'should update the common_paths for Heroku provided by the buildpack to include the Liberty container' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_DETAILS)
 
         liberty = Liberty.new(
         app_dir: 'spec/fixtures/container_liberty',
         configuration: {},
-        common_paths: CommonPaths.new,
-        java_home: '',
-        java_opts: [],
-        license_ids: {}
-        )
-        liberty.detect
-
-        actual_common_paths = liberty.instance_variable_get(:@common_paths)
-        expect(actual_common_paths.instance_variable_get(:@relative_location)).to eq('../../../../..')
-      end
-
-      it 'should update the common_paths provided by the buildpack to include the Liberty container with Heroku path' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-        .and_return(LIBERTY_DETAILS)
-
-        ENV[HEROKU_ENV_VAR] = 'true'
-
-        liberty = Liberty.new(
-        app_dir: 'spec/fixtures/container_liberty',
-        configuration: {},
-        common_paths: CommonPaths.new,
+        common_paths: CommonPaths.new('.'),
         java_home: '',
         java_opts: [],
         license_ids: {}
@@ -246,9 +221,10 @@ module LibertyBuildpack::Container
 
         actual_common_paths = liberty.instance_variable_get(:@common_paths)
         expect(actual_common_paths.instance_variable_get(:@relative_location)).to eq('../../../..')
+        expect(actual_common_paths.instance_variable_get(:@relative_to_base)).to eq('../../../..')
       end
 
-      it 'should use Liberty path when common_paths is not provided in the context' do
+      it 'should update the common_paths for CF default to Liberty path when common_paths is not provided in the context' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_DETAILS)
 
@@ -262,7 +238,8 @@ module LibertyBuildpack::Container
         liberty.detect
 
         actual_common_paths = liberty.instance_variable_get(:@common_paths)
-        expect(actual_common_paths.instance_variable_get(:@relative_location)).to eq('../../../../..')
+        expect(actual_common_paths.instance_variable_get(:@relative_location)).to eq('../../../..')
+        expect(actual_common_paths.instance_variable_get(:@relative_to_base)).to eq('../../../../..')
       end
 
     end

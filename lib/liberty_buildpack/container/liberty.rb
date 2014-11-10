@@ -96,7 +96,8 @@ module LibertyBuildpack::Container
     def detect
       liberty_version = Liberty.find_liberty_item(@app_dir, @configuration)[0]
       if liberty_version
-        @common_paths.relative_location = relative_directory
+        # set the relative path from '.liberty/usr/servers/defaultserver'
+        @common_paths.relative_location = File.join(LIBERTY_HOME, USR_PATH, SERVERS_PATH, DEFAULT_SERVER)
         [liberty_type, liberty_id(liberty_version)]
       end
     end
@@ -134,15 +135,6 @@ module LibertyBuildpack::Container
       jvm_options
       server_name_string = ContainerUtils.space(server_name)
       "#{create_vars_string}#{java_home_string}#{start_script_string}#{server_name_string}"
-    end
-
-    # relative location of the execution directory
-    def relative_directory
-      if Heroku.heroku?
-        '../../../..'
-      else
-        '../../../../..'
-      end
     end
 
     private

@@ -59,28 +59,6 @@ module LibertyBuildpack::Container
       it 'should not detect without manifest' do
         expect(detected).to be_nil
       end
-
-      describe 'the relative location returned by common paths after detect gets invoked' do
-        subject(:relative_location) do |example|
-          java_main = JavaMain.new(context)
-          java_main.detect
-          actual_common_paths = java_main.instance_variable_get(:@common_paths)
-          actual_common_paths.instance_variable_get(:@relative_location)
-        end
-
-        it 'should update the common_paths provided by the buildpack to include the Standalone Java container path',
-           common_paths: CommonPaths.new,
-           configuration: { 'java_main_class' => 'java-main' } do
-
-          expect(relative_location).to eq('../')
-        end
-
-        it 'should result with Java Standalone path when the common_paths is not provided in its context',
-           configuration: { 'java_main_class' => 'java-main' } do
-
-          expect(relative_location).to eq('../')
-        end
-      end
     end
 
     describe 'compile' do

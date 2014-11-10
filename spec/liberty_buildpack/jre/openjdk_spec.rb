@@ -140,7 +140,7 @@ module LibertyBuildpack::Jre
             license_ids: {}
         ).release
 
-        expect(java_opts).to include("-XX:OnOutOfMemoryError=./app/#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{OpenJdk::KILLJAVA_FILE_NAME}")
+        expect(java_opts).to include("-XX:OnOutOfMemoryError=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{OpenJdk::KILLJAVA_FILE_NAME}")
       end
     end
 
