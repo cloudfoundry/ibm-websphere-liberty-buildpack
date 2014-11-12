@@ -232,7 +232,7 @@ module LibertyBuildpack::Jre
 
          expect(released).to include('-Xdump:heap:defaults:file=' + common_paths.dump_directory + '/heapdump.%Y%m%d.%H%M%S.%pid.%seq.phd')
          expect(released).to include('-Xdump:java:defaults:file=' + common_paths.dump_directory + '/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt')
-         expect(released).to include('-Xdump:snap:defaults:file=' + common_paths.dump_directory + '/Snap.Y%m%d.%H%M%S.%pid.%seq.trc')
+         expect(released).to include('-Xdump:snap:defaults:file=' + common_paths.dump_directory + '/Snap.%Y%m%d.%H%M%S.%pid.%seq.trc')
          expect(released).to include('-Xdump:none')
        end
     end
