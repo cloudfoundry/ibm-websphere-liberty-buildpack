@@ -21,9 +21,14 @@ require 'rexml/document'
 
 def add_runtime_variable(element, name, value)
   unless name.nil? || value.nil?
-    new_element = REXML::Element.new('variable', element)
-    new_element.add_attribute('name', name.downcase)
-      new_element.add_attribute('value', value)
+    variables = element.root.elements.to_a("//variable[@name='#{name.downcase}']")
+    if variables.empty?
+      variable = REXML::Element.new('variable', element)
+      variable.add_attribute('name', name.downcase)
+      variable.add_attribute('value', value)
+    else
+      variables.last.add_attribute('value', value)
+    end
   end
 end
 
