@@ -19,7 +19,6 @@ require 'liberty_buildpack/util/dash_case'
 require 'liberty_buildpack/util/java_main_utils'
 require 'liberty_buildpack/util'
 require 'liberty_buildpack/container/container_utils'
-require 'liberty_buildpack/container/common_paths'
 require 'fileutils'
 
 module LibertyBuildpack::Container
@@ -34,14 +33,12 @@ module LibertyBuildpack::Container
     # @option context [String] :app_dir the directory that the application exists in
     # @option context [String] :java_home the directory that acts as +JAVA_HOME+
     # @option context [Array<String>] :java_opts an array that Java options can be added to
-    # @option context [CommonPaths] :common_paths the set of paths common across components that components should reference
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @app_dir = context[:app_dir]
       @java_home = context[:java_home]
       @java_opts = context[:java_opts]
-      @common_paths = context[:common_paths] || CommonPaths.new
       @configuration = context[:configuration]
     end
 
@@ -49,10 +46,7 @@ module LibertyBuildpack::Container
     #
     # @return [String] returns +Java-Main+ if the MANIFEST.MF of the application contains the Java-Main tag.
     def detect
-      if main_class
-        @common_paths.relative_location = '../'
-        ['JAR', JavaMain.to_s.dash_case]
-      end
+      main_class ? ['JAR', JavaMain.to_s.dash_case] : nil
     end
 
     # Prepares the application to run.
