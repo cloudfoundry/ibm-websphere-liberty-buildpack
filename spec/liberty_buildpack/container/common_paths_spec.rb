@@ -21,6 +21,8 @@ module LibertyBuildpack::Container
 
   describe CommonPaths do
 
+    HEROKU_ENV_VAR = 'DYNO'.freeze
+
     before do
       $stdout = StringIO.new
       $stderr = StringIO.new
@@ -78,7 +80,11 @@ module LibertyBuildpack::Container
 
       context 'when app subdir does not exist' do
         before do
-          allow(LibertyBuildpack::Util::Heroku).to receive(:heroku?).and_return(true)
+          ENV[HEROKU_ENV_VAR] = 'dyno'
+        end
+
+        after(:each) do
+          ENV[HEROKU_ENV_VAR] = nil
         end
 
         it 'should provide the diagnostics directory based off the default directory' do
