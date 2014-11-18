@@ -15,282 +15,190 @@
 # limitations under the License.
 
 require 'spec_helper'
+require 'component_helper'
 require 'fileutils'
 require 'liberty_buildpack/jre/ibmjdk'
 
 module LibertyBuildpack::Jre
 
   describe IBMJdk do
-    DETAILS_PRE_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.7.0'), 'test-uri', 'spec/fixtures/license.html']
-    DETAILS_POST_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.8.0'), 'test-uri', 'spec/fixtures/license.html']
+    include_context 'component_helper'
+
+    CURRENT_SERVICE_RELEASE = '1.7.0'.freeze
 
     let(:application_cache) { double('ApplicationCache') }
-    let(:memory_heuristic) { double('MemoryHeuristic', resolve: %w(opt-1 opt-2)) }
 
-    before do
-      $stdout = StringIO.new
-      $stderr = StringIO.new
+    before do | example |
+      # By default, always stub the return of a valid ibmjdk_config.yml against a given service_release as indicated by
+      # the spec test's service_release metadata.  Tests that test for errors can disable a valid return of the
+      # ibmjdk_config.yml by setting its find_item metadata to false along with the optional expected error
+      find_item = example.metadata[:return_find_item].nil? ? true : example.metadata[:return_find_item]
+      if find_item
+        token_version = example.metadata[:service_release]
+
+        ibmjdk_config = [LibertyBuildpack::Util::TokenizedVersion.new(token_version), uri, 'spec/fixtures/license.html']
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(ibmjdk_config)
+      else
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise(example.metadata[:raise_error_message])
+      end
 
       # return license file by default
       application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
+
     end
 
-    after do
-      $stdout = STDOUT
-      $stderr = STDERR
-    end
+    # tests for common behaviors across IBMJDK v7 releases
+    shared_examples_for 'IBMJDK v7' do | service_release |
 
-    it 'should detect with id of ibmjdk-<version>' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
+      it 'adds the JAVA_HOME to java_home', java_home: '', java_opts: [], license_ids: {} do | example |
 
-        detected = IBMJdk.new(
-            app_dir: '',
-            java_home: '',
-            java_opts: [],
-            configuration: {},
-            license_ids: {}
-        ).detect
+        java_home = example.metadata[:java_home]
 
-        expect(detected).to eq('ibmjdk-1.7.0')
-      end
-    end
-
-    it 'should extract Java from a bin script' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.bin'))
-
-        IBMJdk.new(
-            app_dir: root,
-            configuration: {},
-            java_home: '',
-            java_opts: [],
-            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
-        ).compile
-
-        java = File.join(root, '.java', 'jre', 'bin', 'java')
-        expect(File.exists?(java)).to eq(true)
-      end
-    end
-
-    it 'should extract Java from a tar gz' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
-
-        IBMJdk.new(
-            app_dir: root,
-            configuration: {},
-            java_home: '',
-            java_opts: [],
-            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
-        ).compile
-
-        java = File.join(root, '.java', 'jre', 'bin', 'java')
-        expect(File.exists?(java)).to eq(true)
-      end
-    end
-
-    it 'should display Avoid Trouble message when specifying <512MB mem limit' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
-        ENV['MEMORY_LIMIT'] = '256m'
-
-        IBMJdk.new(
-            app_dir: root,
-            configuration: {},
-            java_home: '',
-            java_opts: [],
-            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
-        ).compile
-
-        expect($stdout.string).to match(/Avoid Trouble/)
-      end
-    end
-
-    it 'should not display Avoid Trouble message when specifying 512MB or higher mem limit' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
-        ENV['MEMORY_LIMIT'] = '512m'
-
-        IBMJdk.new(
-            app_dir: root,
-            configuration: {},
-            java_home: '',
-            java_opts: [],
-            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
-        ).compile
-        expect($stdout.string).not_to match(/Avoid Trouble/)
-      end
-    end
-
-    it 'adds the JAVA_HOME to java_home' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-
-        java_home = ''
-        IBMJdk.new(
-            app_dir: '/application-directory',
-            java_home: java_home,
-            java_opts: [],
-            configuration: {},
-            license_ids: {}
-        )
+        # context is provided by component_helper, its default values are provided by 'describe' metadata, and
+        # customized through test's metadata
+        IBMJdk.new(context)
 
         expect(java_home).to eq('.java')
       end
-    end
 
-    it 'should fail when the license ids do not match' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        expect do
-          IBMJdk.new(
-            app_dir: '',
-            java_home: '',
-            java_opts: [],
-            configuration: {},
-            license_ids: { 'IBM_JVM_LICENSE' => 'Incorrect' }
-          ).compile
-        end.to raise_error
+      describe 'detect', java_home: '', license_ids: {}, service_release: service_release do
+
+        # context is provided by component_helper, its default values are provided by 'describe' metadata, and
+        # customized through test's metadata
+        subject(:detected) { IBMJdk.new(context).detect }
+
+        it 'should detect with id of ibmjdk-<version>' do
+          expect(detected).to eq('ibmjdk-' + service_release)
+        end
+
+        it 'should fail when ConfiguredItem.find_item fails', return_find_item: false, raise_error_message: 'test error' do
+          expect { detected }.to raise_error(/IBM\ JRE\ error:\ test\ error/)
+        end
+      end # end of detect shared tests
+
+      describe 'compile',
+               java_home: '',
+               java_opts: [],
+               configuration: {},
+               license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' },
+               service_release: service_release do
+
+        before do | example |
+          # get the application cache fixture from the application_cache double provided in the overall setup
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          cache_fixture = example.metadata[:cache_fixture]
+          application_cache.stub(:get).with(uri).and_yield(File.open("spec/fixtures/#{cache_fixture}")) if cache_fixture
+        end
+
+        # context is provided by component_helper, its default values are provided by 'describe' metadata, and
+        # customized through test's metadata
+        subject(:compiled) { IBMJdk.new(context).compile }
+
+        it 'should extract Java from a bin script', cache_fixture: 'stub-ibm-java.bin'  do
+          compiled
+
+          java = File.join(app_dir, '.java', 'jre', 'bin', 'java')
+          expect(File.exists?(java)).to eq(true)
+        end
+
+        it 'should extract Java from a tar gz', cache_fixture: 'stub-ibm-java.tar.gz' do
+          compiled
+
+          java = File.join(app_dir, '.java', 'jre', 'bin', 'java')
+          expect(File.exists?(java)).to eq(true)
+        end
+
+        it 'should not display Avoid Trouble message when specifying 512MB or higher mem limit', cache_fixture: 'stub-ibm-java.tar.gz' do
+          ENV['MEMORY_LIMIT'] = '512m'
+
+          expect { compiled }.not_to output(/Avoid Trouble/).to_stdout
+        end
+
+        it 'should display Avoid Trouble message when specifying <512MB mem limit', cache_fixture: 'stub-ibm-java.tar.gz' do
+          ENV['MEMORY_LIMIT'] = '256m'
+
+          expect { compiled }.to output(/Avoid Trouble/).to_stdout
+        end
+
+        it 'should fail when the license ids do not match', app_dir: '', license_ids: { 'IBM_JVM_LICENSE' => 'Incorrect' } do
+          expect { compiled }.to raise_error
+        end
+
+        it 'places the killjava script (with appropriately substituted content) in the diagnostics directory', cache_fixture: 'stub-ibm-java.bin' do
+          compiled
+
+          expect(Pathname.new(File.join(LibertyBuildpack::Diagnostics.get_diagnostic_directory(app_dir), IBMJdk::KILLJAVA_FILE_NAME))).to exist
+        end
+
+      end # end of compile shared tests
+
+      describe 'release',
+               java_home: '',
+               java_opts: [],
+               configuration: {},
+               license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' },
+               service_release: service_release do
+
+        # context is provided by component_helper, its default values are provided by 'describe' metadata, and
+        # customized through test's metadata
+        subject(:released) { IBMJdk.new(context).release }
+
+        it 'should add default dump options that output data to the common dumps directory, if enabled' do
+
+          expect(released).to include('-Xdump:heap:defaults:file=./../dumps/heapdump.%Y%m%d.%H%M%S.%pid.%seq.phd')
+          expect(released).to include('-Xdump:java:defaults:file=./../dumps/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt')
+          expect(released).to include('-Xdump:snap:defaults:file=./../dumps/Snap.%Y%m%d.%H%M%S.%pid.%seq.trc')
+          expect(released).to include('-Xdump:none')
+        end
+
+        it 'should add extra memory options when a memory limit is set' do
+          ENV['MEMORY_LIMIT'] = '512m'
+
+          expect(released).to include('-Xtune:virtualized')
+          expect(released).to include('-Xmx384M')
+        end
+
+        it 'should provide troubleshooting info for JVM shutdowns' do
+          ENV['MEMORY_LIMIT'] = '512m'
+
+          expect(released).to include("-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{IBMJdk::KILLJAVA_FILE_NAME}")
+        end
+      end # end of release shared tests
+
+    end # end of shared tests for IBMJDK v7 release
+
+    context 'IBMJDK Service Release 1.7.0' do
+      it_behaves_like 'IBMJDK v7', '1.7.0'
+
+      if CURRENT_SERVICE_RELEASE == '1.7.0'
+        describe 'release',
+                 java_home: '',
+                 java_opts: [],
+                 configuration: {},
+                 license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' },
+                 service_release: '1.7.0' do
+
+          # context is provided by component_helper, its default values are provided by 'describe' metadata, and
+          # customized through test's metadata
+          subject(:java_opts) { IBMJdk.new(context).release }
+
+          it 'should used -Xnocompressedrefs when the memory limit is less than 256m' do
+            ENV['MEMORY_LIMIT'] = '64m'
+
+            expect(java_opts).to include('-Xtune:virtualized')
+            expect(java_opts).to include('-Xmx48M')
+            expect(java_opts).to include('-Xnocompressedrefs')
+          end
+
+          it 'should add memory options to java_opts' do
+            ENV['MEMORY_LIMIT'] = nil
+
+            expect(java_opts).to include('-Xnocompressedrefs')
+            expect(java_opts).to include('-Xtune:virtualized')
+          end
+        end # end release
       end
-    end
 
-    it 'should fail when ConfiguredItem.find_item fails' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise('test error')
-        expect do
-          IBMJdk.new(
-              app_dir: '',
-              java_home: '',
-              java_opts: [],
-              configuration: {},
-              license_ids: {}
-          ).detect
-        end.to raise_error(/IBM\ JRE\ error:\ test\ error/)
-      end
-    end
-
-    it 'should add memory options to java_opts' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        ENV['MEMORY_LIMIT'] = nil
-
-        java_opts = []
-        IBMJdk.new(
-            app_dir: '/application-directory',
-            java_home: '',
-            java_opts: java_opts,
-            configuration: {},
-            license_ids: {}
-        ).release
-
-        expect(java_opts).to include('-Xnocompressedrefs')
-        expect(java_opts).to include('-Xtune:virtualized')
-      end
-    end
-
-    it 'should add extra memory options when a memory limit is set' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        ENV['MEMORY_LIMIT'] = '512m'
-
-        java_opts = []
-        IBMJdk.new(
-            app_dir: '/application-directory',
-            java_home: '',
-            java_opts: java_opts,
-            configuration: {},
-            license_ids: {}
-        ).release
-
-        expect(java_opts).to include('-Xtune:virtualized')
-        expect(java_opts).to include('-Xmx384M')
-      end
-    end
-
-    it 'should add default dump options that output data to the common dumps directory, if enabled' do
-       Dir.mktmpdir do |root|
-         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-         common_paths = LibertyBuildpack::Container::CommonPaths.new
-
-         released = IBMJdk.new(
-             app_dir: '/application-directory',
-             java_home: '',
-             java_opts: [],
-             common_paths: common_paths,
-             configuration: {},
-             license_ids: {}
-         ).release
-
-         expect(released).to include('-Xdump:heap:defaults:file=' + common_paths.dump_directory + '/heapdump.%Y%m%d.%H%M%S.%pid.%seq.phd')
-         expect(released).to include('-Xdump:java:defaults:file=' + common_paths.dump_directory + '/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt')
-         expect(released).to include('-Xdump:snap:defaults:file=' + common_paths.dump_directory + '/Snap.%Y%m%d.%H%M%S.%pid.%seq.trc')
-         expect(released).to include('-Xdump:none')
-       end
-    end
-
-    it 'should used -Xnocompressedrefs when the memory limit is less than 256m' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        ENV['MEMORY_LIMIT'] = '64m'
-
-        java_opts = []
-        IBMJdk.new(
-            app_dir: '/application-directory',
-            java_home: '',
-            java_opts: java_opts,
-            configuration: {},
-            license_ids: {}
-        ).release
-
-        expect(java_opts).to include('-Xtune:virtualized')
-        expect(java_opts).to include('-Xmx48M')
-        expect(java_opts).to include('-Xnocompressedrefs')
-      end
-    end
-
-    it 'should provide troubleshooting info for JVM shutdowns' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        ENV['MEMORY_LIMIT'] = '512m'
-
-        java_opts = []
-        IBMJdk.new(
-            app_dir: '/application-directory',
-            java_home: '',
-            java_opts: java_opts,
-            configuration: {},
-            license_ids: {}
-        ).release
-
-        expect(java_opts).to include("-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{IBMJdk::KILLJAVA_FILE_NAME}")
-      end
-    end
-
-    it 'places the killjava script (with appropriately substituted content) in the diagnostics directory' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS_PRE_8)
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.bin'))
-
-        IBMJdk.new(
-            app_dir: root,
-            configuration: {},
-            java_home: '',
-            java_opts: [],
-            license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' }
-        ).compile
-
-        expect(Pathname.new(File.join(LibertyBuildpack::Diagnostics.get_diagnostic_directory(root), IBMJdk::KILLJAVA_FILE_NAME))).to exist
-      end
     end
 
   end
