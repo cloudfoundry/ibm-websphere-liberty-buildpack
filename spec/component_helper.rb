@@ -29,7 +29,11 @@ shared_context 'component_helper' do
       java_home:      example.metadata[:java_home],
       java_opts:      example.metadata[:java_opts],
       common_paths:   example.metadata[:common_paths],
-      configuration:  example.metadata[:configuration] }
+      license_ids:    example.metadata[:license_ids],
+      configuration:  example.metadata[:configuration],
+      common_paths:   example.metadata[:common_paths] }
   end
+
+  let(:uri) { 'test-uri' }
 
 end
