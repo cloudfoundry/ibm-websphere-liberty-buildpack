@@ -270,14 +270,14 @@ module LibertyBuildpack::Container
         # Disable configuration (server.xml) monitoring
         disable_config_monitoring(server_xml_doc)
         # Check if appstate ICAP feature can be used
-        appstate_available = check_appstate_feature(server_xml_doc)
+        appstate_available = File.file?(icap_extension) ? check_appstate_feature(server_xml_doc) : false
         @services_manager.update_configuration(server_xml_doc, false, current_server_dir)
 
         XmlUtils.write_formatted_xml_file(server_xml_doc, server_xml)
       elsif Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
         # rubocop does not allow methods longer than 25 lines, so following is factored out
         update_server_xml_app(create_server_xml)
-        appstate_available = File.file? icap_extension
+        appstate_available = File.file?(icap_extension)
       else
         raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
       end
@@ -359,11 +359,9 @@ module LibertyBuildpack::Container
     end
 
     def check_appstate_feature(server_xml_doc)
-      # Currently appstate can work only with the application named 'myapp' and only if ICAP features
-      # are enabled via extensions.
-      myapp_apps = REXML::XPath.match(server_xml_doc, '/server/application[@name="myapp"]')
-      if File.file?(icap_extension) && ! myapp_apps.empty?
-
+      # Currently appstate can work only with one application
+      apps = REXML::XPath.match(server_xml_doc, '/server/application | /server/webApplication | /server/enterpriseApplication')
+      if apps.size == 1 && !apps[0].attributes['name'].nil?
         # Add appstate-1.0 feature
         feature_managers = REXML::XPath.match(server_xml_doc, '/server/featureManager')
         if feature_managers.empty?
@@ -376,12 +374,12 @@ module LibertyBuildpack::Container
 
         # Turn on marker file using appstate element
         appstate = REXML::Element.new('appstate', server_xml_doc.root)
-        appstate.add_attribute('appName', 'myapp')
+        appstate.add_attribute('appName', apps[0].attributes['name'])
         appstate.add_attribute('markerPath', '${home}/.liberty.state')
-
-        return true
+        true
+      else
+        false
       end
-      false
     end
 
     def add_droplet_yaml
