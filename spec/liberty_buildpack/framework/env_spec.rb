@@ -24,6 +24,7 @@ module LibertyBuildpack::Framework
     it 'should detect with env configuration' do
       detected = Env.new(
         app_dir: 'root',
+        environment: {},
         configuration: { 'foo' => 'http://bar.com' }
       ).detect
 
@@ -33,6 +34,7 @@ module LibertyBuildpack::Framework
     it 'should not detect with empty env configuration' do
       detected = Env.new(
         app_dir: 'root',
+        environment: {},
         configuration: {}
       ).detect
 
@@ -42,6 +44,7 @@ module LibertyBuildpack::Framework
     it 'should not detect with nil env configuration' do
       detected = Env.new(
         app_dir: 'root',
+        environment: {},
         configuration: nil
       ).detect
 
@@ -52,6 +55,7 @@ module LibertyBuildpack::Framework
       Dir.mktmpdir do |root|
         Env.new(
           app_dir: root,
+          environment: {},
           configuration: { 'foo' => 'bar', 'rmu' => 'http://doesnotexist.com', 'bar' => 'a b c', ' ' => 'a', 'b' => ' ' }
         ).compile
 
@@ -60,10 +64,68 @@ module LibertyBuildpack::Framework
 
         env_contents = File.readlines(env_file)
         expect(env_contents.size).to eq(4)
-        expect(env_contents).to include(/export foo.*=.*"bar"/)
-        expect(env_contents).to include(%r(export rmu.*=.*\"http://doesnotexist.com\"))
-        expect(env_contents).to include(/export bar.*=.*"a b c"/)
-        expect(env_contents).to include(/export b.*=.*" "/)
+        expect(env_contents).to include(/export foo="bar"/)
+        expect(env_contents).to include(%r(export rmu=\"http://doesnotexist.com\"))
+        expect(env_contents).to include(/export bar="a b c"/)
+        expect(env_contents).to include(/export b=" "/)
+      end
+    end
+
+    it 'should create env.sh with env configuration from profile' do
+      Dir.mktmpdir do |root|
+        yml = %Q(---
+        foo: bar
+        rmu: http://doesnotexist.com
+        profile_1:
+          foo: car
+          bart: simpson)
+
+        Env.new(
+          app_dir: root,
+          environment: { 'IBM_ENV_PROFILE' => 'profile_1' },
+          configuration: YAML.load(yml)
+        ).compile
+
+        env_file = File.join(root, '.profile.d', 'env.sh')
+        expect(File.file?(env_file)).to eq(true)
+
+        env_contents = File.readlines(env_file)
+        expect(env_contents.size).to eq(3)
+        expect(env_contents).to include(/export foo="car"/)
+        expect(env_contents).to include(%r(export rmu=\"http://doesnotexist.com\"))
+        expect(env_contents).to include(/export bart="simpson"/)
+      end
+    end
+
+    it 'should create env.sh with env configuration from list of profiles' do
+      Dir.mktmpdir do |root|
+        yml = %Q(---
+        foo: bar
+        rmu: http://doesnotexist.com
+        my_profile:
+          disco: stu
+          bart: man
+        profile_1:
+          foo: car
+          bart: simpson
+        profile-2:
+          bar: no cow)
+
+        Env.new(
+          app_dir: root,
+          environment: { 'IBM_ENV_PROFILE' => 'profile_1, bad_profile, my_profile' },
+          configuration: YAML.load(yml)
+        ).compile
+
+        env_file = File.join(root, '.profile.d', 'env.sh')
+        expect(File.file?(env_file)).to eq(true)
+
+        env_contents = File.readlines(env_file)
+        expect(env_contents.size).to eq(4)
+        expect(env_contents).to include(/export foo="car"/)
+        expect(env_contents).to include(%r(export rmu=\"http://doesnotexist.com\"))
+        expect(env_contents).to include(/export bart="man"/)
+        expect(env_contents).to include(/export disco="stu"/)
       end
     end
 

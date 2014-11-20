@@ -33,6 +33,7 @@ module LibertyBuildpack::Framework
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @configuration = context[:configuration]
       @app_dir = context[:app_dir]
+      @environment = context[:environment]
     end
 
     # Detects whether the buildpack provides custom environment variables.
@@ -49,17 +50,28 @@ module LibertyBuildpack::Framework
       profiled_dir = File.join(@app_dir, '.profile.d')
       FileUtils.mkdir_p(profiled_dir)
 
-      variables = []
-      @configuration.each do | key, value |
-        key = key.strip
-        variables << "export #{key}=\"#{value}\"" unless key.empty?
+      variables = {}
+      # apply default variables
+      copy_variables(variables, @configuration)
+      # apply profiles
+      profiles.each do | profile |
+        profile = profile.strip
+        profile_variables = @configuration[profile]
+        if profile_variables.nil?
+          @logger.debug { "Environment variable profile #{profile} not found." }
+        elsif profile_variables.is_a? Hash
+          @logger.debug { "Applying environment variable profile #{profile}." }
+          copy_variables(variables, profile_variables)
+        end
       end
 
       @logger.debug { "Buildpack environment variables: #{variables}" }
 
       env_file_name = File.join(profiled_dir, 'env.sh')
       env_file = File.new(env_file_name, 'w')
-      env_file.puts(variables)
+      variables.each do | key, value |
+        env_file.puts("export #{key}=\"#{value}\"")
+      end
       env_file.close
     end
 
@@ -75,6 +87,21 @@ module LibertyBuildpack::Framework
       !@configuration.nil? && @configuration.size > 0
     end
 
+    def copy_variables(variables, configuration)
+      configuration.each do | key, value |
+        key = key.strip
+        variables[key] = value unless value.is_a?(Hash) || value.is_a?(Array) || key.empty?
+      end
+    end
+
+    def profiles
+      profiles_var = @environment['IBM_ENV_PROFILE']
+      if profiles_var.nil?
+        []
+      else
+        profiles_var.split(',')
+      end
+    end
   end
 
 end
