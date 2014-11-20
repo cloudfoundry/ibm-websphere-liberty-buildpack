@@ -1067,44 +1067,6 @@ module LibertyBuildpack::Container
         end
       end
 
-      it 'should add droplet.yaml when server xml contains myapp application' do
-        Dir.mktmpdir do |root|
-          droplet_yaml_file = File.join root, 'droplet.yaml'
-          root = File.join(root, 'app')
-          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
-          File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
-            file.write("<server><httpEndpoint id=\"defaultHttpEndpoint\" host=\"localhost\" httpPort=\"9080\" httpsPort=\"9443\" /><application name=\"myapp\" /></server>")
-          end
-
-          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-            .and_return(LIBERTY_DETAILS)
-
-          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
-          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
-
-          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
-
-          Liberty.new(
-            app_dir: root,
-            configuration: {},
-            environment: {},
-            license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
-          ).compile
-
-          liberty_directory = File.join root, '.liberty'
-          expect(Dir.exists?(liberty_directory)).to eq(true)
-
-          server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
-          server_xml_contents = File.read(server_xml_file)
-          expect(server_xml_contents.include? "<httpDispatcher enableWelcomePage='false'/>").to eq(true)
-          expect(server_xml_contents.include? "<config updateTrigger='mbean'/>").to eq(true)
-          expect(server_xml_contents.include? "<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>").to eq(true)
-
-          expect(File.exists?(droplet_yaml_file)).to eq(true)
-        end
-      end
-
       it 'should raise an exception when the repository cannot be found' do
         Dir.mktmpdir do |root|
           root = File.join(root, 'app')
@@ -1300,6 +1262,107 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
         ).compile
       end
+    end
+
+    context 'droplet.yaml' do
+
+      def generate(root, xml)
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
+            file.write("<server><httpEndpoint id=\"defaultHttpEndpoint\" host=\"localhost\" httpPort=\"9080\" httpsPort=\"9443\" />#{xml}</server>")
+          end
+
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+            .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          Liberty.new(
+            app_dir: root,
+            configuration: {},
+            environment: {},
+            license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+      end
+
+      def check_appstate(app_xml, app_name)
+        Dir.mktmpdir do |root|
+          droplet_yaml_file = File.join root, 'droplet.yaml'
+          root = File.join(root, 'app')
+
+          generate(root, app_xml)
+
+          liberty_directory = File.join root, '.liberty'
+          expect(Dir.exists?(liberty_directory)).to eq(true)
+
+          server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false'/>")
+          expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
+          expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
+          expect(server_xml_contents).to include("<appstate appName='#{app_name}' markerPath='${home}/.liberty.state'/>")
+
+          expect(File.exists?(droplet_yaml_file)).to eq(true)
+        end
+      end
+
+      def check_no_appstate(app_xml)
+        Dir.mktmpdir do |root|
+          droplet_yaml_file = File.join root, 'droplet.yaml'
+          root = File.join(root, 'app')
+
+          generate(root, app_xml)
+
+          liberty_directory = File.join root, '.liberty'
+          expect(Dir.exists?(liberty_directory)).to eq(true)
+
+          server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false'/>")
+          expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
+          expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
+          expect(server_xml_contents).not_to match(/<appstate.*\/>/)
+
+          expect(File.exists?(droplet_yaml_file)).to eq(false)
+        end
+      end
+
+      it 'should add droplet.yaml when server xml contains myapp application' do
+        check_appstate("<application name=\"myapp\" />", 'myapp')
+      end
+
+      it 'should add droplet.yaml when server xml contains foo application' do
+        check_appstate("<application name=\"foo\" />", 'foo')
+      end
+
+      it 'should add droplet.yaml when server xml contains foo webApplication' do
+        check_appstate("<webApplication name=\"fooWar\" />", 'fooWar')
+      end
+
+      it 'should add droplet.yaml when server xml contains foo enterpriseApplication' do
+        check_appstate("<enterpriseApplication name=\"fooEar\" />", 'fooEar')
+      end
+
+      it 'should NOT add droplet.yaml when server xml contains two applications' do
+        check_no_appstate("<application name=\"foo\" /><application name=\"foo2\" />")
+      end
+
+      it 'should NOT add droplet.yaml when server xml contains two webApplications' do
+        check_no_appstate("<webApplication name=\"fooWar\" /><webApplication name=\"fooWar2\" />")
+      end
+
+      it 'should NOT add droplet.yaml when server xml contains two enterpriseApplications' do
+        check_no_appstate("<enterpriseApplication name=\"fooEar\" /><enterpriseApplication name=\"fooEar2\" />")
+      end
+
+      it 'should NOT add droplet.yaml when server xml contains two different application types' do
+        check_no_appstate("<application name=\"foo\" /><webApplication name=\"fooWar\" />")
+      end
+
     end
 
     describe 'release' do
