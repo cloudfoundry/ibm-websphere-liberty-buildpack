@@ -557,5 +557,63 @@ module LibertyBuildpack::Services
 
     end # describe
 
-  end # describe DataCache
+    describe 'parse_compliant_vcap_service' do
+
+      let(:vcap_services) do
+        { 'myName' =>
+          [{ 'name' => 'myName',
+              'plan' => 'beta',
+              'label' => 'myLabel',
+              'credentials' => {
+                'url' => 'http://foobar',
+                'password' => 'myPassword',
+                'scopes' => %w(singleton request)
+              }
+            }]
+        }
+      end
+
+      def test_result(generated_hash, generated_xml, name, value)
+        expect(generated_hash[name]).to eq(value)
+
+        variables = REXML::XPath.match(generated_xml, "/server/variable[@name='#{name}']")
+        expect(variables).not_to be_empty
+        expect(variables[0].attributes['value']).to eq(value)
+      end
+
+      it 'parse default' do
+        doc = REXML::Document.new('<server></server>')
+        hash = Utils.parse_compliant_vcap_service(doc.root, vcap_services['myName'][0])
+
+        test_result(hash, doc.root, 'cloud.services.myName.name', 'myName')
+        test_result(hash, doc.root, 'cloud.services.myName.plan', 'beta')
+        test_result(hash, doc.root, 'cloud.services.myName.label', 'myLabel')
+        test_result(hash, doc.root, 'cloud.services.myName.connection.url', 'http://foobar')
+        test_result(hash, doc.root, 'cloud.services.myName.connection.password', 'myPassword')
+        test_result(hash, doc.root, 'cloud.services.myName.connection.scopes', 'singleton, request')
+      end
+
+      it 'parse custom' do
+        doc = REXML::Document.new('<server></server>')
+        hash = Utils.parse_compliant_vcap_service(doc.root, vcap_services['myName'][0]) do | name, value |
+          if name == 'credentials.scopes'
+            value = value.join(' ')
+          elsif name == 'plan'
+            value = 'alpha'
+          else
+            value
+          end
+        end
+
+        test_result(hash, doc.root, 'cloud.services.myName.name', 'myName')
+        test_result(hash, doc.root, 'cloud.services.myName.plan', 'alpha')
+        test_result(hash, doc.root, 'cloud.services.myName.label', 'myLabel')
+        test_result(hash, doc.root, 'cloud.services.myName.connection.url', 'http://foobar')
+        test_result(hash, doc.root, 'cloud.services.myName.connection.password', 'myPassword')
+        test_result(hash, doc.root, 'cloud.services.myName.connection.scopes', 'singleton request')
+      end
+
+    end
+
+  end # describe
 end

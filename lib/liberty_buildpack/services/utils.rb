@@ -26,8 +26,18 @@ module LibertyBuildpack::Services
 
     #---------------------------------------------------------------------
     # A utility method that can be used by most service classes to generate runtime-vars.xml entries. Services with json that does not follow normal conventions
-    # cannot use this utility method and must provide the proper implementation in the service class. If you find this utility method doesn't quite work for you,
-    # you must write your own implementation - do not change this utility method
+    # might not be able to use this utility method and should provide the proper implementation in the service class. For services with json with non-String values
+    # it is possible to customize how the property values are converted into a String by provding a code block that does the translation. For example:
+    #
+    #  Utils.parse_compliant_vcap_service(doc.root, vcap_services) do | name, value |
+    #    if name == 'credentials.scope'
+    #      value = value.join(' ')
+    #    else
+    #      value
+    #    end
+    #  end
+    #
+    # By default, properties of Array type are converted into a comma separated String.
     #
     # @param [REXML::Element] element - the root element for the runtime-vars.xml doc. A new sub-element will be written to this doc for each cloud variable generated.
     # @param [Hash] properties - the vcap_services data for the service instance.
@@ -41,13 +51,18 @@ module LibertyBuildpack::Services
           # To make life easier for the user, add a special key into the return hash to make it easier to find the name of the service.
           hash_to_return['service_name'] = properties[property] if property == 'name'
           name = "cloud.services.#{properties['name']}.#{property}"
-          value = properties[property]
+          value = block_given? ? yield(property, properties[property]) : properties[property]
           add_runtime_var(element, hash_to_return, name, value)
         elsif properties[property].class == Hash && property == 'credentials'
           # credentials. Create cloud form of variable and add to runtime_vars and hash
           properties[property].keys.each do |subproperty|
             name = "cloud.services.#{properties['name']}.connection.#{subproperty}"
             value = properties[property][subproperty]
+            if block_given?
+              value = yield("#{property}.#{subproperty}", value)
+            elsif value.is_a?(Array)
+              value = value.join(', ')
+            end
             add_runtime_var(element, hash_to_return, name, value)
           end # each subproperty
         end
