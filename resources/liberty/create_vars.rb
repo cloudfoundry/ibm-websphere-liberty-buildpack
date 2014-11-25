@@ -22,7 +22,7 @@ require 'rexml/document'
 def add_runtime_variable(element, name, value)
   unless name.nil? || value.nil?
     variables = element.root.elements.to_a("//variable[@name='#{name.downcase}']")
-    value = value.join(', ') if value.is_a?(Array)
+    value = value.is_a?(Array) ? value.join(', ') : value
     if variables.empty?
       variable = REXML::Element.new('variable', element)
       variable.add_attribute('name', name.downcase)
