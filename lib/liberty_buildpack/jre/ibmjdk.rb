@@ -203,10 +203,10 @@ module LibertyBuildpack::Jre
     # user
     def default_dump_opts
       default_options = []
+      default_options.push '-Xdump:none'
       default_options.push "-Xdump:heap:defaults:file=#{@common_paths.dump_directory}/heapdump.%Y%m%d.%H%M%S.%pid.%seq.phd"
       default_options.push "-Xdump:java:defaults:file=#{@common_paths.dump_directory}/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt"
       default_options.push "-Xdump:snap:defaults:file=#{@common_paths.dump_directory}/Snap.%Y%m%d.%H%M%S.%pid.%seq.trc"
-      default_options.push '-Xdump:none'
       default_options
     end
 
