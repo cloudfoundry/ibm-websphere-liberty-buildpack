@@ -18,9 +18,6 @@ RSpec::Core::RakeTask.new(:spec) do |t|
   t.rspec_opts = '--tty' if ENV.has_key? 'RAKE_FORCE_COLOR'
 end
 
-require 'ci/reporter/rake/rspec'
-task :spec => "ci:setup:rspec"
-
 require 'yard'
 YARD::Rake::YardocTask.new do |t|
   t.options = ['--no-stats']
@@ -96,7 +93,7 @@ task :package, [:zipfile, :hosts, :version] do |t, args|
 
     bc = BuildpackCache.new(File.join(dest, 'admin_cache'))
     # Collect all remote content using all config files
-    configs = bc.collect_configs nil, cache_hosts 
+    configs = bc.collect_configs nil, cache_hosts
     bc.download_cache(configs)
     # Fix file permissions
     system("find #{dest} -type f -exec chmod a+r {} \\;")

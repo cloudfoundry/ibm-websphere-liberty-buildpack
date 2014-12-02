@@ -15,6 +15,7 @@
 # the License.
 
 require 'spec_helper'
+require 'logging_helper'
 require 'liberty_buildpack/container/services_manager'
 require 'liberty_buildpack/services/mongo'
 require 'liberty_buildpack/util/heroku'
@@ -22,6 +23,7 @@ require 'liberty_buildpack/util/heroku'
 module LibertyBuildpack::Services
 
   describe 'MongoDB' do
+    include_context 'logging_helper'
 
     #----------------
     # Helper method to check an xml file agains expected results.

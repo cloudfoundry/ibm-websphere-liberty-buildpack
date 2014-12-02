@@ -23,16 +23,6 @@ module LibertyBuildpack::Container
 
     HEROKU_ENV_VAR = 'DYNO'.freeze
 
-    before do
-      $stdout = StringIO.new
-      $stderr = StringIO.new
-    end
-
-    after do
-      $stdout = STDOUT
-      $stderr = STDERR
-    end
-
     # Heroku
     context 'For a PaaS where the app root is the same as the container user home' do
       before do
