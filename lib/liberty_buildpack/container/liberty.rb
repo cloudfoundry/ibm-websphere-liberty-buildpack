@@ -289,7 +289,8 @@ module LibertyBuildpack::Container
       server_xml_doc = XmlUtils.read_xml_file(filename)
       @services_manager.update_configuration(server_xml_doc, true, current_server_dir)
       application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
-      Liberty.web_inf(@app_dir) ? application.attributes['type'] = 'war' : application.attributes['type'] = 'ear'
+      application.attributes['location'] = myapp_name
+      application.attributes['type'] = myapp_type
       XmlUtils.write_formatted_xml_file(server_xml_doc, filename)
     end
 
@@ -706,8 +707,16 @@ module LibertyBuildpack::Container
       end
     end
 
+    def myapp_type
+      Liberty.web_inf(@app_dir) ? 'war' : 'ear'
+    end
+
+    def myapp_name
+      "myapp.#{myapp_type}"
+    end
+
     def myapp_dir
-      File.join(apps_dir, 'myapp')
+      File.join(apps_dir, myapp_name)
     end
 
     def apps_dir
