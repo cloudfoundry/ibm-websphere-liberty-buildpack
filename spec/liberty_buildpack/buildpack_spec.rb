@@ -32,8 +32,8 @@ module LibertyBuildpack
     let(:stub_jre2) { double('StubJre2', detect: nil, compile: nil) }
 
     before do
-      VERSION_CONFIG_PATH = Pathname.new(File.expand_path('../../config/version.yml', File.dirname(__FILE__))).freeze
-      YAML.stub(:load_file).with(VERSION_CONFIG_PATH).and_return({})
+      version_config_path = Pathname.new(File.expand_path('../../config/version.yml', File.dirname(__FILE__))).freeze
+      YAML.stub(:load_file).with(version_config_path).and_return({})
 
       YAML.stub(:load_file).with(File.expand_path('config/logging.yml')).and_return(
           'default_log_level' => 'DEBUG'

@@ -47,6 +47,18 @@ and is bound to a PostgreSQL service that is named mydb:
 </library>
 ```
 
+With this configuration, the datasource should be accessible using Java code similar to the following:
+
+```
+import javax.annotation.Resource
+import javax.sql.DataSource
+
+...
+
+@Resource(name = "jdbc/mydb")
+private DataSource mydb;
+```
+
 The configuration elements in the server.xml file use the following IDs and ID formats:
 
 * The dataSource element uses a configuration ID of postgresql-service_name.
@@ -65,3 +77,8 @@ attributes:
 * portNumber
 
 The Liberty buildpack does not update the jndiName attribute.
+
+You can provide your own client driver JAR files. The client driver JAR files must be placed in the
+`usr/servers/<servername>/lib` directory. If you do not provide client driver JAR files, the Liberty buildpack
+provides the files for you. The client driver JAR files that you provide must use the standard names that are
+established by the providing vendor. You cannot rename client JAR files.

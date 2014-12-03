@@ -6,7 +6,7 @@ this by doing the following:
 
 * Generate variable bindings for the bound services based on the content of VCAP_SERVICES.
 * Install additional Liberty features and/or client libraries, e.g. JDBC drivers, required to access the bound services.
-* Generate or update server.xml stanzas required by the services.
+* Generate or update configuration elements in the server.xml required by the services.
 
 If you want the application to manage the service directly, you can opt-out of automatic configuration for the
 service by setting the services_autoconfig_excludes environment variable.
@@ -27,10 +27,11 @@ installation.
 
 See the documentation for the bound service type for more details.
 
-## Generating or updating server.xml configuration stanzas
+## Generating or updating server.xml configuration
 
-When you push an application, the Liberty buildpack generates the server.xml stanzas as described in [Modifications]. When
-you bind a service, the Liberty buildpack may generate additional stanzas in the server.xml for the bound service.
+When you push an application, the Liberty buildpack generates configuration elements in the server.xml as described in
+[Modifications]. When you bind a service, the Liberty buildpack may generate additional elememnts in the server.xml for
+the bound service.
 
 See the documentation for the bound service type for more details.
 
@@ -74,5 +75,5 @@ env:
   services_autoconfig_excludes: mysql=config mongodb-2.2=all
 ``` 
 
-[Accessing the Information of Bound Services]: server-xml-options.md#accessing_the_information_of_bound_services
-[Modifications]: server-xml-options.md#server.xml_modifications
+[Accessing the Information of Bound Services]: server-xml-options.md#accessing-the-information-of-bound-services
+[Modifications]: server-xml-options.md#serverxml-modifications

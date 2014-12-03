@@ -7,10 +7,11 @@ configuration elements in the server.xml file. The elements are required to acce
 * A mongoDB element.
 * A library element with an embedded fileset subelement. The library element is created for the MongoDB driver.
 * A featureManager element. The Liberty buildpack also adds the mongodb-2.0 feature to the featureManager element.
+* An application element. The Liberty buildpack adds the classloader for the Mongo library to the application element.
 
 In addition, the Liberty buildpack provides the MongoDB driver that is required.
 
-In the dataSource element, the Liberty buildpack generates a JNDI name that is used by your application to access
+In the mongoDB element, the Liberty buildpack generates a JNDI name that is used by your application to access
 MongoDB. Because the Liberty buildpack does not have access to the JNDI name that is used by the application,
 the Liberty buildpack generates a JNDI name with a convention of mongo/service_name, where service_name is the
 name of the bound service. For example, if you bind a MongoDB service that is named mydb to the application,
@@ -22,6 +23,10 @@ The following example shows the configuration that is generated when an applicat
 bound to a MongoDB service instance that is named mydb:
 
 ```
+    <application name="myapp" context-root="/" location="myapp" type="war">
+        <classloader commonLibraryRef='mongo-library'/>
+    </application>
+    
     <mongo id='mongo-mydb' libraryRef='mongo-library'
            user='${cloud.services.mydb.connection.user}'
            password='${cloud.services.mydb.connection.password}'>
@@ -39,6 +44,18 @@ bound to a MongoDB service instance that is named mydb:
     </library>
 ```
 
+With this configuration, the mongoDB database should be accessible using Java code similar to the following:
+
+```
+import javax.annotation.Resource
+import com.mongodb.DB
+
+...
+
+@Resource(name = "mongo/mydb")
+private DB mydb;
+```
+
 The configuration elements in the server.xml file use the following IDs and ID formats:
 
 * The mongo element uses a configuration ID of mongo-service_name.
@@ -46,3 +63,17 @@ The configuration elements in the server.xml file use the following IDs and ID f
 * The library element uses a configuration ID of mongo-library.
 * The fileset element uses a configuration ID of mongo-fileset.
 
+If the Liberty buildpack finds existing configuration, it checks and updates the configuration if necessary.
+For example, the buildpack might update the following elements and attributes:
+
+* The user and password attributes in the mongo element. The hostNames and ports subelements of the mongo
+element might also be updated.
+* The databaseName attribute of the mongoDB element.
+* The dir and includes attributes of the fileset element.
+
+The Liberty buildpack does not update the jndiName attribute.
+
+You can provide your own client driver JAR files. The client driver JAR files must be placed in the
+`usr/servers/<servername>/lib` directory. If you do not provide client driver JAR files, the Liberty buildpack
+provides the files for you. The client driver JAR files that you provide must use the standard names that are
+established by the providing vendor. You cannot rename client JAR files.

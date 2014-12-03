@@ -567,7 +567,7 @@ module LibertyBuildpack::Container
 
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to eq(true)
-          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp"').to eq(true)
+          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp.war"').to eq(true)
           expect(server_xml_contents.include? 'type="war"').to eq(true)
           expect(server_xml_contents.include? 'httpPort="${port}"').to eq(true)
           expect(server_xml_contents.include? '<httpDispatcher enableWelcomePage="false"/>').to eq(true)
@@ -666,7 +666,7 @@ module LibertyBuildpack::Container
 
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents.include? '<featureManager>').to eq(true)
-          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp"').to eq(true)
+          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp.ear"').to eq(true)
           expect(server_xml_contents.include? 'type="ear"').to eq(true)
           expect(server_xml_contents.include? 'httpPort="${port}"').to eq(true)
           expect(server_xml_contents.include? '<config updateTrigger="mbean"/>').to eq(true)
