@@ -208,7 +208,11 @@ module LibertyBuildpack
     end
 
     def self.log_debug_data(logger)
-      logger.debug { "Environment Variables: #{ENV.to_hash}" }
+      safe_env = ENV.to_hash
+      if safe_env.has_key? 'VCAP_SERVICES'
+        safe_env.merge!({ 'VCAP_SERVICES' => LibertyBuildpack::Util.safe_vcap_services(safe_env['VCAP_SERVICES']) })
+      end
+      logger.debug { "Environment Variables: #{safe_env}" }
 
       # Log information about the buildpack's git repository to enable stale forks to be spotted.
       # Call the debug method passing a parameter rather than a block so that, should the git command
