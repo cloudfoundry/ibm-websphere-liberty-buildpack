@@ -38,6 +38,7 @@ shared_context 'logging_helper' do
     $DEBUG = example.metadata[:debug]
     $VERBOSE = example.metadata[:verbose]
 
+    LibertyBuildpack::Diagnostics::LoggerFactory.send :close # suppress warnings
     LibertyBuildpack::Diagnostics::LoggerFactory.create_logger app_dir
   end
 

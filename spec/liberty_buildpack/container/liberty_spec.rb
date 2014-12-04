@@ -264,6 +264,49 @@ module LibertyBuildpack::Container
         end
       end
 
+      it 'should not write VCAP_SERVICES credentials as debug info' do
+        old_level = ENV['JBP_LOG_LEVEL']
+        begin
+          Dir.mktmpdir do |root|
+            Dir.mkdir File.join(root, 'WEB-INF')
+
+            LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+            .and_return(LIBERTY_DETAILS)
+            LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+            component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+            LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+            application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+            secret = 'VERY SECRET PHRASE'
+            plaindata = 'PLAIN DATA'
+            ENV['JBP_LOG_LEVEL'] = 'debug'
+
+            LibertyBuildpack::Diagnostics::LoggerFactory.send :close # suppress warnings
+            LibertyBuildpack::Diagnostics::LoggerFactory.create_logger root
+
+            library_directory = File.join(root, '.lib')
+            FileUtils.mkdir_p(library_directory)
+            Liberty.new(
+            app_dir: root,
+            lib_directory: library_directory,
+            configuration: {},
+            environment: {},
+            vcap_services: { 'data' => [{ 'credentials' => { 'identity' => secret }, 'data' => plaindata }] },
+            license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+            ).compile
+
+            log_content = File.read LibertyBuildpack::Diagnostics.get_buildpack_log root
+
+            expect(log_content).not_to match(secret)
+            expect(log_content).to match(/PRIVATE DATA HIDDEN/)
+            expect(log_content).to match(plaindata)
+          end
+        ensure
+          ENV['JBP_LOG_LEVEL'] = old_level
+        end
+      end
+
       it 'should extract Liberty from a TAR file' do
         Dir.mktmpdir do |root|
           root = File.join(root, 'app')

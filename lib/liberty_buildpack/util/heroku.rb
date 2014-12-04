@@ -59,7 +59,7 @@ module LibertyBuildpack::Util
             type = key
             service = {}
             service['name'] = service_name_map[key] || generate_name(key)
-            service['credentials'] = create_default_credentials(value)
+            service['credentials'] = create_default_credentials(key, value)
           end
 
           vcap_services[type] = [service]
@@ -110,7 +110,7 @@ module LibertyBuildpack::Util
       [key, service]
     end
 
-    def create_default_credentials(value)
+    def create_default_credentials(key, value)
       credentials = {}
       begin
         uri = URI.parse(value)
@@ -120,7 +120,7 @@ module LibertyBuildpack::Util
         credentials['password'] = uri.password unless uri.password.nil?
         credentials['name'] = uri.path[1..-1]  unless uri.path[1..-1].nil?
       rescue URI::InvalidURIError
-        @logger.debug("unable to parse #{value}")
+        @logger.debug("unable to parse #{key}")
       end
       credentials['uri'] = credentials['url'] = value
       credentials

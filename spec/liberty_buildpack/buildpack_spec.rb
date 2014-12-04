@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'application_helper'
+require 'logging_helper'
 require 'spec_helper'
 require 'liberty_buildpack/buildpack'
 require 'liberty_buildpack/diagnostics/logger_factory'
@@ -23,6 +25,8 @@ module LibertyBuildpack
   APP_DIR = 'test-app-dir'.freeze
 
   describe Buildpack do
+    include_context 'application_helper'
+    include_context 'logging_helper'
 
     let(:stub_container1) { double('StubContainer1', detect: nil, compile: nil) }
     let(:stub_container2) { double('StubContainer2', detect: nil, compile: nil) }
@@ -62,6 +66,18 @@ module LibertyBuildpack
 
     after do
       $stderr = STDERR
+    end
+
+    it 'should not write VCAP_SERVICES credentials as debug info',
+       log_level: 'DEBUG' do
+      ENV['VCAP_SERVICES'] = '{"type":[{"credentials":"VERY SECRET PHRASE","plain":"PLAIN DATA"}]}'
+      log_content = with_buildpack do |buildpack|
+        app_dir = File.dirname buildpack.instance_variable_get(:@lib_directory)
+        File.read LibertyBuildpack::Diagnostics.get_buildpack_log app_dir
+      end
+      expect(log_content).not_to match(/VERY SECRET PHRASE/)
+      expect(log_content).to match(/credentials.*PRIVATE DATA HIDDEN/)
+      expect(log_content).to match(/PLAIN DATA/)
     end
 
     it 'should call detect on all non-JRE components and only one JRE component' do

@@ -15,6 +15,7 @@
 # limitations under the License.
 
 require 'spec_helper'
+require 'logging_helper'
 require 'liberty_buildpack/util/heroku'
 
 module LibertyBuildpack::Util
@@ -38,6 +39,7 @@ module LibertyBuildpack::Util
   end
 
   describe 'VCAP_SERVICES' do
+    include_context 'logging_helper'
 
     def check_database_url(vcap_services)
       services = vcap_services['DATABASE_URL']
@@ -101,7 +103,16 @@ module LibertyBuildpack::Util
       expect(tags).to include('mongodb')
     end
 
-    it 'generate without service mappings' do
+    def check_debug_output(env)
+      log_content = File.read LibertyBuildpack::Diagnostics.get_buildpack_log app_dir
+      env.each do |key, value|
+        if key.end_with?(Heroku::URL_SUFFIX) || key.end_with?(Heroku::URI_SUFFIX)
+          expect(log_content).not_to match(value)
+        end
+      end
+    end
+
+    it 'generate without service mappings', log_level: 'DEBUG' do
       env = {}
       env['DATABASE_URL'] = 'http://u:p@foo:500/bar'
       env['HEROKU_POSTGRESQL_RED_URL'] = 'postgre://doesnotexist.xyz'
@@ -132,9 +143,12 @@ module LibertyBuildpack::Util
 
       # verify MONGOSOUP_URL
       check_mongo(vcap_services, 'MONGOSOUP_URL', 'mongosoup', env['MONGOSOUP_URL'])
+
+      # verify we don't leak credentials
+      check_debug_output(env)
     end
 
-    it 'generate with service mappings' do
+    it 'generate with service mappings', log_level: 'DEBUG' do
       env = {}
       env['DATABASE_URL'] = 'http://u:p@foo:500/bar'
       env['HEROKU_POSTGRESQL_RED_URL'] = 'postgre://doesnotexist.xyz'
@@ -170,6 +184,9 @@ module LibertyBuildpack::Util
 
       # verify MONGOSOUP_URL
       check_mongo(vcap_services, 'MONGOSOUP_URL', 'soup', env['MONGOSOUP_URL'])
+
+      # verify we don't leak credentials
+      check_debug_output(env)
     end
 
   end # describe

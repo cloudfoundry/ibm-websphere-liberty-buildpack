@@ -20,6 +20,7 @@ require 'fileutils'
 require 'set'
 require 'liberty_buildpack/container'
 require 'liberty_buildpack/container/install_components'
+require 'liberty_buildpack/util'
 require 'liberty_buildpack/util/constantize'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
@@ -32,7 +33,7 @@ module LibertyBuildpack::Container
 
     def initialize(vcap_services, server_dir, opt_out_string)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
-      @logger.debug("init: server dir is #{server_dir}, vcap_services is #{vcap_services} and opt_out is #{opt_out_string}")
+      @logger.debug("init: server dir is #{server_dir}, vcap_services is #{LibertyBuildpack::Util.safe_vcap_services(vcap_services)} and opt_out is #{opt_out_string}")
       @opt_out = parse_opt_out(opt_out_string)
       FileUtils.mkdir_p(server_dir)
       # The collection of service instances that require full autoconfig
@@ -258,14 +259,14 @@ module LibertyBuildpack::Container
       runtime_vars_doc = REXML::Document.new('<server></server>')
       unless vcap_services.nil?
         vcap_services.each do |service_type, service_data|
-          @logger.debug("processing service type #{service_type} and data #{service_data}")
+          @logger.debug("processing service type #{service_type} and data #{LibertyBuildpack::Util.safe_service_data(service_data)}")
           process_service_type(runtime_vars_doc.root, service_type, service_data)
         end
       end
       runtime_vars = File.join(server_dir, 'runtime-vars.xml')
       LibertyBuildpack::Util::XmlUtils.write_formatted_xml_file(runtime_vars_doc, runtime_vars)
       @logger.debug("runtime-vars file is #{runtime_vars}")
-      @logger.debug("runtime vars contents is #{File.readlines(runtime_vars)}")
+      @logger.debug("runtime vars contents is #{LibertyBuildpack::Util.safe_credential_properties(File.readlines(runtime_vars))}")
     end
 
     #------------------------------------------------------
