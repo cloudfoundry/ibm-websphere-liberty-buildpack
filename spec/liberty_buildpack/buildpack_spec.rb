@@ -64,6 +64,27 @@ module LibertyBuildpack
       $stderr = STDERR
     end
 
+    it 'should not write VCAP_SERVICES credentials as debug info' do
+      old_level = ENV['JBP_LOG_LEVEL']
+      old_servs = ENV['VCAP_SERVICES']
+      begin
+        secret = 'VERY SECRET PHRASE'
+        ENV['JBP_LOG_LEVEL'] = 'debug'
+        ENV['VCAP_SERVICES'] = "blah-blah \"credentials\":{#{secret}} end-blah"
+        log_content = with_buildpack do |buildpack|
+          app_dir = File.dirname buildpack.instance_variable_get(:@lib_directory)
+          File.read LibertyBuildpack::Diagnostics.get_buildpack_log app_dir
+        end
+        expect(log_content).not_to match(secret)
+        expect(log_content).to match(/credentials.*PRIVATE DATA HIDDEN/)
+        expect(log_content).to match(/blah-blah/)
+        expect(log_content).to match(/end-blah/)
+      ensure
+        ENV['JBP_LOG_LEVEL'] = old_level
+        ENV['VCAP_SERVICES'] = old_servs
+      end
+    end
+
     it 'should call detect on all non-JRE components and only one JRE component' do
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_container1.stub(:apps).and_return(['root/app1', 'root/app2'])

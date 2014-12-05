@@ -45,4 +45,19 @@ module LibertyBuildpack::Util
     service
   end
 
+  # Get services as either hash or string and return as a string with
+  # credentials info masked out as PRIVATE DATA HIDDEN string
+  #
+  # @return [String] returns masked vcap_services string
+  def self.safe_vcap_services(vcap_services)
+    vcap_services.to_s.gsub(/(\"credentials\".+?){.*?}/, '\\1["PRIVATE DATA HIDDEN"]')
+  end
+
+  # Get services as either array or a string of lines from runtime_vars.xml
+  # and mask cloud.services.*.connection.* values out as PRIVATE DATA HIDDEN
+  #
+  # @return [String] returns masked runtime_vars.xml content
+  def self.safe_credential_properties(property)
+    property.to_s.gsub(/(<variable\s+name='cloud\.services\.[^']*\.connection\.[^']*'\s+value=').*?('\s*\/>)/, '\\1[PRIVATE DATA HIDDEN]\\2')
+  end
 end
