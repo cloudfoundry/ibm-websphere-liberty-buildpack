@@ -32,8 +32,12 @@ cf push <APP-NAME> -p <ARCHIVE> -b https://github.com/cloudfoundry/ibm-websphere
 All Documentation is available in the Docs folder of the buildpack.
 
 * [Liberty Buildpack Design Overview](docs/design.md)
-* Container
+* Containers
     * [Liberty Container](docs/container-liberty.md)
+        * [Service Plug-ins](docs/service-plugins.md)
+            * [MongoDB](docs/services/mongo.md)
+            * [MySQL](docs/services/mysql.md)
+            * [PostgreSQL](docs/services/postgresql.md)
     * [Java Main (for jars with a main() class)](docs/java-main.md)
 * Frameworks
 	* [Java Opts Framework](docs/framework-java_opts.md)
