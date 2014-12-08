@@ -19,6 +19,7 @@ require 'liberty_buildpack'
 require 'liberty_buildpack/buildpack_version'
 require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/util/constantize'
+require 'liberty_buildpack/util/heroku'
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/diagnostics/common'
 require 'pathname'
@@ -208,7 +209,16 @@ module LibertyBuildpack
     end
 
     def self.log_debug_data(logger)
-      logger.debug { "Environment Variables: #{ENV.to_hash}" }
+      logger.debug do
+        safe_env = ENV.to_hash
+        if safe_env.has_key? 'VCAP_SERVICES'
+          safe_env.merge!({ 'VCAP_SERVICES' => LibertyBuildpack::Util.safe_vcap_services(safe_env['VCAP_SERVICES']) })
+        end
+        if LibertyBuildpack::Util::Heroku.heroku?
+          LibertyBuildpack::Util.safe_heroku_env!(safe_env)
+        end
+        "Environment Variables: #{safe_env}"
+      end
 
       # Log information about the buildpack's git repository to enable stale forks to be spotted.
       # Call the debug method passing a parameter rather than a block so that, should the git command
