@@ -15,11 +15,13 @@
 # the License.
 
 require 'spec_helper'
+require 'logging_helper'
 require 'rexml/document'
 require 'liberty_buildpack/services/utils'
 
 module LibertyBuildpack::Services
   describe Utils do
+    include_context 'logging_helper'
 
     #----------------
     # Helper method to check an xml file agains expected results.

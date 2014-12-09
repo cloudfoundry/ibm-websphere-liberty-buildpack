@@ -15,12 +15,14 @@
 # the License.
 
 require 'spec_helper'
+require 'logging_helper'
 require 'liberty_buildpack/container/liberty'
 require 'liberty_buildpack/container/container_utils'
 
 module LibertyBuildpack::Container
 
   describe Liberty do
+    include_context 'logging_helper'    # logging_helper only for now
 
     LIBERTY_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('8.5.5')
     LIBERTY_SINGLE_DOWNLOAD_URI = 'test-liberty-uri.tar.gz'.freeze # end of URI (here ".tar.gz") is significant in liberty container code
@@ -31,15 +33,8 @@ module LibertyBuildpack::Container
     let(:component_index) { double('ComponentIndex') }
 
     before do
-      $stdout = StringIO.new
-      $stderr = StringIO.new
       # return license file by default
       application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
-    end
-
-    after do
-      $stdout = STDOUT
-      $stderr = STDERR
     end
 
     describe 'prepare applications' do

@@ -15,11 +15,13 @@
 # limitations under the License.
 
 require 'spec_helper'
+require 'logging_helper'
 require 'liberty_buildpack/framework/spring_auto_reconfiguration'
 
 module LibertyBuildpack::Framework
 
   describe SpringAutoReconfiguration do
+    include_context 'logging_helper'
 
     SPRING_AUTO_RECONFIGURATION_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('0.6.8')
 
@@ -27,16 +29,6 @@ module LibertyBuildpack::Framework
 
     let(:application_cache) { double('ApplicationCache') }
     let(:web_xml_modifier) { double('WebXmlModifier') }
-
-    before do
-      $stdout = StringIO.new
-      $stderr = StringIO.new
-    end
-
-    after do
-      $stdout = STDOUT
-      $stderr = STDERR
-    end
 
     it 'should detect with Spring JAR in WEB-INF' do
       LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)

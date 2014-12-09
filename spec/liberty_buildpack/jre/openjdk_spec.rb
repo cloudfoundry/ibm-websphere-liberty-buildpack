@@ -15,6 +15,7 @@
 # limitations under the License.
 
 require 'spec_helper'
+require 'logging_helper'
 require 'fileutils'
 require 'liberty_buildpack/jre/openjdk'
 require 'liberty_buildpack/container/common_paths'
@@ -22,6 +23,7 @@ require 'liberty_buildpack/container/common_paths'
 module LibertyBuildpack::Jre
 
   describe OpenJdk do
+    include_context 'logging_helper'
 
     OPENJDK_DETAILS_PRE_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.7.0'), 'test-uri']
     OPENJDK_DETAILS_POST_8 = [LibertyBuildpack::Util::TokenizedVersion.new('1.8.0'), 'test-uri']
@@ -31,13 +33,6 @@ module LibertyBuildpack::Jre
 
     before do
       allow(LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new).and_return(memory_heuristic)
-      $stdout = StringIO.new
-      $stderr = StringIO.new
-    end
-
-    after do
-      $stdout = STDOUT
-      $stderr = STDERR
     end
 
     it 'should detect with id of openjdk-<version>' do

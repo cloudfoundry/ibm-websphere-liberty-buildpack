@@ -15,12 +15,14 @@
 # limitations under the License.
 
 require 'spec_helper'
+require 'logging_helper'
 require 'application_helper'
 require 'console_helper'
 
 shared_context 'component_helper' do
   include_context 'application_helper'
   include_context 'console_helper'
+  include_context 'logging_helper'
 
   let(:component) { described_class.new context }
 

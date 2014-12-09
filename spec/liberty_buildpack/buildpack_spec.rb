@@ -14,19 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'application_helper'
+require 'component_helper'
 require 'logging_helper'
 require 'spec_helper'
+require 'logging_helper'
 require 'liberty_buildpack/buildpack'
 require 'liberty_buildpack/diagnostics/logger_factory'
 
 module LibertyBuildpack
 
-  APP_DIR = 'test-app-dir'.freeze
-
   describe Buildpack do
-    include_context 'application_helper'
     include_context 'logging_helper'
+    include_context 'component_helper'
 
     let(:stub_container1) { double('StubContainer1', detect: nil, compile: nil) }
     let(:stub_container2) { double('StubContainer2', detect: nil, compile: nil) }
@@ -64,15 +63,10 @@ module LibertyBuildpack
       $stderr = StringIO.new
     end
 
-    after do
-      $stderr = STDERR
-    end
-
     it 'should not write VCAP_SERVICES credentials as debug info',
        log_level: 'DEBUG' do
       ENV['VCAP_SERVICES'] = '{"type":[{"credentials":"VERY SECRET PHRASE","plain":"PLAIN DATA"}]}'
       log_content = with_buildpack do |buildpack|
-        app_dir = File.dirname buildpack.instance_variable_get(:@lib_directory)
         File.read LibertyBuildpack::Diagnostics.get_buildpack_log app_dir
       end
       expect(log_content).not_to match(/VERY SECRET PHRASE/)
@@ -287,11 +281,8 @@ module LibertyBuildpack
     end
 
     def with_buildpack(&block)
-      LibertyBuildpack::Diagnostics::LoggerFactory.send :close # suppress warnings
-      Dir.mktmpdir do |root|
-        Buildpack.drive_buildpack_with_logger(File.join(root, APP_DIR), 'Error %s') do |buildpack|
-          block.call buildpack
-        end
+      Buildpack.drive_buildpack_with_logger(app_dir, 'Error %s') do |buildpack|
+        block.call buildpack
       end
     end
 

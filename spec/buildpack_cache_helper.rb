@@ -27,9 +27,11 @@ shared_context 'buildpack_cache_helper' do
   let(:buildpack_cache_dir) { app_dir }
 
   let(:java_buildpack_cache_dir) { buildpack_cache_dir + 'java-buildpack' }
+  let(:ibm_liberty_buildpack_cache_dir) { buildpack_cache_dir + 'ibm-liberty-buildpack' }
 
   before do
     FileUtils.mkdir_p java_buildpack_cache_dir
+    FileUtils.mkdir_p ibm_liberty_buildpack_cache_dir
     ENV['BUILDPACK_CACHE'] = buildpack_cache_dir.to_s
   end
 

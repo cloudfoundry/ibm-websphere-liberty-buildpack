@@ -38,11 +38,15 @@ shared_context 'logging_helper' do
     $DEBUG = example.metadata[:debug]
     $VERBOSE = example.metadata[:verbose]
 
-    LibertyBuildpack::Diagnostics::LoggerFactory.send :close # suppress warnings
-    LibertyBuildpack::Diagnostics::LoggerFactory.create_logger app_dir
+    LibertyBuildpack::Diagnostics::LoggerFactory.send :close
+    diagnostics_directory = LibertyBuildpack::Diagnostics.get_diagnostic_directory(app_dir)
+    FileUtils.rm_rf diagnostics_directory
+
+    raise 'Failed to create logger' if LibertyBuildpack::Diagnostics::LoggerFactory.create_logger(app_dir).nil?
   end
 
   after do
+    LibertyBuildpack::Diagnostics::LoggerFactory.send :close
     FileUtils.rm_rf LibertyBuildpack::Diagnostics.get_diagnostic_directory app_dir
 
     ENV['JBP_LOG_LEVEL'] = previous_log_level

@@ -15,11 +15,13 @@
 # limitations under the License.
 
 require 'spec_helper'
+require 'logging_helper'
 require 'liberty_buildpack/framework/env'
 
 module LibertyBuildpack::Framework
 
   describe Env do
+    include_context 'logging_helper'
 
     it 'should detect with env configuration' do
       detected = Env.new(

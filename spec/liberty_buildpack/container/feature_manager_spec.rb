@@ -17,11 +17,13 @@
 require 'fileutils'
 require 'liberty_buildpack/container/feature_manager'
 require 'spec_helper'
+require 'logging_helper'
 require 'tmpdir'
 
 module LibertyBuildpack::Container
 
   describe FeatureManager do
+    include_context 'logging_helper'
 
     FEATURE_REPOSITORY_FIXTURE_DIR = 'spec/fixtures/liberty_feature_repository'.freeze
 

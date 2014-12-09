@@ -21,16 +21,6 @@ module LibertyBuildpack::Container
 
   describe InstallComponents do
 
-    before do
-      $stdout = StringIO.new
-      $stderr = StringIO.new
-    end
-
-    after do
-      $stdout = STDOUT
-      $stderr = STDERR
-    end
-
     describe 'zip' do
 
       it 'add zip' do

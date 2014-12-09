@@ -36,18 +36,4 @@ RSpec.configure do |config|
     c.syntax = [:should, :expect]
   end
   config.filter_run :focus
-  # Ensure a logger exists for any class under test that needs one.
-  config.before(:all) do
-    LibertyBuildpack::Diagnostics::LoggerFactory.send :close
-    diagnostics_directory = LibertyBuildpack::Diagnostics.get_diagnostic_directory(Dir.tmpdir)
-    FileUtils.rm_rf diagnostics_directory
-    raise 'Failed to create logger' if LibertyBuildpack::Diagnostics::LoggerFactory.create_logger(Dir.tmpdir).nil?
-  end
-
-  config.after(:all) do
-    LibertyBuildpack::Diagnostics::LoggerFactory.send :close
-    diagnostics_directory = LibertyBuildpack::Diagnostics.get_diagnostic_directory(Dir.tmpdir)
-    FileUtils.rm_rf diagnostics_directory
-  end
-
 end
