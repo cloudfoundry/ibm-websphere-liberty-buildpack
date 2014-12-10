@@ -1,5 +1,5 @@
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013-2014 the original author or authors.
+# Copyright 2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,16 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for components to use in the buildpack
+# Service configuration
 ---
-containers:
-  - "LibertyBuildpack::Container::JavaMain"
-  - "LibertyBuildpack::Container::Liberty"
-jres:
-  - "LibertyBuildpack::Jre::IBMJdk"
-  - "LibertyBuildpack::Jre::OpenJdk"
-frameworks:
-  - "LibertyBuildpack::Framework::Env"
-  - "LibertyBuildpack::Framework::JavaOpts"
-  - "LibertyBuildpack::Framework::SpringAutoReconfiguration"
-  - "LibertyBuildpack::Framework::NewRelicAgent"
+version: 3.12.0
+repository_root: "https://download.run.pivotal.io/new-relic/"
