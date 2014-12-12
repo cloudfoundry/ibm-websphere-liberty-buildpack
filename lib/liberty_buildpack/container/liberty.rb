@@ -376,7 +376,7 @@ module LibertyBuildpack::Container
         # Turn on marker file using appstate element
         appstate = REXML::Element.new('appstate', server_xml_doc.root)
         appstate.add_attribute('appName', apps[0].attributes['name'])
-        appstate.add_attribute('markerPath', '${home}/.liberty.state')
+        appstate.add_attribute('markerPath', '${home}/../.liberty.state')
         true
       else
         false
@@ -387,8 +387,6 @@ module LibertyBuildpack::Container
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
       container_root = File.expand_path('..', @app_dir)
       FileUtils.cp(File.join(resources, 'droplet.yaml'), container_root)
-      droplet_yaml = File.join(container_root, 'droplet.yaml')
-      system "sed -i -e 's|app/.liberty.state|#{File.basename(@app_dir)}/.liberty.state|' #{droplet_yaml}"
     end
 
     # Copies the template server xml into the server directory structure and prepares it

@@ -648,7 +648,7 @@ module LibertyBuildpack::Container
 
           droplet_yaml_content = YAML.load(File.read droplet_yaml_file)
           expect(droplet_yaml_content).to have_key('state_file')
-          expect(droplet_yaml_content['state_file']).to eq('app/.liberty.state')
+          expect(droplet_yaml_content['state_file']).to eq('.liberty.state')
         end
       end
 
@@ -1347,7 +1347,7 @@ module LibertyBuildpack::Container
           expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false'/>")
           expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
-          expect(server_xml_contents).to include("<appstate appName='#{app_name}' markerPath='${home}/.liberty.state'/>")
+          expect(server_xml_contents).to include("<appstate appName='#{app_name}' markerPath='${home}/../.liberty.state'/>")
 
           expect(File.exists?(droplet_yaml_file)).to eq(true)
         end
