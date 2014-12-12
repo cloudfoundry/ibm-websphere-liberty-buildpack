@@ -1,2 +1,2 @@
 ---
-state_file: app/.liberty.state
+state_file: .liberty.state

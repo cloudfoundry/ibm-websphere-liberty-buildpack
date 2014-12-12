@@ -1,3 +1,6 @@
+# IBM WebSphere Application Server Liberty Buildpack
+# Copyright 2014 the original author or authors.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +15,12 @@
 
 # Services configuration
 ---
-# attributes required by all service plugins
+# Attributes required by all service plugins. These attributes will be consumed by the services framework, so all
+# plugins must contain these attributes.
 class_name : LibertyBuildpack::Services::Default
 class_file : default.rb
 server_xml_stanza : none
+service_filter : '\Adefault\z'
+
+# Plugin specific attributes. In general, these attributes will be consumed only by the plugin implementation. If the
+# plugin implementation chooses to use framework utility methods, these framework methods may require usage of standard keys.
