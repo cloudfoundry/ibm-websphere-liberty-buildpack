@@ -237,4 +237,120 @@ module LibertyBuildpack::Container
 
   end # describe
 
+  describe 'filter_conflicting_features' do
+    #----------------
+    # Helper method to check an xml file against expected results.
+    #
+    # @param xml - the name of the xml file file containing the results (server.xml, runtime_vars.xml)
+    # @param - expected - the array of strings we expect to find in the xml file, in order.
+    #----------------
+    def validate_xml(server_xml, expected)
+      # At present, with no formatter, REXML writes server.xml as a single line (no cr). If we write a special formatter in the future to change that,
+      # then the following algorithm will need to change.
+      server_xml_contents = File.readlines(server_xml)
+      # For each String in the expected array, make sure there is a corresponding entry in server.xml
+      # make sure we consume all entries in the expected array.
+      expected.each do |line|
+        expect(server_xml_contents[0]).to include(line)
+      end
+    end
+
+    #----------------------------------------------
+    # Helper method that adds <featureManager> and <feature> into a REXML server.xml doc
+    #----------------------------------------------
+    def add_features(doc, features)
+      fm = REXML::Element.new('featureManager', doc)
+      features.each do |feature|
+        f = REXML::Element.new('feature', fm)
+        f.add_text(feature)
+      end
+    end
+
+    it 'should remove a single conflict from a single featureManager element' do
+      Dir.mktmpdir do |root|
+        # create a server.xml and populate it with features. Include a servlet-3.0/3.1 conflict with the feature to be removed appearing first.
+        server_xml = File.join(root, 'server.xml')
+        server_xml_doc = REXML::Document.new('<server></server>')
+        add_features(server_xml_doc.root, ['servlet-3.0', 'jsp-2.2', 'servlet-3.1'])
+        FeatureManager.filter_conflicting_features(server_xml_doc)
+        File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
+        # Set up results checker
+        s1 = '<server>'
+        s2 = '<featureManager><feature>jsp-2.2</feature><feature>servlet-3.1</feature></featureManager>'
+        s3 = '</server>'
+        expected = [s1, s2, s3]
+        validate_xml(server_xml, expected)
+      end
+    end # it
+
+    it 'should remove a different single conflict from a single featureManager element' do
+      Dir.mktmpdir do |root|
+        # create a server.xml and populate it with features. Include a websocket-1.0/servlet-3.0 conflict with feature to be removed appearing last.
+        server_xml = File.join(root, 'server.xml')
+        server_xml_doc = REXML::Document.new('<server></server>')
+        add_features(server_xml_doc.root, ['websocket-1.0', 'jsp-2.2', 'servlet-3.0'])
+        FeatureManager.filter_conflicting_features(server_xml_doc)
+        File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
+        # Set up results checker
+        s1 = '<server>'
+        s2 = '<featureManager><feature>websocket-1.0</feature><feature>jsp-2.2</feature></featureManager>'
+        s3 = '</server>'
+        expected = [s1, s2, s3]
+        validate_xml(server_xml, expected)
+      end
+    end # it
+
+    it 'should remove duplicate conflicts from a single featureManager element' do
+      Dir.mktmpdir do |root|
+        # create a server.xml and populate it with features. Include a servlet-3.0/3.1 conflict with multiple servlet-3.0 instances.
+        server_xml = File.join(root, 'server.xml')
+        server_xml_doc = REXML::Document.new('<server></server>')
+        add_features(server_xml_doc.root, ['servlet-3.0', 'jsp-2.2', 'servlet-3.1', 'servlet-3.0'])
+        FeatureManager.filter_conflicting_features(server_xml_doc)
+        File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
+        # Set up results
+        s1 = '<server>'
+        s2 = '<featureManager><feature>jsp-2.2</feature><feature>servlet-3.1</feature></featureManager>'
+        s3 = '</server>'
+        expected = [s1, s2, s3]
+        validate_xml(server_xml, expected)
+      end
+    end # it
+
+    it 'should remove multiple conflicts from a single featureManager element' do
+      Dir.mktmpdir do |root|
+        # create a server.xml and populate it with features. Include a servlet-3.0/3.1 and websocket/servlet-3.0 conflict.
+        server_xml = File.join(root, 'server.xml')
+        server_xml_doc = REXML::Document.new('<server></server>')
+        add_features(server_xml_doc.root, ['servlet-3.0', 'jsp-2.2', 'servlet-3.1', 'websocket-1.0', 'jdbc-4.0'])
+        FeatureManager.filter_conflicting_features(server_xml_doc)
+        File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
+        # Set up results
+        s1 = '<server>'
+        s2 = '<featureManager><feature>jsp-2.2</feature><feature>servlet-3.1</feature><feature>websocket-1.0</feature><feature>jdbc-4.0</feature></featureManager>'
+        s3 = '</server>'
+        expected = [s1, s2, s3]
+        validate_xml(server_xml, expected)
+      end
+    end # it
+
+    it 'should remove conflicts that span multiple featureManager elements' do
+      Dir.mktmpdir do |root|
+        # create a server.xml and populate it with features. Include a servlet-3.0/3.1 conflict in different featureManager elements.
+        server_xml = File.join(root, 'server.xml')
+        server_xml_doc = REXML::Document.new('<server></server>')
+        add_features(server_xml_doc.root, ['servlet-3.0', 'jsp-2.2'])
+        add_features(server_xml_doc.root, ['servlet-3.1', 'websocket-1.0', 'jdbc-4.0'])
+        FeatureManager.filter_conflicting_features(server_xml_doc)
+        File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
+        # Set up results
+        s1 = '<server>'
+        s2 = '<featureManager><feature>jsp-2.2</feature></featureManager>'
+        s3 = '<featureManager><feature>servlet-3.1</feature><feature>websocket-1.0</feature><feature>jdbc-4.0</feature></featureManager>'
+        s4 = '</server>'
+        expected = [s1, s2, s3, s4]
+        validate_xml(server_xml, expected)
+      end
+    end # it
+  end # filter_conflicting_features
 end # module
