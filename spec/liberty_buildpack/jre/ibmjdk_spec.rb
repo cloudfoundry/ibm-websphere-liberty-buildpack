@@ -144,11 +144,11 @@ module LibertyBuildpack::Jre
         subject(:released) { IBMJdk.new(context).release }
 
         it 'should add default dump options that output data to the common dumps directory, if enabled' do
-
-          expect(released).to include('-Xdump:heap:defaults:file=./../dumps/heapdump.%Y%m%d.%H%M%S.%pid.%seq.phd')
-          expect(released).to include('-Xdump:java:defaults:file=./../dumps/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt')
-          expect(released).to include('-Xdump:snap:defaults:file=./../dumps/Snap.%Y%m%d.%H%M%S.%pid.%seq.trc')
-          expect(released).to include('-Xdump:none')
+          expect(released).to include('-Xdump:none',
+                                      '-Xdump:heap:defaults:file=./../dumps/heapdump.%Y%m%d.%H%M%S.%pid.%seq.phd',
+                                      '-Xdump:java:defaults:file=./../dumps/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt',
+                                      '-Xdump:snap:defaults:file=./../dumps/Snap.%Y%m%d.%H%M%S.%pid.%seq.trc',
+                                      '-Xdump:heap+java+snap:events=user')
         end
 
         it 'should add extra memory options when a memory limit is set' do
