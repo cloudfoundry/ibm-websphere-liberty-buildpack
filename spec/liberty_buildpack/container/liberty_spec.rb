@@ -503,7 +503,7 @@ module LibertyBuildpack::Container
           root = File.join(root, 'app')
           FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
           File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
-            file.write('your text')
+            file.write('<server/>')
           end
           app_dir = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'apps')
           FileUtils.mkdir_p(app_dir)
@@ -722,7 +722,7 @@ module LibertyBuildpack::Container
           root = File.join(root, 'app')
           FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
           File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
-            file.write('your text')
+            file.write('<server/>')
           end
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
@@ -762,7 +762,7 @@ module LibertyBuildpack::Container
           root = File.join(root, 'app')
           FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
           File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
-            file.write('your text')
+            file.write('<server/>')
           end
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
@@ -797,7 +797,7 @@ module LibertyBuildpack::Container
           root = File.join(root, 'app')
           FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
           File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
-            file.write('your text')
+            file.write('<server/>')
           end
           FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'extension', 'lib')
           File.open(File.join(root, 'wlp', 'usr', 'extension', 'lib', 'existing.jar'), 'w') do |file|

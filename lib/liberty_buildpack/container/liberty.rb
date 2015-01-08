@@ -272,6 +272,7 @@ module LibertyBuildpack::Container
         # Check if appstate ICAP feature can be used
         appstate_available = File.file?(icap_extension) ? check_appstate_feature(server_xml_doc) : false
         @services_manager.update_configuration(server_xml_doc, false, current_server_dir)
+        FeatureManager.filter_conflicting_features(server_xml_doc)
 
         XmlUtils.write_formatted_xml_file(server_xml_doc, server_xml)
       elsif Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
