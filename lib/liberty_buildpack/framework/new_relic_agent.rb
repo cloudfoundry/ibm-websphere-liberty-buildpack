@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2014 the original author or authors.
+# Copyright 2014-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ require 'liberty_buildpack/framework'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/download'
 require 'liberty_buildpack/container/common_paths'
+require 'liberty_buildpack/services/vcap_services'
 
 module LibertyBuildpack::Framework
 
@@ -44,6 +45,7 @@ module LibertyBuildpack::Framework
       @common_paths = context[:common_paths] || LibertyBuildpack::Container::CommonPaths.new
       @vcap_application = context[:vcap_application]
       @vcap_services = context[:vcap_services]
+      @services = @vcap_services ? LibertyBuildpack::Services::VcapServices.new(@vcap_services) : LibertyBuildpack::Services::VcapServices.new({})
       @java_opts = context[:java_opts]
     end
 
@@ -101,15 +103,47 @@ module LibertyBuildpack::Framework
     # Name of the new relic service
     NR_SERVICE_NAME = 'newrelic'.freeze
 
+    # VCAP_SERVICES keys
+    LICENSE_KEY = 'licenseKey'.freeze
+    CREDENTIALS_KEY = 'credentials'.freeze
+
+    # VCAP_APPLICATION keys
+    APPLICATION_NAME_KEY = 'application_name'.freeze
+
     # new relic's directory of artifacts in the droplet
     NR_HOME_DIR = '.new_relic_agent'.freeze
 
     #-----------------------------------------------------------------------------------------
-    # Determines if the New Relic service is included in VCAP_SERVICES.
+    # Determines if the New Relic service is included in VCAP_SERVICES. First, the service type
+    # will be checked as a quick test for an exact match.  If the service type value does not match
+    # the New Relic service name, then the New Relic service name will be used as a regular
+    # expression by the services utility that checks all the services that have either a name,
+    # label, or a tag that includes the service name as a substring.
     #
     # @return [Boolean]  true if the app is bound to a new relic service
     #------------------------------------------------------------------------------------------
     def nr_service_exist?
+      exact_service_type_match? || service_manager_match?
+    end
+
+    #-----------------------------------------------------------------------------------------
+    # Use the New Relic service name as a filter for the service manager to process all the
+    # VCAP_SERVICES services and return true for the first service that contains other valid keys
+    # with values that match the new relic filter.
+    #
+    # @return [Boolean]  true if the app is bound to a new relic service based on the service manager criteria
+    #------------------------------------------------------------------------------------------
+    def service_manager_match?
+      @services.one_service?(NR_SERVICE_NAME, LICENSE_KEY)
+    end
+
+    #-----------------------------------------------------------------------------------------
+    # Return true if VCAP_SERVICES contains a service key name that matches exactly with the
+    # the new relic service name. A quick test to avoid processing all the services.
+    #
+    # @return [Boolean]  true if the service type name is an exact match to newrelic's service name
+    #------------------------------------------------------------------------------------------
+    def exact_service_type_match?
       !@vcap_services.nil? && !@vcap_services[NR_SERVICE_NAME].nil? && !@vcap_services[NR_SERVICE_NAME].empty?
     end
 
@@ -119,7 +153,7 @@ module LibertyBuildpack::Framework
     # @return [Boolean]  true if the app is bound to a new relic service
     #------------------------------------------------------------------------------------------
     def app_has_name?
-      !@vcap_application.nil? && !@vcap_application['application_name'].nil? && !@vcap_application['application_name'].empty?
+      !@vcap_application.nil? && !@vcap_application[APPLICATION_NAME_KEY].nil? && !@vcap_application[APPLICATION_NAME_KEY].empty?
     end
 
     #-----------------------------------------------------------------------------------------
@@ -128,7 +162,7 @@ module LibertyBuildpack::Framework
     # @return [String] the application name from VCAP_APPLICATION
     #------------------------------------------------------------------------------------------
     def vcap_app_name
-      @vcap_application['application_name']
+      @vcap_application[APPLICATION_NAME_KEY]
     end
 
     #-----------------------------------------------------------------------------------------
@@ -137,7 +171,7 @@ module LibertyBuildpack::Framework
     # @return [String]  the license information from VCAP_SERVICES
     #------------------------------------------------------------------------------------------
     def vcap_nr_license
-      @vcap_services[NR_SERVICE_NAME][0]['credentials']['licenseKey']
+      @services.find_service(NR_SERVICE_NAME)[CREDENTIALS_KEY][LICENSE_KEY]
     end
 
     #-----------------------------------------------------------------------------------------
