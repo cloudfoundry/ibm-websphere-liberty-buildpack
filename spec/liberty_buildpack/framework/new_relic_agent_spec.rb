@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2014 the original author or authors.
+# Copyright 2014-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -75,6 +75,32 @@ module LibertyBuildpack::Framework
 
       subject(:detected) { NewRelicAgent.new(context).detect }
 
+      context 'user provided service' do
+        def_type = 'servicetype'
+        def_name = 'servicename'
+        def_label = 'user-provided'
+        def_tags = ['atag']
+        def_credentials = { 'licenseKey' => 'abcdef0123456789' }
+
+        it 'should be detected when the service name includes newrelic substring',
+           vcap_services_context: { def_type => [{ 'name' => 'newrelic', 'label' => def_label, 'tags' => def_tags,
+                                                   'credentials' => def_credentials }] } do
+          expect(detected).to eq(versionid)
+        end
+
+        it 'should be detected when the tag includes newrelic substring',
+           vcap_services_context: { def_type => [{ 'name' => def_name, 'label' => def_label, 'tags' => ['newrelictag'],
+                                                   'credentials' => def_credentials }] } do
+          expect(detected).to eq(versionid)
+        end
+
+        it 'should not be detected unless the name or tag includes newrelic substring',
+           vcap_services_context: { def_type => [{ 'name' => def_name, 'label' => def_label, 'tags' => def_tags,
+                                                   'credentials' => def_credentials }] } do
+          expect(detected).to eq(nil)
+        end
+      end
+
       context 'application with no services' do
         it 'should not detect the new relic service',
            vcap_services_context: {} do
@@ -83,15 +109,22 @@ module LibertyBuildpack::Framework
       end
 
       context 'application with one service' do
-        it 'should be detected when an application\'s service includes newrelic',
+        it 'should be detected when an application\'s service type includes newrelic',
            vcap_services_context: { 'newrelic' => [{ 'name' => 'test-newrelic', 'label' => 'newrelic',
                                                      'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
 
           expect(detected).to eq(versionid)
         end
 
-        it 'should not be detected for an appication\'s service that does not match newrelic',
+        it 'should not be detected for an appication\'s service type that does not match newrelic',
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-mysql', 'label' => 'mysql',
+                                                  'credentials' => { 'licenseKey' => '9876543210fedcba' } }] }do
+
+          expect(detected).to eq(nil)
+        end
+
+        it 'should detect based on the service instance name when the label and name are not the same',
+           vcap_services_context: { 'mysql' => [{ 'name' => 'test-postgres', 'label' => 'mysql',
                                                   'credentials' => { 'licenseKey' => '9876543210fedcba' } }] }do
 
           expect(detected).to eq(nil)
