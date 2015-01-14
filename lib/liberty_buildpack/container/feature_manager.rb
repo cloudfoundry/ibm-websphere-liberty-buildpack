@@ -87,10 +87,25 @@ module LibertyBuildpack::Container
         @logger.debug('exit')
       end
 
+      #-------------------------------
+      # Remove incompatible versions of the same feature from server.xml.
+      # For example, if both servlet-3.0 and servlet-3.1 are specified in featureManager, remove servlet-3.0
+      #
+      # @param doc - the REXML::Document for server.xml
+      #-------------------------------
+      def self.filter_conflicting_features(doc)
+        features = get_features_in_server_xml(doc.root)
+        to_remove = find_conflicting_features(features)
+        remove_features_from_server_xml(doc.root, to_remove)
+      end
+
     private
 
       FEATURES_ALREADY_PRESENT_MSG_CODE = 'CWWKF1216I'.freeze
       FEATURES_INSTALLED_MSG_CODE       = 'CWWKF1017I'.freeze
+      CONFLICTING_FEATURES = { 'beanValidation-1.1' => 'beanValidation-1.0', 'ejbLite-3.2' => 'ejbLite-3.1', 'jaxrs-2.0' => 'jaxrs-1.1', 'jdbc-4.1' => 'jdbc-4.0',
+        'jms-2.0' => 'jms-1.1', 'jmsMdb-3.2' => 'jmsMdb-3.1', 'jpa-2.1' => 'jpa-2.0', 'mdb-3.2' => 'mdb-3.1', 'servlet-3.1' => 'servlet-3.0',
+        'wasJmsClient-2.0' => 'wasJmsClient-1.1', 'websocket-1.0' => 'servlet-3.0' }.freeze
 
       # common code used by internal instance method use_liberty_repository? and
       # public class method enabled?
@@ -183,6 +198,58 @@ module LibertyBuildpack::Container
         end
         @logger.debug("exit (#{jvm_args})")
         jvm_args
+      end
+
+      #-------------------------------
+      # Return a Set containing the names of all features specified in server.xml.
+      #
+      # @param doc - the REXML::Document for server.xml
+      #-------------------------------
+      def self.get_features_in_server_xml(doc)
+        # Get the featureManager element. Assume there may be multiples
+        managers = doc.elements.to_a('//featureManager')
+        features = Set.new
+        managers.each do |manager|
+          elements = manager.get_elements('feature')
+          elements.each do |element|
+            features.add(element.text)
+          end
+        end
+        features
+      end
+
+      #-------------------------------
+      # Return a Set containing the names of all conflicting features that need to be removed from featureManager.
+      #
+      # @param features - a Set containing the names of features to be removed.
+      #-------------------------------
+      def self.find_conflicting_features(features)
+        conflicts = Set.new
+        features.each do |feature|
+          conflict = CONFLICTING_FEATURES[feature]
+          unless conflict.nil?
+            puts "removing feature #{conflict} from server.xml as it conflicts with feature #{feature}"
+            conflicts.add(conflict)
+          end
+        end
+        conflicts
+      end
+
+      #-------------------------------
+      # Remove all instances of the specified features from server.xml.
+      #
+      # @param doc - the REXML::Document for server.xml
+      # @param to_remove - a Set containing the names of the features to remove.
+      #-------------------------------
+      def self.remove_features_from_server_xml(doc, to_remove)
+        # Get the featureManager element. Assume there may be multiples
+        managers = doc.elements.to_a('//featureManager')
+        managers.each do |manager|
+          elements = manager.get_elements('feature')
+          elements.each do |element|
+            manager.delete_element(element) if to_remove.include?(element.text)
+          end
+        end
       end
 
   end # class
