@@ -113,8 +113,6 @@ module LibertyBuildpack
 
       RANGE_SEPARATOR = '..'.freeze
 
-      private_constant :RANGE_SEPARATOR
-
       def get_bounds(range)
         if range.index(RANGE_SEPARATOR)
           lower_bound, upper_bound = range.split(RANGE_SEPARATOR)

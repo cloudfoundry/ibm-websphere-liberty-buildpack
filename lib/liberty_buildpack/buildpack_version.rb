@@ -99,8 +99,6 @@ module LibertyBuildpack
 
     GIT_DIR = (Pathname.new(__FILE__).dirname + '../../.git').freeze
 
-    private_constant :GIT_DIR
-
     def remote_string
       "#{@remote}##{@hash}" if @remote && !@remote.empty? && @hash && !@hash.empty?
     end

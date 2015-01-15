@@ -84,7 +84,7 @@ module LibertyBuildpack::Framework
     private
 
     def has_configuration?
-      !@configuration.nil? && @configuration.size > 0
+      !@configuration.nil? && @configuration.size > 0 && !'---'.eql?(@configuration)
     end
 
     def copy_variables(variables, configuration)
