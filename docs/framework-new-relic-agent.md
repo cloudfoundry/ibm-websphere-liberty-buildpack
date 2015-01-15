@@ -3,9 +3,8 @@ The New Relic Agent Framework causes an application to be automatically configur
 
 <table>
   <tr>
-    <td><strong>Detection Criterion</strong></td><td>Existence of a New Relic service is defined as the <a href="http://docs.cloudfoundry.org/devguide/deploy-apps/environment-variable.html#VCAP-SERVICES"><code>VCAP_SERVICES</code></a> payload containing at least one of the following:
+    <td><strong>Detection Criterion</strong></td><td>Existence of a single New Relic service is defined as the <a href="http://docs.cloudfoundry.org/devguide/deploy-apps/environment-variable.html#VCAP-SERVICES"><code>VCAP_SERVICES</code></a> payload containing at least one of the following:
       <ul>
-        <li>service key name of <code>newrelic</code>.</li>
         <li>name that has the substring <code>newrelic</code>. <strong>Note: </strong> This is only applicable to user-provided services</li>
         <li>label that has the substring <code>newrelic</code>.</li>
         <li>tags that have the substring <code>newrelic</code>.</li>

@@ -40,12 +40,18 @@ module LibertyBuildpack::Services
     def one_service?(filter, *required_credentials)
       candidates = select(&matcher(filter))
       match = false
-      if candidates.one?
+
+      if candidates.empty?
+        @logger.debug("Unable to resolve a single service plugin for service #{filter}. No matches exist")
+      elsif candidates.one?
         if credentials?(candidates.first['credentials'], required_credentials)
           match = true
         else
           @logger.warn("A service with a name label or tag matching #{filter} was found, but was missing one of the required credentials #{required_credentials}")
         end
+      else
+        @logger.error("Unable to resolve a single service plugin for service #{filter}. Found potential matches of #{candidates}.")
+        raise "Unable to resolve a single service plugin for service #{filter}. Multiple inexact matches exist."
       end
 
       match

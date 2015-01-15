@@ -26,8 +26,14 @@ describe LibertyBuildpack::Services::VcapServices do
       { 'name' => 'test-name', 'label' => label, 'tags' => ['test-tag'], 'plan' => 'test-plan',
       'credentials' => { 'uri' => 'test-uri', 'h1' => 'foo', 'h2' => 'foo' } }
     end
+    let(:same_service) do
+      { 'name' => 'diff-name', 'label' => label, 'tags' => ['test-tag'], 'plan' => 'test-plan',
+      'credentials' => { 'uri' => 'test-uri', 'h1' => 'foo', 'h2' => 'foo' } }
+    end
 
     let(:services) { described_class.new('test' => [service]) }
+    let(:multi_services) { described_class.new('test' => [service], 'test2' => [same_service]) }
+    let(:multiple_match_error) { 'Multiple inexact matches exist' }
   end
 
   shared_examples_for 'a default service with a label value:' do | label_value |
@@ -35,7 +41,12 @@ describe LibertyBuildpack::Services::VcapServices do
       let(:label) { label_value }
     end
 
-    it 'returns false from one_service? if there is no service that matches' do
+    it 'raise error from one_service? if there is more than one of the same service' do
+      expect { multi_services.one_service? 'test-tag' }.to raise_error(RuntimeError, /#{multiple_match_error}/)
+      expect { multi_services.one_service?(/test-tag/) }.to raise_error(RuntimeError, /#{multiple_match_error}/)
+    end
+
+    it 'raise error from one_service? if there is no service that matches' do
       expect(services.one_service? 'bad-test').not_to be
       expect(services.one_service?(/bad-test/)).not_to be
     end
@@ -108,7 +119,6 @@ describe LibertyBuildpack::Services::VcapServices do
         expect(services.one_service? 'test-name').not_to be
         expect(services.one_service?(/test-name/)).not_to be
       end
-
     end
   end
 
@@ -118,6 +128,11 @@ describe LibertyBuildpack::Services::VcapServices do
     describe 'match service based on name' do
       include_context 'service context' do
         let(:label) { 'user-provided' }
+      end
+
+      it 'returns true from one_service? if there is a matching name' do
+        expect(services.one_service? 'test-name').to be
+        expect(services.one_service?(/test-name/)).to be
       end
 
       it 'returns service from find_service? if there is a matching name' do
