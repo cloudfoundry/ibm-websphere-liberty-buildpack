@@ -94,9 +94,11 @@ module LibertyBuildpack::Container
       # @param doc - the REXML::Document for server.xml
       #-------------------------------
       def self.filter_conflicting_features(doc)
+        logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
         features = get_features_in_server_xml(doc.root)
         to_remove = find_conflicting_features(features)
-        remove_features_from_server_xml(doc.root, to_remove)
+        removed = remove_features_from_server_xml(doc.root, to_remove)
+        logger.debug("The following features were removed from server.xml to prevent conflicts: #{removed.to_a}") unless removed.empty?
       end
 
     private
@@ -227,10 +229,7 @@ module LibertyBuildpack::Container
         conflicts = Set.new
         features.each do |feature|
           conflict = CONFLICTING_FEATURES[feature]
-          unless conflict.nil?
-            puts "removing feature #{conflict} from server.xml as it conflicts with feature #{feature}"
-            conflicts.add(conflict)
-          end
+          conflicts.add(conflict) unless conflict.nil?
         end
         conflicts
       end
@@ -240,16 +239,22 @@ module LibertyBuildpack::Container
       #
       # @param doc - the REXML::Document for server.xml
       # @param to_remove - a Set containing the names of the features to remove.
+      # @return [Set] - a Set of features there were actaully removed.
       #-------------------------------
       def self.remove_features_from_server_xml(doc, to_remove)
         # Get the featureManager element. Assume there may be multiples
+        removed = Set.new
         managers = doc.elements.to_a('//featureManager')
         managers.each do |manager|
           elements = manager.get_elements('feature')
           elements.each do |element|
-            manager.delete_element(element) if to_remove.include?(element.text)
+            if to_remove.include?(element.text)
+              manager.delete_element(element)
+              removed.add(element.text)
+            end
           end
         end
+        removed
       end
 
   end # class
