@@ -88,6 +88,15 @@ module LibertyBuildpack::Framework
           expect(detected).to eq(versionid)
         end
 
+        it 'should raise a runtime error for multiple valid new relic user services',
+           vcap_services_context: { def_type => [{ 'name' => 'newrelic', 'label' => def_label, 'tags' => def_tags,
+                                                   'credentials' => def_credentials }],
+                                  'servicetype2' => [{ 'name' => 'newrelic', 'label' => def_label, 'tags' => def_tags,
+                                                   'credentials' => def_credentials }] } do
+
+          expect { detected }.to raise_error(RuntimeError)
+        end
+
         it 'should be detected when the tag includes newrelic substring',
            vcap_services_context: { def_type => [{ 'name' => def_name, 'label' => def_label, 'tags' => ['newrelictag'],
                                                    'credentials' => def_credentials }] } do
@@ -109,22 +118,22 @@ module LibertyBuildpack::Framework
       end
 
       context 'application with one service' do
-        it 'should be detected when an application\'s service type includes newrelic',
+        it 'should be detected when an application has a valid service attribute that includes newrelic',
            vcap_services_context: { 'newrelic' => [{ 'name' => 'test-newrelic', 'label' => 'newrelic',
                                                      'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
 
           expect(detected).to eq(versionid)
         end
 
-        it 'should not be detected for an appication\'s service type that does not match newrelic',
+        it 'should not be detected if new relic service does not exist',
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-mysql', 'label' => 'mysql',
                                                   'credentials' => { 'licenseKey' => '9876543210fedcba' } }] }do
 
           expect(detected).to eq(nil)
         end
 
-        it 'should detect based on the service instance name when the label and name are not the same',
-           vcap_services_context: { 'mysql' => [{ 'name' => 'test-postgres', 'label' => 'mysql',
+        it 'should not be detected since name is not used as a match check unless it is a user service',
+           vcap_services_context: { 'mysql' => [{ 'name' => 'test-newrelic', 'label' => 'mysql',
                                                   'credentials' => { 'licenseKey' => '9876543210fedcba' } }] }do
 
           expect(detected).to eq(nil)
@@ -139,6 +148,15 @@ module LibertyBuildpack::Framework
                                                   'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
 
           expect(detected).to eq(versionid)
+        end
+
+        it 'should raise a runtime error if multiple newrelic services exist',
+           vcap_services_context: { 'newrelickey1' => [{ 'name' => 'test-name', 'label' => 'newrelic',
+                                                  'credentials' => { 'licenseKey' => 'abcdef0123456789' } }],
+                                    'newrelickey2' => [{ 'name' => 'test-name', 'label' => 'newrelic',
+                                                  'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
+
+          expect { detected }.to raise_error(RuntimeError)
         end
 
         it 'should not be detected if none of the services is new relic',

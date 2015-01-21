@@ -114,37 +114,13 @@ module LibertyBuildpack::Framework
     NR_HOME_DIR = '.new_relic_agent'.freeze
 
     #-----------------------------------------------------------------------------------------
-    # Determines if the New Relic service is included in VCAP_SERVICES. First, the service type
-    # will be checked as a quick test for an exact match.  If the service type value does not match
-    # the New Relic service name, then the New Relic service name will be used as a regular
-    # expression by the services utility that checks all the services that have either a name,
-    # label, or a tag that includes the service name as a substring.
+    # Determines if the New Relic service is included in VCAP_SERVICES based on whether the
+    # service entry has valid entries.
     #
     # @return [Boolean]  true if the app is bound to a new relic service
     #------------------------------------------------------------------------------------------
     def nr_service_exist?
-      exact_service_type_match? || service_manager_match?
-    end
-
-    #-----------------------------------------------------------------------------------------
-    # Use the New Relic service name as a filter for the service manager to process all the
-    # VCAP_SERVICES services and return true for the first service that contains other valid keys
-    # with values that match the new relic filter.
-    #
-    # @return [Boolean]  true if the app is bound to a new relic service based on the service manager criteria
-    #------------------------------------------------------------------------------------------
-    def service_manager_match?
       @services.one_service?(NR_SERVICE_NAME, LICENSE_KEY)
-    end
-
-    #-----------------------------------------------------------------------------------------
-    # Return true if VCAP_SERVICES contains a service key name that matches exactly with the
-    # the new relic service name. A quick test to avoid processing all the services.
-    #
-    # @return [Boolean]  true if the service type name is an exact match to newrelic's service name
-    #------------------------------------------------------------------------------------------
-    def exact_service_type_match?
-      !@vcap_services.nil? && !@vcap_services[NR_SERVICE_NAME].nil? && !@vcap_services[NR_SERVICE_NAME].empty?
     end
 
     #-----------------------------------------------------------------------------------------
