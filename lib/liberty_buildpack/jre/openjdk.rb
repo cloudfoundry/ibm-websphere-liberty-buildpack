@@ -20,6 +20,7 @@ require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/jre'
 require 'liberty_buildpack/jre/memory/openjdk_memory_heuristic_factory'
 require 'liberty_buildpack/repository/configured_item'
+require 'liberty_buildpack/util'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'pathname'
@@ -41,6 +42,7 @@ module LibertyBuildpack::Jre
     # @option context [Hash] :configuration the properties provided by the user
     # @option contect [String] :jvm_type the type of jvm the user wants to use e.g ibmjre or openjdk
     def initialize(context)
+      @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
@@ -54,15 +56,16 @@ module LibertyBuildpack::Jre
     #
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
-      @version = OpenJdk.find_openjdk(@configuration)[0]
-      id @version if @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
+      return nil if @jvm_type.nil? || !@jvm_type.downcase.start_with?('openjdk')
+      @version = find_openjdk(@configuration, @jvm_type)[0]
+      id @version
     end
 
     # Downloads and unpacks a OpenJdk
     #
     # @return [void]
     def compile
-      @version, @uri = OpenJdk.find_openjdk(@configuration)
+      @version, @uri = find_openjdk(@configuration, @jvm_type)
       download_start_time = Time.now
 
       print "-----> Downloading OpenJdk #{@version} from #{@uri} "
@@ -78,9 +81,10 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def release
-      @version = OpenJdk.find_openjdk(@configuration)[0]
+      @version = find_openjdk(@configuration, @jvm_type)[0]
+      user_version =  LibertyBuildpack::Util.user_requested_version(@configuration, @jvm_type)
       @java_opts << "-XX:OnOutOfMemoryError=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
-      @java_opts.concat memory(@configuration)
+      @java_opts.concat memory(user_version)
     end
 
     private
@@ -92,6 +96,9 @@ module LibertyBuildpack::Jre
     KEY_MEMORY_HEURISTICS = 'memory_heuristics'
 
     KEY_MEMORY_SIZES = 'memory_sizes'
+    KEY_REPOSITORY_ROOT = 'repository_root'.freeze
+    KEY_VERSION = 'version'.freeze
+    KEY_DEFAULT = 'default'.freeze
 
     def expand(file)
       expand_start_time = Time.now
@@ -104,8 +111,10 @@ module LibertyBuildpack::Jre
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
-    def self.find_openjdk(configuration)
-      LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
+    def find_openjdk(configuration, jvm_type)
+      version =  LibertyBuildpack::Util.user_requested_version(configuration, jvm_type)
+      repository_configuration = { KEY_REPOSITORY_ROOT => configuration[KEY_REPOSITORY_ROOT], KEY_VERSION => version }
+      LibertyBuildpack::Repository::ConfiguredItem.find_item(repository_configuration)
     rescue => e
       raise RuntimeError, "OpenJdk error: #{e.message}", e.backtrace
     end
@@ -122,9 +131,16 @@ module LibertyBuildpack::Jre
       File.dirname(file.path)
     end
 
-    def memory(configuration)
-      sizes = @configuration[KEY_MEMORY_SIZES] || {}
-      heuristics = @configuration[KEY_MEMORY_HEURISTICS] || {}
+    def memory(version)
+      sizes = @configuration[KEY_MEMORY_SIZES] ? @configuration[KEY_MEMORY_SIZES].clone : {}
+      heuristics = @configuration[KEY_MEMORY_HEURISTICS] ? @configuration[KEY_MEMORY_HEURISTICS].clone : {}
+      if version.start_with?('1.7')
+        heuristics.delete 'metaspace'
+        sizes.delete 'metaspace'
+      else
+        heuristics.delete 'permgen'
+        sizes.delete 'permgen'
+      end
       OpenJDKMemoryHeuristicFactory.create_memory_heuristic(sizes, heuristics, @version).resolve
     end
 

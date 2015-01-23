@@ -123,7 +123,7 @@ module LibertyBuildpack
     LIB_DIRECTORY = '.lib'
 
     # Instances should only be constructed by this class.
-    def initialize(app_dir)
+    def initialize(app_dir) # rubocop:disable MethodLength
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @buildpack_version = BuildpackVersion.new
       Buildpack.log_debug_data @logger
@@ -137,6 +137,7 @@ module LibertyBuildpack
       vcap_services = environment.delete 'VCAP_SERVICES'
       license_ids = get_license_hash
       jvm_type = environment['JVM']
+      jvm_type = jvm_type.strip unless jvm_type.nil?
 
       basic_context = {
           app_dir: app_dir,
