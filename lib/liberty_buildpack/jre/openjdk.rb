@@ -20,6 +20,7 @@ require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/jre'
 require 'liberty_buildpack/jre/memory/openjdk_memory_heuristic_factory'
 require 'liberty_buildpack/repository/configured_item'
+require 'liberty_buildpack/util'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'pathname'
@@ -56,7 +57,7 @@ module LibertyBuildpack::Jre
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
       return nil if @jvm_type.nil? || !@jvm_type.downcase.start_with?('openjdk')
-      @version = OpenJdk.find_openjdk(@configuration, @jvm_type)[0]
+      @version = find_openjdk(@configuration, @jvm_type)[0]
       id @version
     end
 
@@ -64,7 +65,7 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def compile
-      @version, @uri = OpenJdk.find_openjdk(@configuration, @jvm_type)
+      @version, @uri = find_openjdk(@configuration, @jvm_type)
       download_start_time = Time.now
 
       print "-----> Downloading OpenJdk #{@version} from #{@uri} "
@@ -80,8 +81,8 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def release
-      @version = OpenJdk.find_openjdk(@configuration, @jvm_type)[0]
-      user_version =  OpenJdk.user_requested_version(@configuration, @jvm_type)
+      @version = find_openjdk(@configuration, @jvm_type)[0]
+      user_version =  LibertyBuildpack::Util.user_requested_version(@configuration, @jvm_type)
       @java_opts << "-XX:OnOutOfMemoryError=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
       @java_opts.concat memory(user_version)
     end
@@ -110,8 +111,8 @@ module LibertyBuildpack::Jre
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
-    def self.find_openjdk(configuration, jvm_type)
-      version =  OpenJdk.user_requested_version(configuration, jvm_type)
+    def find_openjdk(configuration, jvm_type)
+      version =  LibertyBuildpack::Util.user_requested_version(configuration, jvm_type)
       repository_configuration = { KEY_REPOSITORY_ROOT => configuration[KEY_REPOSITORY_ROOT], KEY_VERSION => version }
       LibertyBuildpack::Repository::ConfiguredItem.find_item(repository_configuration)
     rescue => e
@@ -154,22 +155,6 @@ module LibertyBuildpack::Jre
       end
     end
 
-    # Determine the requested JVM version based on the value of the JVM environment variable (@jvm_type).
-    #
-    # @param [Hash] config the configuration hash from the context passed to this object in the context.
-    # @param [String] jvm_type the contents of the JVM environment variable (passed in as the contexts @jvm_type attribute)
-    def self.user_requested_version(config, jvm_type)
-      return config[KEY_VERSION][config[KEY_VERSION][KEY_DEFAULT]] if jvm_type.nil?
-      parts = jvm_type.split('-', 2)
-      return config[KEY_VERSION][config[KEY_VERSION][KEY_DEFAULT]] if parts.empty? || parts.size == 1
-      requested = parts[1]
-      version = config[KEY_VERSION][requested]
-      if version.nil?
-        LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("No mapping found for requested jre version #{requested}, using the default")
-        return config[KEY_VERSION][config[KEY_VERSION][KEY_DEFAULT]]
-      end
-      version
-    end
   end
 
 end

@@ -107,4 +107,25 @@ module LibertyBuildpack::Util
       end
     end
   end
+
+  # Determine the requested repository version based on the JVM environment variable (@jvm_type).
+  #
+  # At present, the usage of this method is limited to jre components. Usage may be expanded to other components in the future
+  #
+  # @param [Hash] config the configuration hash from the context passed to this object in the context. The hash must contain a 'version' => Hash
+  #     and the version has must contain a value for the key of 'default'.
+  # @param [String] jvm_type the contents of the JVM environment variable (passed in as the contexts @jvm_type attribute)
+  def self.user_requested_version(config, jvm_type)
+    default = config['version'][config['version']['default']]
+    return default if jvm_type.nil?
+    parts = jvm_type.split('-', 2)
+    return default if parts.empty? || parts.size == 1
+    requested = parts[1]
+    version = config['version'][requested]
+    if version.nil?
+      LibertyBuildpack::Diagnostics::LoggerFactory.get_logger.debug("No mapping found for requested jre version #{requested}, using the default")
+      return default
+    end
+    version
+  end
 end
