@@ -33,6 +33,9 @@ module LibertyBuildpack::Jre
       allow(LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new).and_return(memory_heuristic)
       $stdout = StringIO.new
       $stderr = StringIO.new
+      # Read the contents of the .yml config file. Use the actual file for most realistic coverage.
+      file = File.join(File.expand_path('../../../config', File.dirname(__FILE__)), 'openjdk.yml')
+      @config = YAML.load_file(file)
     end
 
     after do
@@ -40,20 +43,94 @@ module LibertyBuildpack::Jre
       $stderr = STDERR
     end
 
-    it 'should detect with id of openjdk-<version>' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(OPENJDK_DETAILS_PRE_8)
+    context 'detect' do
+      it 'should return latest version of the default major release when no version is specified' do
+        Dir.mktmpdir do |root|
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).and_yield(File.open('spec/fixtures/jre/openjdk/index.yml'))
 
-        detected = OpenJdk.new(
-            app_dir: '',
-            java_home: '',
-            java_opts: [],
-            configuration: {},
-            license_ids: {},
-            jvm_type: 'openjdk'
-        ).detect
+          detected = OpenJdk.new(
+              app_dir: '',
+              java_home: '',
+              java_opts: [],
+              configuration: @config,
+              license_ids: {},
+              jvm_type: 'openjdk'
+          ).detect
 
-        expect(detected).to eq('openjdk-1.7.0')
+          expect(detected).to eq('openjdk-1.7.0_71')
+        end
+      end
+
+      it 'should return latest V7 version when 1.7 is specified' do
+        Dir.mktmpdir do |root|
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).and_yield(File.open('spec/fixtures/jre/openjdk/index.yml'))
+
+          detected = OpenJdk.new(
+              app_dir: '',
+              java_home: '',
+              java_opts: [],
+              configuration: @config,
+              license_ids: {},
+              jvm_type: 'openjdk-1.7'
+          ).detect
+
+          expect(detected).to eq('openjdk-1.7.0_71')
+        end
+      end
+
+      it 'should detect within minor version when specified and present' do
+        Dir.mktmpdir do |root|
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).and_yield(File.open('spec/fixtures/jre/openjdk/index.yml'))
+          @config['version']['1.7.1'] = '1.7.1_+'
+
+          detected = OpenJdk.new(
+              app_dir: '',
+              java_home: '',
+              java_opts: [],
+              configuration: @config,
+              license_ids: {},
+              jvm_type: 'openjdk-1.7.1'
+          ).detect
+
+          expect(detected).to eq('openjdk-1.7.1_65')
+        end
+      end
+
+      it 'should detect with default version when specified version does not exist' do
+        Dir.mktmpdir do |root|
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).and_yield(File.open('spec/fixtures/jre/openjdk/index.yml'))
+
+          detected = OpenJdk.new(
+              app_dir: '',
+              java_home: '',
+              java_opts: [],
+              configuration: @config,
+              license_ids: {},
+              jvm_type: 'openjdk-1.7.1'
+          ).detect
+
+          expect(detected).to eq('openjdk-1.7.0_71')
+        end
+      end
+
+      it 'should fail when ConfiguredItem.find_item fails' do
+        Dir.mktmpdir do |root|
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise('test error')
+          expect do
+            OpenJdk.new(
+                app_dir: '',
+                java_home: '',
+                java_opts: [],
+                configuration: @config,
+                license_ids: {},
+                jvm_type: 'openjdk'
+            ).detect
+          end.to raise_error(/OpenJdk\ error:\ test\ error/)
+        end
       end
     end
 
@@ -65,7 +142,7 @@ module LibertyBuildpack::Jre
 
         OpenJdk.new(
             app_dir: root,
-            configuration: {},
+            configuration: @config,
             java_home: '',
             java_opts: [],
             license_ids: {}
@@ -85,7 +162,7 @@ module LibertyBuildpack::Jre
             app_dir: '/application-directory',
             java_home: java_home,
             java_opts: [],
-            configuration: {},
+            configuration: @config,
             license_ids: {}
         )
 
@@ -102,27 +179,12 @@ module LibertyBuildpack::Jre
             app_dir: root,
             java_home: '',
             java_opts: java_opts,
-            configuration: {},
+            configuration: @config,
             license_ids: {}
         ).release
 
         expect(java_opts).to include('opt-1')
         expect(java_opts).to include('opt-2')
-      end
-    end
-
-    it 'should fail when ConfiguredItem.find_item fails' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise('test error')
-        expect do
-          OpenJdk.new(
-              app_dir: '',
-              java_home: '',
-              java_opts: [],
-              configuration: {},
-              license_ids: {}
-          ).detect
-        end.to raise_error(/OpenJdk\ error:\ test\ error/)
       end
     end
 
@@ -136,7 +198,7 @@ module LibertyBuildpack::Jre
             java_home: '',
             java_opts: java_opts,
             common_paths: LibertyBuildpack::Container::CommonPaths.new,
-            configuration: {},
+            configuration: @config,
             license_ids: {}
         ).release
 
@@ -152,7 +214,7 @@ module LibertyBuildpack::Jre
 
         OpenJdk.new(
             app_dir: root,
-            configuration: {},
+            configuration: @config,
             java_home: '',
             java_opts: [],
             license_ids: {}

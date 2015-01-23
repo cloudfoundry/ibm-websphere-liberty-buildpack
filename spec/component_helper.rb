@@ -35,7 +35,8 @@ shared_context 'component_helper' do
       configuration:  example.metadata[:configuration],
       common_paths:   example.metadata[:common_paths],
       vcap_application: example.metadata[:vcap_application_context],
-      vcap_services:  example.metadata[:vcap_services_context] }
+      vcap_services:  example.metadata[:vcap_services_context],
+      jvm_type:       example.metadata[:jvm_type] }
   end
 
   let(:uri) { 'test-uri' }

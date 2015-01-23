@@ -32,7 +32,7 @@ class BuildpackCache
   # Downloads remote resources into the cache directory
   #
   # @param [Array<Hash>] configs array of configurations referencing index.yml
-  def download_cache(configs)
+  def download_cache(configs) # rubocop:disable MethodLength
     if configs.empty?
       @logger.warn 'No cache to download.'
       return
@@ -51,13 +51,22 @@ class BuildpackCache
       rescue => e
         abort "ERROR: Failed loading #{index_uri}: #{e}"
       end
-      candidate = LibertyBuildpack::Util::TokenizedVersion.new(config[VERSION])
-      version = LibertyBuildpack::Repository::VersionResolver.resolve(candidate, index.keys)
-      file_uri = download_license(index[version.to_s])
-      file = File.join(@cache_dir, filename(file_uri))
-      download(file_uri, file)
-      # If file is a component_index.yml parse and download files it references as well
-      download_components(file_uri, file) if file_uri.end_with? COMP_INDEX_PATH
+      # Some config repositories contain a single version, others contain a hash of multiple versions
+      if config[VERSION].instance_of?(Hash)
+        versions = config[VERSION]
+      else
+        versions = { config[VERSION] => config[VERSION] }
+      end
+      versions.each do |key, version|
+        next if key == 'default'
+        candidate = LibertyBuildpack::Util::TokenizedVersion.new(version)
+        real_version = LibertyBuildpack::Repository::VersionResolver.resolve(candidate, index.keys)
+        file_uri = download_license(index[real_version.to_s])
+        file = File.join(@cache_dir, filename(file_uri))
+        download(file_uri, file)
+        # If file is a component_index.yml parse and download files it references as well
+        download_components(file_uri, file) if file_uri.end_with? COMP_INDEX_PATH
+      end
     end
   end
 

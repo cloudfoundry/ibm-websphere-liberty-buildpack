@@ -28,27 +28,10 @@ module LibertyBuildpack::Jre
 
     let(:application_cache) { double('ApplicationCache') }
 
-    before do | example |
-      # By default, always stub the return of a valid ibmjdk_config.yml against a given service_release as indicated by
-      # the spec test's service_release metadata.  Tests that test for errors can disable a valid return of the
-      # ibmjdk_config.yml by setting its find_item metadata to false along with the optional expected error
-      find_item = example.metadata[:return_find_item].nil? ? true : example.metadata[:return_find_item]
-      if find_item
-        token_version = example.metadata[:service_release]
-
-        ibmjdk_config = [LibertyBuildpack::Util::TokenizedVersion.new(token_version), uri, 'spec/fixtures/license.html']
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(ibmjdk_config)
-      else
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise(example.metadata[:raise_error_message])
-      end
-
-      # return license file by default
-      application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
-
-    end
-
     # tests for common behaviors across IBMJDK v7 releases
     shared_examples_for 'IBMJDK v7' do | service_release |
+      # ibmjre requires dummy config since Bluemix overwrites ibmjdk.yml.
+      config = { 'repository_root' => 'http://dummyurl', 'version' => { 'default' => '1.7', '1.7' => '1.7.1_+', '1.7.0' => '1.7.0_+' } }
 
       it 'adds the JAVA_HOME to java_home', java_home: '', java_opts: [], license_ids: {} do | example |
 
@@ -61,14 +44,33 @@ module LibertyBuildpack::Jre
         expect(java_home).to eq('.java')
       end
 
-      describe 'detect', java_home: '', license_ids: {}, service_release: service_release do
+      describe 'detect', java_home: '', configuration: config, license_ids: {}, service_release: service_release do
 
-        # context is provided by component_helper, its default values are provided by 'describe' metadata, and
-        # customized through test's metadata
+        before do |example|
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).and_yield(File.open('spec/fixtures/jre/ibmjdk/index.yml'))
+          find_item = example.metadata[:return_find_item].nil? ? true : example.metadata[:return_find_item]
+          if find_item == false
+            LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise(example.metadata[:raise_error_message])
+          end
+        end
+
         subject(:detected) { IBMJdk.new(context).detect }
 
-        it 'should detect with id of ibmjdk-<version>' do
-          expect(detected).to eq('ibmjdk-' + service_release)
+        it 'should return latest version of the default major release when no version is specified' do
+          expect(detected).to eq('ibmjdk-1.7.1_65')
+        end
+
+        it 'should return latest V7 version when 1.7 is specified', jvm_type: 'ibmjdk-1.7' do
+          expect(detected).to eq('ibmjdk-1.7.1_65')
+        end
+
+        it 'should detect within minor version when specified and present', jvm_type: 'ibmjdk-1.7.0' do
+          expect(detected).to eq('ibmjdk-1.7.0_71')
+        end
+
+        it 'should detect with default version when specified version does not exist', jvm_type: 'ibmjdk-1.6' do
+          expect(detected).to eq('ibmjdk-1.7.1_65')
         end
 
         it 'should fail when ConfiguredItem.find_item fails', return_find_item: false, raise_error_message: 'test error' do
@@ -79,13 +81,20 @@ module LibertyBuildpack::Jre
       describe 'compile',
                java_home: '',
                java_opts: [],
-               configuration: {},
+               configuration: config,
                license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' },
                service_release: service_release do
 
         before do | example |
           # get the application cache fixture from the application_cache double provided in the overall setup
           LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          # Stub the results of ConfiguredItem.find to return a license file.
+          token_version = example.metadata[:service_release]
+          ibmjdk_config = [LibertyBuildpack::Util::TokenizedVersion.new(token_version), uri, 'spec/fixtures/license.html']
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(ibmjdk_config)
+          # Stub the ApplicationCache lookup of the license file to return the license file.
+          application_cache.stub(:get).with('spec/fixtures/license.html').and_yield(File.open('spec/fixtures/license.html'))
+          # Stub the ApplicationCache lookup of the JDK downloadable
           cache_fixture = example.metadata[:cache_fixture]
           application_cache.stub(:get).with(uri).and_yield(File.open("spec/fixtures/#{cache_fixture}")) if cache_fixture
         end
@@ -135,7 +144,7 @@ module LibertyBuildpack::Jre
       describe 'release',
                java_home: '',
                java_opts: [],
-               configuration: {},
+               configuration: config,
                license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' },
                service_release: service_release do
 
@@ -174,7 +183,6 @@ module LibertyBuildpack::Jre
         describe 'release',
                  java_home: '',
                  java_opts: [],
-                 configuration: {},
                  license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' },
                  service_release: '1.7.0' do
 
