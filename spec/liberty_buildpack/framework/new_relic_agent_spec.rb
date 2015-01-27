@@ -249,7 +249,7 @@ module LibertyBuildpack::Framework
         expect(released).to include("-javaagent:./#{newrelic_home}/#{versionid}.jar")
         expect(released).to include("-Dnewrelic.home=./#{newrelic_home}")
         expect(released).to include('-Dnewrelic.config.license_key=abcdefghijklmnop1234')
-        expect(released).to include('-Dnewrelic.config.app_name=\'TestApp\'')
+        expect(released).to include('-Dnewrelic.config.app_name=TestApp')
         expect(released).to include("-Dnewrelic.config.log_file_path=./#{newrelic_home}/logs")
       end
 
@@ -261,7 +261,7 @@ module LibertyBuildpack::Framework
         expect(released).to include("-javaagent:../../../#{newrelic_home}/#{versionid}.jar")
         expect(released).to include("-Dnewrelic.home=../../../#{newrelic_home}")
         expect(released).to include('-Dnewrelic.config.license_key=abcdefghijklmnop1234')
-        expect(released).to include('-Dnewrelic.config.app_name=\'TestApp\'')
+        expect(released).to include('-Dnewrelic.config.app_name=TestApp')
         expect(released).to include("-Dnewrelic.config.log_file_path=../../../#{newrelic_home}/logs")
       end
     end # end of release

@@ -94,7 +94,7 @@ module LibertyBuildpack::Framework
       @java_opts << "-javaagent:#{nr_agent}"
       @java_opts << "-Dnewrelic.home=#{nr_home_dir}"
       @java_opts << "-Dnewrelic.config.license_key=#{vcap_nr_license}"
-      @java_opts << "-Dnewrelic.config.app_name=\'#{vcap_app_name}\'"
+      @java_opts << "-Dnewrelic.config.app_name=#{vcap_app_name}"
       @java_opts << "-Dnewrelic.config.log_file_path=#{nr_logs_dir}"
     end
 
