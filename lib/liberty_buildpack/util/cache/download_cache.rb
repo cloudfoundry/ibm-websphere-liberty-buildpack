@@ -21,7 +21,7 @@ require 'liberty_buildpack/util/cache/admin_cache'
 require 'liberty_buildpack/util/cache/buildpack_stash'
 require 'liberty_buildpack/util/cache/file_cache'
 require 'liberty_buildpack/util/cache/internet_availability'
-require 'liberty_buildpack/util/heroku'
+require 'liberty_buildpack/util/http'
 require 'monitor'
 require 'net/http'
 require 'tmpdir'
@@ -195,16 +195,10 @@ module LibertyBuildpack::Util::Cache
     end
 
     def issue_http_request(request, uri, &block)
-      # Workaround for "sslv3 alert handshake failure" error in the environment where the buildpack
-      # is staged on Heroku.
-      # Both the detect and compile phases fail when using SSL.
-      if LibertyBuildpack::Util::Heroku.heroku? && uri.include?('download.run.pivotal.io')
-        uri = uri.sub('https', 'http')
-      end
       add_user_agent_header(request)
       1.upto(retry_limit) do |try|
         begin
-          Net::HTTP.start(*start_parameters(uri)) do |http|
+          LibertyBuildpack::Util::HTTP.start(*start_parameters(uri)) do |http|
             http.request request do |response|
               response_code = response.code
               if response_code == HTTP_OK || response_code == HTTP_NOT_MODIFIED
