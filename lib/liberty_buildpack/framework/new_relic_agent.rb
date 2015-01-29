@@ -88,7 +88,7 @@ module LibertyBuildpack::Framework
       app_dir = @common_paths.relative_location
       nr_home_dir = File.join(app_dir, NR_HOME_DIR)
       nr_agent = File.join(nr_home_dir, @nr_jar)
-      nr_logs_dir = File.join(nr_home_dir, 'logs')
+      nr_logs_dir = @common_paths.log_directory
 
       # create the new relic agent command as java_opts
       @java_opts << "-javaagent:#{nr_agent}"
