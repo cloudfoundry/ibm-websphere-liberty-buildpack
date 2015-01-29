@@ -43,9 +43,9 @@ module LibertyBuildpack
         range.floor == 0 ? JVM_DEFAULT_STACK_SIZE : range.floor
       end
 
-      JVM_DEFAULT_STACK_SIZE = MemorySize.new('1M').freeze
+      private
 
-      private_constant :JVM_DEFAULT_STACK_SIZE
+      JVM_DEFAULT_STACK_SIZE = MemorySize.new('1M').freeze
 
     end
 

@@ -136,8 +136,6 @@ module LibertyBuildpack
 
       KILO = 1024.freeze
 
-      private_constant :KILO
-
       def memory_size_operation(other)
         fail "Invalid parameter: instance of #{other.class} is not a MemorySize" unless other.is_a? MemorySize
         from_numeric(yield @bytes, other.bytes)
