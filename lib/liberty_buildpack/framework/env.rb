@@ -97,7 +97,8 @@ module LibertyBuildpack::Framework
     def profiles
       profiles_var = @environment['IBM_ENV_PROFILE']
       if profiles_var.nil?
-        []
+        region = @environment['BLUEMIX_REGION']
+        region.nil? ? [] : [region]
       else
         profiles_var.split(',')
       end
