@@ -129,5 +129,31 @@ module LibertyBuildpack::Framework
       end
     end
 
+    it 'should create env.sh with env configuration from profile using BLUEMIX_REGION' do
+      Dir.mktmpdir do |root|
+        yml = %Q(---
+        foo: bar
+        rmu: http://doesnotexist.com
+        "ibm:profile:1":
+          foo: car
+          bart: simpson)
+
+        Env.new(
+          app_dir: root,
+          environment: { 'BLUEMIX_REGION' => 'ibm:profile:1' },
+          configuration: YAML.load(yml)
+        ).compile
+
+        env_file = File.join(root, '.profile.d', 'env.sh')
+        expect(File.file?(env_file)).to eq(true)
+
+        env_contents = File.readlines(env_file)
+        expect(env_contents.size).to eq(3)
+        expect(env_contents).to include(/export foo="car"/)
+        expect(env_contents).to include(%r(export rmu=\"http://doesnotexist.com\"))
+        expect(env_contents).to include(/export bart="simpson"/)
+      end
+    end
+
   end
 end
