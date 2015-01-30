@@ -249,8 +249,8 @@ module LibertyBuildpack::Framework
         expect(released).to include("-javaagent:./#{newrelic_home}/#{versionid}.jar")
         expect(released).to include("-Dnewrelic.home=./#{newrelic_home}")
         expect(released).to include('-Dnewrelic.config.license_key=abcdefghijklmnop1234')
-        expect(released).to include('-Dnewrelic.config.app_name=\'TestApp\'')
-        expect(released).to include("-Dnewrelic.config.log_file_path=./#{newrelic_home}/logs")
+        expect(released).to include('-Dnewrelic.config.app_name=TestApp')
+        expect(released).to include('-Dnewrelic.config.log_file_path=./../logs')
       end
 
       it 'should return command line options for a valid service in a container with an adjusted relative location',
@@ -261,8 +261,8 @@ module LibertyBuildpack::Framework
         expect(released).to include("-javaagent:../../../#{newrelic_home}/#{versionid}.jar")
         expect(released).to include("-Dnewrelic.home=../../../#{newrelic_home}")
         expect(released).to include('-Dnewrelic.config.license_key=abcdefghijklmnop1234')
-        expect(released).to include('-Dnewrelic.config.app_name=\'TestApp\'')
-        expect(released).to include("-Dnewrelic.config.log_file_path=../../../#{newrelic_home}/logs")
+        expect(released).to include('-Dnewrelic.config.app_name=TestApp')
+        expect(released).to include('-Dnewrelic.config.log_file_path=../../../../logs')
       end
     end # end of release
 
