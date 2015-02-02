@@ -18,6 +18,7 @@
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/util/cache'
 require 'liberty_buildpack/util/cache/admin_cache'
+require 'liberty_buildpack/util/cache/authentication_utils'
 require 'liberty_buildpack/util/cache/buildpack_stash'
 require 'liberty_buildpack/util/cache/file_cache'
 require 'liberty_buildpack/util/cache/internet_availability'
@@ -108,6 +109,8 @@ module LibertyBuildpack::Util::Cache
     HTTP_OK = '200'.freeze
 
     HTTP_NOT_MODIFIED = '304'.freeze
+
+    HTTP_NOT_AUTHORIZED = '401'.freeze
 
     HTTP_ERRORS = [
         EOFError,
@@ -205,11 +208,16 @@ module LibertyBuildpack::Util::Cache
                 InternetAvailability.internet_available
                 yield response, response_code
                 return
+              elsif response_code == HTTP_NOT_AUTHORIZED
+                fail(AuthenticationRequired, "Location #{uri} requires authentication")
               else
                 fail(InferredNetworkFailure, "Bad HTTP response: #{response_code}")
               end
             end
           end
+        rescue AuthenticationRequired => ex
+          retry if AuthenticationUtils.authorization request, uri
+          raise
         rescue InferredNetworkFailure, *HTTP_ERRORS => ex
           handle_failure(ex, try, retry_limit, &block)
         end
@@ -297,6 +305,13 @@ module LibertyBuildpack::Util::Cache
 
     # Inferred network failure.
     class InferredNetworkFailure < Exception
+      def initialize(reason)
+        super reason
+      end
+    end
+
+    # Authentication exception.
+    class AuthenticationRequired < Exception
       def initialize(reason)
         super reason
       end
