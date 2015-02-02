@@ -89,15 +89,10 @@ bundle install --gemfile Gemfile.rubymine-debug
 [install additional gems]: http://stackoverflow.com/questions/11732715/how-do-i-install-ruby-debug-base19x-on-mountain-lion-for-intellij
 [pull request]: https://help.github.com/articles/using-pull-requests
 [Pull requests]: http://help.github.com/send-pull-requests
-[example]: docs/util-repositories.md#setting-up-your-web-server
 [options]: docs/server-xml-options.md
 [tuning options]: docs/tuning.md
 [java main push]: docs/java-main.md
-[Repositories]: docs/util-repositories.md
-[ibmjdk.yml]: config/ibmjdk.yml
-[liberty.yml]: config/liberty.yml
-[wasdev.net]: http://wasdev.net
-[developerWorks Java site]: https://www.ibm.com/developerworks/java/jdk/
+
 [Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.3/lafiles/runtime//en.html
 [JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-EWOD-99YA4J&title=IBM%C2%AE+SDK%2C+Java+Technology+Edition%2C+Version+7+Release+1&l=en
 [manifest documentation]: http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html
