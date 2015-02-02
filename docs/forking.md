@@ -12,7 +12,7 @@ To fork the Buildpack and host your own binaries, then complete the following:
   The download will be in an archive .bin format.
    
 5. Copy the binaries to a location that the buildpack will be able to access via HTTP. For details see
-  [Repositories][]. For an example see [Setting up your Web Server][example]
+  [Repositories][]. For an example see [Setting up your Web Server][]
 
 6. Modify the code in [`config/ibmjdk.yml`][ibmjdk.yml] to point to the JRE.
 
@@ -24,3 +24,10 @@ To fork the Buildpack and host your own binaries, then complete the following:
 ```bash
 cf push <APP-NAME> -p <ARCHIVE> -b <URL to forked repository>
 ```
+
+[wasdev.net]: http://wasdev.net
+[developerWorks Java site]: https://www.ibm.com/developerworks/java/jdk/
+[Repositories]: util-repositories.md
+[Setting up your Web Server]: util-repositories.md#setting-up-your-web-server
+[ibmjdk.yml]: ../config/ibmjdk.yml
+[liberty.yml]: ../config/liberty.yml
