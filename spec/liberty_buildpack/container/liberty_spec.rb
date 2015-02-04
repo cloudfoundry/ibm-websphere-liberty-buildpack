@@ -453,6 +453,7 @@ module LibertyBuildpack::Container
 
           expect(File.exists?(File.join root, '.java', 'overlay.txt')).to eq(true)
           expect(File.exists?(File.join root, '.java', 'test.txt')).to eq(true)
+          expect(Dir.exists?(File.join root, 'resources', '.java-overlay')).to eq(false)
         end
       end
 
@@ -488,6 +489,7 @@ module LibertyBuildpack::Container
 
           expect(File.exists?(File.join root, '.java', 'overlay.txt')).to eq(true)
           expect(File.exists?(File.join root, '.java', 'test.txt')).to eq(true)
+          expect(Dir.exists?(File.join root, 'wlp', 'usr', 'servers', 'server1', 'resources', '.java-overlay')).to eq(false)
         end
       end
 

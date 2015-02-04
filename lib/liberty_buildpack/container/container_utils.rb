@@ -90,5 +90,28 @@ module LibertyBuildpack::Container
         end
       end
     end
+
+    # Overlay JVM files. Move base_dir/resources/.java-overlay/.java files to app_dir/.
+    #
+    # @param [String] base_dir the base directory that contains Java files to overlay.
+    # @param [String] app_dir the application directory where the files will be copied to.
+    def self.overlay_java(base_dir, app_dir)
+      java_overlay_dir = File.join(base_dir, RESOURCES_DIR, JAVA_OVERLAY_DIR)
+      overlay_src = File.join(java_overlay_dir, JAVA_DIR)
+      if File.exists?(overlay_src)
+        print "-----> Overlaying Java files from #{overlay_src}\n"
+        FileUtils.cp_r(overlay_src, app_dir)
+        FileUtils.rm_rf(java_overlay_dir)
+      end
+    end
+
+    private
+
+    RESOURCES_DIR = 'resources'.freeze
+
+    JAVA_OVERLAY_DIR  = '.java-overlay'.freeze
+
+    JAVA_DIR = '.java'.freeze
+
   end
 end
