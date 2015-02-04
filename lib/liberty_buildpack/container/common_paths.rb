@@ -67,7 +67,7 @@ module LibertyBuildpack::Container
     # provided relative path into one represented by symbols only.  Eg: Passing 'container/bin' will result in
     # '../..' as the relative_location.
     #
-    # @param [String] the new_relative_location
+    # @param [String] new_relative_location the new_relative_location
     def relative_location=(new_relative_location)
       # Updates the application path according to the platform based on the given environment.  Heroku does not
       # append 'app' while CloudFoundry v2 appends 'app' as the application's root in an execution environment.

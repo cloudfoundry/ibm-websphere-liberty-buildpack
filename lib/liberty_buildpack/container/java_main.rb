@@ -79,12 +79,6 @@ module LibertyBuildpack::Container
 
     CLASS_PATH_PROPERTY = 'Class-Path'.freeze
 
-    RESOURCES_DIR = 'resources'.freeze
-
-    JAVA_DIR = '.java'.freeze
-
-    JAVA_OVERLAY_DIR  = '.java-overlay'.freeze
-
     def java_home
       File.join('$PWD', @java_home)
     end
@@ -107,11 +101,7 @@ module LibertyBuildpack::Container
     end
 
     def overlay_java
-      overlay_src = File.join(@app_dir, RESOURCES_DIR, JAVA_OVERLAY_DIR, JAVA_DIR)
-      if File.exists?(overlay_src)
-        print "Overlaying java from #{overlay_src}\n"
-        FileUtils.cp_r(overlay_src, @app_dir)
-      end
+      ContainerUtils.overlay_java(@app_dir, @app_dir)
     end
 
     def java_bin
