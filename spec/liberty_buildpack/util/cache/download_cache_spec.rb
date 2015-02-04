@@ -341,6 +341,43 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     expect_file_deleted 'lock'
   end
 
+  it 'should raise an exception if no authentication configuration present' do
+    allow(LibertyBuildpack::Util::Cache::AuthenticationUtils)
+          .to receive(:authorization_value).with('http://foo-uri/')
+          .and_return(nil)
+
+    stub_request(:get, 'http://foo-uri/')
+      .to_return(status: 401, body: '', headers: {})
+
+    expect { trigger }.to raise_error 'Location http://foo-uri/ requires authentication'
+  end
+
+  it 'should raise an exception if incorrect authentication present' do
+    # Value dGVzdDp0ZXN0 is 'test:test' in base64
+    allow(LibertyBuildpack::Util::Cache::AuthenticationUtils)
+          .to receive(:authorization_value).with('http://foo-uri/')
+          .and_return('Basic dGVzdDp0ZXN0')
+
+    # Assume that any account is incorrect authentication
+    stub_request(:get, %r(http://.*?foo-uri/))
+      .to_return(status: 401, body: '', headers: {})
+
+    expect { trigger }.to raise_error 'Location http://foo-uri/ requires authentication'
+  end
+
+  it 'should use auth config if authorization required' do
+    allow(LibertyBuildpack::Util::Cache::AuthenticationUtils)
+          .to receive(:authorization_value).with('http://foo-uri/')
+          .and_return({ 'username' => 'test', 'password' => 'test' })
+
+    stub_request(:get, 'http://foo-uri/')
+      .to_return(status: 401, body: '', headers: {})
+    stub_request(:get, 'http://test:test@foo-uri/')
+      .to_return(status: 200, body: 'foo-cached', headers: {})
+
+    trigger
+  end
+
   context do
     include_context 'buildpack_cache_helper'
 

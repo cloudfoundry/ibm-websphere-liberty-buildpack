@@ -7,6 +7,7 @@
 admin_cache
 coverage
 config/licenses.yml
+config/auth.yml
 doc
 spec/reports
 version.txt
