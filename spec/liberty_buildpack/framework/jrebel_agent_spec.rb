@@ -111,13 +111,13 @@ module LibertyBuildpack::Framework
 
       describe 'download JRebel agent jar based on index.yml information' do
         it 'should download the agent with a matching key and jar version' do
-          expect { compiled }.to output(%r{Downloading JRebel zip #{version} from https://downloadsite/jrebel/jrebel-#{version}-nosetup.zip}).to_stdout
-          expect(File.exists?(File.join(app_dir, jrebel_home, versionid))).to eq(true)
+          expect { compiled }.to output(%r{Downloading JRebel Agent #{version} from https://downloadsite/jrebel/jrebel-#{version}-nosetup.zip}).to_stdout
+          expect(File.exists?(File.join(app_dir, jrebel_home, 'jrebel', 'lib', 'libjrebel64.so'))).to eq(true)
         end
 
         it 'should raise an error with original exception if the jar could not be downloaded',
            index_version: '6.0.3', index_uri: 'https://downloadsite/jrebel/jrebel-6.0.3-nosetup.zip' do
-          allow(LibertyBuildpack::Util).to receive(:download).and_raise('underlying download error')
+          allow(LibertyBuildpack::Util::ApplicationCache).to receive(:new).and_raise('underlying download error')
           expect { compiled }.to raise_error(/Unable to download the JRebel zip\. Ensure that the zip at..+underlying download error/)
         end
       end

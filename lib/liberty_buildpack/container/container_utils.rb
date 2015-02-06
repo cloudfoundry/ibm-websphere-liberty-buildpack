@@ -98,7 +98,7 @@ module LibertyBuildpack::Container
     def self.overlay_java(base_dir, app_dir)
       java_overlay_dir = File.join(base_dir, RESOURCES_DIR, JAVA_OVERLAY_DIR)
       overlay_src = File.join(java_overlay_dir, JAVA_DIR)
-      if File.exists?(overlay_src)
+      if Dir.exist?(overlay_src)
         print "-----> Overlaying Java files from #{overlay_src}\n"
         FileUtils.cp_r(overlay_src, app_dir)
         FileUtils.rm_rf(java_overlay_dir)

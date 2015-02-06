@@ -16,4 +16,4 @@
 # Service configuration
 ---
 version: 6.0.3
-repository_root: "http://dl.zeroturnaround.com/jrebel/"
+repository_root: "https://dl.zeroturnaround.com/jrebel/"
