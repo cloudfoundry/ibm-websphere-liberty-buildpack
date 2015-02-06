@@ -25,15 +25,6 @@ module LibertyBuildpack::Framework
   # Provides the required detect/compile/release functionality in order to use JRebel with an application
   class JRebelAgent
 
-    # JRebel home directory
-    JR_HOME_DIR = '.jrebel'.freeze
-    # Name of the main jar file
-    JREBEL_JAR = 'jrebel.jar'
-    # Directory name
-    JREBEL = 'jrebel'
-    # Path tho the native agent within the nosetup.zip
-    LIBJREBEL_SO = File.join(JREBEL, 'lib', 'libjrebel64.so')
-
     # Creates an instance, passing in a context of information available to the component
     #
     # @param [Hash] context the context that is provided to the instance
@@ -57,8 +48,8 @@ module LibertyBuildpack::Framework
     # @return [String] the detected versioned ID if the environment and config are valid, otherwise nil
     #------------------------------------------------------------------------------------------
     def detect
-      if File.exists?("#{@app_dir}/WEB-INF/classes/rebel-remote.xml")
-        @logger.info('Found rebel-remote.xml, enabling JRebel')
+      if File.exist?("#{@app_dir}/WEB-INF/classes/rebel-remote.xml")
+        @logger.debug('Found rebel-remote.xml, enabling JRebel')
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
         @nosetup_zip = "jrebel-#{@version}-nosetup.zip"
         "jrebel-#{@version}"
@@ -80,19 +71,8 @@ module LibertyBuildpack::Framework
 
       jr_home = File.join(@app_dir, JR_HOME_DIR)
       FileUtils.mkdir_p(jr_home)
-
-      download_nosetup_zip(jr_home)
-      FileUtils.rm_r(File.join(jr_home, JREBEL)) if File.exist?(File.join(jr_home, JREBEL))
-      LibertyBuildpack::Container::ContainerUtils.unzip(File.join(jr_home, @nosetup_zip), jr_home)
-    end
-
-    #-----------------------------------------------------------------------------------------
-    # Download the JRebel zip from the repository as specified in the JRebel configuration.
-    #------------------------------------------------------------------------------------------
-    def download_nosetup_zip(jr_home)
-      LibertyBuildpack::Util.download(@version, @uri, 'JRebel zip', @nosetup_zip, jr_home)
-    rescue => e
-      raise "Unable to download the JRebel zip. Ensure that the zip at #{@uri} is available and accessible. #{e.message}"
+      FileUtils.rm_r(File.join(jr_home, JREBEL)) if Dir.exist?(File.join(jr_home, JREBEL))
+      download_and_install_agent(jr_home)
     end
 
     #-----------------------------------------------------------------------------------------
@@ -112,6 +92,38 @@ module LibertyBuildpack::Framework
       @java_opts << '-Drebel.redefine_class=false'
       @java_opts << '-Drebel.log=true'
       @java_opts << "-Drebel.log.file=#{jr_log}"
+    end
+
+    private
+
+    # JRebel home directory
+    JR_HOME_DIR = '.jrebel'.freeze
+    # Name of the main jar file
+    JREBEL_JAR = 'jrebel.jar'.freeze
+    # Directory name
+    JREBEL = 'jrebel'.freeze
+    # Path tho the native agent within the nosetup.zip
+    LIBJREBEL_SO = File.join(JREBEL, 'lib', 'libjrebel64.so')
+
+    #-----------------------------------------------------------------------------------------
+    # Download the JRebel zip from the repository as specified in the JRebel configuration.
+    #------------------------------------------------------------------------------------------
+    def download_and_install_agent(jr_home)
+      download_start_time = Time.now
+      print "-----> Downloading JRebel Agent #{@version} from #{@uri} "
+      LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|
+        puts "(#{(Time.now - download_start_time).duration})"
+        install_agent(file, jr_home)
+      end
+    rescue => e
+      raise "Unable to download the JRebel zip. Ensure that the zip at #{@uri} is available and accessible. #{e.message}"
+    end
+
+    def install_agent(file, jr_home)
+      print '         Installing archive ... '
+      install_start_time = Time.now
+      LibertyBuildpack::Container::ContainerUtils.unzip(file, jr_home)
+      puts "(#{(Time.now - install_start_time).duration})\n"
     end
   end
 end
