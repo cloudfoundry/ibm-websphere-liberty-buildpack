@@ -4,6 +4,7 @@
 .yardoc
 .buildpath
 .project
+*.iml
 admin_cache
 coverage
 config/licenses.yml

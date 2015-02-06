@@ -26,3 +26,4 @@ frameworks:
   - "LibertyBuildpack::Framework::JavaOpts"
   - "LibertyBuildpack::Framework::SpringAutoReconfiguration"
   - "LibertyBuildpack::Framework::NewRelicAgent"
+  - "LibertyBuildpack::Framework::JRebelAgent"
