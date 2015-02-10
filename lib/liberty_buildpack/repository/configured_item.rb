@@ -46,6 +46,8 @@ module LibertyBuildpack::Repository
 
       KEY_VERSION = 'version'.freeze
 
+      KEY_VERSION_ENV_VAR = 'version_env_var'.freeze
+
       def self.index(repository_root)
         RepositoryIndex.new(repository_root)
       end
@@ -56,7 +58,10 @@ module LibertyBuildpack::Repository
       end
 
       def self.version(configuration)
-        LibertyBuildpack::Util::TokenizedVersion.new(configuration[KEY_VERSION])
+        env_var_name = configuration[KEY_VERSION_ENV_VAR]
+        version_from_env = env_var_name.nil? ? nil : ENV[env_var_name]
+        version = version_from_env.nil? ? configuration[KEY_VERSION] : version_from_env
+        LibertyBuildpack::Util::TokenizedVersion.new(version)
       end
 
   end
