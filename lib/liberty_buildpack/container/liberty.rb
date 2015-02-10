@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013-2014 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -106,6 +106,7 @@ module LibertyBuildpack::Container
     #
     # @return [void]
     def compile
+      Liberty.validate(@app_dir)
       @liberty_components_and_uris, @liberty_license = Liberty.find_liberty_files(@app_dir, @configuration)
       unless LibertyBuildpack::Util.check_license(@liberty_license, @license_id)
         print "\nYou have not accepted the IBM Liberty License.\n\nVisit the following uri:\n#{@liberty_license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_LIBERTY_LICENSE: {License Number}.\n"
@@ -621,7 +622,6 @@ module LibertyBuildpack::Container
     #
     # Returns the version, artifact uri, and license of the requested item in the index file
     def self.find_liberty_item(app_dir, configuration)
-      bin_dir?(app_dir)
       if server_xml(app_dir) || web_inf(app_dir) || meta_inf(app_dir)
         version, config_uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
@@ -806,14 +806,17 @@ module LibertyBuildpack::Container
       app.include? '.ear'
     end
 
-    def self.bin_dir?(app_dir)
+    def self.validate(app_dir)
       bin = File.join(app_dir, WLP_PATH, 'bin')
       dir = File.exist? bin
       if dir
-        print "\nThe pushed server is incorrectly packaged. Use the command 'server package --include=usr' to package a server.\n"
-        raise "The pushed server is incorrectly packaged. Use the command 'server package --include=usr' to package a server."
+        print "\nThe pushed packaged server contains runtime binaries. Use the command 'server package --include=usr' to package the server without the runtime binaries.\n"
+        raise "The pushed packaged server contains runtime binaries. Use the command 'server package --include=usr' to package the server without the runtime binaries."
       end
-      dir
+      if Liberty.server_directory(app_dir) && (Liberty.web_inf(app_dir) || Liberty.meta_inf(app_dir))
+        print "\nWAR and EAR files cannot contain a server.xml file in the root directory.\n"
+        raise 'WAR and EAR files cannot contain a server.xml file in the root directory.'
+      end
     end
 
     def self.server_xml_directory(app_dir)
