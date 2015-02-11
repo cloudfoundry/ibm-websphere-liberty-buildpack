@@ -129,28 +129,42 @@ module LibertyBuildpack::Framework
         jrebel = JRebelAgent.new(context)
         jrebel.detect
         jrebel.release
+        context[:java_opts]
       end
 
-      it 'should return command line options for a valid service in a default container' do
-        expect(released).to include('-agentpath:./.jrebel/jrebel/lib/libjrebel64.so')
-        expect(released).to include('-Xshareclasses:none')
-        expect(released).to include('-Drebel.remoting_plugin=true')
-        expect(released).to include('-Drebel.redefine_class=false')
-        expect(released).to include('-Drebel.log=true')
-        expect(released).to include('-Drebel.log.file=./../logs/jrebel.log')
+      it 'should return command line options for a valid service in a default container',
+         java_opts: [] do | example |
+        java_opts = released
+        expect(java_opts).to include('-agentpath:./.jrebel/jrebel/lib/libjrebel64.so')
+        expect(java_opts).to include('-Xshareclasses:none')
+        expect(java_opts).to include('-Drebel.remoting_plugin=true')
+        expect(java_opts).to include('-Drebel.redefine_class=false')
+        expect(java_opts).to include('-Drebel.log=true')
+        expect(java_opts).to include('-Drebel.log.file=./../logs/jrebel.log')
+      end
+
+      it 'should return command line options for a valid service in a default container with openjdk',
+         java_opts: [], jvm_type: 'openjdk' do | example |
+        java_opts = released
+        expect(java_opts).to include('-agentpath:./.jrebel/jrebel/lib/libjrebel64.so')
+        expect(java_opts).not_to include('-Xshareclasses:none')
+        expect(java_opts).to include('-Drebel.remoting_plugin=true')
+        expect(java_opts).to include('-Drebel.redefine_class=false')
+        expect(java_opts).to include('-Drebel.log=true')
+        expect(java_opts).to include('-Drebel.log.file=./../logs/jrebel.log')
       end
 
       it 'should return command line options for a valid service in a container with an adjusted relative location',
-         common_paths: LibertyBuildpack::Container::CommonPaths.new do |example|
-
+         java_opts: [], common_paths: LibertyBuildpack::Container::CommonPaths.new do |example|
         example.metadata[:common_paths].relative_location = 'custom/container/dir'
 
-        expect(released).to include('-agentpath:../../../.jrebel/jrebel/lib/libjrebel64.so')
-        expect(released).to include('-Xshareclasses:none')
-        expect(released).to include('-Drebel.remoting_plugin=true')
-        expect(released).to include('-Drebel.redefine_class=false')
-        expect(released).to include('-Drebel.log=true')
-        expect(released).to include('-Drebel.log.file=../../../../logs/jrebel.log')
+        java_opts = released
+        expect(java_opts).to include('-agentpath:../../../.jrebel/jrebel/lib/libjrebel64.so')
+        expect(java_opts).to include('-Xshareclasses:none')
+        expect(java_opts).to include('-Drebel.remoting_plugin=true')
+        expect(java_opts).to include('-Drebel.redefine_class=false')
+        expect(java_opts).to include('-Drebel.log=true')
+        expect(java_opts).to include('-Drebel.log.file=../../../../logs/jrebel.log')
       end
     end # end of release
   end
