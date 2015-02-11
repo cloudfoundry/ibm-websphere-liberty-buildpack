@@ -4,6 +4,7 @@
 .yardoc
 .buildpath
 .project
+.buildpack-diagnostics
 *.iml
 admin_cache
 coverage

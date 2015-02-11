@@ -25,16 +25,20 @@ shared_context 'application_helper' do
   previous_environment = ENV.to_hash
 
   let(:environment) do
-    { 'test-key'      => 'test-value', 'VCAP_APPLICATION' => vcap_application.to_yaml,
-      'VCAP_SERVICES' => vcap_services.to_yaml }
+    { 'test-key'      => 'test-value', 'VCAP_APPLICATION' => vcap_application,
+      'VCAP_SERVICES' => vcap_services }
   end
 
-  let(:vcap_application) { { 'application_name' => 'test-application-name' } }
+  let(:vcap_application) { "{\"application_name\":\"test-application-name\"}" }
 
-  let(:vcap_services) do
-    { 'test-service-n/a' => [{ 'name'        => 'test-service-name', 'label' => 'test-service-n/a',
-                               'tags'        => ['test-service-tag'], 'plan' => 'test-plan',
-                               'credentials' => { 'uri' => 'test-uri' } }] }
+  let(:vcap_services) do |example|
+    if example.metadata[:vcap_services]
+     example.metadata[:vcap_services]
+    else
+     "{\"test-service-n/a\":" +
+       "[{\"name\":\"test-service-name\",\"label\":\"test-service-n/a\",\"tags\":[\"test-service-tag\"]," +
+       "\"plan\":\"test-plan\",\"credentials\":{ \"uri\":\"test-uri\" } }]}"
+    end
   end
 
   before do
