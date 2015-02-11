@@ -100,7 +100,21 @@ class BuildpackCache
     if File.exists?(uri)
       FileUtils.cp uri, target
     else
-      Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: rich_uri.scheme == 'https') do |http|
+      http_object=Net::HTTP
+      # Modfications to use proxy environment variable
+      proxy=ENV['HTTPS_PROXY']
+      proxy=ENV['https_proxy'] unless proxy
+      proxy=ENV['HTTP_PROXY'] unless proxy
+      proxy=ENV['http_proxy'] unless proxy
+      regex_get_host_port=/^https?:\/\/(.+):([0-9]+).*$/
+      if proxy and not proxy.empty?
+        captures=regex_get_host_port.match(proxy).captures
+        proxy_host=captures[0]
+        proxy_port=captures[1]
+        http_object=Net::HTTP::Proxy(proxy_host, proxy_port)
+      end
+      # end
+      http_object.start(rich_uri.host, rich_uri.port, use_ssl: rich_uri.scheme == 'https') do |http|
         request = Net::HTTP::Get.new(rich_uri.request_uri)
         http.request request do |response|
           File.open(target, File::CREAT | File::WRONLY) do |file|
