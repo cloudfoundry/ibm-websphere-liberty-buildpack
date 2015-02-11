@@ -40,6 +40,7 @@ module LibertyBuildpack::Framework
       @configuration = context[:configuration]
       @common_paths = context[:common_paths] || LibertyBuildpack::Container::CommonPaths.new
       @java_opts = context[:java_opts]
+      @jvm_type = context[:jvm_type]
     end
 
     #-----------------------------------------------------------------------------------------
@@ -87,11 +88,12 @@ module LibertyBuildpack::Framework
       jr_log = File.join(@common_paths.log_directory, 'jrebel.log')
 
       @java_opts << "-agentpath:#{jr_native_agent}"
-      @java_opts << '-Xshareclasses:none'
       @java_opts << '-Drebel.remoting_plugin=true'
       @java_opts << '-Drebel.redefine_class=false'
       @java_opts << '-Drebel.log=true'
       @java_opts << "-Drebel.log.file=#{jr_log}"
+
+      @java_opts << '-Xshareclasses:none' unless openjdk?
     end
 
     private
@@ -125,5 +127,10 @@ module LibertyBuildpack::Framework
       LibertyBuildpack::Container::ContainerUtils.unzip(file, jr_home)
       puts "(#{(Time.now - install_start_time).duration})\n"
     end
+
+    def openjdk?
+      @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
+    end
+
   end
 end
