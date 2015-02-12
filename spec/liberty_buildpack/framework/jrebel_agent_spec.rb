@@ -149,7 +149,7 @@ module LibertyBuildpack::Framework
         expect(java_opts).to include('-agentpath:./.jrebel/jrebel/lib/libjrebel64.so')
         expect(java_opts).not_to include('-Xshareclasses:none')
         expect(java_opts).to include('-Drebel.remoting_plugin=true')
-        expect(java_opts).to include('-Drebel.redefine_class=false')
+        expect(java_opts).not_to include('-Drebel.redefine_class=false')
         expect(java_opts).to include('-Drebel.log=true')
         expect(java_opts).to include('-Drebel.log.file=./../logs/jrebel.log')
       end
