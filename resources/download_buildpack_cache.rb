@@ -90,6 +90,31 @@ class BuildpackCache
     end
   end
 
+  # Reads the environment variables to look for an HTTP proxy
+  # and returns a Hash with the proxy host and port, if any.
+  #
+  # Read variables are (in this order): HTTPS_PROXY, https_proxy, HTTP_PROXY,
+  # http_proxy. The first result obtained in this order is the one returned.
+  #
+  # If none is found, nil is returned.
+  #
+  # @return a hash like {:host => 'a host', :port => aPort} with the proxy configuration, or nil.
+  def proxy_from_env
+    proxy = ENV['HTTPS_PROXY']
+    proxy = ENV['https_proxy'] unless proxy
+    proxy = ENV['HTTP_PROXY'] unless proxy
+    proxy = ENV['http_proxy'] unless proxy
+    regex_get_host_port = %r{^https?://(.+):([0-9]+).*$}
+    returned_proxy_hash = nil
+    if (proxy) && (!proxy.empty?)
+      captures = regex_get_host_port.match(proxy).captures
+      proxy_host = captures[0]
+      proxy_port = captures[1]
+      returned_proxy_hash = { host: proxy_host, port: proxy_port }
+    end
+    # return returned_proxy_hash
+  end
+
   # Downloads remote location into the specified target file
   #
   # @param [String] uri location of the remote resource
@@ -100,19 +125,10 @@ class BuildpackCache
     if File.exists?(uri)
       FileUtils.cp uri, target
     else
-      http_object=Net::HTTP
+      http_object = Net::HTTP
       # Modfications to use proxy environment variable
-      proxy=ENV['HTTPS_PROXY']
-      proxy=ENV['https_proxy'] unless proxy
-      proxy=ENV['HTTP_PROXY'] unless proxy
-      proxy=ENV['http_proxy'] unless proxy
-      regex_get_host_port=/^https?:\/\/(.+):([0-9]+).*$/
-      if proxy and not proxy.empty?
-        captures=regex_get_host_port.match(proxy).captures
-        proxy_host=captures[0]
-        proxy_port=captures[1]
-        http_object=Net::HTTP::Proxy(proxy_host, proxy_port)
-      end
+      proxy_hash = proxy_from_env
+      http_object = Net::HTTP::Proxy(proxy_hash[:host], proxy_hash[:port]) if proxy_hash
       # end
       http_object.start(rich_uri.host, rich_uri.port, use_ssl: rich_uri.scheme == 'https') do |http|
         request = Net::HTTP::Get.new(rich_uri.request_uri)
