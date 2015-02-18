@@ -17,10 +17,13 @@
 ---
 repository_root: "https://download.run.pivotal.io/openjdk/lucid/x86_64"
 version: 1.7.0_+
+version_env_var: LBP_OPENJDK_VERSION
 memory_sizes:
-  permgen: 64m..
+  metaspace: 64m..
+  permgen: 64m.. 
 memory_heuristics:
   heap: 75
+  metaspace: 10
   permgen: 10
   stack: 5
   native: 10
