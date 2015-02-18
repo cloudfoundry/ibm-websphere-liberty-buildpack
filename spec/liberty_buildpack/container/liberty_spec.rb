@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013-2014 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -131,21 +131,6 @@ module LibertyBuildpack::Container
         expect(detected).to eq(%w(SVR-DIR liberty-8.5.5))
       end
 
-      it 'should throw an error when a server including binaries was pushed' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-        .and_return(LIBERTY_VERSION)
-
-        expect do
-          Liberty.new(
-          app_dir: 'spec/fixtures/failed-package',
-          configuration: {},
-          java_home: '',
-          java_opts: [],
-          license_ids: {}
-          ).detect
-        end.to raise_error(/The\ pushed\ server\ is\ incorrectly\ packaged.\ Use\ the\ command\ 'server\ package\ --include=usr'\ to\ package\ a\ server/)
-      end
-
       it 'should throw an error when there are multiple server.xmls' do
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
         .and_return(LIBERTY_VERSION)
@@ -245,12 +230,71 @@ module LibertyBuildpack::Container
     end
 
     describe 'compile' do
+      it 'should throw an error when a server including binaries was pushed' do
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        .and_return(LIBERTY_VERSION)
+
+        expect do
+          Liberty.new(
+          app_dir: 'spec/fixtures/failed-package',
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: {}
+          ).compile
+        end.to raise_error(/The\ pushed\ packaged\ server\ contains\ runtime\ binaries.\ Use\ the\ command\ 'server\ package\ --include=usr'\ to\ package\ the\ server\ without\ the\ runtime\ binaries./)
+      end
+
+      it 'should fail if a WAR contains a server.xml in its root' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'WEB-INF')
+          File.open(File.join(root, 'server.xml'), 'w') do |file|
+            file.write('<server></server>')
+          end
+
+          expect do
+            Liberty.new(
+              app_dir: root,
+              lib_directory: '',
+              configuration: {},
+              environment: {},
+              license_ids: {}
+            ).compile
+          end.to raise_error(/WAR\ and\ EAR\ files\ cannot\ contain\ a\ server.xml\ file\ in\ the\ root\ directory./)
+        end
+      end
+
+      it 'should fail if an EAR contains a server.xml in its root' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'META-INF')
+          File.open(File.join(root, 'server.xml'), 'w') do |file|
+            file.write('<server></server>')
+          end
+
+          expect do
+            Liberty.new(
+              app_dir: root,
+              lib_directory: '',
+              configuration: {},
+              environment: {},
+              license_ids: {}
+            ).compile
+          end.to raise_error(/WAR\ and\ EAR\ files\ cannot\ contain\ a\ server.xml\ file\ in\ the\ root\ directory./)
+        end
+      end
+
       it 'should fail if license ids do not match' do
         Dir.mktmpdir do |root|
           Dir.mkdir File.join(root, 'WEB-INF')
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
+
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
           expect do
             Liberty.new(
@@ -260,7 +304,7 @@ module LibertyBuildpack::Container
               environment: {},
               license_ids: { 'IBM_LIBERTY_LICENSE' => 'Incorrect' }
             ).compile
-          end.to raise_error
+          end.to raise_error(RuntimeError, '')
         end
       end
 
