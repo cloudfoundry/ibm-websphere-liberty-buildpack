@@ -56,7 +56,10 @@ module LibertyBuildpack::Repository
       end
 
       def self.version(configuration)
-        LibertyBuildpack::Util::TokenizedVersion.new(configuration[KEY_VERSION])
+        env_var_name = configuration['class_name'].nil? ? nil : 'LBP_' + configuration['class_name'] + '_VERSION'
+        version_from_env = env_var_name.nil? ? nil : ENV[env_var_name]
+        version = version_from_env.nil? ? configuration[KEY_VERSION] : version_from_env
+        LibertyBuildpack::Util::TokenizedVersion.new(version)
       end
 
   end
