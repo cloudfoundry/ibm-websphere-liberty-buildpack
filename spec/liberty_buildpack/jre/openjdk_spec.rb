@@ -31,6 +31,7 @@ module LibertyBuildpack::Jre
 
     before do
       allow(LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new).and_return(memory_heuristic)
+      @config = { 'repository_root' => 'http://dummyurl', 'version' => '1.0.1_+' }
       $stdout = StringIO.new
       $stderr = StringIO.new
     end
@@ -38,24 +39,99 @@ module LibertyBuildpack::Jre
     after do
       $stdout = STDOUT
       $stderr = STDERR
+      ENV['LBP_OPENJDK_VERSION'] = nil
     end
 
-    it 'should detect with id of openjdk-<version>' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(OPENJDK_DETAILS_PRE_8)
+    context 'detect' do
 
-        detected = OpenJdk.new(
-            app_dir: '',
-            java_home: '',
-            java_opts: [],
-            configuration: {},
-            license_ids: {},
-            jvm_type: 'openjdk'
-        ).detect
+      it 'should not detect if openjdk is not set as jvm type' do
+        Dir.mktmpdir do |root|
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).and_yield(File.open('spec/fixtures/test-versions.yml'))
 
-        expect(detected).to eq('openjdk-1.7.0')
+          detected = OpenJdk.new(
+              app_dir: '',
+              java_home: '',
+              java_opts: [],
+              configuration: @config,
+              license_ids: {},
+              jvm_type: nil
+          ).detect
+
+          expect(detected).to be_nil
+        end
       end
-    end
+
+      it 'should not detect if openjdk is not set as jvm type due to input error' do
+        Dir.mktmpdir do |root|
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).and_yield(File.open('spec/fixtures/test-versions.yml'))
+
+          detected = OpenJdk.new(
+              app_dir: '',
+              java_home: '',
+              java_opts: [],
+              configuration: @config,
+              license_ids: {},
+              jvm_type: 'openjdk1'
+          ).detect
+
+          expect(detected).to be_nil
+        end
+      end
+      it 'should return latest version of the default release when no version is specified' do
+        Dir.mktmpdir do |root|
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).and_yield(File.open('spec/fixtures/test-versions.yml'))
+
+          detected = OpenJdk.new(
+              app_dir: '',
+              java_home: '',
+              java_opts: [],
+              configuration: @config,
+              license_ids: {},
+              jvm_type: 'openjdk'
+          ).detect
+
+          expect(detected).to eq('openjdk-1.0.1_05')
+        end
+      end
+
+      it 'overrides version with an env var' do
+        Dir.mktmpdir do |root|
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).and_yield(File.open('spec/fixtures/test-versions.yml'))
+          ENV['LBP_OPENJDK_VERSION'] = '1.2.+'
+
+          detected = OpenJdk.new(
+              app_dir: '',
+              java_home: '',
+              java_opts: [],
+              configuration: @config,
+              license_ids: {},
+              jvm_type: 'openjdk'
+          ).detect
+
+          expect(detected).to eq('openjdk-1.2.0_02')
+        end
+      end
+
+      it 'should fail when ConfiguredItem.find_item fails' do
+        Dir.mktmpdir do |root|
+          expect do
+            OpenJdk.new(
+              app_dir: '',
+              java_home: '',
+              java_opts: [],
+              configuration: {},
+              license_ids: {},
+              jvm_type: 'openjdk'
+            ).detect
+          end.to raise_error(/OpenJdk\ error:/)
+        end
+      end
+
+    end # context detect
 
     it 'should extract Java from a GZipped TAR' do
       Dir.mktmpdir do |root|
@@ -108,21 +184,6 @@ module LibertyBuildpack::Jre
 
         expect(java_opts).to include('opt-1')
         expect(java_opts).to include('opt-2')
-      end
-    end
-
-    it 'should fail when ConfiguredItem.find_item fails' do
-      Dir.mktmpdir do |root|
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise('test error')
-        expect do
-          OpenJdk.new(
-              app_dir: '',
-              java_home: '',
-              java_opts: [],
-              configuration: {},
-              license_ids: {}
-          ).detect
-        end.to raise_error(/OpenJdk\ error:\ test\ error/)
       end
     end
 

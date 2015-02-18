@@ -44,6 +44,7 @@ module LibertyBuildpack::Jre
       @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
+      @configuration['class_name'] = 'OPENJDK' unless @configuration.nil?
       @common_paths = context[:common_paths] || LibertyBuildpack::Container::CommonPaths.new
       @jvm_type = context[:jvm_type]
       context[:java_home].concat JAVA_HOME unless context[:java_home].include? JAVA_HOME
@@ -54,15 +55,16 @@ module LibertyBuildpack::Jre
     #
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
-      @version = OpenJdk.find_openjdk(@configuration)[0]
-      id @version if @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
+      return nil if @jvm_type.nil? || 'openjdk'.casecmp(@jvm_type) != 0
+      @version = find_openjdk(@configuration)[0]
+      id @version
     end
 
     # Downloads and unpacks a OpenJdk
     #
     # @return [void]
     def compile
-      @version, @uri = OpenJdk.find_openjdk(@configuration)
+      @version, @uri = find_openjdk(@configuration)
       download_start_time = Time.now
 
       print "-----> Downloading OpenJdk #{@version} from #{@uri} "
@@ -78,7 +80,7 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def release
-      @version = OpenJdk.find_openjdk(@configuration)[0]
+      @version = find_openjdk(@configuration)[0]
       @java_opts << "-XX:OnOutOfMemoryError=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
       @java_opts.concat memory(@configuration)
     end
@@ -104,7 +106,7 @@ module LibertyBuildpack::Jre
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
-    def self.find_openjdk(configuration)
+    def find_openjdk(configuration)
       LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
     rescue => e
       raise RuntimeError, "OpenJdk error: #{e.message}", e.backtrace
@@ -118,13 +120,16 @@ module LibertyBuildpack::Jre
       File.join @app_dir, JAVA_HOME
     end
 
-    def self.cache_dir(file)
-      File.dirname(file.path)
-    end
-
     def memory(configuration)
       sizes = @configuration[KEY_MEMORY_SIZES] || {}
       heuristics = @configuration[KEY_MEMORY_HEURISTICS] || {}
+      if @version[1].to_i < 8
+        heuristics.delete 'metaspace'
+        sizes.delete 'metaspace'
+      else
+        heuristics.delete 'permgen'
+        sizes.delete 'permgen'
+      end
       OpenJDKMemoryHeuristicFactory.create_memory_heuristic(sizes, heuristics, @version).resolve
     end
 

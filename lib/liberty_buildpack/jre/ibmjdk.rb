@@ -54,6 +54,7 @@ module LibertyBuildpack::Jre
       @java_opts = context[:java_opts]
       @common_paths = context[:common_paths] || LibertyBuildpack::Container::CommonPaths.new
       @configuration = context[:configuration]
+      @configuration['class_name'] = 'IBMJDK'  unless @configuration.nil?
       @license_id = context[:license_ids]['IBM_JVM_LICENSE']
       @jvm_type = context[:jvm_type]
       context[:java_home].concat JAVA_HOME unless context[:java_home].include? JAVA_HOME
@@ -64,15 +65,16 @@ module LibertyBuildpack::Jre
     #
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
-      @version = IBMJdk.find_ibmjdk(@configuration)[0]
-      id @version if @jvm_type == '' || @jvm_type == nil || 'ibmjre'.casecmp(@jvm_type) == 0
+      return nil if !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
+      @version = find_ibmjdk(@configuration)[0]
+      id @version
     end
 
     # Downloads and unpacks a JRE
     #
     # @return [void]
     def compile
-      @version, @uri, @license = IBMJdk.find_ibmjdk(@configuration)
+      @version, @uri, @license = find_ibmjdk(@configuration)
       unless LibertyBuildpack::Util.check_license(@license, @license_id)
         print "\nYou have not accepted the IBM JVM License.\n\nVisit the following uri:\n#{@license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
         raise
@@ -155,7 +157,7 @@ module LibertyBuildpack::Jre
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
-    def self.find_ibmjdk(configuration)
+    def find_ibmjdk(configuration)
       LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
     rescue => e
       raise RuntimeError, "IBM JRE error: #{e.message}", e.backtrace
@@ -167,10 +169,6 @@ module LibertyBuildpack::Jre
 
     def java_home
       File.join @app_dir, JAVA_HOME
-    end
-
-    def self.cache_dir(file)
-      File.dirname(file.path)
     end
 
     def memory(configuration)
@@ -209,10 +207,6 @@ module LibertyBuildpack::Jre
       default_options.push "-Xdump:snap:defaults:file=#{@common_paths.dump_directory}/Snap.%Y%m%d.%H%M%S.%pid.%seq.trc"
       default_options.push '-Xdump:heap+java+snap:events=user'
       default_options
-    end
-
-    def pre_8
-      @version < LibertyBuildpack::Util::TokenizedVersion.new('1.8.0')
     end
 
     def copy_killjava_script

@@ -28,27 +28,19 @@ module LibertyBuildpack::Jre
 
     let(:application_cache) { double('ApplicationCache') }
 
-    before do | example |
-      # By default, always stub the return of a valid ibmjdk_config.yml against a given service_release as indicated by
-      # the spec test's service_release metadata.  Tests that test for errors can disable a valid return of the
-      # ibmjdk_config.yml by setting its find_item metadata to false along with the optional expected error
-      find_item = example.metadata[:return_find_item].nil? ? true : example.metadata[:return_find_item]
-      if find_item
-        token_version = example.metadata[:service_release]
-
-        ibmjdk_config = [LibertyBuildpack::Util::TokenizedVersion.new(token_version), uri, 'spec/fixtures/license.html']
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(ibmjdk_config)
-      else
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise(example.metadata[:raise_error_message])
-      end
-
-      # return license file by default
-      application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
-
-    end
-
     # tests for common behaviors across IBMJDK v7 releases
     shared_examples_for 'IBMJDK v7' do | service_release |
+
+      before do | example |
+        # By default, always stub the return of a valid ibmjdk_config.yml against a given service_release as indicated by
+        # the spec test's service_release metadata.  Tests that test for errors can disable a valid return of the
+        # ibmjdk_config.yml by setting its find_item metadata to false along with the optional expected error
+        token_version = example.metadata[:service_release]
+        ibmjdk_config = [LibertyBuildpack::Util::TokenizedVersion.new(token_version), uri, 'spec/fixtures/license.html']
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(ibmjdk_config)
+        # return license file by default
+        application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
+      end
 
       it 'adds the JAVA_HOME to java_home', java_home: '', java_opts: [], license_ids: {} do | example |
 
@@ -60,21 +52,6 @@ module LibertyBuildpack::Jre
 
         expect(java_home).to eq('.java')
       end
-
-      describe 'detect', java_home: '', license_ids: {}, service_release: service_release do
-
-        # context is provided by component_helper, its default values are provided by 'describe' metadata, and
-        # customized through test's metadata
-        subject(:detected) { IBMJdk.new(context).detect }
-
-        it 'should detect with id of ibmjdk-<version>' do
-          expect(detected).to eq('ibmjdk-' + service_release)
-        end
-
-        it 'should fail when ConfiguredItem.find_item fails', return_find_item: false, raise_error_message: 'test error' do
-          expect { detected }.to raise_error(/IBM\ JRE\ error:\ test\ error/)
-        end
-      end # end of detect shared tests
 
       describe 'compile',
                java_home: '',
@@ -201,6 +178,34 @@ module LibertyBuildpack::Jre
 
     end
 
+    context 'detect' do
+      # dummy up config with a dummy default version that matches a downlevel version in test-versions.yml
+      config = { 'repository_root' => 'http://dummyurl', 'version' => '1.0.1_+' }
+      describe 'detect', java_home: '', configuration: config, license_ids: {} do
+
+        before do |example|
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).and_yield(File.open('spec/fixtures/test-versions.yml'))
+        end
+
+        after do |example|
+          ENV['LBP_IBMJDK_VERSION'] = nil
+        end
+
+        subject(:detected) { IBMJdk.new(context).detect }
+
+        it 'should return latest version of the default release when no env version is specified' do
+          expect(detected).to eq('ibmjdk-1.0.1_05')
+        end
+
+        it 'honors environment variable override' do
+           ENV['LBP_IBMJDK_VERSION'] = '1.+'
+           expect(detected).to eq('ibmjdk-1.2.0_02')
+        end
+
+      end # end of detect shared tests
+
+    end
   end
 
 end
