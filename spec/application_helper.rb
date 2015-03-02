@@ -29,15 +29,15 @@ shared_context 'application_helper' do
       'VCAP_SERVICES' => vcap_services }
   end
 
-  let(:vcap_application) { "{\"application_name\":\"test-application-name\"}" }
+  let(:vcap_application) { "{\"application_name\": \"test-application-name\"}" }
 
   let(:vcap_services) do |example|
     if example.metadata[:vcap_services]
      example.metadata[:vcap_services]
     else
-     "{\"test-service-n/a\":" +
-       "[{\"name\":\"test-service-name\",\"label\":\"test-service-n/a\",\"tags\":[\"test-service-tag\"]," +
-       "\"plan\":\"test-plan\",\"credentials\":{ \"uri\":\"test-uri\" } }]}"
+     "{\"test-service-n/a\": " +
+       "[{\"name\": \"test-service-name\", \"label\": \"test-service-n/a\", \"tags\": [\"test-service-tag\"], " +
+       "\"plan\": \"test-plan\", \"credentials\": { \"uri\": \"test-uri\" } }]}"
     end
   end
 
