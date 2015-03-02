@@ -70,6 +70,7 @@ module LibertyBuildpack
 
     it 'should not write VCAP_SERVICES credentials as debug info',
        log_level: 'DEBUG',
+       show_output: 'true',
         vcap_services: "{\"type\":[{\"credentials\":\"VERY SECRET PHRASE\",\"plain\":\"PLAIN DATA\"}]}" do
 
       log_content = with_buildpack do |buildpack|
