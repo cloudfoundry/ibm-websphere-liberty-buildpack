@@ -748,14 +748,6 @@ module LibertyBuildpack::Container
       File.join(liberty_home, 'etc', 'extensions', 'icap.properties')
     end
 
-    def self.web_inf_lib(app_dir)
-      File.join app_dir, WEB_INF, 'lib'
-    end
-
-    def self.ear_lib(app_dir)
-      File.join app_dir, 'lib'
-    end
-
     def self.web_inf(app_dir)
       web_inf = File.join(app_dir, WEB_INF)
       File.directory?(File.join(app_dir, WEB_INF)) && !main_class?(app_dir) ? web_inf : nil
@@ -797,15 +789,6 @@ module LibertyBuildpack::Container
       candidates.any? ? candidates[0] : nil
     end
 
-    def self.contains_type(app_dir, type)
-      files = Dir.glob(File.join(app_dir, type))
-      files == [] || files == nil ? nil : files
-    end
-
-    def self.ear?(app)
-      app.include? '.ear'
-    end
-
     def self.validate(app_dir)
       bin = File.join(app_dir, WLP_PATH, 'bin')
       dir = File.exist? bin
@@ -817,15 +800,6 @@ module LibertyBuildpack::Container
         print "\nWAR and EAR files cannot contain a server.xml file in the root directory.\n"
         raise 'WAR and EAR files cannot contain a server.xml file in the root directory.'
       end
-    end
-
-    def self.server_xml_directory(app_dir)
-      server_xml_dest = File.join(app_dir, LIBERTY_HOME, USR_PATH, '**/server.xml')
-      candidates = Dir.glob(server_xml_dest)
-      if candidates.size > 1
-        raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}"
-      end
-      candidates.any? ? File.dirname(candidates[0]) : nil
     end
 
     def self.server_xml(app_dir)
@@ -873,23 +847,6 @@ module LibertyBuildpack::Container
           File.rename(temp_directory, app)
         end
       end
-    end
-
-    def self.splat_expand(apps)
-      apps.each do |app|
-        if File.file? app
-          ContainerUtils.unzip(app, './app')
-          FileUtils.rm_rf("#{app}")
-        end
-      end
-    end
-
-    def self.all_extracted?(file_array)
-      state = true
-      file_array.each do |file|
-          state = false if File.file?(file)
-      end
-      state
     end
 
   end
