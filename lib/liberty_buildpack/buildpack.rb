@@ -144,7 +144,7 @@ module LibertyBuildpack
           java_home: '',
           java_opts: [],
           lib_directory: @lib_directory,
-          common_paths: @common_paths,         
+          common_paths: @common_paths,
           vcap_application: vcap_application ? YAML.load(vcap_application) : {},
           vcap_services: vcap_services ? YAML.load(vcap_services) : {},
           license_ids: license_ids ? license_ids : {},
