@@ -317,6 +317,11 @@ module LibertyBuildpack::Services
       Utils.find_and_update_attribute(mongos, 'password', @password)
       find_and_update_endpoint_element(mongos, 'hostNames', @hosts)
       find_and_update_endpoint_element(mongos, 'ports', @ports)
+      # delete all hostNames and ports attributes to prevent a conflict with hostNames and ports elements we just added.
+      mongos.each do |mongo|
+        mongo.delete_attribute('hostNames')
+        mongo.delete_attribute('ports')
+      end
       # The mongo stanza may contain the library by reference or by containment. It must be one or the other. We rely on Liberty configuration to coherency check.
       lib_id = nil
       lib_element = []
