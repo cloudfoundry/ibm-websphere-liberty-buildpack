@@ -132,7 +132,19 @@ module LibertyBuildpack::Services
         validate_xml(server_xml, expected_config)
       end
 
-      def check_server_xml_update(root, sm)
+      def check_server_xml_update_attribute(root, sm)
+        contents = []
+        contents << '<server>'
+        contents << '<featureManager><feature>jsp-2.2</feature></featureManager>'
+        t1 = "<mongo id='#{get_mongo_id}' libraryRef='myLibrary' password='noPassword' user='noUser' hostNames='noHost' ports='1111'/>"
+        contents << t1
+        contents << "<mongoDB databaseName='noDB' id='#{get_mongodb_id}' jndiName='myJndi' mongoRef='#{get_mongo_id}'/>"
+        contents << "<library id='myLibrary'><fileset dir='lib' id='lib-id'/></library>"
+        contents << '</server>'
+        check_server_xml_update(root, sm, contents)
+      end
+
+      def check_server_xml_update_element(root, sm)
         contents = []
         contents << '<server>'
         contents << '<featureManager><feature>jsp-2.2</feature></featureManager>'
@@ -142,7 +154,10 @@ module LibertyBuildpack::Services
         contents << "<mongoDB databaseName='noDB' id='#{get_mongodb_id}' jndiName='myJndi' mongoRef='#{get_mongo_id}'/>"
         contents << "<library id='myLibrary'><fileset dir='lib' id='lib-id'/></library>"
         contents << '</server>'
+        check_server_xml_update(root, sm, contents)
+      end
 
+      def check_server_xml_update(root, sm, contents)
         server_xml_doc = REXML::Document.new(contents.join)
         server_xml = File.join(root, 'server.xml')
         sm.update_configuration(server_xml_doc, false, root)
@@ -166,7 +181,8 @@ module LibertyBuildpack::Services
           sm = LibertyBuildpack::Container::ServicesManager.new(vcap_services, root, nil)
           check_variables(root, vcap_services, hosts, ports, uri)
           check_server_xml_create(root, sm)
-          check_server_xml_update(root, sm)
+          check_server_xml_update_element(root, sm)
+          check_server_xml_update_attribute(root, sm)
         end
       end
 
