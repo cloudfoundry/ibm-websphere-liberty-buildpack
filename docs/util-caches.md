@@ -44,8 +44,8 @@ The [`DownloadCache`][] is the most generic of the three caches.  You can create
 ```ruby
 # Creates an instance of the cache that is backed by the filesystem rooted at +cache_root+
 #
-# @param [String] cache_root the filesystem root for downloaded files to be cached in
-def initialize(cache_root = Dir.tmpdir)
+# @param [String] cache_root the filesystem directory in which to cache downloaded files
+def initialize(cache_root = Pathname.new(Dir.tmpdir))
 ```
 
 ## `LibertyBuildpack::Util::ApplicationCache`
@@ -71,5 +71,5 @@ def initialize
 ```
 
 [`ApplicationCache`]: ../lib/liberty_buildpack/util/application_cache.rb
-[`DownloadCache`]: ../lib/liberty_buildpack/util/download_cache.rb
-[`GlobalCache`]: ../lib/liberty_buildpack/util/global_cache.rb
+[`DownloadCache`]: ../lib/liberty_buildpack/util/cache/download_cache.rb
+[`GlobalCache`]: ../lib/liberty_buildpack/util/cache/global_cache.rb
