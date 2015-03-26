@@ -29,6 +29,7 @@ To configure the framework, you can modify the [`config/springautoreconfiguratio
 
 | Name | Description
 | ---- | -----------
+| `enabled` | Whether to attempt auto-reconfiguration.
 | `repository_root` | The URL of the Auto Reconfiguration repository index ([details][repositories]).
 | `version` | The version of Auto Reconfiguration to use. You can find the candidate versions [here][].
 

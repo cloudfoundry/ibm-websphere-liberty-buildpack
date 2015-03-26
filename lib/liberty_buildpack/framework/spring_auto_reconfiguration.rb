@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013-2014 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -75,13 +75,17 @@ module LibertyBuildpack::Framework
       WEB_XML = File.join 'WEB-INF', 'web.xml'
 
       def self.find_auto_reconfiguration(app_dir, configuration)
-        if spring_application?(app_dir)
+        if enabled?(configuration) && spring_application?(app_dir)
           version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
         else
           version = nil
           uri = nil
         end
         return version, uri # rubocop:disable RedundantReturn
+      end
+
+      def self.enabled?(configuration)
+        configuration['enabled'].nil? || configuration['enabled']
       end
 
       def id(version)
