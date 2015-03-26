@@ -69,6 +69,17 @@ module LibertyBuildpack::Framework
       expect(detected).to be_nil
     end
 
+    it 'should not detect when disabled' do
+      LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
+
+      detected = SpringAutoReconfiguration.new(
+        app_dir: 'spec/fixtures/framework_auto_reconfiguration_servlet_4',
+        configuration: { 'enabled' => false }
+      ).detect
+
+      expect(detected).to be_nil
+    end
+
     it 'should only create a lib directory if spring_core*.jar exists' do
       Dir.mktmpdir do |root|
         lib_directory = File.join root, '.lib'
