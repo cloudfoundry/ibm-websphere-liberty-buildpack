@@ -42,12 +42,15 @@ module LibertyBuildpack
       YAML.stub(:load_file).with(File.expand_path('config/logging.yml')).and_return(
           'default_log_level' => 'DEBUG'
       )
-      YAML.stub(:load_file).with(File.expand_path('config/components.yml')).and_return(
-          'containers' => ['Test::StubContainer1', 'Test::StubContainer2'],
-          'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
-          'jres' => ['Test::StubJre1', 'Test::StubJre2']
-      )
       YAML.stub(:load_file).with(File.expand_path('config/licenses.yml')).and_return(nil)
+
+      allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).and_call_original
+      allow(LibertyBuildpack::Util::ConfigurationUtils)
+        .to receive(:load).with('components').and_return(
+           'containers' => ['Test::StubContainer1', 'Test::StubContainer2'],
+           'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
+           'jres'       => ['Test::StubJre1', 'Test::StubJre2']
+      )
 
       Test::StubContainer1.stub(:new).and_return(stub_container1)
       Test::StubContainer2.stub(:new).and_return(stub_container2)
@@ -246,9 +249,10 @@ module LibertyBuildpack
 
     it 'should raise error for bad configuration file that is missing container components' do
       stub_jre1.stub(:detect).and_return('stub-jre-1')
-      YAML.stub(:load_file).with(File.expand_path('config/components.yml')).and_return(
-          'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
-          'jres' => ['Test::StubJre1', 'Test::StubJre2']
+      allow(LibertyBuildpack::Util::ConfigurationUtils)
+        .to receive(:load).with('components').and_return(
+           'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
+           'jres'       => ['Test::StubJre1', 'Test::StubJre2']
       )
 
       expect { with_buildpack { |buildpack| buildpack.detect } }.to raise_error SystemExit
@@ -257,9 +261,10 @@ module LibertyBuildpack
 
     it 'should raise error for bad configuration file that is missing jre components' do
       stub_jre1.stub(:detect).and_return('stub-jre-1')
-      YAML.stub(:load_file).with(File.expand_path('config/components.yml')).and_return(
-          'containers' => ['Test::StubContainer1', 'Test::StubContainer2'],
-          'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
+      allow(LibertyBuildpack::Util::ConfigurationUtils)
+        .to receive(:load).with('components').and_return(
+           'containers' => ['Test::StubContainer1', 'Test::StubContainer2'],
+           'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
       )
 
       expect { with_buildpack { |buildpack| buildpack.detect } }.to raise_error SystemExit

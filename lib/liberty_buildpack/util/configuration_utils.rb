@@ -1,7 +1,7 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2014 the original author or authors.
+# Copyright 2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,30 +18,41 @@
 require 'pathname'
 require 'liberty_buildpack/util'
 require 'liberty_buildpack/diagnostics/logger_factory'
+require 'shellwords'
 require 'yaml'
 
 module LibertyBuildpack::Util
 
-  # Utilities for dealing with Groovy applications
+  # Utility for loading configuration
   class ConfigurationUtils
 
     private_class_method :new
 
     class << self
 
-      # Loads a configuration file from the buildpack configuration directory.  If the configuration file does not exist,
-      # returns an empty hash.
+      # Loads a configuration file from the buildpack configuration directory.  If the configuration file does not
+      # exist, returns an empty hash. Overlays configuration in a matching environment variable, on top of the loaded
+      # configuration, if present. Will not add a new configuration key where an existing one does not exist.
       #
       # @param [String] identifier the identifier of the configuration
-      # @param [Boolean] should_log whether the contents of the configuration file should be logged.  This value should be
-      #                             left to its default and exists to allow the logger to use the utility.
+      # @param [Boolean] should_log whether the contents of the configuration file should be logged.  This value
+      #                             should be left to its default and exists to allow the logger to use the utility.
       # @return [Hash] the configuration or an empty hash if the configuration file does not exist
       def load(identifier, should_log = true)
-        file = CACHE_DIRECTORY + "#{identifier}.yml"
+        file = CONFIG_DIRECTORY + "#{identifier}.yml"
 
         if file.exist?
           configuration = YAML.load_file(file)
           logger.debug { "Configuration from #{file}: #{configuration}" } if should_log
+
+          user_provided = ENV[environment_variable_name(identifier)]
+
+          if user_provided
+            YAML.load(user_provided).each do |new_prop|
+              configuration = do_merge(configuration, new_prop, should_log)
+            end
+            logger.debug { "Configuration from #{file} modified with: #{user_provided}" } if should_log
+          end
         else
           logger.debug { "No configuration file #{file} found" } if should_log
         end
@@ -51,7 +62,31 @@ module LibertyBuildpack::Util
 
       private
 
-      CACHE_DIRECTORY = Pathname.new(File.expand_path('../../../config', File.dirname(__FILE__))).freeze
+      CONFIG_DIRECTORY = Pathname.new(File.expand_path('../../../config', File.dirname(__FILE__))).freeze
+
+      ENVIRONMENT_VARIABLE_PATTERN = 'JBP_CONFIG_'
+
+      def do_merge(hash_v1, hash_v2, should_log)
+        hash_v2.each do |key, value|
+          if hash_v1.key? key
+            hash_v1[key] = do_resolve_value(key, hash_v1[key], value, should_log)
+          else
+            logger.warn { "User config value for '#{key}' is not valid, existing property not present" } if should_log
+          end
+        end
+        hash_v1
+      end
+
+      def do_resolve_value(key, v1, v2, should_log)
+        return do_merge(v1, v2, should_log) if v1.is_a?(Hash) && v2.is_a?(Hash)
+        return v2 if (!v1.is_a?(Hash)) && (!v2.is_a?(Hash))
+        logger.warn { "User config value for '#{key}' is not valid, must be of a similar type" } if should_log
+        v1
+      end
+
+      def environment_variable_name(config_name)
+        ENVIRONMENT_VARIABLE_PATTERN + config_name.upcase
+      end
 
       def logger
         LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
