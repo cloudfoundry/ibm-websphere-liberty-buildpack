@@ -14,13 +14,18 @@
 # limitations under the License.
 
 # Configuration for OpenJdk repository
+# If Java 7 is selected, the 'permgen' option will be used. 
+# If Java 8 is selected, the 'metaspace' option will be used. 
+# Please see the documentation for more detail.
 ---
 repository_root: "https://download.run.pivotal.io/openjdk/lucid/x86_64"
 version: 1.7.0_+
 memory_sizes:
+  metaspace: 64m..
   permgen: 64m..
 memory_heuristics:
   heap: 75
+  metaspace: 10
   permgen: 10
   stack: 5
   native: 10

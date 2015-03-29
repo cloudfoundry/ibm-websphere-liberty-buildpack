@@ -120,10 +120,6 @@ module LibertyBuildpack::Jre
 
     JAVA_HOME = '.java'.freeze
 
-    KEY_MEMORY_HEURISTICS = 'memory_heuristics'
-
-    KEY_MEMORY_SIZES = 'memory_sizes'
-
     def expand(file)
       expand_start_time = Time.now
       print "         Expanding JRE to #{JAVA_HOME} ... "
@@ -167,10 +163,6 @@ module LibertyBuildpack::Jre
 
     def java_home
       File.join @app_dir, JAVA_HOME
-    end
-
-    def self.cache_dir(file)
-      File.dirname(file.path)
     end
 
     def memory(configuration)

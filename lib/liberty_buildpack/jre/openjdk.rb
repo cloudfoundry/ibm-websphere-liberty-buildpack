@@ -22,6 +22,7 @@ require 'liberty_buildpack/jre/memory/openjdk_memory_heuristic_factory'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/format_duration'
+require 'liberty_buildpack/util/tokenized_version'
 require 'pathname'
 
 module LibertyBuildpack::Jre
@@ -80,7 +81,7 @@ module LibertyBuildpack::Jre
     def release
       @version = OpenJdk.find_openjdk(@configuration)[0]
       @java_opts << "-XX:OnOutOfMemoryError=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
-      @java_opts.concat memory(@configuration)
+      @java_opts.concat memory
     end
 
     private
@@ -89,9 +90,11 @@ module LibertyBuildpack::Jre
 
     JAVA_HOME = '.java'.freeze
 
-    KEY_MEMORY_HEURISTICS = 'memory_heuristics'
+    KEY_MEMORY_HEURISTICS = 'memory_heuristics'.freeze
 
-    KEY_MEMORY_SIZES = 'memory_sizes'
+    KEY_MEMORY_SIZES = 'memory_sizes'.freeze
+
+    VERSION_8 = LibertyBuildpack::Util::TokenizedVersion.new('1.8.0').freeze
 
     def expand(file)
       expand_start_time = Time.now
@@ -118,13 +121,18 @@ module LibertyBuildpack::Jre
       File.join @app_dir, JAVA_HOME
     end
 
-    def self.cache_dir(file)
-      File.dirname(file.path)
-    end
+    def memory
+      sizes      = @configuration[KEY_MEMORY_SIZES] ? @configuration[KEY_MEMORY_SIZES].clone : {}
+      heuristics = @configuration[KEY_MEMORY_HEURISTICS] ? @configuration[KEY_MEMORY_HEURISTICS].clone : {}
 
-    def memory(configuration)
-      sizes = @configuration[KEY_MEMORY_SIZES] || {}
-      heuristics = @configuration[KEY_MEMORY_HEURISTICS] || {}
+      if @version < VERSION_8
+        heuristics.delete 'metaspace'
+        sizes.delete 'metaspace'
+      else
+        heuristics.delete 'permgen'
+        sizes.delete 'permgen'
+      end
+
       OpenJDKMemoryHeuristicFactory.create_memory_heuristic(sizes, heuristics, @version).resolve
     end
 
