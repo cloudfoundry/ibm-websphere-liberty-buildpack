@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013-2014 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ require 'fileutils'
 require 'liberty_buildpack'
 require 'liberty_buildpack/buildpack_version'
 require 'liberty_buildpack/container/common_paths'
+require 'liberty_buildpack/util/configuration_utils'
 require 'liberty_buildpack/util/constantize'
 require 'liberty_buildpack/util/heroku'
 require 'liberty_buildpack/diagnostics/logger_factory'
@@ -111,8 +112,6 @@ module LibertyBuildpack
 
     private
 
-    COMPONENTS_CONFIG = '../../config/components.yml'.freeze
-
     LICENSE_CONFIG = '../../config/licenses.yml'.freeze
     BUILDPACK_MESSAGE = '-----> Liberty Buildpack Version: %s'.freeze
 
@@ -159,25 +158,12 @@ module LibertyBuildpack
     end
 
     def self.components(logger)
-      expanded_path = File.expand_path(COMPONENTS_CONFIG, File.dirname(__FILE__))
-      components = YAML.load_file(expanded_path)
-
-      logger.debug { "#{expanded_path} contents: #{components}" }
-
-      components
+      Util::ConfigurationUtils.load('components')
     end
 
     def self.configuration(app_dir, type, logger)
-      name = type.match(/^(?:.*::)?(.*)$/)[1].downcase
-      config_file = File.expand_path("../../config/#{name}.yml", File.dirname(__FILE__))
-
-      if File.exists? config_file
-        configuration = YAML.load_file(config_file)
-
-        logger.debug { "#{config_file} contents: #{configuration}" }
-      end
-
-      configuration || {}
+      component_id = type.match(/^(?:.*::)?(.*)$/)[1].downcase
+      Util::ConfigurationUtils.load(component_id)
     end
 
     def self.configure_context(basic_context, type, logger)
