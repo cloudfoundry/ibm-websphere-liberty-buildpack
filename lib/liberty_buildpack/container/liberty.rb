@@ -109,15 +109,17 @@ module LibertyBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
-      server_dir = ' .liberty/usr/servers/' << server_name << '/'
+      server_dir = ' wlp/usr/servers/' << server_name << '/'
       runtime_vars_file =  server_dir + 'runtime-vars.xml'
       create_vars_string = File.join(LIBERTY_HOME, 'create_vars.rb') << runtime_vars_file << ' &&'
       java_home_string = ContainerUtils.space("JAVA_HOME=\"$PWD/#{@java_home}\"")
+      wlp_user_dir_string = ContainerUtils.space('WLP_USER_DIR="$PWD/wlp/usr"')
       start_script_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'bin', 'server'))
       start_script_string << ContainerUtils.space('run')
       jvm_options
       server_name_string = ContainerUtils.space(server_name)
-      "#{create_vars_string}#{java_home_string}#{start_script_string}#{server_name_string}"
+      move_app
+      "#{create_vars_string}#{java_home_string}#{wlp_user_dir_string}#{start_script_string}#{server_name_string}"
     end
 
     private
@@ -135,6 +137,37 @@ module LibertyBuildpack::Container
         Liberty.expand_apps(ears)
         wars = Dir.glob("#{server_path}/**/*.war")
         Liberty.expand_apps(wars)
+      end
+    end
+
+    def move_app
+      if Liberty.liberty_directory(@app_dir)
+        # Nothing to move
+      elsif Liberty.server_directory(@app_dir)
+        dest = File.join(@app_dir, '.wlp', USR_PATH, SERVERS_PATH, DEFAULT_SERVER)
+        move_and_relink @app_dir, dest
+        FileUtils.mv File.join(@app_dir, '.wlp'), File.join(@app_dir, WLP_PATH)
+      else
+        dest = File.join(@app_dir, '.wlp', USR_PATH, SERVERS_PATH)
+        FileUtils.mkdir_p(dest)
+        FileUtils.mv default_server_path, dest
+        dest = File.join(dest, DEFAULT_SERVER, 'apps', myapp_name)
+        FileUtils.rm_rf(dest)
+        move_and_relink @app_dir, dest
+        FileUtils.mv File.join(@app_dir, '.wlp'), File.join(@app_dir, WLP_PATH)
+      end
+    end
+
+    def move_and_relink(src, dest)
+      # Remember symlink targets
+      links = Dir[File.join(src, '**', '*')].select { |file| File.symlink?(file) }
+      linkmap = Hash[links.map { |link| [Pathname(link).relative_path_from(Pathname(src)), File.realpath(link)] }]
+      FileUtils.mkdir_p(dest)
+      FileUtils.mv Dir[File.join(src, '*')], dest
+      # Relink symlinks to the targets
+      linkmap.each do |link, target|
+        file = File.join(dest, link)
+        FileUtils.ln_sf(Pathname(target).relative_path_from(Pathname(File.dirname(file))), file)
       end
     end
 
