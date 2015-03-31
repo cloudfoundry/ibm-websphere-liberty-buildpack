@@ -4,7 +4,7 @@ This framework enables the use of [JRebel][jrebel] with deployed applications. T
 <table>
   <tr>
     <td><strong>Detection Criterion</strong></td>
-    <td>Presence of a `WEB-INF/classes/rebel-remote.xml` file inside the application archive. This file is present in every application that is configured to use JRebel Remoting.</td>
+    <td>Presence of a `rebel-remote.xml` file inside the application archive. This file is present in every application that is configured to use JRebel Remoting.</td>
   </tr>
   <tr>
     <td><strong>Tags</strong></td><td><tt>jrebel-&lt;version&gt;</tt></td>
