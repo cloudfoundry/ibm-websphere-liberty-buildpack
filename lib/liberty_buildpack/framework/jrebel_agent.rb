@@ -44,12 +44,16 @@ module LibertyBuildpack::Framework
     end
 
     #-----------------------------------------------------------------------------------------
-    # Determines if the application contains a rebel-remote.xml to provide a configured jrebel agent
+    # Determines if the application/server contains a rebel-remote.xml to provide a configured JRebel agent
     #
     # @return [String] the detected versioned ID if the environment and config are valid, otherwise nil
     #------------------------------------------------------------------------------------------
     def detect
-      if File.exist?("#{@app_dir}/WEB-INF/classes/rebel-remote.xml")
+      rebel_remote_xmls = Dir.glob(["#{@app_dir}/**/rebel-remote.xml"])
+
+      @logger.debug("rebel_remote_xmls=[#{rebel_remote_xmls.join(', ')}]")
+
+      if !rebel_remote_xmls.empty?
         @logger.debug('Found rebel-remote.xml, enabling JRebel')
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
         @nosetup_zip = "jrebel-#{@version}-nosetup.zip"

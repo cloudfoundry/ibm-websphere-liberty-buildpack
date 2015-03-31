@@ -24,53 +24,47 @@ module LibertyBuildpack::Framework
   describe 'JRebelAgent' do
     include_context 'component_helper'    # component context
 
-    JREBEL_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('6.0.3')
-    JREBEL_DETAILS = [JREBEL_VERSION, 'test-uri']
     # test data
-    let(:jrebel_home) { '.jrebel' }   # the expected staged newrelic agent directory
+    let(:jrebel_home) { '.jrebel' }
     let(:application_cache) { double('ApplicationCache') }
     let(:version) { '6.0.3' }
-    let(:versionid) { "jrebel-#{version}-nosetup.zip" }
+    let(:tokenized_version) { LibertyBuildpack::Util::TokenizedVersion.new(version) }
 
     before do | example |
-      # an index.yml entry returned from the index.yml of the new relic repository
       if example.metadata[:index_version]
-        # new relic index.yml info provided by tests
+        # JRebel index.yml info provided by tests
         index_version = example.metadata[:index_version]
         index_uri = example.metadata[:index_uri]
-        index_license = example.metadata[:index_license]
       else
-        # default values for the new relic index.yml info for tests
+        # default values for the JRebel index.yml info for tests
         index_version = version
-        index_uri =  "https://downloadsite/jrebel/#{versionid}.jar"
+        index_uri =  "https://downloadsite/jrebel/jrebel-#{version}-nosetup.zip"
       end
 
       # By default, always stub the return of a valid index.yml entry
       find_item = example.metadata[:return_find_item].nil? ? true : example.metadata[:return_find_item]
       if find_item
-        index_yml_entry = [LibertyBuildpack::Util::TokenizedVersion.new(index_version), index_uri, index_license]
+        index_yml_entry = [LibertyBuildpack::Util::TokenizedVersion.new(index_version), index_uri]
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(index_yml_entry)
       else
         # tests can set find_item=false and a raise_error_message to mock a failed return of processing the index.yml
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise(example.metadata[:raise_error_message])
       end
 
-      # For a download request of a new relic agent jar, return the fixture jar
+      # For a download request of a JRebel agent jar, return the fixture jar
       LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
-      application_cache.stub(:get).with(index_uri).and_yield(File.open('spec/fixtures/stub-new-relic-agent.jar'))
+      application_cache.stub(:get).with(index_uri).and_yield(File.open('spec/fixtures/stub-jrebel-nosetup.zip'))
     end
 
     describe 'configuration' do
       it 'must have 6.0.3 as the configured version' do
         configuration = YAML.load_file(File.expand_path('../../../config/jrebelagent.yml', File.dirname(__FILE__)))
-        expect(LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)[0]).to eq(JREBEL_VERSION)
+        expect(LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)[0]).to eq(tokenized_version)
       end
     end
 
     describe 'detect' do
       it 'should not attach JRebel agent when no rebel-remote.xml in the application' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(JREBEL_DETAILS)
-
         detected = JRebelAgent.new(
             app_dir: 'spec/fixtures/jrebel_test_app_no_rebel_remote',
             configuration: {}
@@ -79,11 +73,54 @@ module LibertyBuildpack::Framework
         expect(detected).to be_nil
       end
 
-      it 'should attach JRebel agent when rebel-remote.xml is in the application' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(JREBEL_DETAILS)
-
+      it 'should attach JRebel agent when rebel-remote.xml is in a WAR application' do
         detected = JRebelAgent.new(
             app_dir: 'spec/fixtures/jrebel_test_app_with_rebel_remote',
+            configuration: {}
+        ).detect
+
+        expect(detected).to eq('jrebel-6.0.3')
+      end
+
+      it 'should attach JRebel agent when rebel-remote.xml is in an EAR application' do
+        detected = JRebelAgent.new(
+            app_dir: 'spec/fixtures/jrebel_test_ear_with_rebel_remote',
+            configuration: {}
+        ).detect
+
+        expect(detected).to eq('jrebel-6.0.3')
+      end
+
+      it 'should attach JRebel agent when rebel-remote.xml is in a WAR application inside a packaged server' do
+        detected = JRebelAgent.new(
+            app_dir: 'spec/fixtures/jrebel_test_packaged_server_with_war_with_rebel_remote',
+            configuration: {}
+        ).detect
+
+        expect(detected).to eq('jrebel-6.0.3')
+      end
+
+      it 'should attach JRebel agent when rebel-remote.xml is in an EAR application inside a packaged server' do
+        detected = JRebelAgent.new(
+            app_dir: 'spec/fixtures/jrebel_test_packaged_server_with_ear_with_rebel_remote',
+            configuration: {}
+        ).detect
+
+        expect(detected).to eq('jrebel-6.0.3')
+      end
+
+      it 'should attach JRebel agent when rebel-remote.xml is in a WAR application inside a server directory' do
+        detected = JRebelAgent.new(
+            app_dir: 'spec/fixtures/jrebel_test_server_dir_with_war_with_rebel_remote',
+            configuration: {}
+        ).detect
+
+        expect(detected).to eq('jrebel-6.0.3')
+      end
+
+      it 'should attach JRebel agent when rebel-remote.xml is in an EAR application inside a server directory' do
+        detected = JRebelAgent.new(
+            app_dir: 'spec/fixtures/jrebel_test_server_dir_with_ear_with_rebel_remote',
             configuration: {}
         ).detect
 
@@ -133,7 +170,7 @@ module LibertyBuildpack::Framework
       end
 
       it 'should return command line options for a valid service in a default container',
-         java_opts: [] do | example |
+         java_opts: [] do
         java_opts = released
         expect(java_opts).to include('-agentpath:./.jrebel/jrebel/lib/libjrebel64.so')
         expect(java_opts).to include('-Xshareclasses:none')
@@ -144,7 +181,7 @@ module LibertyBuildpack::Framework
       end
 
       it 'should return command line options for a valid service in a default container with openjdk',
-         java_opts: [], jvm_type: 'openjdk' do | example |
+         java_opts: [], jvm_type: 'openjdk' do
         java_opts = released
         expect(java_opts).to include('-agentpath:./.jrebel/jrebel/lib/libjrebel64.so')
         expect(java_opts).not_to include('-Xshareclasses:none')

@@ -83,8 +83,12 @@ module LibertyBuildpack::Container
         wars = Dir.glob(File.expand_path(File.join(@app_dir, '*.war')))
         Liberty.expand_apps(wars)
       elsif server_xml
-        ['*.war', '*.ear'].each { |suffix| apps_found += Dir.glob(File.expand_path(File.join(server_xml, '..', '**', suffix))) }
-        Liberty.expand_apps(apps_found)
+        server_path = File.dirname(server_xml)
+        ears = Dir.glob("#{server_path}/**/*.ear")
+        Liberty.expand_apps(ears)
+        wars = Dir.glob("#{server_path}/**/*.war")
+        Liberty.expand_apps(wars)
+        apps_found = ears + wars
       end
       apps_found
     end
