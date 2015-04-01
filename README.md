@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack.svg?branch=master)](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack)
-
-# IBM WebSphere Application Server Liberty Buildpack
+# IBM WebSphere Application Server Liberty Buildpack [![Build Status](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack.svg?branch=master)](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack)
 
 The `liberty-buildpack` is a [Cloud Foundry][] Buildpack for running applications on IBM's WebSphere Application Server [Liberty Profile][].
 
@@ -48,6 +46,7 @@ All Documentation is available in the Docs folder of the buildpack.
     * [Open JDK](docs/open-jdk.md)
 * [Server Behavior xml Options](docs/server-xml-options.md)
 * [Forking the buildpack](docs/forking.md)
+* [Overriding buildpack configuration](docs/configuration.md)
 * [Setting Environment Variables](docs/env.md)
 * [Installation (admin buildpack into CF)](docs/installation.md)
 * [Tuning](docs/tuning.md)
@@ -93,6 +92,6 @@ bundle install --gemfile Gemfile.rubymine-debug
 [tuning options]: docs/tuning.md
 [java main push]: docs/java-main.md
 
-[Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.3/lafiles/runtime//en.html
+[Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.5/lafiles/runtime//en.html
 [JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-EWOD-99YA4J&title=IBM%C2%AE+SDK%2C+Java+Technology+Edition%2C+Version+7+Release+1&l=en
 [manifest documentation]: http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html
