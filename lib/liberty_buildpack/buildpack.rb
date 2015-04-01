@@ -127,7 +127,7 @@ module LibertyBuildpack
       @buildpack_version = BuildpackVersion.new
       Buildpack.log_debug_data @logger
       Buildpack.require_component_files
-      components = Buildpack.components @logger
+      components = LibertyBuildpack::Util::ConfigurationUtils.load('components')
 
       @lib_directory = Buildpack.lib_directory app_dir
       @common_paths = LibertyBuildpack::Container::CommonPaths.new
@@ -157,24 +157,16 @@ module LibertyBuildpack
       compacted_tags.select { |tag| tag != '' }
     end
 
-    def self.components(logger)
-      Util::ConfigurationUtils.load('components')
-    end
-
-    def self.configuration(app_dir, type, logger)
+    def self.configure_context(basic_context, type)
       component_id = type.match(/^(?:.*::)?(.*)$/)[1].downcase
-      Util::ConfigurationUtils.load(component_id)
-    end
-
-    def self.configure_context(basic_context, type, logger)
       configured_context = basic_context.clone
-      configured_context[:configuration] = Buildpack.configuration(configured_context[:app_dir], type, logger)
+      configured_context[:configuration] = LibertyBuildpack::Util::ConfigurationUtils.load(component_id)
       configured_context
     end
 
-    def self.construct_components(components, type, basic_context, logger)
+    def self.construct_components(components, type, basic_context)
       components[type].map do |component|
-        component.constantize.new(Buildpack.configure_context(basic_context, component, logger))
+        component.constantize.new(Buildpack.configure_context(basic_context, component))
       end
     end
 
@@ -267,12 +259,12 @@ module LibertyBuildpack
       raise "No components of type #{JRE_TYPE} defined in components configuration.  At least one must be defined" if components[JRE_TYPE].nil?
 
       # finds the first jre component and its version that doesn't return false.  Just need one jre component.
-      jres = Buildpack.construct_components(components, JRE_TYPE, basic_context, @logger)
+      jres = Buildpack.construct_components(components, JRE_TYPE, basic_context)
       @jre = jres.find { |jre| @jre_version = jre.detect }
       @logger.error("JRE component did not detect a valid version. It's possible that the JVM environment variable needs to be set or its value needs to be corrected.") if @jre.nil?
 
-      @frameworks = Buildpack.construct_components(components, FRAMEWORK_TYPE, basic_context, @logger)
-      @containers = Buildpack.construct_components(components, CONTAINER_TYPE, basic_context, @logger)
+      @frameworks = Buildpack.construct_components(components, FRAMEWORK_TYPE, basic_context)
+      @containers = Buildpack.construct_components(components, CONTAINER_TYPE, basic_context)
     end
 
     def self.initialize_env(dir)
