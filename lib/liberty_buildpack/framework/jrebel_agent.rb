@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2014 the original author or authors.
+# Copyright 2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/framework'
 require 'liberty_buildpack/repository/configured_item'
@@ -49,6 +50,8 @@ module LibertyBuildpack::Framework
     # @return [String] the detected versioned ID if the environment and config are valid, otherwise nil
     #------------------------------------------------------------------------------------------
     def detect
+      return nil unless enabled?
+
       rebel_remote_xmls = Dir.glob(["#{@app_dir}/**/rebel-remote.xml"])
 
       @logger.debug("rebel_remote_xmls=[#{rebel_remote_xmls.join(', ')}]")
@@ -136,6 +139,10 @@ module LibertyBuildpack::Framework
 
     def openjdk?
       @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
+    end
+
+    def enabled?
+      @configuration['enabled'].nil? || @configuration['enabled']
     end
 
   end
