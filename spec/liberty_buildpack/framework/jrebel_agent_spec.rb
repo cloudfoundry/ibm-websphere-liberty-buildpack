@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2014 the original author or authors.
+# Copyright 2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -126,9 +126,19 @@ module LibertyBuildpack::Framework
 
         expect(detected).to eq('jrebel-6.0.3')
       end
+
+      it 'should not attach JRebel agent when disabled' do
+        detected = JRebelAgent.new(
+            app_dir: 'spec/fixtures/jrebel_test_app_with_rebel_remote',
+            configuration: { 'enabled' => false }
+        ).detect
+
+        expect(detected).to be_nil
+      end
+
     end # end of detect tests
 
-    describe 'compile' do
+    describe 'compile', configuration: {} do
 
       before do
         FileUtils.mkdir_p("#{app_dir}/WEB-INF/classes/")
@@ -160,7 +170,7 @@ module LibertyBuildpack::Framework
       end
     end # end compile
 
-    describe 'release', java_opts: [] do
+    describe 'release', java_opts: [], configuration: {} do
 
       subject(:released) do
         jrebel = JRebelAgent.new(context)
