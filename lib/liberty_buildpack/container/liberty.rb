@@ -23,6 +23,7 @@ require 'liberty_buildpack/container/feature_manager'
 require 'liberty_buildpack/container/install_components'
 require 'liberty_buildpack/container/optional_components'
 require 'liberty_buildpack/container/services_manager'
+require 'liberty_buildpack/container/web_xml_ext'
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/repository/component_index'
 require 'liberty_buildpack/repository/configured_item'
@@ -67,30 +68,7 @@ module LibertyBuildpack::Container
       @vcap_application = context[:vcap_application]
       @license_id = context[:license_ids]['IBM_LIBERTY_LICENSE']
       @environment = context[:environment]
-      @apps = apps
-    end
-
-    # Get a list of web applications that are in the server directory
-    #
-    # @return [Array<String>] :array of file names of discovered applications
-    def apps
-      apps_found = []
-      server_xml = Liberty.server_xml(@app_dir)
-      if Liberty.web_inf(@app_dir)
-        apps_found = [@app_dir]
-      elsif Liberty.meta_inf(@app_dir)
-        apps_found = [@app_dir]
-        wars = Dir.glob(File.expand_path(File.join(@app_dir, '*.war')))
-        Liberty.expand_apps(wars)
-      elsif server_xml
-        server_path = File.dirname(server_xml)
-        ears = Dir.glob("#{server_path}/**/*.ear")
-        Liberty.expand_apps(ears)
-        wars = Dir.glob("#{server_path}/**/*.war")
-        Liberty.expand_apps(wars)
-        apps_found = ears + wars
-      end
-      apps_found
+      unpack_apps
     end
 
     # Detects whether this application is a Liberty application.
@@ -143,6 +121,22 @@ module LibertyBuildpack::Container
     end
 
     private
+
+    def unpack_apps
+      server_xml = Liberty.server_xml(@app_dir)
+      if Liberty.web_inf(@app_dir)
+        # nothing to do
+      elsif Liberty.meta_inf(@app_dir)
+        wars = Dir.glob(File.expand_path(File.join(@app_dir, '*.war')))
+        Liberty.expand_apps(wars)
+      elsif server_xml
+        server_path = File.dirname(server_xml)
+        ears = Dir.glob("#{server_path}/**/*.ear")
+        Liberty.expand_apps(ears)
+        wars = Dir.glob("#{server_path}/**/*.war")
+        Liberty.expand_apps(wars)
+      end
+    end
 
     def jvm_options
       # disable 2-phase (XA) transactions via a -D option, as they are unsupported in
@@ -291,7 +285,13 @@ module LibertyBuildpack::Container
       application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
       application.attributes['location'] = myapp_name
       application.attributes['type'] = myapp_type
+      application.attributes['context-root'] = get_context_root || '/'
       XmlUtils.write_formatted_xml_file(server_xml_doc, filename)
+    end
+
+    def get_context_root
+      ibm_web_xml = WebXmlExt.read(File.join(@app_dir, WEB_INF, 'ibm-web-ext.xml'))
+      ibm_web_xml.get_context_root unless ibm_web_xml.nil?
     end
 
     def update_http_endpoint(server_xml_doc)
