@@ -15,12 +15,14 @@
 # the License.
 
 require 'spec_helper'
+require 'logging_helper'
 require 'liberty_buildpack/container/liberty'
 require 'liberty_buildpack/container/container_utils'
 
 module LibertyBuildpack::Container
 
   describe Liberty do
+    include_context 'logging_helper'
 
     LIBERTY_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('8.5.5')
     LIBERTY_SINGLE_DOWNLOAD_URI = 'test-liberty-uri.tar.gz'.freeze # end of URI (here ".tar.gz") is significant in liberty container code
@@ -31,15 +33,8 @@ module LibertyBuildpack::Container
     let(:component_index) { double('ComponentIndex') }
 
     before do
-      $stdout = StringIO.new
-      $stderr = StringIO.new
       # return license file by default
       application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
-    end
-
-    after do
-      $stdout = STDOUT
-      $stderr = STDERR
     end
 
     describe 'prepare applications' do
@@ -1719,119 +1714,72 @@ module LibertyBuildpack::Container
       end
     end
 
-  end
+    describe 'context root from ibm-web-ext.xml' do
 
-  describe 'Liberty finds all applications' do
-    before(:each) do
-      LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
-      .and_return(LIBERTY_VERSION)
-    end
+      def run(root)
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
 
-    it 'finds a single war' do
-      Dir.mktmpdir do |root|
-        FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
-        app_dir = File.join(root, 'apps')
-        spring_dir = File.join(app_dir, 'spring.war')
-        FileUtils.mkdir_p(spring_dir)
-        FileUtils.cp_r('spec/fixtures/framework_auto_reconfiguration_servlet_2', spring_dir)
-        liberty_container = Liberty.new(
-        app_dir: root,
-        configuration: {},
-        license_ids: {}
-        )
+          LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+          component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
 
-        apps = liberty_container.apps
-        expect(apps).to match_array([spring_dir])
-        expect(File.directory?(spring_dir)).to eq(true)
+          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+
+          library_directory = File.join(root, '.lib')
+          FileUtils.mkdir_p(library_directory)
+          Liberty.new(
+          app_dir: root,
+          lib_directory: library_directory,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          ).compile
+      end
+
+      it 'should produce server.xml with right context-root (from ibm-web-ext.xml)' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          web_inf = File.join(root, 'WEB-INF')
+          FileUtils.mkdir_p web_inf
+          FileUtils.cp('spec/fixtures/ibm-web-ext.xml', web_inf)
+          run(root)
+          server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
+          expect(File.exists?(server_xml_file)).to eq(true)
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents.include? '<application name="myapp" context-root="myContext" location="myapp.war" type="war"').to eq(true)
+        end
+      end
+
+      it 'should produce server.xml with root context-root (ibm-web-ext.xml has no context-root)' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          web_inf = File.join(root, 'WEB-INF')
+          FileUtils.mkdir_p web_inf
+          FileUtils.cp('spec/fixtures/ibm-web-ext-no-context.xml', File.join(web_inf, 'ibm-web-ext.xml'))
+          run(root)
+          server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
+          expect(File.exists?(server_xml_file)).to eq(true)
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp.war" type="war"').to eq(true)
+        end
+      end
+
+      it 'should produce server.xml with root context-root (ibm-web-ext.xml is malformed)' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          web_inf = File.join(root, 'WEB-INF')
+          FileUtils.mkdir_p web_inf
+          FileUtils.cp('spec/fixtures/ibm-web-ext-bad.xml', File.join(web_inf, 'ibm-web-ext.xml'))
+          run(root)
+          server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
+          expect(File.exists?(server_xml_file)).to eq(true)
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents.include? '<application name="myapp" context-root="/" location="myapp.war" type="war"').to eq(true)
+        end
       end
     end
 
-    it 'finds a single ear' do
-      Dir.mktmpdir do |root|
-        FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
-        app_dir = File.join(root, 'apps')
-        spring_dir = File.join(app_dir, 'spring.ear')
-        FileUtils.mkdir_p(spring_dir)
-        FileUtils.cp_r('spec/fixtures/framework_auto_reconfiguration_servlet_2', spring_dir)
-        liberty_container = Liberty.new(
-        app_dir: root,
-        configuration: {},
-        license_ids: {}
-        )
-
-        apps = liberty_container.apps
-        expect(apps).to match_array([spring_dir])
-        expect(File.directory?(spring_dir)).to eq(true)
-      end
-    end
-
-    it 'finds an expanded war' do
-      Dir.mktmpdir do |root|
-        FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
-        app_dir = File.join(root, 'apps')
-        spring1_war = File.join(app_dir, 'spring.war')
-        FileUtils.mkdir_p(app_dir)
-        FileUtils.cp('spec/fixtures/stub-spring.war', spring1_war)
-        liberty_container = Liberty.new(
-        app_dir: root,
-        configuration: {},
-        license_ids: {}
-        )
-
-        apps = liberty_container.apps
-        expect(apps).to match_array([spring1_war])
-        expect(File.directory?(spring1_war)).to eq(true)
-      end
-    end
-
-    it 'finds an expanded ear' do
-      Dir.mktmpdir do |root|
-        FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
-        app_dir = File.join(root, 'apps')
-        spring1_ear = File.join(app_dir, 'spring.ear')
-        FileUtils.mkdir_p(app_dir)
-        FileUtils.cp('spec/fixtures/stub-spring.ear', spring1_ear)
-        liberty_container = Liberty.new(
-        app_dir: root,
-        configuration: {},
-        license_ids: {}
-        )
-
-        apps = liberty_container.apps
-        expect(apps).to match_array([spring1_ear])
-        expect(File.directory?(spring1_ear)).to eq(true)
-      end
-    end
-
-    it 'finds multiple applications' do
-      Dir.mktmpdir do |root|
-        FileUtils.cp('spec/fixtures/container_liberty_single_server/server.xml', root)
-        app_dir = File.join(root, 'apps', 'wars')
-        app_dir2 = File.join(root, 'apps', 'ears')
-        spring1_war = File.join(app_dir, 'spring1.war')
-        spring2_war = File.join(app_dir, 'spring2.war')
-        spring1_ear = File.join(app_dir, 'spring1.ear')
-        spring2_ear = File.join(app_dir, 'spring2.ear')
-        FileUtils.mkdir_p(app_dir)
-        FileUtils.mkdir_p(app_dir2)
-        FileUtils.cp('spec/fixtures/stub-spring.war', spring1_war)
-        FileUtils.cp('spec/fixtures/stub-spring.war', spring2_war)
-        FileUtils.cp('spec/fixtures/stub-spring.ear', spring1_ear)
-        FileUtils.cp('spec/fixtures/stub-spring.ear', spring2_ear)
-        liberty_container = Liberty.new(
-        app_dir: root,
-        configuration: {},
-        license_ids: {}
-        )
-
-        apps = liberty_container.apps
-        expect(apps).to match_array([spring1_war, spring2_war, spring1_ear, spring2_ear])
-        expect(File.directory?(spring1_war)).to eq(true)
-        expect(File.directory?(spring2_war)).to eq(true)
-        expect(File.directory?(spring1_ear)).to eq(true)
-        expect(File.directory?(spring2_ear)).to eq(true)
-      end
-    end
   end
 
 end
