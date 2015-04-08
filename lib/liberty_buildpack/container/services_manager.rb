@@ -259,8 +259,12 @@ module LibertyBuildpack::Container
       runtime_vars_doc = REXML::Document.new('<server></server>')
       unless vcap_services.nil?
         vcap_services.each do |service_type, service_data|
-          @logger.debug("processing service type #{service_type} and data #{LibertyBuildpack::Util.safe_service_data(service_data)}")
-          process_service_type(runtime_vars_doc.root, service_type, service_data)
+          if 'user-provided'.eql?(service_type)
+            process_user_provided_services(runtime_vars_doc, service_data)
+          else
+            @logger.debug("processing service type #{service_type} and data #{LibertyBuildpack::Util.safe_service_data(service_data)}")
+            process_service_type(runtime_vars_doc.root, service_type, service_data)
+          end
         end
       end
       runtime_vars = File.join(server_dir, 'runtime-vars.xml')
@@ -299,6 +303,25 @@ module LibertyBuildpack::Container
           else
             @service_type_instances[xml_element] = @service_type_instances[xml_element] + 1
           end
+        end
+      end
+    end
+
+    #------------------------------------------------------
+    # Process user provided services.  The name of each user-provided service is treated as a label, with each credential set being
+    # passed as the entire corresponding service_data.  This allows each user-provided-service to resolve to a single type of service.
+    #
+    # @param runtime_vars_doc - the REXML doc for runtime_vars.xml
+    # @param service_data - the array holding the instances data
+    #------------------------------------------------------
+    def process_user_provided_services(runtime_vars_doc, service_data)
+      service_data.each do |service|
+        unless service['name'].nil?
+          usrp_service_type = service['name']
+          usrp_service_data = []
+          usrp_service_data << service
+          @logger.debug("processing service type #{usrp_service_type} and data #{LibertyBuildpack::Util.safe_service_data(service_data)}")
+          process_service_type(runtime_vars_doc.root, usrp_service_type, usrp_service_data)
         end
       end
     end
