@@ -27,10 +27,18 @@ installation.
 
 See the documentation for the bound service type for more details.
 
+## User-Provided Service Instances
+
+The Liberty buildpack will recognize user-provided services and install features and client libraries for you. The name
+of the user-provided service must include the supported `service_filter` of the service that you want to have installed.
+For example, a user-provided service named `myMongoInstance` would be recognized by the buildpack as a Mongo service.
+
+The `service_filter` for a supported service can be found in the YAML files in the [service config dir].
+
 ## Generating or updating server.xml configuration
 
 When you push an application, the Liberty buildpack generates configuration elements in the server.xml as described in
-[Modifications]. When you bind a service, the Liberty buildpack may generate additional elememnts in the server.xml for
+[Modifications]. When you bind a service, the Liberty buildpack may generate additional elements in the server.xml for
 the bound service.
 
 See the documentation for the bound service type for more details.
@@ -77,3 +85,4 @@ env:
 
 [Accessing the Information of Bound Services]: server-xml-options.md#accessing-the-information-of-bound-services
 [Modifications]: server-xml-options.md#serverxml-modifications
+[service config dir]: /lib/liberty_buildpack/services/config
