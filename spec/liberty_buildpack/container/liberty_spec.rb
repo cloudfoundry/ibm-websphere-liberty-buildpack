@@ -1529,13 +1529,11 @@ module LibertyBuildpack::Container
         end
 
         it 'should generate a jvm.options file if one is not provided in server directory case' do
-          root_jvm_opts, server_jvm_opts = jvm_opt_test('jvm.options', File.join('.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context|
+          server_jvm_opts = jvm_opt_test(File.join('wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context|
             FileUtils.mkdir_p File.join(root, '.liberty', 'usr', 'servers', 'defaultServer')
             create_server_xml(root)
             context[:java_opts] = %w(test-opt-2 test-opt-1)
           end
-
-          expect(root_jvm_opts).to match(/test-opt-1/)
 
           expect(server_jvm_opts).to match(/test-opt-1/)
           expect(server_jvm_opts).to match(/test-opt-2/)
@@ -1567,7 +1565,7 @@ module LibertyBuildpack::Container
         end
 
         it 'should use jvm.options file if one is provided in server directory case.' do
-          root_jvm_opts, server_jvm_opts = jvm_opt_test('jvm.options', File.join('.liberty', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context, liberty_home|
+          server_jvm_opts = jvm_opt_test(File.join('wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context, liberty_home|
             Dir.mkdir File.join(root, 'WEB-INF')
             FileUtils.mkdir_p File.join(liberty_home, 'usr', 'servers', 'defaultServer')
             create_server_xml(root)
@@ -1575,9 +1573,6 @@ module LibertyBuildpack::Container
 
             context[:java_opts] = %w(test-opt-2 test-opt-1) # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
           end
-
-          expect(root_jvm_opts).to match(/provided-opt-1/)
-          expect(root_jvm_opts).to match(/test-opt-1/)
 
           expect(server_jvm_opts).to match(/provided-opt-1/)
           expect(server_jvm_opts).to match(/test-opt-1/)
@@ -1622,7 +1617,7 @@ module LibertyBuildpack::Container
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1640,7 +1635,7 @@ module LibertyBuildpack::Container
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1658,7 +1653,7 @@ module LibertyBuildpack::Container
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/myServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run myServer")
+          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/myServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" .liberty/bin/server run myServer")
         end
       end
 
@@ -1676,7 +1671,7 @@ module LibertyBuildpack::Container
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb .liberty/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/defaultServer/runtime-vars.xml && JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" .liberty/bin/server run defaultServer")
         end
       end
 
