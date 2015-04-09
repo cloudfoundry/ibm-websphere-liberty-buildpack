@@ -271,55 +271,80 @@ module LibertyBuildpack::Container
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
       if server_xml
-        # Preserve the original configuration before we start modifying it
-        FileUtils.cp "#{server_xml}", "#{server_xml}.org"
-
-        server_xml_doc = XmlUtils.read_xml_file(server_xml)
-
-        # Perform inlining of includes prior to adding include for runtime-vars.xml
-        # as the file may not exist yet.
-        inline_includes(server_xml_doc, File.dirname(server_xml), LocationResolver.new(@app_dir, liberty_home, server_name))
-
-        update_http_endpoint(server_xml_doc)
-        update_web_container(server_xml_doc)
-
-        # add runtime-vars.xml include to server.xml.
-        add_runtime_vars(server_xml_doc)
-
-        # Liberty logs must go into cf logs directory so cf logs command displays them.
-        update_logs_dir(server_xml_doc)
-
-        # Disable default Liberty Welcome page to avoid returning 200 response before app is ready.
-        disable_welcome_page(server_xml_doc)
-        # Disable application monitoring
-        disable_application_monitoring(server_xml_doc)
-        # Disable configuration (server.xml) monitoring
-        disable_config_monitoring(server_xml_doc)
-        # Check if appstate ICAP feature can be used
-        appstate_available = File.file?(icap_extension) ? check_appstate_feature(server_xml_doc) : false
-        @services_manager.update_configuration(server_xml_doc, false, current_server_dir)
-        FeatureManager.filter_conflicting_features(server_xml_doc)
-
-        XmlUtils.write_formatted_xml_file(server_xml_doc, server_xml)
+        update_provided_server_xml(server_xml)
       elsif Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
-        # rubocop does not allow methods longer than 25 lines, so following is factored out
-        update_server_xml_app(create_server_xml)
-        appstate_available = File.file?(icap_extension)
+        create_default_server_xml
       else
         raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
       end
-
-      add_droplet_yaml if appstate_available
     end
 
-    def update_server_xml_app(filename)
-      server_xml_doc = XmlUtils.read_xml_file(filename)
-      @services_manager.update_configuration(server_xml_doc, true, current_server_dir)
-      application = REXML::XPath.match(server_xml_doc, '/server/application')[0]
+    def update_provided_server_xml(server_xml)
+      # Preserve the original configuration before we start modifying it
+      FileUtils.cp "#{server_xml}", "#{server_xml}.org"
+
+      server_xml_doc = XmlUtils.read_xml_file(server_xml)
+
+      # Perform inlining of includes prior to adding include for runtime-vars.xml
+      # as the file may not exist yet.
+      inline_includes(server_xml_doc, File.dirname(server_xml), LocationResolver.new(@app_dir, liberty_home, server_name))
+
+      # add common settings
+      update_server_xml_common(server_xml_doc, false)
+
+      XmlUtils.write_formatted_xml_file(server_xml_doc, server_xml)
+    end
+
+    def create_default_server_xml
+      server_xml_doc = REXML::Document.new('<server></server>')
+      server_xml_doc.context[:attribute_quote] = :quote
+
+      default_config = @configuration['default_config']
+
+      # create featureManager with configured features
+      feature_manager = REXML::Element.new('featureManager', server_xml_doc.root)
+      unless default_config.nil?
+        features = default_config['features'] || []
+        features.each do | feature |
+          feature_element = REXML::Element.new('feature', feature_manager)
+          feature_element.text = feature
+        end
+      end
+
+      # create application
+      application = REXML::Element.new('application', server_xml_doc.root)
+      application.attributes['name'] = 'myapp'
       application.attributes['location'] = myapp_name
       application.attributes['type'] = myapp_type
       application.attributes['context-root'] = get_context_root || '/'
+
+      # add common settings
+      update_server_xml_common(server_xml_doc, true)
+
+      filename = File.join(default_server_path, SERVER_XML)
       XmlUtils.write_formatted_xml_file(server_xml_doc, filename)
+    end
+
+    def update_server_xml_common(server_xml_doc, create)
+      update_http_endpoint(server_xml_doc)
+      update_web_container(server_xml_doc)
+      # add runtime-vars.xml include to server.xml.
+      add_runtime_vars(server_xml_doc)
+      # Liberty logs must go into cf logs directory so cf logs command displays them.
+      update_logs_dir(server_xml_doc)
+      # Disable default Liberty Welcome page to avoid returning 200 response before app is ready.
+      disable_welcome_page(server_xml_doc)
+      # Disable application monitoring
+      disable_application_monitoring(server_xml_doc)
+      # Disable configuration (server.xml) monitoring
+      disable_config_monitoring(server_xml_doc)
+
+      # Check if appstate ICAP feature can be used
+      add_droplet_yaml if File.file?(icap_extension) && check_appstate_feature(server_xml_doc)
+
+      # update config for services
+      @services_manager.update_configuration(server_xml_doc, create, current_server_dir)
+      FeatureManager.filter_conflicting_features(server_xml_doc)
     end
 
     def get_context_root
@@ -358,8 +383,14 @@ module LibertyBuildpack::Container
     end
 
     def update_logs_dir(server_xml_doc)
-      include_file = REXML::Element.new('logging', server_xml_doc.root)
-      include_file.add_attribute('logDirectory', '${application.log.dir}')
+      elements = REXML::XPath.match(server_xml_doc, '/server/logging')
+      if elements.empty?
+        logging = REXML::Element.new('logging', server_xml_doc.root)
+      else
+        logging = elements.last
+      end
+      logging.add_attribute('logDirectory', '${application.log.dir}')
+      logging.add_attribute('consoleLogLevel', 'INFO') if logging.attribute('consoleLogLevel').nil?
     end
 
     def disable_config_monitoring(server_xml_doc)
@@ -420,15 +451,6 @@ module LibertyBuildpack::Container
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
       container_root = File.expand_path('..', @app_dir)
       FileUtils.cp(File.join(resources, 'droplet.yaml'), container_root)
-    end
-
-    # Copies the template server xml into the server directory structure and prepares it
-    def create_server_xml
-      server_xml = File.join(default_server_path, SERVER_XML)
-      FileUtils.mkdir_p(default_server_path)
-      resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-      FileUtils.cp(File.join(resources, SERVER_XML), server_xml)
-      server_xml
     end
 
     def make_server_script_runnable
