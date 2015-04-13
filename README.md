@@ -41,6 +41,7 @@ All Documentation is available in the Docs folder of the buildpack.
 	* [Java Opts Framework](docs/framework-java_opts.md)
 	* [Spring Auto Reconfiguration Framework](docs/framework-spring-auto-reconfiguration.md)
 	* [New Relic Agent Framework](docs/framework-new-relic-agent.md)
+	* [JRebel Agent Framework](docs/framework-jrebel-agent.md)
 * JREs
     * [IBM JDK](docs/ibm-jdk.md)
     * [Open JDK](docs/open-jdk.md)
