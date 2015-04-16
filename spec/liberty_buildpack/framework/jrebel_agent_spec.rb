@@ -188,6 +188,7 @@ module LibertyBuildpack::Framework
         expect(java_opts).to include('-Drebel.redefine_class=false')
         expect(java_opts).to include('-Drebel.log=true')
         expect(java_opts).to include('-Drebel.log.file=./../logs/jrebel.log')
+        expect(java_opts).to include('-Drebel.cloud.platform=cloudfoundry/ibm-websphere-liberty-buildpack')
       end
 
       it 'should return command line options for a valid service in a default container with openjdk',
@@ -199,6 +200,7 @@ module LibertyBuildpack::Framework
         expect(java_opts).not_to include('-Drebel.redefine_class=false')
         expect(java_opts).to include('-Drebel.log=true')
         expect(java_opts).to include('-Drebel.log.file=./../logs/jrebel.log')
+        expect(java_opts).to include('-Drebel.cloud.platform=cloudfoundry/ibm-websphere-liberty-buildpack')
       end
 
       it 'should return command line options for a valid service in a container with an adjusted relative location',
@@ -212,6 +214,7 @@ module LibertyBuildpack::Framework
         expect(java_opts).to include('-Drebel.redefine_class=false')
         expect(java_opts).to include('-Drebel.log=true')
         expect(java_opts).to include('-Drebel.log.file=../../../../logs/jrebel.log')
+        expect(java_opts).to include('-Drebel.cloud.platform=cloudfoundry/ibm-websphere-liberty-buildpack')
       end
     end # end of release
   end

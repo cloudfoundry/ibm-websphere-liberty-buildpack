@@ -70,7 +70,7 @@ module LibertyBuildpack::Container
         if File.exists? '/usr/bin/unzip'
           system "unzip -qqo '#{file}'"
         else
-          system "jar xf '#{file}'"
+          system "jar xf \"#{file}\""
         end
       end
     end
@@ -84,9 +84,9 @@ module LibertyBuildpack::Container
       file = File.expand_path(file)
       Dir.chdir (dir) do
         if File.exists? '/usr/bin/zip'
-          system "zip -rq #{file} *"
+          system "zip -rq '#{file}' *"
         else
-          system "jar cf #{file} *"
+          system "jar cf \"#{file}\" *"
         end
       end
     end
