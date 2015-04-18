@@ -21,7 +21,7 @@ minify: false
 liberty_repository_properties:
   useRepository: true
 
-default_config:
+app_archive:
  features: 
  - jsf-2.0
  - jsp-2.2

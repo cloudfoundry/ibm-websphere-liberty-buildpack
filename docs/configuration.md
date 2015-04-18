@@ -12,7 +12,7 @@ Buildpack configuration can be overridden with an environment variable matching 
 1. Configure the buildpack with a custom set of [Liberty profile](container-liberty.md) features (for WAR and EAR files only):
 
     ```bash
-    cf set-env myApplication JBP_CONFIG_LIBERTY '[default_config: {features: [jsp-2.2, websocket-1.1]}]'
+    cf set-env myApplication JBP_CONFIG_LIBERTY '[app_archive: {features: [jsp-2.2, websocket-1.1]}]'
     ```
 
 1. Configure the buildpack to use [OpenJDK](open-jdk.md) 8:

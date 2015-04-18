@@ -23,7 +23,7 @@ The Liberty container can be configured by modifying the [`config/liberty.yml`][
 |`version`| The version of the Liberty profile. You can find the candidate versions [here][index.yml].
 |`minify`| Boolean indicating whether the Liberty server should be [minified](#minify). The default value is `false`.
 | `liberty_repository_properties` | [Liberty repository configuration](#liberty-repository-configuration). 
-| `default_config` | [Default configuration](#default-configuration) for WAR and EAR files. 
+| `app_archive` | [Default configuration](#default-configuration) for WAR and EAR files. 
 
 #### Minify
 
@@ -50,7 +50,7 @@ liberty_repository_properties:
 The buildpack provides a default `server.xml` configuration when deploying WAR or EAR files. The configuration contains a list of Liberty features that are enabled by default. This set of features can be adjusted by modifying the `features` setting.
 
 ```yaml
-default_config:
+app_archive:
  features: 
  - jsf-2.0
  - jsp-2.2
