@@ -299,7 +299,7 @@ module LibertyBuildpack::Container
       server_xml_doc = REXML::Document.new('<server></server>')
       server_xml_doc.context[:attribute_quote] = :quote
 
-      default_config = @configuration['default_config']
+      default_config = @configuration['app_archive']
 
       # create featureManager with configured features
       feature_manager = REXML::Element.new('featureManager', server_xml_doc.root)

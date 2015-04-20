@@ -40,18 +40,18 @@ module LibertyBuildpack::Container
     end
 
     def default_features
-      default_configuration['default_config']['features']
+      default_configuration['app_archive']['features']
     end
 
     def custom_configuration
       configuration = YAML.load_file(File.expand_path('../../../config/liberty.yml', File.dirname(__FILE__)))
       configuration['liberty_repository_properties']['useRepository'] = false
-      configuration['default_config']['features'] = ['websocket-1.0', 'servlet-3.1']
+      configuration['app_archive']['features'] = ['websocket-1.0', 'servlet-3.1']
       configuration
     end
 
     def custom_features
-      custom_configuration['default_config']['features']
+      custom_configuration['app_archive']['features']
     end
 
     before do
