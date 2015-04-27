@@ -98,6 +98,7 @@ module LibertyBuildpack::Framework
       @java_opts << '-Drebel.remoting_plugin=true'
       @java_opts << '-Drebel.log=true'
       @java_opts << "-Drebel.log.file=#{jr_log}"
+      @java_opts << '-Drebel.cloud.platform=cloudfoundry/ibm-websphere-liberty-buildpack'
 
       unless openjdk?
         @java_opts << '-Drebel.redefine_class=false'
