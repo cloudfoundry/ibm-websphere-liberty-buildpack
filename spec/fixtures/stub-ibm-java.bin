@@ -1,5 +1,12 @@
-# Emulate broken JRE installer behaviour of unpacking in to current directory
-BASEDIR=$(dirname $0)
-rm -rf $BASEDIR/jre_dir
-mkdir -p $BASEDIR/jre_dir/jre/bin
-echo "java" > $BASEDIR/jre_dir/jre/bin/java
+# Emulate .bin installer unpacking java by reading its location from response.properties passed through as a param ($4)
+FILE=$4
+while read line; do
+    arr=$(echo $line | tr "=" "\n")
+    for x in $arr
+    do
+      TEMPDIR="$x"
+    done
+done < $FILE
+
+mkdir -p $TEMPDIR/jre/bin
+echo "java" > $TEMPDIR/jre/bin/java 
