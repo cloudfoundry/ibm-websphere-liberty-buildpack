@@ -128,22 +128,14 @@ module LibertyBuildpack::Jre
       FileUtils.mkdir_p(java_home)
 
       if File.basename(file.path).end_with?('.bin.cached', '.bin')
-        Dir.mktmpdir do |temp|
-          response_file = File.new(File.join(temp, 'response.properties'), 'w')
+          response_file = File.new(File.join(File.dirname(file.path), 'response.properties'), 'w')
           response_file.puts('INSTALLER_UI=silent')
           response_file.puts("USER_INSTALL_DIR=#{java_home}")
           response_file.close
 
-          ## Copy JRE as JRE installer ignoring USER_INSTALL_DIR and admin cache read-only
-          copy = File.join(temp, File.basename(file.path))
-          FileUtils.cp(file.path, copy)
+          File.chmod(0755, file.path)
+          system "#{file.path} -i silent -f #{response_file.path} 2>&1"
 
-          File.chmod(0755, copy)
-          system "#{copy} -i silent -f #{response_file.path} 2>&1"
-
-          ## Move expanded JRE to JAVA_HOME as JRE installer ignoring USER_INSTALL_DIR
-          Pathname.new(temp).children.select { |child| child.directory? }.map { |path| system "mv #{path.to_s}/* #{java_home}" }
-        end
       else
         system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
       end
