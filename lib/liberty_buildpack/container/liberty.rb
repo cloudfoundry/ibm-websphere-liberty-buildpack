@@ -147,6 +147,7 @@ module LibertyBuildpack::Container
         dest = File.join(@app_dir, '.wlp', USR_PATH, SERVERS_PATH, DEFAULT_SERVER)
         move_and_relink @app_dir, dest
         FileUtils.mv File.join(@app_dir, '.wlp'), File.join(@app_dir, WLP_PATH)
+        move_user_features
       else
         dest = File.join(@app_dir, '.wlp', USR_PATH, SERVERS_PATH)
         FileUtils.mkdir_p(dest)
@@ -155,6 +156,7 @@ module LibertyBuildpack::Container
         FileUtils.rm_rf(dest)
         move_and_relink @app_dir, dest
         FileUtils.mv File.join(@app_dir, '.wlp'), File.join(@app_dir, WLP_PATH)
+        move_user_features
       end
     end
 
@@ -169,6 +171,11 @@ module LibertyBuildpack::Container
         file = File.join(dest, link)
         FileUtils.ln_sf(Pathname(target).relative_path_from(Pathname(File.dirname(file))), file)
       end
+    end
+
+    def move_user_features
+      extension_dir = File.join(usr_dir, 'extension')
+      FileUtils.mv(extension_dir, File.join(@app_dir, WLP_PATH, USR_PATH)) if Dir.exists?(extension_dir)
     end
 
     def jvm_options

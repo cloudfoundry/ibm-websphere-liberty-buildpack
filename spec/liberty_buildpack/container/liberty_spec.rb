@@ -1655,6 +1655,70 @@ module LibertyBuildpack::Container
           check_default_config(server_xml_file, 'war', '/', default_features)
         end
       end
+
+    end
+
+    describe 'droplet layout' do
+      let(:test_java_home) { 'test-java-home' }
+
+      def run(root, app_contents)
+        set_liberty_fixture('spec/fixtures/wlp-stub-dummy-user-esa.tgz')
+
+        FileUtils.cp_r(app_contents, root)
+        liberty = Liberty.new(
+          app_dir: root,
+          java_home: test_java_home,
+          java_opts: '',
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          )
+        liberty.compile
+        liberty.release
+
+        # verify features are in the right place
+        feature_jar = File.join(root, 'wlp', 'usr', 'extension', 'lib', 'dummy_feature.jar')
+        expect(File.exists?(feature_jar)).to eq(true)
+        feature_mf = File.join(root, 'wlp', 'usr', 'extension', 'lib', 'features', 'dummy_feature.mf')
+        expect(File.exists?(feature_mf)).to eq(true)
+      end
+
+      it 'should return correct layout for the WEB-INF case' do
+        Dir.mktmpdir do |root|
+          run(root, 'spec/fixtures/container_liberty/.')
+
+          app_dir = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'apps', 'myapp.war')
+          expect(Dir.exists?(app_dir)).to eq(true)
+        end
+      end
+
+      it 'should return correct layout for the META-INF case' do
+        Dir.mktmpdir do |root|
+          run(root, 'spec/fixtures/container_liberty_ear/.')
+
+          app_dir = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'apps', 'myapp.ear')
+          expect(Dir.exists?(app_dir)).to eq(true)
+        end
+      end
+
+      it 'should return correct layout for the server directory case' do
+        Dir.mktmpdir do |root|
+          run(root, 'spec/fixtures/container_liberty_single_server/.')
+
+          server_xml = File.join(root, 'wlp', 'usr', 'servers', 'defaultServer', 'server.xml')
+          expect(File.exists?(server_xml)).to eq(true)
+        end
+      end
+
+      it 'should return correct layout for the packaged server case' do
+        Dir.mktmpdir do |root|
+          run(root, 'spec/fixtures/container_liberty_server/.')
+
+          server_xml = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          expect(File.exists?(server_xml)).to eq(true)
+        end
+      end
+
     end
 
   end
