@@ -31,14 +31,9 @@ module LibertyBuildpack::Container
     private
 
       # Return an xpath string of the form,
-      # "/server/featureManager[feature = ('x') or feature = ('y')]"
+      # "/server/featureManager/feature[. = 'x' or . = 'y']/node()"
       def self.feature_names_to_feature_xpath(feature_names)
-        xpath = ''
-        feature_names.each do
-          |feature_name|
-          xpath << (xpath.empty? ? "/server/featureManager[feature = ('#{feature_name}')" : " or feature = ('#{feature_name}')")
-        end
-        xpath << ']'
+        "/server/featureManager/feature[. = '" << feature_names.join("' or . = '") << "']/node()"
       end
 
     public
@@ -54,9 +49,7 @@ module LibertyBuildpack::Container
       # select any of the features that the component provides. Thus a non-empty
       # result indicates that the server requires one or more features that the
       # component provides.
-      COMPONENT_NAME_TO_FEATURE_XPATH = {
-        'liberty_ext' => feature_names_to_feature_xpath(COMPONENT_NAME_TO_FEATURE_NAMES['liberty_ext']),
-      }.freeze
+      COMPONENT_NAME_TO_FEATURE_XPATH = Hash[COMPONENT_NAME_TO_FEATURE_NAMES.map { |k, v| [k, feature_names_to_feature_xpath(v)] }].freeze
 
   end
 
