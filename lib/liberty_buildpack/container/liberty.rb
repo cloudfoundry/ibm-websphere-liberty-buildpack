@@ -534,18 +534,27 @@ module LibertyBuildpack::Container
     # case it is required, or it may be optional, in which case it is required
     # if one of the features it supplies is requested in a server.xml.
     def configured_feature_requires_component?(component)
+      list_configured_features_from_component(component).length > 0
+    end
+
+    def list_configured_features_from_component(component)
       features_xpath = OptionalComponents::COMPONENT_NAME_TO_FEATURE_XPATH[component]
       if !features_xpath
-        # component is not optional, as it is not in the optional component hash.
-        true
+        # no such component
+        []
       elsif (server_xml = Liberty.server_xml(@app_dir))
-        # component is optional and server.xml is supplied, so check requested features.
+        # server.xml is supplied, so check requested features.
         server_xml_doc = XmlUtils.read_xml_file(server_xml)
-        server_features = REXML::XPath.match(server_xml_doc, features_xpath)
-        server_features.length > 0 ? true : false
+        REXML::XPath.match(server_xml_doc, features_xpath)
       else
-        # component is optional, but no server.xml supplied, so no optional features are requested.
-        false
+        # no server.xml supplied, so check default features.
+        feature_names = OptionalComponents::COMPONENT_NAME_TO_FEATURE_NAMES[component]
+
+        default_config = @configuration['app_archive']
+        default_features = default_config.nil? ? [] : default_config['features'] || []
+
+        # return an intersection of two arrays
+        default_features & feature_names
       end
     end
 

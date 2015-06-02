@@ -1721,6 +1721,86 @@ module LibertyBuildpack::Container
 
     end
 
+    describe 'extended features' do
+      def run(root, configuration = default_configuration)
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(LIBERTY_DETAILS)
+
+        LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+        component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI, 'liberty_ext' => 'wlp-stub-ext.tar.gz' })
+
+        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+        application_cache.stub(:get).with('wlp-stub-ext.tar.gz').and_yield(File.open('spec/fixtures/wlp-stub-ext.tar.gz'))
+
+        Liberty.new(
+          app_dir: root,
+          configuration: configuration,
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+        ).compile
+      end
+
+      it 'should extract extended features if specifed in server.xml' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p root
+          File.open(File.join(root, 'server.xml'), 'w') do |file|
+            file.write('<server><featureManager><feature>mongodb-2.0</feature></featureManager></server>')
+          end
+
+          run(root)
+
+          feature = File.join root, '.liberty', 'lib', 'features', 'mongodb-2.0.mf'
+          expect(File).to exist(feature)
+        end
+      end
+
+      it 'should NOT extract extended features if NOT specifed in server.xml' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p root
+          File.open(File.join(root, 'server.xml'), 'w') do |file|
+            file.write('<server><featureManager><feature>jsp-2.2</feature></featureManager></server>')
+          end
+
+          run(root)
+
+          feature = File.join root, '.liberty', 'lib', 'features', 'mongodb-2.0.mf'
+          expect(File).not_to exist(feature)
+        end
+      end
+
+      it 'should extract extended features if specifed in config/liberty.yml' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
+
+          config = default_configuration
+          config['app_archive']['features'] = ['mongodb-2.0']
+          run(root, config)
+
+          feature = File.join root, '.liberty', 'lib', 'features', 'mongodb-2.0.mf'
+          expect(File).to exist(feature)
+        end
+      end
+
+      it 'should NOT extract extended features if NOT specifed in config/liberty.yml' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
+
+          config = default_configuration
+          config['app_archive']['features'] = ['jsp-2.2']
+          run(root, config)
+
+          feature = File.join root, '.liberty', 'lib', 'features', 'mongodb-2.0.mf'
+          expect(File).not_to exist(feature)
+        end
+      end
+
+    end
+
   end
 
 end
