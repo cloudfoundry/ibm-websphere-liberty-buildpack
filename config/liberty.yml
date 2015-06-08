@@ -33,3 +33,17 @@ app_archive:
  - jndi-1.0
  - managedBeans-1.0
  - jaxrs-1.1
+
+# Map of optional Liberty component download name to feature names.
+# Used when liberty_repository_properties/useRepository is false.
+component_feature_map:
+ liberty_ext:
+ - jaxb-2.2
+ - jaxws-2.2
+ - jmsMdb-3.1
+ - mongodb-2.0
+ - wasJmsClient-1.1
+ - wasJmsSecurity-1.0
+ - wasJmsServer-1.0
+ - wmqJmsClient-1.1
+ - wsSecurity-1.1

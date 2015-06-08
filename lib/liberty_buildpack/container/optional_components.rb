@@ -23,12 +23,17 @@ module LibertyBuildpack::Container
   # the index.yml file (except when the index.yml points directly to an
   # all-in-one Liberty download). The index.yml file is pointed to by the
   # buildpack's liberty.yml file.
-  #
-  # The liberty_core, icap_ext and appstate components are not optional.
 
   class OptionalComponents
 
     private
+
+      CONFIG_FILE = '../../../config/liberty.yml'.freeze
+
+      def self.initialize
+        config = YAML.load_file(File.expand_path(CONFIG_FILE, File.dirname(__FILE__)))
+        @@configuration = config['component_feature_map'] || {}
+      end
 
       # Return an xpath string of the form,
       # "/server/featureManager/feature[. = 'x' or . = 'y']/node()"
@@ -36,13 +41,13 @@ module LibertyBuildpack::Container
         "/server/featureManager/feature[. = '" << feature_names.join("' or . = '") << "']/node()"
       end
 
+      initialize
+
     public
 
       # A map of Liberty Bluemix component name to an array of feature names
       # that the component provides.
-      COMPONENT_NAME_TO_FEATURE_NAMES = {
-        'liberty_ext' => ['jaxb-2.2', 'jaxws-2.2', 'jmsMdb-3.1', 'mongodb-2.0', 'wasJmsClient-1.1', 'wasJmsSecurity-1.0', 'wasJmsServer-1.0', 'wmqJmsClient-1.1', 'wsSecurity-1.1'],
-      }.freeze
+      COMPONENT_NAME_TO_FEATURE_NAMES = @@configuration
 
       # A map of Liberty Bluemix component name to an XPath expression string
       # that may be used query against the contents of a server.xml file to
