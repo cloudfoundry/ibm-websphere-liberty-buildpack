@@ -37,6 +37,7 @@ All Documentation is available in the Docs folder of the buildpack.
             * [MySQL](docs/services/mysql.md)
             * [PostgreSQL](docs/services/postgresql.md)
     * [Java Main (for jars with a main() class)](docs/java-main.md)
+    * [DistZip](docs/container-distZip.md)
 * Frameworks
 	* [Java Opts Framework](docs/framework-java_opts.md)
 	* [Spring Auto Reconfiguration Framework](docs/framework-spring-auto-reconfiguration.md)
