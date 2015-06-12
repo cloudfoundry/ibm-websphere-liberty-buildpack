@@ -17,9 +17,11 @@
 require 'spec_helper'
 require 'rexml/document'
 require 'liberty_buildpack/services/utils'
+require 'logging_helper'
 
 module LibertyBuildpack::Services
   describe Utils do
+    include_context 'logging_helper'
 
     #----------------
     # Helper method to check an xml file agains expected results.
@@ -107,11 +109,6 @@ module LibertyBuildpack::Services
         end
       end # it
 
-      it 'should raise when no featureManager exists' do
-        doc = REXML::Document.new('<server></server>')
-        expect { Utils.add_features(doc.root, %w(someFeature otherFeature)) }.to raise_error(RuntimeError, 'Feature Manager not found')
-      end # it
-
       it 'should raise when doc is nil' do
         expect { Utils.add_features(nil, %w(someFeature otherFeature)) }.to raise_error(RuntimeError, 'invalid parameters')
       end # it
@@ -121,10 +118,46 @@ module LibertyBuildpack::Services
         expect { Utils.add_features(doc.root, nil) }.to raise_error(RuntimeError, 'invalid parameters')
       end # it
 
-      it 'should raise when features is empty' do
+      it 'should raise when feature conditionals are invalid' do
         doc = REXML::Document.new('<server></server>')
-        expect { Utils.add_features(doc.root, []) }.to raise_error(RuntimeError, 'invalid parameters')
+
+        condition = {}
+        expect { Utils.add_features(doc.root, condition) }.to raise_error(RuntimeError, 'Invalid feature condition')
+
+        condition = { 'if' => ['a'] }
+        expect { Utils.add_features(doc.root, condition) }.to raise_error(RuntimeError, 'Invalid feature condition')
+
+        condition = { 'then' => ['a'] }
+        expect { Utils.add_features(doc.root, condition) }.to raise_error(RuntimeError, 'Invalid feature condition')
+
+        condition = { 'else' => ['a'] }
+        expect { Utils.add_features(doc.root, condition) }.to raise_error(RuntimeError, 'Invalid feature condition')
+      end
+
+      it 'should handle feature conditionals' do
+        condition = { 'if' => ['servlet-3.0', 'jdbc-4.0'], 'then' => ['jsp-2.2'], 'else' => ['jsp-2.3'] }
+
+        # should use jsp-2.3 because no feature is found
+        doc = REXML::Document.new('<server></server>')
+        Utils.add_features(doc.root, condition)
+        features = Utils.get_features(doc.root)
+        expect(features).to include('jsp-2.3')
+
+        # should use jsp-2.2 because servlet-3.0 is found
+        doc = REXML::Document.new('<server></server>')
+        Utils.add_features(doc.root, %w(servlet-3.0))
+        Utils.add_features(doc.root, condition)
+        features = Utils.get_features(doc.root)
+        expect(features).to include('servlet-3.0', 'jsp-2.2')
+
+        # should use jsp-2.2 becuase jdbc-4.0 is found
+        doc = REXML::Document.new('<server></server>')
+        Utils.add_features(doc.root, %w(jdbc-4.0))
+        Utils.add_features(doc.root, condition)
+        features = Utils.get_features(doc.root)
+        expect(features).to include('jdbc-4.0', 'jsp-2.2')
       end # it
+
     end # describe test add features
 
     describe 'test update_bootstrap_properties' do

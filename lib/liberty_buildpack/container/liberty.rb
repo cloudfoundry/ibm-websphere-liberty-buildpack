@@ -351,7 +351,6 @@ module LibertyBuildpack::Container
 
       # update config for services
       @services_manager.update_configuration(server_xml_doc, create, current_server_dir)
-      FeatureManager.filter_conflicting_features(server_xml_doc)
     end
 
     def get_context_root
@@ -603,9 +602,8 @@ module LibertyBuildpack::Container
       else
         # shouldn't happen, expect index.yml or component_index.yml to always
         # name files that can be handled here.
-        print("Unknown file type, not downloaded, at #{uri}\n")
+        puts "Unknown file type, not downloaded, at #{uri}"
       end
-      print("\n")
     end
 
     def install_archive(file, uri, root)
@@ -613,13 +611,14 @@ module LibertyBuildpack::Container
       install_start_time = Time.now
       if uri.end_with?('.zip', 'jar')
         ContainerUtils.unzip(file.path, root)
+        puts "(#{(Time.now - install_start_time).duration})"
       elsif uri.end_with?('tar.gz', '.tgz')
         system "tar -zxf #{file.path} -C #{root} 2>&1"
+        puts "(#{(Time.now - install_start_time).duration})"
       else
         # shouldn't really happen
-        print("Unknown file type, not installed, at #{uri}.\n")
+        puts "Unknown file type, not installed, at #{uri}."
       end
-      puts "(#{(Time.now - install_start_time).duration})\n"
     end
 
     def download_and_install_esas(esas, root)
@@ -628,33 +627,33 @@ module LibertyBuildpack::Container
         uri = esa[0]
         options = esa[1]
         if uri.include? '://'
-          puts "-----> Downloading from #{uri} ... "
+          print "-----> Downloading from #{uri} ... "
         else
           filename = File.basename(uri)
-          puts "-----> Retrieving #{filename} ... "
+          print "-----> Retrieving #{filename} ... "
         end
         download_start_time = Time.now
         # for each downloaded file, there is a corresponding cached, etag, last_modified, and lock extension
         LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
-          print "(#{(Time.now - download_start_time).duration}).\n"
+          puts "(#{(Time.now - download_start_time).duration})."
           install_esa(file, options, root)
         end
       end
     end
 
     def install_esa(file, options, root)
-      print 'Installing feature ... '
+      print '         Installing feature ... '
       install_start_time = Time.now
       # setup the command and options
       cmd = File.join(root, WLP_PATH, 'bin', 'featureManager')
-      script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS="" #{cmd} install #{file.path} #{options}"
+      script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS="" #{cmd} install #{file.path} #{options} 2>&1"
       output = `#{script_string}`
       if  $CHILD_STATUS.to_i != 0
-        puts "\n #{output}"
+        puts 'FAILED'
+        puts "#{output}"
       else
-        puts "(#{(Time.now - install_start_time).duration}).\n"
+        puts "(#{(Time.now - install_start_time).duration})."
       end
-      print("\n")
     end
 
     def inline_includes(server_xml_doc, server_xml_dir, location_resolver)
