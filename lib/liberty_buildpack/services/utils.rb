@@ -87,32 +87,36 @@ module LibertyBuildpack::Services
     end
 
     #------------------------------------------------------------------------------------
-    # A utility method to to add features into the server.xml featurManager.
+    # A utility method to to add features into the server.xml featureManager. The features
+    # parameter can be specified as an array, for example ['jdbc-4.0'] or as a hash. If the
+    # parameter is specified as a hash value, it must contain 'if', 'then', and 'else' mappings.
+    # The function will check if any of the features specified under the 'if' mapping exist in
+    # the server.xml. If a single match is found, the function will add the features under the
+    # 'then' mapping into the featureManager. Otherwise, the features under the 'else' mapping
+    # will be added.
     #
     # @param [REXML::Element] doc - the root element of the server.xml document.
-    # @param [Array<String>] features - an array of features to add to the featureManager. e.g ['logAnalysis-1.0']
+    # @param features - an array or hash of features to add to the featureManager.
     #------------------------------------------------------------------------------------
     def self.add_features(doc, features)
-      raise 'invalid parameters' if doc.nil? || features.nil? || features.length == 0
-      # Get the featureManager element. Assume there may be multiples
-      managers = doc.elements.to_a('//featureManager')
-      raise 'Feature Manager not found' if managers.size == 0
-      features.each do |feature|
-        found = false
-        managers.each do |manager|
-          elements = manager.get_elements('feature')
-          elements.each do |element|
-            text = element.text
-            if text == feature
-              found = true
-              break
-            end # if
-          end  # element
-        end # managers
-        if found == false
-          log_feature = REXML::Element.new('feature', managers[0])
-          log_feature.add_text(feature)
+      raise 'invalid parameters' if doc.nil? || features.nil?
+
+      current_features = get_features(doc)
+      if features.is_a?(Hash)
+        condition_features = features['if']
+        condition_true_features = features['then']
+        condition_false_features = features['else']
+        raise 'Invalid feature condition' if condition_features.nil? || condition_true_features.nil? || condition_false_features.nil?
+
+        if shared_elements?(current_features, condition_features)
+          add_features_sub(doc, current_features, condition_true_features)
+        else
+          add_features_sub(doc, current_features, condition_false_features)
         end
+      elsif features.is_a?(Array)
+        add_features_sub(doc, current_features, features)
+      else
+        raise 'Invalid feature expression type'
       end
     end
 
@@ -318,6 +322,43 @@ module LibertyBuildpack::Services
         logger.debug("Found client_jar_key: #{urls[client_jar_key]}")
         return [urls[client_jar_key]]
       end
+    end
+
+    def self.get_features(doc)
+      managers = doc.elements.to_a('//featureManager')
+      features = Set.new
+      managers.each do |manager|
+        elements = manager.get_elements('feature')
+        elements.each do |element|
+          features.add(element.text)
+        end
+      end
+      features
+    end
+
+    def self.add_features_sub(doc, current_features, features)
+      additional_features = Set.new
+      features.each do |feature|
+        additional_features.add(feature) unless current_features.include?(feature)
+      end
+
+      managers = doc.elements.to_a('//featureManager')
+      if managers.empty?
+        manager = REXML::Element.new('featureManager', doc.root)
+      else
+        manager = managers.first
+      end
+      additional_features.each do |feature|
+        element = REXML::Element.new('feature', manager)
+        element.add_text(feature)
+      end
+    end
+
+    def self.shared_elements?(array1, array2)
+      array2.each do | element |
+        return true if array1.include?(element)
+      end
+      false
     end
 
   end

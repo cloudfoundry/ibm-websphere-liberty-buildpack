@@ -21,7 +21,11 @@ class_file : postgresql.rb
 server_xml_stanza : dataSource
 
 # plugin specific attributes
-features : ['jdbc-4.0']
+features: 
+ if: ['jdbc-4.1']
+ then: []
+ else: ['jdbc-4.0']
+
 client_jars : 'postgresql-.*.jar'
 
 service_filter : 'postgresql|elephantsql'
