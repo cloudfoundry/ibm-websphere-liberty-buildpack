@@ -15,5 +15,5 @@
 
 # Service configuration
 ---
-version: 3.12.0
+version: 3.+
 repository_root: "https://download.run.pivotal.io/new-relic/"
