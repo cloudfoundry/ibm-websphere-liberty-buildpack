@@ -363,6 +363,7 @@ module LibertyBuildpack::Container
 
       if endpoints.empty?
         endpoint = REXML::Element.new('httpEndpoint', server_xml_doc.root)
+        endpoint.add_attribute('id', 'defaultHttpEndpoint')
       else
         endpoint = endpoints[0]
         endpoints.drop(1).each { |element| element.parent.delete_element(element) }

@@ -948,6 +948,8 @@ module LibertyBuildpack::Container
           endpoints = REXML::XPath.match(REXML::Document.new(server_xml_contents), '/server/httpEndpoint')
           expect(endpoints.size).to eq(1)
           attributes = endpoints[0].attributes
+          expect(attributes).to have_key('id')
+          expect(attributes['id']).to eq('defaultHttpEndpoint')
           expect(attributes).to have_key('httpPort')
           expect(attributes).not_to have_key('httpsPort')
           expect(attributes).to have_key('host')
