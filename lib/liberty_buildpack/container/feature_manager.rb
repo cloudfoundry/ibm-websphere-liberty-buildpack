@@ -72,7 +72,7 @@ module LibertyBuildpack::Container
           script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS=#{jvm_args} #{cmd} install --acceptLicense #{features} --when-file-exists=replace"
 
           @logger.debug("script invocation string is #{script_string}")
-          output = `#{script_string}`
+          output = `#{script_string} 2>&1`
           # if ($CHILD_STATUS.to_i == 0) doesn't seem to work, as $CHILD_STATUS is
           # nil, so parse output for known message codes.
           if output.include?(FEATURES_ALREADY_PRESENT_MSG_CODE)
