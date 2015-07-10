@@ -280,10 +280,41 @@ module LibertyBuildpack::Container
       if server_xml
         update_provided_server_xml(server_xml)
       elsif Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
+        check_default_features
         create_default_server_xml
       else
         raise 'Neither a server.xml nor WEB-INF directory nor a ear was found.'
       end
+    end
+
+    def check_default_features
+      unless features_set?
+        features = config_features(@configuration) || []
+        puts sprintf('-----> Warning: Liberty feature set is not specified. Using the default feature set: %s. For the best results, explicitly set the features via the JBP_CONFIG_LIBERTY environment variable or deploy the application as a server directory or packaged server with a custom server.xml file.', features)
+      end
+    end
+
+    def features_set?
+      conf_env = @environment['JBP_CONFIG_LIBERTY']
+      unless conf_env.nil?
+        begin
+          value = YAML.load(conf_env)
+          if !config_features(value).nil?
+            return true
+          elsif value.is_a?(Array)
+            value.each do | item |
+              return true unless config_features(item).nil?
+            end
+          end
+        rescue SyntaxError
+          return false
+        end
+      end
+      false
+    end
+
+    def config_features(config)
+      config['app_archive']['features'] if config.is_a?(Hash) && !config['app_archive'].nil?
     end
 
     def update_provided_server_xml(server_xml)

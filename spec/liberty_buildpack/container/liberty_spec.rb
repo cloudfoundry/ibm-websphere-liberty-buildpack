@@ -1800,6 +1800,59 @@ module LibertyBuildpack::Container
           expect(File).not_to exist(feature)
         end
       end
+    end
+
+    describe 'default feature warning message' do
+
+      def run(root, env = {})
+        set_liberty_fixture('spec/fixtures/wlp-stub.tar.gz')
+
+        Liberty.new(
+          app_dir: root,
+          lib_directory: '',
+          configuration: default_configuration,
+          environment: env,
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+        ).compile
+      end
+
+      it 'should warn about default features for WAR' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty/.', root)
+          expect { run(root) }.to output(/feature set is not specified/).to_stdout
+        end
+      end
+
+      it 'should warn about default features for EAR' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty_ear/.', root)
+          expect { run(root) }.to output(/feature set is not specified/).to_stdout
+        end
+      end
+
+      it 'should warn about default features when overrides are NOT set correctly' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty/.', root)
+          env = { 'JBP_CONFIG_LIBERTY' => '[features: blah, app_archive: {feature: [jsp-2.2]}]' }
+          expect { run(root, env) }.to output(/feature set is not specified/).to_stdout
+        end
+      end
+
+      it 'should NOT warn about default features when overrides are set as hash' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty/.', root)
+          env = { 'JBP_CONFIG_LIBERTY' => 'app_archive: {features: [jsp-2.2]}' }
+          expect { run(root, env) }.not_to output(/feature set is not specified/).to_stdout
+        end
+      end
+
+      it 'should NOT warn about default features when overrides are set as array' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty/.', root)
+          env = { 'JBP_CONFIG_LIBERTY' => '[foo: bar, app_archive: {features: [jsp-2.2]}]' }
+          expect { run(root, env) }.not_to output(/feature set is not specified/).to_stdout
+        end
+      end
 
     end
 
