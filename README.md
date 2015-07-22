@@ -94,6 +94,6 @@ bundle install --gemfile Gemfile.rubymine-debug
 [tuning options]: docs/tuning.md
 [java main push]: docs/java-main.md
 
-[Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.5/lafiles/runtime//en.html
-[JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-EWOD-99YA4J&title=IBM%C2%AE+SDK%2C+Java+Technology+Edition%2C+Version+7+Release+1&l=en
+[Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.6/lafiles/runtime//en.html
+[JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-JWOD-9NXJQY&title=IBM%C2%AE+SDK%2C+Java+Technology+Edition%2C+Version+7+Release+1&l=en
 [manifest documentation]: http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html
