@@ -130,6 +130,7 @@ module LibertyBuildpack::Jre
       if File.basename(file.path).end_with?('.bin.cached', '.bin')
           response_file = File.new(File.join(File.dirname(file.path), 'response.properties'), 'w')
           response_file.puts('INSTALLER_UI=silent')
+          response_file.puts('LICENSE_ACCEPTED=TRUE')
           response_file.puts("USER_INSTALL_DIR=#{java_home}")
           response_file.close
 
