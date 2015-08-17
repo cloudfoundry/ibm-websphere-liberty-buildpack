@@ -28,7 +28,7 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/repository/component_index'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util'
-require 'liberty_buildpack/util/application_cache'
+require 'liberty_buildpack/util/cache/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/properties'
 require 'liberty_buildpack/util/license_management'
@@ -627,7 +627,7 @@ module LibertyBuildpack::Container
           print "-----> Retrieving #{filename} ... "
         end
         download_start_time = Time.now
-        LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
+        LibertyBuildpack::Util::Cache::ApplicationCache.new.get(uri) do |file|
           puts "(#{(Time.now - download_start_time).duration})"
           install_archive(file, uri, root)
         end
@@ -666,7 +666,7 @@ module LibertyBuildpack::Container
         end
         download_start_time = Time.now
         # for each downloaded file, there is a corresponding cached, etag, last_modified, and lock extension
-        LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
+        LibertyBuildpack::Util::Cache::ApplicationCache.new.get(uri) do |file|
           puts "(#{(Time.now - download_start_time).duration})."
           install_esa(file, options, root)
         end

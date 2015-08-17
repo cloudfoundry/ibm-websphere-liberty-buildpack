@@ -54,7 +54,7 @@ module LibertyBuildpack::Framework
       end
 
       # For a download request of a new relic agent jar, return the fixture jar
-      LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+      LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
       application_cache.stub(:get).with(index_uri).and_yield(File.open('spec/fixtures/stub-new-relic-agent.jar'))
     end
 

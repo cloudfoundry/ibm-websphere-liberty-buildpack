@@ -22,7 +22,7 @@ require 'liberty_buildpack/container'
 require 'liberty_buildpack/container/install_components'
 require 'liberty_buildpack/util'
 require 'liberty_buildpack/util/constantize'
-require 'liberty_buildpack/util/application_cache'
+require 'liberty_buildpack/util/cache/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/xml_utils'
 require 'liberty_buildpack/diagnostics/logger_factory'
@@ -467,7 +467,7 @@ module LibertyBuildpack::Container
         filename = File.basename(uri)
         print "-----> Retrieving and installing client jar(s) from #{filename} "
       end
-      LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file|
+      LibertyBuildpack::Util::Cache::ApplicationCache.new.get(uri) do |file|
         if file.path.end_with?('zip.cached')
           system "unzip -oq -d #{root} #{file.path} 2>&1"
           Dir.glob("#{root}/**/*.jar").each do |file2|

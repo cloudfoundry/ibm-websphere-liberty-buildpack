@@ -20,7 +20,12 @@ require 'liberty_buildpack/util/cache/authentication_utils'
 
 describe LibertyBuildpack::Util::Cache::AuthenticationUtils do
 
-  after do
+  before(:each) do
+    # reset cached value before each test
+    described_class.class_variable_set :@@auth_config, nil
+  end
+
+  after(:each) do
     # reset cached value after each test
     described_class.class_variable_set :@@auth_config, nil
   end

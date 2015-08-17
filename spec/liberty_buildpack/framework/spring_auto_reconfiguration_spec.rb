@@ -79,7 +79,7 @@ module LibertyBuildpack::Framework
         FileUtils.cp_r 'spec/fixtures/framework_auto_reconfiguration_servlet_5/.', root
 
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
 
         SpringAutoReconfiguration.new(
@@ -102,7 +102,7 @@ module LibertyBuildpack::Framework
         FileUtils.cp_r 'spec/fixtures/framework_auto_reconfiguration_servlet_5/.', root
 
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
 
         SpringAutoReconfiguration.new(
@@ -123,7 +123,7 @@ module LibertyBuildpack::Framework
         web_xml = File.join root, 'WEB-INF', 'web.xml'
 
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-auto-reconfiguration.jar'))
         LibertyBuildpack::Framework::WebXmlModifier.stub(:new).and_return(web_xml_modifier)
         web_xml_modifier.should_receive(:augment_root_context)
@@ -159,7 +159,7 @@ module LibertyBuildpack::Framework
 
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
 
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
         LibertyBuildpack::Container::Liberty.new(
@@ -205,7 +205,7 @@ module LibertyBuildpack::Framework
         Dir['spec/fixtures/additional_libs/*'].each { |file| FileUtils.cp(file, lib_directory) }
 
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(SPRING_AUTO_RECONFIGURATION_DETAILS)
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
         LibertyBuildpack::Container::Liberty.new(

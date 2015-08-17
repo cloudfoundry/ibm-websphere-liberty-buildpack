@@ -16,7 +16,7 @@
 
 require 'fileutils'
 require 'liberty_buildpack/util'
-require 'liberty_buildpack/util/application_cache'
+require 'liberty_buildpack/util/cache/application_cache'
 require 'liberty_buildpack/util/format_duration'
 
 module LibertyBuildpack::Util
@@ -33,7 +33,7 @@ module LibertyBuildpack::Util
     download_start_time = Time.now
     print "-----> Downloading #{description} #{version} from #{uri} "
 
-    LibertyBuildpack::Util::ApplicationCache.new.get(uri) do |file| # TODO: Use global cache #50175265
+    LibertyBuildpack::Util::Cache::ApplicationCache.new.get(uri) do |file| # TODO: Use global cache #50175265
       FileUtils.cp(file.path, File.join(target_directory, jar_name))
       puts "(#{(Time.now - download_start_time).duration})"
     end

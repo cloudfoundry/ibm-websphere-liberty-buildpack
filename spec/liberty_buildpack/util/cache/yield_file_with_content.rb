@@ -1,7 +1,7 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2014-2015 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,12 +15,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'liberty_buildpack/util'
+require 'rspec/expectations'
+require 'rspec/matchers/built_in/yield'
 
-# A module encapsulating all of the utility components for caching
-module LibertyBuildpack::Util::Cache
+RSpec::Matchers.define :yield_file_with_content do |expected|
+  match do |block|
+    probe = RSpec::Matchers::BuiltIn::YieldProbe.probe(block)
+    probe.yielded_once?(:yield_with_args) && content(probe.single_yield_args.first) =~ expected
+  end
 
-  # The location to find cached resources in the buildpack
-  CACHED_RESOURCES_DIRECTORY = Pathname.new(File.expand_path('../../../../resources/cache', __FILE__))
+  supports_block_expectations
 
+  def content(file)
+    File.read(file)
+  end
 end

@@ -72,7 +72,7 @@ module LibertyBuildpack::Jre
 
     it 'should extract Java from a GZipped TAR' do
       Dir.mktmpdir do |root|
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
 
         OpenJdk.new(
@@ -177,7 +177,7 @@ module LibertyBuildpack::Jre
 
     it 'places the killjava script (with appropriately substituted content) in the diagnostics directory' do
       Dir.mktmpdir do |root|
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
 
         OpenJdk.new(

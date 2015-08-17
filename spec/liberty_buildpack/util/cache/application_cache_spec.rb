@@ -20,9 +20,9 @@ require 'application_helper'
 require 'internet_availability_helper'
 require 'logging_helper'
 require 'constants'
-require 'liberty_buildpack/util/application_cache'
+require 'liberty_buildpack/util/cache/application_cache'
 
-describe LibertyBuildpack::Util::ApplicationCache do
+describe LibertyBuildpack::Util::Cache::ApplicationCache do
   include_context 'application_helper'
   include_context 'internet_availability_helper'
   include_context 'logging_helper'

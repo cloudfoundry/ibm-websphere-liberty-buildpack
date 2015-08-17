@@ -85,7 +85,7 @@ module LibertyBuildpack::Jre
 
         before do | example |
           # get the application cache fixture from the application_cache double provided in the overall setup
-          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
           cache_fixture = example.metadata[:cache_fixture]
           application_cache.stub(:get).with(uri).and_yield(File.open("spec/fixtures/#{cache_fixture}")) if cache_fixture
         end

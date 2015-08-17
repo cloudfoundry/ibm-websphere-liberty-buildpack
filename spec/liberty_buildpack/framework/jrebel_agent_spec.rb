@@ -52,7 +52,7 @@ module LibertyBuildpack::Framework
       end
 
       # For a download request of a JRebel agent jar, return the fixture jar
-      LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+      LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
       application_cache.stub(:get).with(index_uri).and_yield(File.open('spec/fixtures/stub-jrebel-nosetup.zip'))
     end
 
@@ -164,7 +164,7 @@ module LibertyBuildpack::Framework
 
         it 'should raise an error with original exception if the jar could not be downloaded',
            index_version: '6.0.3', index_uri: 'https://downloadsite/jrebel/jrebel-6.0.3-nosetup.zip' do
-          allow(LibertyBuildpack::Util::ApplicationCache).to receive(:new).and_raise('underlying download error')
+          allow(LibertyBuildpack::Util::Cache::ApplicationCache).to receive(:new).and_raise('underlying download error')
           expect { compiled }.to raise_error(/Unable to download the JRebel zip\. Ensure that the zip at..+underlying download error/)
         end
       end

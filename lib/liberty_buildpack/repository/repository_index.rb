@@ -30,7 +30,7 @@ module LibertyBuildpack::Repository
     def initialize(repository_root)
       @index = {}
       repository_root = repository_root[0..-2] while repository_root.end_with? '/'
-      LibertyBuildpack::Util::Cache::DownloadCache.new.get("#{repository_root}#{INDEX_PATH}") do |file|
+      cache.get("#{repository_root}#{INDEX_PATH}") do |file|
         @index.merge! YAML.load_file(file)
       end
     end
@@ -52,7 +52,12 @@ module LibertyBuildpack::Repository
 
     private
 
-      INDEX_PATH = '/index.yml'
+    INDEX_PATH = '/index.yml'.freeze
+
+    def cache
+      LibertyBuildpack::Util::Cache::DownloadCache.new(Pathname.new(Dir.tmpdir),
+                                                       LibertyBuildpack::Util::Cache::CACHED_RESOURCES_DIRECTORY)
+    end
 
   end
 

@@ -90,6 +90,21 @@ class BuildpackCache
     end
   end
 
+  def secure?(uri)
+    uri.scheme == 'https'
+  end
+
+  def proxy(uri)
+    proxy_uri = if secure?(uri)
+                  URI.parse(ENV['https_proxy'] || ENV['HTTPS_PROXY'] || '')
+                else
+                  URI.parse(ENV['http_proxy'] || ENV['HTTP_PROXY'] || '')
+                end
+
+    @logger.debug { "Proxy: #{proxy_uri.host}, #{proxy_uri.port}, #{proxy_uri.user}, #{proxy_uri.password}" }
+    Net::HTTP::Proxy(proxy_uri.host, proxy_uri.port, proxy_uri.user, proxy_uri.password)
+  end
+
   # Downloads remote location into the specified target file
   #
   # @param [String] uri location of the remote resource
@@ -100,7 +115,7 @@ class BuildpackCache
     if File.exists?(uri)
       FileUtils.cp uri, target
     else
-      Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: rich_uri.scheme == 'https') do |http|
+      proxy(rich_uri).start(rich_uri.host, rich_uri.port, use_ssl: secure?(rich_uri)) do |http|
         request = Net::HTTP::Get.new(rich_uri.request_uri)
         http.request request do |response|
           File.open(target, File::CREAT | File::WRONLY) do |file|
@@ -120,7 +135,7 @@ class BuildpackCache
   #
   # @param [String] uri location of the remote resource
   def filename(uri)
-    "#{URI.escape(uri, '/')}.cached"
+    "#{URI.escape(uri, ':/')}.cached"
   end
 
   # Returns array of config maps containing references to the root index.yml
