@@ -1,10 +1,11 @@
 ---
+sudo: false
 language: ruby
 matrix:
   include:
     - rvm: "1.9.3-p545"
       env: COMMAND=rake
-    - rvm: "1.9.2"
+    - rvm: "2.2.2"
       env: COMMAND=rspec
 install: bundle install --deployment --without debug
 script: bundle exec $COMMAND

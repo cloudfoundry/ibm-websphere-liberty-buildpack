@@ -1,4 +1,5 @@
 # Encoding: utf-8
+# Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright 2015 the original author or authors.
 #
@@ -14,25 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'net/http'
-require 'uri'
+module LibertyBuildpack
+  module Util
+    module Cache
 
-# The Net:HTTP library in Ruby 1.9.2 does not send SNI TLS extension. The extension maybe
-# be required by certain web sites.
-# This class extends the Net:HTTP class and sets the SNI extension on older Ruby runtime.
-module LibertyBuildpack::Util
-
-  # Provides SNI TLS work-around for Net::HTTP
-  class HTTP < Net::HTTP
-
-    def use_ssl?
-      # Set SNI TLS extension on SSLSocket if using older Ruby
-      if @use_ssl && RUBY_VERSION < '1.9.3' && !@socket.nil? && !@socket.io.nil?
-        @socket.io.hostname = @address if @socket.io.respond_to? :hostname=
+      # An error thrown when a we infer that an error has occurred (rather than receiving an explicit indication)
+      class InferredNetworkFailure < StandardError
       end
-      @use_ssl
+
     end
-
   end
-
 end

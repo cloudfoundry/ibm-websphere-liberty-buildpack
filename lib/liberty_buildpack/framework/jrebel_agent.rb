@@ -18,6 +18,7 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/framework'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/download'
+require 'liberty_buildpack/util/cache/application_cache'
 require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/container/container_utils'
 
@@ -123,7 +124,7 @@ module LibertyBuildpack::Framework
     def download_and_install_agent(jr_home)
       download_start_time = Time.now
       print "-----> Downloading JRebel Agent #{@version} from #{@uri} "
-      LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|
+      LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file|
         puts "(#{(Time.now - download_start_time).duration})"
         install_agent(file, jr_home)
       end

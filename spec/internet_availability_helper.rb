@@ -1,7 +1,7 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2014 the original author or authors.
+# Copyright 2014-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,20 +19,12 @@ require 'spec_helper'
 require 'liberty_buildpack/util/cache/internet_availability'
 
 shared_context 'internet_availability_helper' do
+  include_context 'logging_helper'
 
-  # Reset cache and honour example metadata for cache.
+  # Re-initialize internet availability
   before do |example|
-    LibertyBuildpack::Util::Cache::InternetAvailability.clear_internet_availability
-    LibertyBuildpack::Util::Cache::InternetAvailability.store_internet_availability true if example.metadata[:skip_availability_check]
-  end
-
-  ############
-  # Run test #
-  ############
-
-  # Reset cache
-  after do
-    LibertyBuildpack::Util::Cache::InternetAvailability.clear_internet_availability
+    LibertyBuildpack::Util::Cache::InternetAvailability.instance.send :initialize
+    LibertyBuildpack::Util::Cache::InternetAvailability.instance.available false if example.metadata[:disable_internet]
   end
 
 end

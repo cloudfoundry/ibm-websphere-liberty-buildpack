@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2014 the original author or authors.
+# Copyright 2014-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,22 +28,14 @@ module LibertyBuildpack::Util::Cache
     # Location of the admin cache relative to the directory this file is in
     ADMIN_CACHE = Pathname.new(File.expand_path('../../../../admin_cache', File.dirname(__FILE__))).freeze
 
-    # Creates an instance of the file cache that is backed by the filesystem rooted at +ADMIN_CACHE+
-    #
-    # @param [String] uri a uri which uniquely identifies the file in the cache root
-    def initialize(uri)
-      key = URI.escape(uri, '/')
-      @cached = ADMIN_CACHE + "#{key}.cached"
-    end
-
     # Yields an open file containing the cached data.
     #
+    # @param [String] uri a uri which uniquely identifies the file in the cache root
     # @return [Boolean] +true+ if and only if data is cached
-    def use_cache
-      if @cached.exist?
-        @cached.open(File::RDONLY) do |cached_file|
-          yield cached_file
-        end
+    def self.in_cache?(uri, &block)
+      cached_file = CachedFile.new ADMIN_CACHE, uri, false
+      if cached_file.cached?
+        cached_file.cached(File::RDONLY | File::BINARY, false, &block)
         true
       else
         false

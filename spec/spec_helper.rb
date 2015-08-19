@@ -27,6 +27,8 @@ require 'fileutils'
 require 'liberty_buildpack/diagnostics/common'
 require 'liberty_buildpack/diagnostics/logger_factory'
 
+require 'liberty_buildpack/util/cache/yield_file_with_content'
+
 RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.expect_with :rspec do |c|

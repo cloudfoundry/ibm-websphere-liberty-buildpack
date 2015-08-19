@@ -66,7 +66,7 @@ module LibertyBuildpack::Container
       LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
       component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
 
-      LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+      LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
       application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open(fixture))
     end
 
@@ -474,7 +474,7 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_OS_DETAILS)
 
-          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with('wlp-developers.jar').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
           library_directory = File.join(root, '.lib')
@@ -518,7 +518,7 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
            .and_return(LIBERTY_OS_DETAILS)
 
-          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
            application_cache.stub(:get).with('wlp-developers.jar').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
           Liberty.new(
@@ -554,7 +554,7 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
            .and_return(LIBERTY_OS_DETAILS)
 
-          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
            application_cache.stub(:get).with('wlp-developers.jar').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
           Liberty.new(
@@ -1112,7 +1112,7 @@ module LibertyBuildpack::Container
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_DETAILS)
 
-          LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+          LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
           application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
 
           library_directory = File.join(root, '.lib')
@@ -1401,7 +1401,7 @@ module LibertyBuildpack::Container
             LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
             .and_return(LIBERTY_DETAILS)
 
-            LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+            LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
             application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
             # provide the unit tests with the application root directory and basic context to customize
@@ -1731,7 +1731,7 @@ module LibertyBuildpack::Container
         LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
         component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI, 'liberty_ext' => 'wlp-stub-ext.tar.gz' })
 
-        LibertyBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
         application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
         application_cache.stub(:get).with('wlp-stub-ext.tar.gz').and_yield(File.open('spec/fixtures/wlp-stub-ext.tar.gz'))
 

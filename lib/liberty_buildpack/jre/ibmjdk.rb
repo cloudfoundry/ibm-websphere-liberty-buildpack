@@ -19,7 +19,7 @@ require 'liberty_buildpack/diagnostics/common'
 require 'liberty_buildpack/jre'
 require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/repository/configured_item'
-require 'liberty_buildpack/util/application_cache'
+require 'liberty_buildpack/util/cache/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/tokenized_version'
 require 'liberty_buildpack/util/license_management'
@@ -88,7 +88,7 @@ module LibertyBuildpack::Jre
         filename = File.basename(@uri)
         print "-----> Retrieving IBM #{@version} JRE (#{filename}) ... "
       end
-      LibertyBuildpack::Util::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
+      LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
         puts "(#{(Time.now - download_start_time).duration})"
         expand file
       end

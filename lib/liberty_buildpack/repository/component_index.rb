@@ -34,7 +34,7 @@ module LibertyBuildpack::Repository
     def initialize(release_root_uri)
       if !release_root_uri.nil? && release_root_uri.end_with?("#{COMP_INDEX_PATH}")
          @comp_index = {}
-         LibertyBuildpack::Util::Cache::DownloadCache.new.get("#{release_root_uri}") do |file|
+         cache.get("#{release_root_uri}") do |file|
             @comp_index.merge! YAML.load_file(file)
          end
          @components = @comp_index
@@ -45,7 +45,12 @@ module LibertyBuildpack::Repository
 
     private
 
-      COMP_INDEX_PATH = '/component_index.yml'
+    COMP_INDEX_PATH = '/component_index.yml'.freeze
+
+    def cache
+      LibertyBuildpack::Util::Cache::DownloadCache.new(Pathname.new(Dir.tmpdir),
+                                                       LibertyBuildpack::Util::Cache::CACHED_RESOURCES_DIRECTORY)
+    end
 
   end
 

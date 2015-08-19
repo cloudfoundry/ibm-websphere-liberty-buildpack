@@ -19,7 +19,6 @@ require 'liberty_buildpack/framework'
 require 'liberty_buildpack/framework/framework_utils'
 require 'liberty_buildpack/framework/spring_auto_reconfiguration/web_xml_modifier'
 require 'liberty_buildpack/repository/configured_item'
-require 'liberty_buildpack/util/application_cache'
 require 'liberty_buildpack/util/download'
 require 'liberty_buildpack/util/format_duration'
 
