@@ -14,12 +14,7 @@
 # limitations under the License.
 
 require 'rspec/core/rake_task'
-RSpec::Core::RakeTask.new(:spec) do |t|
-  t.rspec_opts = '--tty' if ENV.has_key? 'RAKE_FORCE_COLOR'
-end
-
-require 'ci/reporter/rake/rspec'
-task :spec => "ci:setup:rspec"
+RSpec::Core::RakeTask.new
 
 require 'yard'
 YARD::Rake::YardocTask.new do |t|
