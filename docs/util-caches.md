@@ -59,17 +59,5 @@ The [`ApplicationCache`][] is a cache that persists files into the application c
 def initialize
 ```
 
-## `LibertyBuildpack::Util::GlobalCache`
-The [`GlobalCache`][] is a cache that persists files into the global cache passed to all scripts.  It examines `ENV['BUILDPACK_CACHE']` for the cache location and configures itself accordingly.
-
-```ruby
-# Creates an instance that is configured to use the global cache.  The global cache location is defined by the
-# +BUILDPACK_CACHE+ environment variable
-#
-# @raise if the +BUILDPACK_CACHE+ environment variable is +nil+
-def initialize
-```
-
-[`ApplicationCache`]: ../lib/liberty_buildpack/util/application_cache.rb
+[`ApplicationCache`]: ../lib/liberty_buildpack/util/cache/application_cache.rb
 [`DownloadCache`]: ../lib/liberty_buildpack/util/cache/download_cache.rb
-[`GlobalCache`]: ../lib/liberty_buildpack/util/cache/global_cache.rb
