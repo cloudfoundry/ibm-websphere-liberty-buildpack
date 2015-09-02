@@ -1,7 +1,7 @@
 Configuration
 =============
 
-Buildpack configuration can be overridden with an environment variable matching the [configuration file](../config) you wish to override minus the `.yml` extension and with a prefix of `JBP_CONFIG`. The value of the variable should be valid inline yaml. For example:
+Buildpack configuration can be overridden with an environment variable matching the [configuration file](../config) you wish to override minus the `.yml` extension and with a prefix of `JBP_CONFIG`. The value of the variable should be valid inline YAML. For example:
 
 1. Configure the buildpack to use [Liberty profile](container-liberty.md) beta:
 
@@ -35,7 +35,5 @@ Buildpack configuration can be overridden with an environment variable matching 
    cf set-env myApplication JBP_CONFIG_SPRINGAUTORECONFIGURATION 'enabled: false'
    ```
 
-The environment variables can also be specified in the applications `manifest.yml` file. See the [Environment Variables][] documentation for more information.
-
-[Environment Variables]: http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html#env-block
+The environment variables can also be specified in the [manifest.yml](http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html) file. Checkout the sample [manifest.yml](./configuration/manifest.yml) file that sets Liberty features and configures IBM JRE version. 
 

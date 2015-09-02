@@ -1,0 +1,5 @@
+---
+env:
+  JBP_CONFIG_IBMJDK: "version: 1.7.+"
+  JBP_CONFIG_LIBERTY: "app_archive: {features: [jsf-2.0, jsp-2.2, servlet-3.0, ejbLite-3.1, cdi-1.0, jpa-2.0, jdbc-4.0, jndi-1.0, managedBeans-1.0, jaxrs-1.1]}"
+
