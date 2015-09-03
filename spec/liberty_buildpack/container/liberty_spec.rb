@@ -1261,7 +1261,7 @@ module LibertyBuildpack::Container
 
     context 'droplet.yaml' do
 
-      def generate(root, xml)
+      def generate(root, xml, configuration)
         FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
         File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
           file.write("<server><httpEndpoint id=\"defaultHttpEndpoint\" host=\"localhost\" httpPort=\"9080\" httpsPort=\"9443\" />#{xml}</server>")
@@ -1271,18 +1271,18 @@ module LibertyBuildpack::Container
 
         Liberty.new(
             app_dir: root,
-            configuration: {},
+            configuration: configuration,
             environment: {},
             license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
         ).compile
       end
 
-      def check_appstate(app_xml, app_name)
+      def check_appstate(app_xml, app_name, configuration = default_configuration)
         Dir.mktmpdir do |root|
           droplet_yaml_file = File.join root, 'droplet.yaml'
           root = File.join(root, 'app')
 
-          generate(root, app_xml)
+          generate(root, app_xml, configuration)
 
           liberty_directory = File.join root, '.liberty'
           expect(Dir.exists?(liberty_directory)).to eq(true)
@@ -1298,12 +1298,12 @@ module LibertyBuildpack::Container
         end
       end
 
-      def check_no_appstate(app_xml)
+      def check_no_appstate(app_xml, configuration = default_configuration)
         Dir.mktmpdir do |root|
           droplet_yaml_file = File.join root, 'droplet.yaml'
           root = File.join(root, 'app')
 
-          generate(root, app_xml)
+          generate(root, app_xml, configuration)
 
           liberty_directory = File.join root, '.liberty'
           expect(Dir.exists?(liberty_directory)).to eq(true)
@@ -1349,6 +1349,12 @@ module LibertyBuildpack::Container
 
       it 'should NOT add droplet.yaml when server xml contains two different application types' do
         check_no_appstate("<application name=\"foo\" /><webApplication name=\"fooWar\" />")
+      end
+
+      it 'should NOT add droplet.yaml when server xml contains one application and appstate is disabled' do
+        configuration = default_configuration
+        configuration['app_state'] = false
+        check_no_appstate("<application name=\"myapp\" />", configuration)
       end
 
     end

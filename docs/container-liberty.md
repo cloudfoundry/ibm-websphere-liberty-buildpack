@@ -1,17 +1,23 @@
 # Liberty Container
-You can run a web application or Liberty server package in the Liberty Container.
+The Liberty Container runs Java EE 6 and 7 applications on [IBM's WebSphere Application Server Liberty Profile](http://www14.software.ibm.com/webapp/wsbroker/redirect?version=phil&product=was-nd-mp&topic=thread_twlp_devenv). It recognizes Web Archive (WAR) and Enterprise Archive (EAR) files as well applications deployed as a [Liberty server directory](http://www14.software.ibm.com/webapp/wsbroker/redirect?version=phil&product=was-nd-dist&topic=twlp_setup_new_server) or [packaged server](http://www14.software.ibm.com/webapp/wsbroker/redirect?version=phil&product=was-nd-mp&topic=twlp_setup_package_server).
 
 <table border>
   <tr>
-    <td><strong>Detection Criterion</strong></td><td>Existence of a <tt>server.xml</tt> or <tt>WEB-INF/</tt> folder in the application directory</td>
+    <td><strong>Detection Criterion</strong></td>
+    <td><ul>
+	<li>Existence of a <tt>WEB-INF/</tt> folder in the application directory and <a href="java-main.md">Java Main</a> is not detected.</li>
+	<li>Existence of a <tt>META-INF/</tt> folder in the application directory and <a href="java-main.md">Java Main</a> is not detected.</li>
+	<li>Existence of a <tt>server.xml</tt> file in the application directory.</li>
+    </ul></td>
   </tr>
   <tr>
-    <td><strong>Tags</strong></td><td><tt>liberty-&lang;version&rang;</tt></td>
+    <td><strong>Tags</strong></td>
+    <td><tt>liberty-&lang;version&rang;</tt>, <tt>WAR</tt> <i>(if WAR file is detected)</i>, <tt>EAR</tt> <i>(if EAR file is detected)</i>, <tt>SVR-DIR</tt> <i>(if Liberty server directory is detected)</i>, <tt>SVR-PKG</tt> <i>(if Liberty packaged server is detected)</i></td>
   </tr>
 </table>
 Tags are printed to standard output by the Buildpack `detect` script.
 
-To specify the [Spring profiles][], set the [`SPRING_PROFILES_ACTIVE`][SPRING_PROFILES_ACTIVE] environment variable.  This is automatically detected and used by Spring.
+If the application uses Spring, [Spring profiles][] can be specified by setting the [`SPRING_PROFILES_ACTIVE`][] environment variable. This is automatically detected and used by Spring. The [Spring Auto-reconfiguration Framework](framework-spring-auto-reconfiguration.md) will specify the `cloud` profile in addition to any others.
 
 ## Configuration
 
@@ -67,7 +73,7 @@ app_archive:
 [liberty.yml]: ../config/liberty.yml
 [repositories]: util-repositories.md
 [Spring profiles]:http://blog.springsource.com/2011/02/14/spring-3-1-m1-introducing-profile/
-[SPRING_PROFILES_ACTIVE]: http://static.springsource.org/spring/docs/3.1.x/javadoc-api/org/springframework/core/env/AbstractEnvironment.html#ACTIVE_PROFILES_PROPERTY_NAME
+[`SPRING_PROFILES_ACTIVE`]: http://docs.spring.io/spring/docs/4.0.0.RELEASE/javadoc-api/org/springframework/core/env/AbstractEnvironment.html#ACTIVE_PROFILES_PROPERTY_NAME
 [version_syntax]: util-repositories.md#version-syntax-and-ordering
 [index.yml]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml
 
