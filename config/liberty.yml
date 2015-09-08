@@ -18,6 +18,7 @@
 repository_root: "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/"
 version: 8.5.+
 minify: false
+app_state: true
 liberty_repository_properties:
   useRepository: true
 

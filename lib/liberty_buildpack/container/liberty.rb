@@ -378,7 +378,7 @@ module LibertyBuildpack::Container
       disable_config_monitoring(server_xml_doc)
 
       # Check if appstate ICAP feature can be used
-      add_droplet_yaml if File.file?(icap_extension) && check_appstate_feature(server_xml_doc)
+      add_droplet_yaml if appstate_enabled? && check_appstate_feature(server_xml_doc)
 
       # update config for services
       @services_manager.update_configuration(server_xml_doc, create, current_server_dir)
@@ -459,6 +459,12 @@ module LibertyBuildpack::Container
         dispatchers.drop(1).each { |element| element.parent.delete_element(element) }
       end
       dispatcher.add_attribute('enableWelcomePage', 'false')
+    end
+
+    def appstate_enabled?
+      config_enabled = @configuration['app_state'].nil? || @configuration['app_state']
+      feature_present = File.file?(icap_extension)
+      config_enabled && feature_present
     end
 
     def check_appstate_feature(server_xml_doc)
