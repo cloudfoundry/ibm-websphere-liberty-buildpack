@@ -5,9 +5,10 @@ The Liberty Container runs Java EE 6 and 7 applications on [IBM's WebSphere Appl
   <tr>
     <td><strong>Detection Criterion</strong></td>
     <td><ul>
-	<li>Existence of a <tt>WEB-INF/</tt> folder in the application directory and <a href="java-main.md">Java Main</a> is not detected.</li>
-	<li>Existence of a <tt>META-INF/</tt> folder in the application directory and <a href="java-main.md">Java Main</a> is not detected.</li>
-	<li>Existence of a <tt>server.xml</tt> file in the application directory.</li>
+	<li>Existence of a <tt>WEB-INF/</tt> folder in the application directory and <a href="java-main.md">Java Main</a> is not detected, or</li>
+	<li>Existence of a <tt>META-INF/</tt> folder in the application directory and <a href="java-main.md">Java Main</a> is not detected, or</li>
+	<li>Existence of a <tt>server.xml</tt> file in the application directory, or</li>
+	<li>Existence of a <tt>wlp/usr/servers/*/server.xml</tt> file in the application directory.</li>
     </ul></td>
   </tr>
   <tr>
@@ -53,10 +54,13 @@ liberty_repository_properties:
 
 #### Default configuration 
 
-The buildpack provides a default `server.xml` configuration when deploying WAR or EAR files. The configuration contains a list of Liberty features that are enabled by default. This set of features can be adjusted by modifying the `features` setting.
+The buildpack provides a default `server.xml` configuration when deploying WAR or EAR files. That default configuration is populated with a list of Liberty features based on the `["app_archive"]["features"]` setting. The `["app_archive"]["implicit_cdi"]` setting controls whether archives that do not contain the `beans.xml` file are scanned for CDI annotations. 
 
 ```yaml
 app_archive:
+ # Scan archives that do not contain beans.xml for bean-definition annotations (cdi 1.2)
+ implicit_cdi: false
+ # Default features
  features: 
  - jsf-2.0
  - jsp-2.2

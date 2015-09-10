@@ -23,6 +23,9 @@ liberty_repository_properties:
   useRepository: true
 
 app_archive:
+ # Scan archives that do not contain beans.xml for bean-definition annotations (cdi 1.2)
+ implicit_cdi: false
+ # Default features
  features: 
  - jsf-2.0
  - jsp-2.2

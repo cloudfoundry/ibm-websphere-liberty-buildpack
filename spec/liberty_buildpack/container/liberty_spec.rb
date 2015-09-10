@@ -47,6 +47,7 @@ module LibertyBuildpack::Container
       configuration = YAML.load_file(File.expand_path('../../../config/liberty.yml', File.dirname(__FILE__)))
       configuration['liberty_repository_properties']['useRepository'] = false
       configuration['app_archive']['features'] = ['websocket-1.0', 'servlet-3.1']
+      configuration['app_archive']['implicit_cdi'] = true
       configuration
     end
 
@@ -70,7 +71,7 @@ module LibertyBuildpack::Container
       application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open(fixture))
     end
 
-    def check_default_config(server_xml_file, expected_type, expected_context_root, expected_features) # rubocop:disable MethodLength
+    def check_default_config(server_xml_file, expected_type, expected_context_root, expected_features, expected_implicit_cdi = 'false') # rubocop:disable MethodLength
       expect(File.exists?(server_xml_file)).to eq(true)
 
       server_xml_doc = LibertyBuildpack::Util::XmlUtils.read_xml_file(server_xml_file)
@@ -103,6 +104,10 @@ module LibertyBuildpack::Container
       expect(logging).not_to be_nil
       expect(logging.attributes['logDirectory']).to eq('${application.log.dir}')
       expect(logging.attributes['consoleLogLevel']).to eq('INFO')
+
+      cdi = server_xml_doc.elements['/server/cdi12']
+      expect(cdi).not_to be_nil
+      expect(cdi.attributes['enableImplicitBeanArchives']).to eq(expected_implicit_cdi)
 
       features = REXML::XPath.match(server_xml_doc, '/server/featureManager/feature/text()[not(contains(., ":"))]')
       expected_features.each do | expected_feature |
@@ -685,7 +690,7 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
-          check_default_config(server_xml_file, 'war', '/', custom_features)
+          check_default_config(server_xml_file, 'war', '/', custom_features, 'true')
         end
       end
 
@@ -775,7 +780,7 @@ module LibertyBuildpack::Container
           license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
           ).compile
           server_xml_file = File.join root, '.liberty', 'usr', 'servers', 'defaultServer', 'server.xml'
-          check_default_config(server_xml_file, 'ear', '/', custom_features)
+          check_default_config(server_xml_file, 'ear', '/', custom_features, 'true')
         end
       end
 
