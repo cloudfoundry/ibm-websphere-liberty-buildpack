@@ -356,6 +356,11 @@ module LibertyBuildpack::Container
       application.attributes['type'] = myapp_type
       application.attributes['context-root'] = get_context_root || '/'
 
+      # configure CDI 1.2 implicit bean archive scanning
+      cdi = REXML::Element.new('cdi12', server_xml_doc.root)
+      scan = default_config.nil? || default_config['implicit_cdi'].nil? ? false : default_config['implicit_cdi']
+      cdi.add_attribute('enableImplicitBeanArchives', scan)
+
       # add common settings
       update_server_xml_common(server_xml_doc, true)
 
