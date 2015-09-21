@@ -38,23 +38,39 @@ module LibertyBuildpack::Container
       # Return an xpath string of the form,
       # "/server/featureManager/feature[. = 'x' or . = 'y']/node()"
       def self.feature_names_to_feature_xpath(feature_names)
-        "/server/featureManager/feature[. = '" << feature_names.join("' or . = '") << "']/node()"
+        if feature_names.nil? || feature_names.empty?
+          nil
+        else
+          "/server/featureManager/feature[. = '" << feature_names.join("' or . = '") << "']/node()"
+        end
       end
 
       initialize
 
     public
 
-      # A map of Liberty Bluemix component name to an array of feature names
-      # that the component provides.
-      COMPONENT_NAME_TO_FEATURE_NAMES = @@configuration
+      # ---------------------------------------------------------------
+      # Get a list of Liberty features that given component provides.
+      #
+      # @param component_name - The component name.
+      # @return An array of feature names.
+      #----------------------------------------------------------------
+      def self.feature_names(component_name)
+        @@configuration[component_name]
+      end
 
-      # A map of Liberty Bluemix component name to an XPath expression string
-      # that may be used query against the contents of a server.xml file to
-      # select any of the features that the component provides. Thus a non-empty
-      # result indicates that the server requires one or more features that the
-      # component provides.
-      COMPONENT_NAME_TO_FEATURE_XPATH = Hash[COMPONENT_NAME_TO_FEATURE_NAMES.map { |k, v| [k, feature_names_to_feature_xpath(v)] }].freeze
+      # ---------------------------------------------------------------
+      # Get an XPath expression string that may be used query against
+      # the contents of a server.xml file to select any of the features
+      # that a given component provides.
+      # A non-empty result indicates that the server requires one or
+      # more features that the component provides.
+      #
+      # @param component_name - The component name.
+      # @return An XPath expression string.
+      def self.feature_xpath(component_name)
+        feature_names_to_feature_xpath(feature_names(component_name))
+      end
 
   end
 
