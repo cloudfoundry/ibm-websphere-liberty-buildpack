@@ -109,17 +109,20 @@ module LibertyBuildpack::Container
     #
     # @return [String] the command to run the application.
     def release
+      jvm_options
+
       server_dir = ' wlp/usr/servers/' << server_name << '/'
       runtime_vars_file =  server_dir + 'runtime-vars.xml'
       create_vars_string = File.join(LIBERTY_HOME, 'create_vars.rb') << runtime_vars_file << ' &&'
+      skip_maxpermsize_string = ContainerUtils.space('WLP_SKIP_MAXPERMSIZE=true')
       java_home_string = ContainerUtils.space("JAVA_HOME=\"$PWD/#{@java_home}\"")
       wlp_user_dir_string = ContainerUtils.space('WLP_USER_DIR="$PWD/wlp/usr"')
-      start_script_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'bin', 'server'))
-      start_script_string << ContainerUtils.space('run')
-      jvm_options
-      server_name_string = ContainerUtils.space(server_name)
+      server_script_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'bin', 'server'))
+
+      start_command = "#{create_vars_string}#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
       move_app
-      "#{create_vars_string}#{java_home_string}#{wlp_user_dir_string}#{start_script_string}#{server_name_string}"
+
+      start_command
     end
 
     private
