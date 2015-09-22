@@ -26,6 +26,7 @@ require 'liberty_buildpack/util/license_management'
 require 'liberty_buildpack/jre/memory/memory_limit'
 require 'liberty_buildpack/jre/memory/memory_size'
 require 'pathname'
+require 'tempfile'
 
 module LibertyBuildpack::Jre
 
@@ -128,7 +129,7 @@ module LibertyBuildpack::Jre
       FileUtils.mkdir_p(java_home)
 
       if File.basename(file.path).end_with?('.bin.cached', '.bin')
-          response_file = File.new(File.join(File.dirname(file.path), 'response.properties'), 'w')
+          response_file = Tempfile.new('response.properties')
           response_file.puts('INSTALLER_UI=silent')
           response_file.puts('LICENSE_ACCEPTED=TRUE')
           response_file.puts("USER_INSTALL_DIR=#{java_home}")
@@ -137,6 +138,7 @@ module LibertyBuildpack::Jre
           File.chmod(0755, file.path)
           system "#{file.path} -i silent -f #{response_file.path} 2>&1"
 
+          response_file.unlink
       else
         system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
       end
