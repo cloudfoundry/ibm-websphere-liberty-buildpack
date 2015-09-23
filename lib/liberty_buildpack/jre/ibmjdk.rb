@@ -164,18 +164,12 @@ module LibertyBuildpack::Jre
       mem = MemoryLimit.memory_limit
       if mem.nil?
         ## if no memory option has been set by cloudfoundry, we just assume defaults
-        ## except for no compressed refs.
         java_memory_opts = []
-        java_memory_opts.push '-Xnocompressedrefs'
         java_memory_opts.push '-Xtune:virtualized'
 
         java_memory_opts
       else
         java_memory_opts = []
-
-        if mem < MemorySize.new('512M')
-          java_memory_opts.push '-Xnocompressedrefs'
-        end
 
         new_heap_size = mem * HEAP_SIZE_RATIO
 

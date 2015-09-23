@@ -24,8 +24,6 @@ module LibertyBuildpack::Jre
   describe IBMJdk do
     include_context 'component_helper'
 
-    CURRENT_SERVICE_RELEASE = '1.7.0'.freeze
-
     let(:application_cache) { double('ApplicationCache') }
 
     before do | example |
@@ -166,40 +164,6 @@ module LibertyBuildpack::Jre
       end # end of release shared tests
 
     end # end of shared tests for IBMJDK v7 release
-
-    context 'IBMJDK Service Release 1.7.0' do
-      it_behaves_like 'IBMJDK v7', '1.7.0'
-
-      if CURRENT_SERVICE_RELEASE == '1.7.0'
-        describe 'release',
-                 java_home: '',
-                 java_opts: [],
-                 configuration: {},
-                 license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' },
-                 service_release: '1.7.0' do
-
-          # context is provided by component_helper, its default values are provided by 'describe' metadata, and
-          # customized through test's metadata
-          subject(:java_opts) { IBMJdk.new(context).release }
-
-          it 'should used -Xnocompressedrefs when the memory limit is less than 256m' do
-            ENV['MEMORY_LIMIT'] = '64m'
-
-            expect(java_opts).to include('-Xtune:virtualized')
-            expect(java_opts).to include('-Xmx48M')
-            expect(java_opts).to include('-Xnocompressedrefs')
-          end
-
-          it 'should add memory options to java_opts' do
-            ENV['MEMORY_LIMIT'] = nil
-
-            expect(java_opts).to include('-Xnocompressedrefs')
-            expect(java_opts).to include('-Xtune:virtualized')
-          end
-        end # end release
-      end
-
-    end
 
   end
 
