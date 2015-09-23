@@ -102,6 +102,7 @@ module LibertyBuildpack::Jre
     def release
       @java_opts.concat memory(@configuration)
       @java_opts.concat default_dump_opts
+      @java_opts << '-Xshareclasses:none'
       @java_opts << "-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
     end
 
@@ -188,10 +189,6 @@ module LibertyBuildpack::Jre
       default_options.push "-Xdump:snap:defaults:file=#{@common_paths.dump_directory}/Snap.%Y%m%d.%H%M%S.%pid.%seq.trc"
       default_options.push '-Xdump:heap+java+snap:events=user'
       default_options
-    end
-
-    def pre_8
-      @version < LibertyBuildpack::Util::TokenizedVersion.new('1.8.0')
     end
 
     def copy_killjava_script

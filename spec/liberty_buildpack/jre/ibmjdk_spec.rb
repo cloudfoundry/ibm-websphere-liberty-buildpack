@@ -143,6 +143,7 @@ module LibertyBuildpack::Jre
 
         it 'should add default dump options that output data to the common dumps directory, if enabled' do
           expect(released).to include('-Xdump:none',
+                                      '-Xshareclasses:none',
                                       '-Xdump:heap:defaults:file=./../dumps/heapdump.%Y%m%d.%H%M%S.%pid.%seq.phd',
                                       '-Xdump:java:defaults:file=./../dumps/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt',
                                       '-Xdump:snap:defaults:file=./../dumps/Snap.%Y%m%d.%H%M%S.%pid.%seq.trc',
