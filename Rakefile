@@ -96,6 +96,7 @@ task :package, [:zipfile, :hosts, :version] do |t, args|
     # Fix file permissions
     system("find #{dest} -type f -exec chmod a+r {} \\;")
     system("find #{dest} -type d -exec chmod a+rx {} \\;")
+    system("find #{dest} -type f -name '*.bin.cached' -exec chmod a+x {} \\;")
     system("chmod a+rx #{dest}/bin/*")
     system("cd #{dest} && zip -r #{zipfile} -x@.package-exclude .")
   end
