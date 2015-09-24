@@ -7,6 +7,5 @@
 | You have not accepted the IBM Liberty License. | To use the Liberty buildpack you are required to read the Licenses for Liberty Profile and IBM JVM.|   <br>Visit the following uri: <br>IBM [Liberty-License][] and the current IBM [JVM-License][].<br>Extract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. <code><br>ENV: <br>  IBM_LIBERTY_LICENSE: {License Number}.</code>      |
 
 
-
-[Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.6/lafiles/runtime//en.html
-[JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-JWOD-9NXJQY&title=IBM%C2%AE+SDK%2C+Java+Technology+Edition%2C+Version+7+Release+1&l=en
+[Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.7/lafiles/runtime/en.html
+[JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-JWOD-9SYNCP&title=IBM%C2%AE+SDK%2C+Java+Technology+Edition%2C+Version+8.0&l=en

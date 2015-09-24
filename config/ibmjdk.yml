@@ -16,4 +16,4 @@
 # Configuration for JRE repository
 ---
 repository_root: "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/jre"
-version: 1.7.+
+version: 1.8.+
