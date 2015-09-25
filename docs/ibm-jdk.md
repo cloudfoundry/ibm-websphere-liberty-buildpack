@@ -1,5 +1,5 @@
-# IBM JDK
-The IBM JDK is the default used with Liberty profile. You do not need to change the `manifest.yml` file or configure anything else to use the IBM JDK. The behavior is the same as setting the `JVM` environment variable to `ibmjdk`. For example, using the `manifest.yml` file:
+# IBM JRE
+The IBM JRE is the default JRE used by the Liberty buildpack. Unless otherwise configured, the version of IBM JRE that will be used is specified in the [`config/ibmjdk.yml`][] file. If necessary, the IBM JRE can also be explicitly enabled by setting the `JVM` environment variable to `ibmjdk`. For example, using the `manifest.yml` file:
 
 ```bash
 ---
@@ -7,7 +7,7 @@ env:
   JVM: ibmjdk
 ```
 
-If you would prefer to use the Open JDK then please read [Open JDK](open-jdk.md).
+The Liberty buildpack also supports [OpenJDK](open-jdk.md) as an alternative Java runtime.
 
 ## Configuration
 

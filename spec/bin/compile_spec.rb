@@ -26,7 +26,7 @@ describe 'compile script', :integration do
   end
 
   before(:each) do
-    ENV.update({ 'IBM_JVM_LICENSE' => 'L-JWOD-9NXJQY', 'IBM_LIBERTY_LICENSE' => 'L-MCAO-9SYMVC', 'USER_AGENT' => 'RSpec-Test' })
+    ENV.update({ 'IBM_JVM_LICENSE' => 'L-JWOD-9SYNCP', 'IBM_LIBERTY_LICENSE' => 'L-MCAO-9SYMVC', 'USER_AGENT' => 'RSpec-Test' })
   end
 
   after(:each) do
