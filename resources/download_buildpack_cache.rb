@@ -9,6 +9,7 @@ require 'logger'
 
 $LOAD_PATH.unshift File.expand_path(File.join('..', '..', 'lib'), __FILE__)
 require 'liberty_buildpack/repository/version_resolver'
+require 'liberty_buildpack/util/configuration_utils'
 require 'liberty_buildpack/util/tokenized_version'
 
 # Utility class to download remote resources into local cache directory
@@ -26,6 +27,7 @@ class BuildpackCache
   # @param [Logger] logger output destination for loggin information. Using STDOUT by default.
   def initialize(cache_dir, logger = nil)
     @cache_dir = cache_dir
+    @default_repository_root = default_repository_root
     @logger = logger || Logger.new(STDOUT)
   end
 
@@ -61,9 +63,17 @@ class BuildpackCache
     end
   end
 
-  def index_path(config)
+  def repository_root(config)
     uri = config[REPOSITORY_ROOT]
-    uri = uri[0..-2] while uri.end_with? '/'
+    uri = uri.gsub(/\{default.repository.root\}/, @default_repository_root)
+             .gsub(/\{platform\}/, 'trusty')
+             .gsub(/\{architecture\}/, 'x86_64')
+             .chomp('/')
+    uri
+  end
+
+  def index_path(config)
+    uri = repository_root(config)
     "#{uri}#{INDEX_PATH}"
   end
 
@@ -153,11 +163,15 @@ class BuildpackCache
       rescue => e
         abort "ERROR: Failed loading config #{file}: #{e}"
       end
-      if !config.nil? && config.has_key?(REPOSITORY_ROOT) && config.has_key?(VERSION) && (File.exists?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(config[REPOSITORY_ROOT]).host))
+      if !config.nil? && config.has_key?(REPOSITORY_ROOT) && config.has_key?(VERSION) && (File.exists?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(repository_root(config)).host))
         configs.push(config)
       end
     end
     configs
+  end
+
+  def default_repository_root
+    LibertyBuildpack::Util::ConfigurationUtils.load('repository', false)['default_repository_root'].chomp('/')
   end
 end
 

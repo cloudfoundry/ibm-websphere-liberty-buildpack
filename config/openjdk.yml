@@ -18,7 +18,7 @@
 # If Java 8 is selected, the 'metaspace' option will be used. 
 # Please see the documentation for more detail.
 ---
-repository_root: "https://download.run.pivotal.io/openjdk/lucid/x86_64"
+repository_root: ! '{default.repository.root}/openjdk/{platform}/{architecture}'
 version: 1.8.+
 memory_sizes:
   metaspace: 64m..

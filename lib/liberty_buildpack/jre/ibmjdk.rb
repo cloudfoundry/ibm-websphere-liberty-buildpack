@@ -146,7 +146,12 @@ module LibertyBuildpack::Jre
     end
 
     def self.find_ibmjdk(configuration)
-      LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
+      version, entry = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
+      if entry.include?('uri') && entry.include?('license')
+        return version, entry['uri'], entry['license']
+      else
+        return version, entry
+      end
     rescue => e
       raise RuntimeError, "IBM JRE error: #{e.message}", e.backtrace
     end

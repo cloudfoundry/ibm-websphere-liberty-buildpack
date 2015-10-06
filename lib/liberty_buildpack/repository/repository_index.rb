@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013-2014 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,51 +14,91 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/repository'
-require 'liberty_buildpack/util/cache/download_cache'
 require 'liberty_buildpack/repository/version_resolver'
+require 'liberty_buildpack/util/cache'
+require 'liberty_buildpack/util/cache/download_cache'
+require 'liberty_buildpack/util/configuration_utils'
+require 'rbconfig'
 require 'yaml'
 
-module LibertyBuildpack::Repository
+module LibertyBuildpack
+  module Repository
 
-  # A repository index represents the index of repository containing various versions of a file.
-  class RepositoryIndex
+    # A repository index represents the index of repository containing various versions of a file.
+    class RepositoryIndex
 
-    # Creates a new repository index, populating it with values from an index file.
-    #
-    # @param [String] repository_root the root of the repository to create the index for
-    def initialize(repository_root)
-      @index = {}
-      repository_root = repository_root[0..-2] while repository_root.end_with? '/'
-      cache.get("#{repository_root}#{INDEX_PATH}") do |file|
-        @index.merge! YAML.load_file(file)
+      # Creates a new repository index, populating it with values from an index file.
+      #
+      # @param [String] repository_root the root of the repository to create the index for
+      def initialize(repository_root)
+        @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
+
+        @@platform ||= platform
+        @@architecture ||= architecture
+        @@default_repository_root ||= LibertyBuildpack::Util::ConfigurationUtils.load('repository')['default_repository_root']
+                                     .chomp('/')
+
+        cache.get("#{canonical repository_root}#{INDEX_PATH}") do |file|
+          @index = YAML.load_file(file)
+          @logger.debug { @index }
+        end
       end
-    end
 
-    # Finds a version of the file matching the given, possibly wildcarded, version.
-    #
-    # @param [String] version the possibly wildcarded version to find
-    # @return [TokenizedVersion] the version of the file found
-    # @return [String] the URI of the file found
-    def find_item(version)
-      version = VersionResolver.resolve(version, @index.keys)
-      uri = @index[version.to_s]
-      if @index[version.to_s].include?('uri') && @index[version.to_s].include?('license')
-        uri = @index[version.to_s]['uri']
-        license = @index[version.to_s]['license']
+      # Finds a version of the file matching the given, possibly wildcarded, version.
+      #
+      # @param [String] version the possibly wildcarded version to find
+      # @return [TokenizedVersion] the version of the file found
+      # @return [String] the URI of the file found
+      def find_item(version)
+        found_version = VersionResolver.resolve(version, @index.keys)
+        fail "No version resolvable for '#{version}' in #{@index.keys.join(', ')}" if found_version.nil?
+        uri = @index[found_version.to_s]
+        [found_version, uri]
       end
-      return version, uri, license # rubocop:disable RedundantReturn
-    end
 
-    private
+      private
 
-    INDEX_PATH = '/index.yml'.freeze
+      INDEX_PATH = '/index.yml'.freeze
 
-    def cache
-      LibertyBuildpack::Util::Cache::DownloadCache.new(Pathname.new(Dir.tmpdir),
-                                                       LibertyBuildpack::Util::Cache::CACHED_RESOURCES_DIRECTORY)
+      private_constant :INDEX_PATH
+
+      def architecture
+        `uname -m`.strip
+      end
+
+      def cache
+        LibertyBuildpack::Util::Cache::DownloadCache.new(Pathname.new(Dir.tmpdir),
+                                                         LibertyBuildpack::Util::Cache::CACHED_RESOURCES_DIRECTORY)
+      end
+
+      def canonical(raw)
+        cooked = raw
+                   .gsub(/\{default.repository.root\}/, @@default_repository_root)
+                   .gsub(/\{platform\}/, @@platform)
+                   .gsub(/\{architecture\}/, @@architecture)
+                   .chomp('/')
+        @logger.debug { "#{raw} expanded to #{cooked}" }
+        cooked
+      end
+
+      def platform
+        redhat_release = Pathname.new('/etc/redhat-release')
+
+        if redhat_release.exist?
+          tokens = redhat_release.read.match(/(\w+) (?:Linux )?release (\d+)/)
+          "#{tokens[1].downcase}#{tokens[2]}"
+        elsif `uname -s` =~ /Darwin/
+          'mountainlion'
+        elsif !`which lsb_release 2> /dev/null`.empty?
+          `lsb_release -cs`.strip
+        else
+          fail 'Unable to determine platform'
+        end
+      end
+
     end
 
   end
-
 end

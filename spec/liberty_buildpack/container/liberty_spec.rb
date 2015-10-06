@@ -27,7 +27,7 @@ module LibertyBuildpack::Container
 
     LIBERTY_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('8.5.5')
     LIBERTY_SINGLE_DOWNLOAD_URI = 'test-liberty-uri.tar.gz'.freeze # end of URI (here ".tar.gz") is significant in liberty container code
-    LIBERTY_DETAILS = [LIBERTY_VERSION, LIBERTY_SINGLE_DOWNLOAD_URI, 'spec/fixtures/license.html']
+    LIBERTY_DETAILS = [LIBERTY_VERSION, { 'uri' => LIBERTY_SINGLE_DOWNLOAD_URI, 'license' => 'spec/fixtures/license.html' }]
     DISABLE_2PC_JAVA_OPT_REGEX = '-Dcom.ibm.tx.jta.disable2PC=true'.freeze
 
     let(:application_cache) { double('ApplicationCache') }
@@ -474,7 +474,7 @@ module LibertyBuildpack::Container
         Dir.mktmpdir do |root|
           Dir.mkdir File.join(root, 'WEB-INF')
 
-          LIBERTY_OS_DETAILS = [LIBERTY_VERSION, 'wlp-developers.jar', 'spec/fixtures/license.html']
+          LIBERTY_OS_DETAILS = [LIBERTY_VERSION, { 'uri' => 'wlp-developers.jar', 'license' => 'spec/fixtures/license.html' }]
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
           .and_return(LIBERTY_OS_DETAILS)
@@ -518,7 +518,7 @@ module LibertyBuildpack::Container
             file.write('test file that should still exist after overlay')
           end
 
-          LIBERTY_OS_DETAILS = [LIBERTY_VERSION, 'wlp-developers.jar', 'spec/fixtures/license.html']
+          LIBERTY_OS_DETAILS = [LIBERTY_VERSION, { 'uri' => 'wlp-developers.jar', 'license' => 'spec/fixtures/license.html' }]
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
            .and_return(LIBERTY_OS_DETAILS)
@@ -554,7 +554,7 @@ module LibertyBuildpack::Container
             file.write('test file that should still exist after overlay')
           end
 
-          LIBERTY_OS_DETAILS = [LIBERTY_VERSION, 'wlp-developers.jar', 'spec/fixtures/license.html']
+          LIBERTY_OS_DETAILS = [LIBERTY_VERSION, { 'uri' => 'wlp-developers.jar', 'license' => 'spec/fixtures/license.html' }]
 
           LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
            .and_return(LIBERTY_OS_DETAILS)

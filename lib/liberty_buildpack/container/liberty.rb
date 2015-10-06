@@ -743,13 +743,17 @@ module LibertyBuildpack::Container
     # Returns the version, artifact uri, and license of the requested item in the index file
     def self.find_liberty_item(app_dir, configuration)
       if server_xml(app_dir) || web_inf(app_dir) || meta_inf(app_dir)
-        version, config_uri, license = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
+        version, entry = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
+        if entry.include?('uri') && entry.include?('license')
+          return version, entry['uri'], entry['license']
+        else
+          return version, entry, nil
+        end
       else
-        version = config_uri = nil
+        return nil, nil, nil
       end
-      return version, config_uri, license
     rescue => e
       raise RuntimeError, "Liberty container error: #{e.message}", e.backtrace
     end
