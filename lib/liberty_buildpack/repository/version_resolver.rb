@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013-2014 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,53 +17,67 @@
 require 'liberty_buildpack/repository'
 require 'liberty_buildpack/util/tokenized_version'
 
-module LibertyBuildpack::Repository
+module LibertyBuildpack
+  module Repository
 
-  # A resolver that selects values from a collection based on a set of rules governing wildcards
-  class VersionResolver
+    # A resolver that selects values from a collection based on a set of rules governing wildcards
+    class VersionResolver
 
-    # Resolves a version from a collection of versions.  The +candidate_version+ must be structured like:
-    #   * up to three numeric components, followed by an optional string component
-    #   * the final component may be a +
-    # The resolution returns the maximum of the versions that match the candidate version
-    #
-    # @param [TokenizedVersion] candidate_version the version, possibly containing a wildcard, to resolve.  If +nil+,
-    #                                        substituted with +.
-    # @param [Array<String>] versions the collection of versions to resolve against
-    # @return [TokenizedVersion] the resolved version
-    # @raise if no version can be resolved
-    def self.resolve(candidate_version, versions)
-      tokenized_candidate_version = safe_candidate_version candidate_version
-      tokenized_versions = versions.map { |version| LibertyBuildpack::Util::TokenizedVersion.new(version, false) }
+      private_class_method :new
 
-      version = tokenized_versions
-      .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
-      .max { |a, b| a <=> b }
-      raise "No version resolvable for '#{candidate_version}' in #{versions.join(', ')}" if version.nil?
-      version
+      class << self
+
+        # Resolves a version from a collection of versions.  The +candidate_version+ must be structured like:
+        #   * up to three numeric components, followed by an optional string component
+        #   * the final component may be a +
+        # The resolution returns the maximum of the versions that match the candidate version
+        #
+        # @param [TokenizedVersion] candidate_version the version, possibly containing a wildcard, to resolve.  If
+        #                                             +nil+, substituted with +.
+        # @param [Array<String>] versions the collection of versions to resolve against
+        # @return [TokenizedVersion] the resolved version or nil if no matching version is found
+        def resolve(candidate_version, versions)
+          tokenized_candidate_version = safe_candidate_version candidate_version
+          tokenized_versions          = versions.map do |version|
+            LibertyBuildpack::Util::TokenizedVersion.new(version, false)
+          end
+
+          version = tokenized_versions
+                      .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
+                      .max { |a, b| a <=> b }
+
+          version
+        end
+
+        private
+
+        TOKENIZED_WILDCARD = LibertyBuildpack::Util::TokenizedVersion.new('+').freeze
+
+        private_constant :TOKENIZED_WILDCARD
+
+        def safe_candidate_version(candidate_version)
+          if candidate_version.nil?
+            TOKENIZED_WILDCARD
+          else
+            unless candidate_version.is_a?(LibertyBuildpack::Util::TokenizedVersion)
+              fail "Invalid TokenizedVersion '#{candidate_version}'"
+            end
+
+            candidate_version
+          end
+        end
+
+        def matches?(tokenized_candidate_version, tokenized_version)
+          (0..3).all? do |i|
+            tokenized_candidate_version[i].nil? ||
+              tokenized_candidate_version[i] == LibertyBuildpack::Util::TokenizedVersion::WILDCARD ||
+              tokenized_candidate_version[i] == tokenized_version[i]
+          end
+        end
+
+      end
+
     end
 
-    private
-
-      TOKENIZED_WILDCARD = LibertyBuildpack::Util::TokenizedVersion.new('+')
-
-      def self.safe_candidate_version(candidate_version)
-        if candidate_version.nil?
-          TOKENIZED_WILDCARD
-        else
-          raise "Invalid TokenizedVersion '#{candidate_version}'" unless candidate_version.is_a?(LibertyBuildpack::Util::TokenizedVersion)
-          candidate_version
-        end
-      end
-
-      def self.matches?(tokenized_candidate_version, tokenized_version)
-        (0..3).all? do |i|
-          tokenized_candidate_version[i].nil? ||
-            tokenized_candidate_version[i] == LibertyBuildpack::Util::TokenizedVersion::WILDCARD ||
-            tokenized_candidate_version[i] == tokenized_version[i]
-        end
-      end
-
   end
-
 end

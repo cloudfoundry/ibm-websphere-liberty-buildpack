@@ -34,7 +34,7 @@ module LibertyBuildpack::Jre
       if find_item
         token_version = example.metadata[:service_release]
 
-        ibmjdk_config = [LibertyBuildpack::Util::TokenizedVersion.new(token_version), uri, 'spec/fixtures/license.html']
+        ibmjdk_config = [LibertyBuildpack::Util::TokenizedVersion.new(token_version), { 'uri' => uri, 'license' => 'spec/fixtures/license.html' }]
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(ibmjdk_config)
       else
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise(example.metadata[:raise_error_message])

@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,64 +16,58 @@
 
 require 'spec_helper'
 require 'liberty_buildpack/repository/configured_item'
+require 'liberty_buildpack/repository/repository_index'
+require 'liberty_buildpack/util/tokenized_version'
 
-module LibertyBuildpack::Repository
+describe LibertyBuildpack::Repository::ConfiguredItem do
 
-  describe ConfiguredItem do
+  let(:repository_index) { double('RepositoryIndex', find_item: [resolved_version, resolved_uri]) }
 
-    RESOLVED_VERSION = 'resolved-version'
-    RESOLVED_URI = 'resolved-uri'
-    VERSION_KEY = 'version'
-    REPOSITORY_ROOT_KEY = 'repository_root'
-    RESOLVED_ROOT = 'resolved-root'
+  let(:resolved_uri) { 'resolved-uri' }
 
-    before do
-      LibertyBuildpack::Repository::RepositoryIndex.stub(:new).and_return(double('repository index', find_item: [RESOLVED_VERSION, RESOLVED_URI]))
+  let(:resolved_version) { 'resolved-version' }
+
+  before do
+    allow(LibertyBuildpack::Repository::RepositoryIndex).to receive(:new).and_return(repository_index)
+  end
+
+  it 'raises an error if no repository root is specified' do
+    expect { described_class.find_item('Test', {}) }.to raise_error
+  end
+
+  it 'resolves a system.properties version if specified' do
+    details = described_class.find_item('Test',
+                                        'repository_root'      => 'test-repository-root',
+                                        'java.runtime.version' => 'test-java-runtime-version',
+                                        'version'              => '1.7.0')
+
+    expect(details[0]).to eq(resolved_version)
+    expect(details[1]).to eq(resolved_uri)
+  end
+
+  it 'resolves a configuration version if specified' do
+    details = described_class.find_item('Test',
+                                        'repository_root' => 'test-repository-root',
+                                        'version'         => '1.7.0')
+
+    expect(details[0]).to eq(resolved_version)
+    expect(details[1]).to eq(resolved_uri)
+  end
+
+  it 'drives the version validator block if supplied' do
+    described_class.find_item('Test',
+                              'repository_root' => 'test-repository-root',
+                              'version'         => '1.7.0') do |version|
+      expect(version).to eq(LibertyBuildpack::Util::TokenizedVersion.new('1.7.0'))
     end
+  end
 
-    it 'raises an error if no repository root is specified' do
-      expect { ConfiguredItem.find_item({}) }.to raise_error
-    end
+  it 'resolves nil if no version is specified' do
+    details = described_class.find_item('Test',
+                                        'repository_root' => 'test-repository-root')
 
-    it 'resolves a system.properties version if specified' do
-      details = ConfiguredItem.find_item(
-        'repository_root' => 'test-repository-root',
-        'java.runtime.version' => 'test-java-runtime-version',
-        'version' => '1.7.0'
-      )
-
-      expect(details[0]).to eq(RESOLVED_VERSION)
-      expect(details[1]).to eq(RESOLVED_URI)
-    end
-
-    it 'resolves a configuration version if specified' do
-      details = ConfiguredItem.find_item(
-        'repository_root' => 'test-repository-root',
-        'version' => '1.7.0'
-      )
-
-      expect(details[0]).to eq(RESOLVED_VERSION)
-      expect(details[1]).to eq(RESOLVED_URI)
-    end
-
-    it 'drives the version validator block if supplied' do
-      ConfiguredItem.find_item(
-        'repository_root' => 'test-repository-root',
-        'version' => '1.7.0'
-      ) do |version|
-        expect(version).to eq(LibertyBuildpack::Util::TokenizedVersion.new('1.7.0'))
-      end
-    end
-
-    it 'resolves nil if no version is specified' do
-      details = ConfiguredItem.find_item(
-        'repository_root' => 'test-repository-root'
-      )
-
-      expect(details[0]).to eq(RESOLVED_VERSION)
-      expect(details[1]).to eq(RESOLVED_URI)
-    end
-
+    expect(details[0]).to eq(resolved_version)
+    expect(details[1]).to eq(resolved_uri)
   end
 
 end
