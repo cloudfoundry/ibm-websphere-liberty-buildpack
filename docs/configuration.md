@@ -1,39 +1,5 @@
 Configuration
 =============
 
-Buildpack configuration can be overridden with an environment variable matching the [configuration file](../config) you wish to override minus the `.yml` extension and with a prefix of `JBP_CONFIG`. The value of the variable should be valid inline YAML. For example:
-
-1. Configure the buildpack to use [Liberty profile](container-liberty.md) beta:
-
-    ```bash
-    cf set-env myApplication JBP_CONFIG_LIBERTY 'version: 2015.+'
-    ```
-
-1. Configure the buildpack with a custom set of [Liberty profile](container-liberty.md) features (for WAR and EAR files only):
-
-    ```bash
-    cf set-env myApplication JBP_CONFIG_LIBERTY 'app_archive: {features: [jsp-2.2, websocket-1.1]}'
-    ```
-
-1. Configure the buildpack to use [OpenJDK](open-jdk.md) 8:
-
-   ```bash
-   cf set-env myApplication JBP_CONFIG_OPENJDK 'version: 1.8.+'
-   cf set-env myApplication JVM openjdk
-   ```
-
-1. Configure the buildpack to use [OpenJDK](open-jdk.md) 8 with larger Metaspace size:
-
-   ```bash
-   cf set-env myApplication JBP_CONFIG_OPENJDK '[version: 1.8.+, memory_sizes: { metaspace: 256m }]'
-   cf set-env myApplication JVM openjdk
-   ```
-
-1. Disable [Spring Auto Reconfiguration](framework-spring-auto-reconfiguration.md):
-
-   ```bash
-   cf set-env myApplication JBP_CONFIG_SPRINGAUTORECONFIGURATION 'enabled: false'
-   ```
-
-The environment variables can also be specified in the [manifest.yml](http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html) file. Checkout the sample [manifest.yml](./configuration/manifest.yml) file that sets Liberty features and configures IBM JRE version. 
+The buildpack configuration can be overridden with an environment variable matching the [configuration file](../config) you wish to override minus the `.yml` extension and with a prefix of `JBP_CONFIG`. The value of the variable should be valid inline YAML. See the [Liberty container](container-liberty.md#common-configuration-overrides), [OpenJDK JRE](open-jdk.md#common-configuration-overrides), and [Spring Auto Reconfiguration framework](framework-spring-auto-reconfiguration.md#common-configuration-overrides) for examples. Also, see the sample [manifest.yml](./configuration/manifest.yml) file that uses configuration overrides environment variables to set Liberty features and configure version of the IBM JRE.
 

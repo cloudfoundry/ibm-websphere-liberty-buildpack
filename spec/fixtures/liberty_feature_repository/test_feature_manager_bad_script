@@ -20,3 +20,5 @@ echo 'jvm args is ('$JVM_ARGS')' >> $OUTPUT_FILE
 # pretend the features requested were already present so we avoid throwing an
 # exception from buildpack code (before the test code analyzes the command).
 echo "neither already installed nor install success message code"
+
+exit 1
