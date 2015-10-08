@@ -33,6 +33,18 @@ To configure the framework, you can modify the [`config/springautoreconfiguratio
 | `repository_root` | The URL of the Auto Reconfiguration repository index ([details][repositories]).
 | `version` | The version of Auto Reconfiguration to use. You can find the candidate versions [here][].
 
+## Common Configuration Overrides
+
+The Spring Auto Reconfiguration framework [configuration can be overridden](configuration.md) with the `JBP_CONFIG_SPRINGAUTORECONFIGURATION` environment variable. The value of the variable should be valid inline YAML. For example:
+
+1. Disable the framework:
+
+   ```bash
+   $ cf set-env myApplication JBP_CONFIG_SPRINGAUTORECONFIGURATION 'enabled: false'
+   ```
+
+The environment variables can also be specified in the [manifest.yml](http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html) file.
+
 [Configuration and Extension]: ../README.md#Configuration-and-Extension
 [`config/springautoreconfiguration.yml`]: ../config/springautoreconfiguration.yml
 [repositories]: util-repositories.md

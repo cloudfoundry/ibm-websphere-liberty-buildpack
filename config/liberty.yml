@@ -17,6 +17,7 @@
 ---
 repository_root: "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/"
 version: 8.5.+
+type: webProfile7
 minify: false
 app_state: true
 liberty_repository_properties:
@@ -26,17 +27,21 @@ app_archive:
  # Scan archives that do not contain beans.xml for bean-definition annotations (cdi 1.2)
  implicit_cdi: false
  # Default features
- features: 
- - jsf-2.0
- - jsp-2.2
- - servlet-3.0
- - ejbLite-3.1
- - cdi-1.0
- - jpa-2.0
- - jdbc-4.0
+ features:
+ - beanValidation-1.1
+ - cdi-1.2
+ - ejbLite-3.2
+ - el-3.0
+ - jaxrs-2.0
+ - jdbc-4.1
  - jndi-1.0
+ - jpa-2.1
+ - jsf-2.2
+ - jsonp-1.0
+ - jsp-2.3
  - managedBeans-1.0
- - jaxrs-1.1
+ - servlet-3.1
+ - websocket-1.1
 
 # Map of optional Liberty component download name to feature names.
 # Used when liberty_repository_properties/useRepository is false.

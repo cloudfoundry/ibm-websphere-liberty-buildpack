@@ -69,6 +69,24 @@ the range, the constrained size is excluded from the remaining memory, and no fu
 
 Termination is guaranteed since there is a finite number of memory types and in each iteration either none of the remaining memory sizes is constrained by the corresponding range and allocation terminates or at least one memory size is constrained by the corresponding range and is omitted from the next iteration.
 
+## Common Configuration Overrides
+
+The OpenJDK JRE [configuration can be overridden](configuration.md) with the `JBP_CONFIG_OPENJDK` environment variable. The value of the variable should be valid inline YAML. For example:
+
+1. Configure larger metaspace size:
+
+   ```bash
+   $ cf set-env myApplication JBP_CONFIG_OPENJDK 'memory_sizes: { metaspace: 256m }'
+   ```
+
+1. Use OpenJDK version 7:
+
+   ```bash
+   $ cf set-env myApplication JBP_CONFIG_OPENJDK 'version: 1.7.+'
+   ```
+
+The environment variables can also be specified in the [manifest.yml](http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html) file.
+
 [`config/openjdk.yml`]: ../config/openjdk.yml
 [centos6]: http://download.pivotal.io.s3.amazonaws.com/openjdk/centos6/x86_64/index.yml
 [lucid]: http://download.pivotal.io.s3.amazonaws.com/openjdk/lucid/x86_64/index.yml

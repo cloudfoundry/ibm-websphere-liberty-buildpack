@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'English'
 require 'liberty_buildpack'
 require 'liberty_buildpack/container'
 require 'liberty_buildpack/diagnostics/logger_factory'
@@ -73,11 +74,10 @@ module LibertyBuildpack::Container
 
           @logger.debug("script invocation string is #{script_string}")
           output = `#{script_string} 2>&1`
-          # if ($CHILD_STATUS.to_i == 0) doesn't seem to work, as $CHILD_STATUS is
-          # nil, so parse output for known message codes.
-          if output.include?(FEATURES_ALREADY_PRESENT_MSG_CODE)
+          exitcode = $CHILD_STATUS.exitstatus
+          if exitcode == FEATURES_ALREADY_PRESENT_EXIT_CODE
             @logger.debug("no extra features to install, output is #{output}")
-          elsif output.include?(FEATURES_INSTALLED_MSG_CODE)
+          elsif exitcode == FEATURES_INSTALLED_EXIT_CODE
             @logger.debug("installed required features, output is #{output}")
           else
             @logger.debug("could not install required features, output is #{output}")
@@ -89,8 +89,8 @@ module LibertyBuildpack::Container
 
     private
 
-      FEATURES_ALREADY_PRESENT_MSG_CODE = 'CWWKF1216I'.freeze
-      FEATURES_INSTALLED_MSG_CODE       = 'CWWKF1017I'.freeze
+      FEATURES_ALREADY_PRESENT_EXIT_CODE = 22
+      FEATURES_INSTALLED_EXIT_CODE       = 0
 
       # common code used by internal instance method use_liberty_repository? and
       # public class method enabled?

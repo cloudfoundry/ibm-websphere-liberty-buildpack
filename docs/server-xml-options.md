@@ -1,4 +1,4 @@
-Buildpack-enabled Options for Server.xml
+Buildpack-enabled Options for server.xml
 ========================================
 
 Liberty's server behavior is controlled through a file with the name `server.xml`.
@@ -8,37 +8,42 @@ If you are pushing a WAR, EAR or "exploded" (i.e. unzipped) file of either type,
 server.xml will be generated for you with the correct parameters for use
 with Cloud Foundry.  That server.xml will look something like this:
 
-```
+```xml
 <server>
-<server description="new server">
-
-    <!-- Enable features -->
     <featureManager>
-        <feature>jsf-2.0</feature>
-        <feature>jsp-2.2</feature>
-        <feature>servlet-3.0</feature>
-        <feature>ejbLite-3.1</feature>
-        <feature>cdi-1.0</feature>
-        <feature>jpa-2.0</feature>
-        <feature>jdbc-4.0</feature>
-        <feature>transaction-1.1</feature>
+        <feature>beanValidation-1.1</feature>
+        <feature>cdi-1.2</feature>
+        <feature>ejbLite-3.2</feature>
+        <feature>el-3.0</feature>
+        <feature>jaxrs-2.0</feature>
+        <feature>jdbc-4.1</feature>
         <feature>jndi-1.0</feature>
+        <feature>jpa-2.1</feature>
+        <feature>jsf-2.2</feature>
+        <feature>jsonp-1.0</feature>
+        <feature>jsp-2.3</feature>
         <feature>managedBeans-1.0</feature>
-        <feature>jaxrs-1.1</feature>
+        <feature>servlet-3.1</feature>
+        <feature>websocket-1.1</feature>
     </featureManager>
-
-    <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${port}"/>
+    <application name='myapp' location='myapp.war' type='war' context-root='/'/>
+    <cdi12 enableImplicitBeanArchives='false'/>
+    <httpEndpoint id='defaultHttpEndpoint' host='*' httpPort='${port}'/>
+    <webContainer trustHostHeaderPort='true' extractHostHeaderPort='true'/>
+    <include location='runtime-vars.xml'/>
+    <logging logDirectory='${application.log.dir}' consoleLogLevel='INFO'/>
+    <httpDispatcher enableWelcomePage='false'/>
+    <applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>
+    <config updateTrigger='mbean'/>
 </server>
+
 ```
 
-**NOTE**: This server.xml will also contain a reference to the application
-you pushed, with the type of the application (war/ear) and context root "/".  That is to say, if you pushed an app
-using the command `cf push foo`, and your domain is `mydomain.com`, your
-application will be accessible from `http://foo.mydomain.com/`.
+**NOTE**: The `application` element will be updated with the type of the application you deployed (war or ear) and the context root for your application. By default, the context root of `/` is used, unless otherwise set in the `WEB-INF/ibm-web-ext.xml` file embedded with your application. 
 
-Since you are not pushing a server.xml with your application, you are
-foregoing any control over the server's behavior, and the default behavior
-is assumed.
+If you deployed an application using the command `cf push foo`, and your domain is `mydomain.com`, and the application uses the default context root, the application will be accessible from `http://foo.mydomain.com/`. If the application uses a non-default context root, say `/bar`, the application will be accessible from `http://foo.mydomain.com/bar`.
+
+Since you are not pushing a server.xml with your application, you are foregoing most of control over the server's behavior, and the default behavior is assumed. However, you can adjust some things such as the feature list. See the [Liberty container](container-liberty.md#common-configuration-overrides) for details.
 
 ## Server Configurations (including a server.xml)
 

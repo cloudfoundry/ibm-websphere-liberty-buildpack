@@ -20,6 +20,7 @@ class BuildpackCache
   VERSION = 'version'.freeze
   URI_KEY = 'uri'.freeze
   LICENSE_KEY = 'license'.freeze
+  TYPE_KEY = 'type'.freeze
 
   # Creates an instance with the specified logger and locale cache destination
   #
@@ -55,7 +56,7 @@ class BuildpackCache
       end
       candidate = LibertyBuildpack::Util::TokenizedVersion.new(config[VERSION])
       version = LibertyBuildpack::Repository::VersionResolver.resolve(candidate, index.keys)
-      file_uri = download_license(index[version.to_s])
+      file_uri = download_license(index[version.to_s], config[TYPE_KEY])
       file = File.join(@cache_dir, filename(file_uri))
       download(file_uri, file)
       # If file is a component_index.yml parse and download files it references as well
@@ -77,12 +78,12 @@ class BuildpackCache
     "#{uri}#{INDEX_PATH}"
   end
 
-  def download_license(file_uri)
+  def download_license(file_uri, type)
     if file_uri.is_a? Hash
       license_uri = file_uri[LICENSE_KEY]
       license_file = File.join(@cache_dir, filename(license_uri))
       download(license_uri, license_file)
-      file_uri = file_uri[URI_KEY]
+      file_uri = file_uri[type.nil? ? URI_KEY : type]
     end
     file_uri
   end

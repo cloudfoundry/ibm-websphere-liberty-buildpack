@@ -27,7 +27,8 @@ module LibertyBuildpack::Container
 
     LIBERTY_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('8.5.5')
     LIBERTY_SINGLE_DOWNLOAD_URI = 'test-liberty-uri.tar.gz'.freeze # end of URI (here ".tar.gz") is significant in liberty container code
-    LIBERTY_DETAILS = [LIBERTY_VERSION, { 'uri' => LIBERTY_SINGLE_DOWNLOAD_URI, 'license' => 'spec/fixtures/license.html' }]
+    LIBERTY_WEBPROFILE7_DOWNLOAD_URI = 'test-liberty-webProfile7.tar.gz'.freeze
+    LIBERTY_DETAILS = [LIBERTY_VERSION, { 'uri' => LIBERTY_SINGLE_DOWNLOAD_URI, 'license' => 'spec/fixtures/license.html', 'webProfile7' => LIBERTY_WEBPROFILE7_DOWNLOAD_URI }]
     DISABLE_2PC_JAVA_OPT_REGEX = '-Dcom.ibm.tx.jta.disable2PC=true'.freeze
 
     let(:application_cache) { double('ApplicationCache') }
@@ -1867,6 +1868,57 @@ module LibertyBuildpack::Container
 
     end
 
-  end
+    describe 'runtime type' do
+      def run(root, configuration = default_configuration)
+        details = [LIBERTY_VERSION, { 'uri' => LIBERTY_SINGLE_DOWNLOAD_URI, 'license' => 'spec/fixtures/license.html', 'javaee7' => 'javaee7.zip' }]
 
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          .and_return(details)
+
+        LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
+        component_index.stub(:components).and_return({ 'liberty_core' => LIBERTY_SINGLE_DOWNLOAD_URI })
+
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open('spec/fixtures/wlp-stub.tar.gz'))
+        application_cache.stub(:get).with('javaee7.zip').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
+
+        Liberty.new(
+          app_dir: root,
+          configuration: configuration,
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+        ).compile
+      end
+
+      it 'should get webProfile6 runtime' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
+
+          configuration = default_configuration
+          configuration['type'] = 'webProfile6'
+          run(root, configuration)
+
+          file = File.join root, '.liberty', 'etc', 'extensions', 'icap.properties'
+          expect(File).to exist(file)
+        end
+      end
+
+      it 'should get javaee7 runtime' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'WEB-INF')
+
+          configuration = default_configuration
+          configuration['type'] = 'javaee7'
+          run(root, configuration)
+
+          file = File.join root, '.liberty', 'etc', 'extensions', 'icap.properties'
+          expect(File).not_to exist(file)
+        end
+      end
+
+    end
+
+  end
 end

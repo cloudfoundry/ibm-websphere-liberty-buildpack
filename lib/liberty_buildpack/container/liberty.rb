@@ -728,7 +728,7 @@ module LibertyBuildpack::Container
     def self.find_liberty_files(app_dir, configuration)
       config_uri, license = Liberty.find_liberty_item(app_dir, configuration).drop(1)
       # Back to the future. Temporary hack to handle all-in-one liberty core for open source buildpack while the repository is being restructured.
-      if config_uri.end_with?('.jar')
+      if config_uri.end_with?('.jar') || config_uri.end_with?('.zip')
         components_and_uris = { COMPONENT_LIBERTY_CORE => config_uri }
       else
         components_and_uris = LibertyBuildpack::Repository::ComponentIndex.new(config_uri).components
@@ -746,8 +746,10 @@ module LibertyBuildpack::Container
         version, entry = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
-        if entry.include?('uri') && entry.include?('license')
-          return version, entry['uri'], entry['license']
+        if entry.is_a?(Hash)
+          type = runtime_type(configuration)
+          fail "Runtime type not supported: #{type}" if entry[type].nil?
+          return version, entry[type], entry['license']
         else
           return version, entry, nil
         end
@@ -756,6 +758,15 @@ module LibertyBuildpack::Container
       end
     rescue => e
       raise RuntimeError, "Liberty container error: #{e.message}", e.backtrace
+    end
+
+    def self.runtime_type(configuration)
+      type = configuration['type']
+      if type.nil? || type.casecmp('webProfile6') == 0
+        'uri'
+      else
+        type
+      end
     end
 
     def liberty_type
