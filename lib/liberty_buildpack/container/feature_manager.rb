@@ -69,8 +69,8 @@ module LibertyBuildpack::Container
         if use_liberty_repository?
           features = get_features(server_xml)
           jvm_args = get_jvm_args
-          cmd = File.join(liberty_home, 'bin', 'featureManager')
-          script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS=#{jvm_args} #{cmd} install --acceptLicense #{features} --when-file-exists=replace"
+          cmd = File.join(liberty_home, 'bin', 'installUtility')
+          script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS=#{jvm_args} #{cmd} install --acceptLicense #{features}"
 
           @logger.debug("script invocation string is #{script_string}")
           output = `#{script_string} 2>&1`
@@ -164,7 +164,7 @@ module LibertyBuildpack::Container
         @logger.debug('entry')
         server_xml_doc = LibertyBuildpack::Util::XmlUtils.read_xml_file(server_xml)
         features = REXML::XPath.match(server_xml_doc, '/server/featureManager/feature/text()[not(contains(., ":"))]')
-        features = features.join(',')
+        features = features.join(' ')
         @logger.debug("exit (#{features})")
         features
       end
@@ -177,7 +177,7 @@ module LibertyBuildpack::Container
       def get_jvm_args
         @logger.debug('entry')
         if use_liberty_repository_with_properties_file?
-          jvm_args = "-Drepository.description.url=\"file://#{@repository_description_properties_file}\""
+          jvm_args = "-DWLP_REPOSITORIES_PROPS=#{@repository_description_properties_file}"
         else
           jvm_args = ''
         end

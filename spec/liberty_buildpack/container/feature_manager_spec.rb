@@ -37,7 +37,7 @@ module LibertyBuildpack::Container
       liberty_dir = File.join(app_dir, '.liberty')
       liberty_bin_dir = File.join(liberty_dir, 'bin')
       FileUtils.mkdir_p(liberty_bin_dir)
-      feature_manager_script_file = File.join(liberty_bin_dir, 'featureManager')
+      feature_manager_script_file = File.join(liberty_bin_dir, 'installUtility')
       FileUtils.copy(test_feature_manager_script_file, feature_manager_script_file)
       system "chmod +x #{feature_manager_script_file}"
       return app_dir, liberty_dir, liberty_bin_dir # rubocop:disable RedundantReturn
@@ -64,7 +64,7 @@ module LibertyBuildpack::Container
         call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
 
         # check liberty's featureManager was not called.
-        feature_manager_command_file = File.join(liberty_bin_dir, 'featureManager.txt')
+        feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
         expect(File.exists?(feature_manager_command_file)).to eq(false)
       end
     end
@@ -81,7 +81,7 @@ module LibertyBuildpack::Container
         call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
 
         # check liberty's featureManager was not called.
-        feature_manager_command_file = File.join(liberty_bin_dir, 'featureManager.txt')
+        feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
         expect(File.exists?(feature_manager_command_file)).to eq(false)
       end
     end
@@ -98,7 +98,7 @@ module LibertyBuildpack::Container
         call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
 
         # check liberty's featureManager was not called.
-        feature_manager_command_file = File.join(liberty_bin_dir, 'featureManager.txt')
+        feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
         expect(File.exists?(feature_manager_command_file)).to eq(false)
       end
     end
@@ -115,7 +115,7 @@ module LibertyBuildpack::Container
         call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
 
         # check liberty's featureManager was called, with expected parameters.
-        feature_manager_command_file = File.join(liberty_bin_dir, 'featureManager.txt')
+        feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
         expect(File.exists?(feature_manager_command_file)).to eq(true)
         feature_manager_command = File.read feature_manager_command_file
         expect(feature_manager_command).to match(/jsp-2.2/)
@@ -145,7 +145,7 @@ module LibertyBuildpack::Container
         call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
 
         # check liberty's featureManager was called, with expected parameters.
-        feature_manager_command_file = File.join(liberty_bin_dir, 'featureManager.txt')
+        feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
         expect(File.exists?(feature_manager_command_file)).to eq(true)
         feature_manager_command = File.read feature_manager_command_file
         expect(feature_manager_command).to match(/jsp-2.2/)
@@ -154,7 +154,7 @@ module LibertyBuildpack::Container
         expect(feature_manager_command).not_to match(/myUserFeature/)
         # look for : jvm args is (-Drepository.description.url=file:///<something>/.repository.description.properties)
         # (enclosing quotes on path removed once set as environment variable).
-        expect(feature_manager_command).to match(%r{jvm args is \(-Drepository.description.url=file:///.*/\.repository.description.properties\)})
+        expect(feature_manager_command).to match(/jvm args is \(-DWLP_REPOSITORIES_PROPS=.*\.repository.description.properties\)/)
         # look for : java home is (<something>/my-java-home)
         expect(feature_manager_command).to match(/java home is \(.*\/my-java-home\)/)
 
@@ -208,7 +208,7 @@ module LibertyBuildpack::Container
           call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
 
           # check liberty's featureManager was called, with expected parameters.
-          feature_manager_command_file = File.join(liberty_bin_dir, 'featureManager.txt')
+          feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
           expect(File.exists?(feature_manager_command_file)).to eq(true)
           feature_manager_command = File.read feature_manager_command_file
           expect(feature_manager_command).to match(/jvm args is \(\)/)

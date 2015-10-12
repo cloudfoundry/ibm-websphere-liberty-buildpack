@@ -506,13 +506,10 @@ module LibertyBuildpack::Container
     end
 
     def make_server_script_runnable
-      server_script = File.join liberty_home, 'bin', 'server'
-      File.chmod(0755, server_script)
-      # scripts that need to be executable for the feature manager to work
-      feature_manager_script = File.join liberty_home, 'bin', 'featureManager'
-      File.chmod(0755, feature_manager_script)
-      product_info = File.join liberty_home, 'bin', 'productInfo'
-      File.chmod(0755, product_info)
+      %w{server featureManager productInfo installUtility}.each do | name |
+        script = File.join(liberty_home, 'bin', name)
+        File.chmod(0755, script) if File.exists?(script)
+      end
     end
 
     def server_name

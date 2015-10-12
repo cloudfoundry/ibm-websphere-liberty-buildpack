@@ -46,11 +46,22 @@ The `minify` option can be overridden on a per-application basis by specifying a
 
 #### Liberty repository configuration
 
-By default, the Buildpack will download the Liberty features specified in the `server.xml` from [Liberty repository](https://developer.ibm.com/wasdev/downloads/). To disable this feature, set the `useRepository` option to `false`.
+By default, the buildpack will download the Liberty features specified in the `server.xml` from the [Liberty repository][]. To disable this feature, set the `useRepository` option to `false`.
 
 ```yaml
 liberty_repository_properties:
   useRepository: true
+```
+
+When the `useRepository` option to `true`, you can pass additional properties under the `liberty_repository_properties` element to customize the repository information. The additional properties that can be set are defined in the [`installUtility`](http://www14.software.ibm.com/webapp/wsbroker/redirect?version=phil&product=was-base-dist&topic=twlp_config_installutility) documentation. For example, the following specifies a custom feature repository and disables access to the [Liberty repository][]:
+
+```yaml
+liberty_repository_properties:
+  useRepository: true
+  useDefaultRepository: false
+  myRepo.url: http://dev.repo.ibm.com:9080/ma/v1
+  myRepo.user: myUser
+  myRepo.userPassword: myPassword
 ```
 
 #### Default configuration 
@@ -109,4 +120,5 @@ The environment variables can also be specified in the [manifest.yml](http://doc
 [`SPRING_PROFILES_ACTIVE`]: http://docs.spring.io/spring/docs/4.0.0.RELEASE/javadoc-api/org/springframework/core/env/AbstractEnvironment.html#ACTIVE_PROFILES_PROPERTY_NAME
 [version_syntax]: util-repositories.md#version-syntax-and-ordering
 [index.yml]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml
+[Liberty repository]: https://developer.ibm.com/wasdev/downloads/
 
