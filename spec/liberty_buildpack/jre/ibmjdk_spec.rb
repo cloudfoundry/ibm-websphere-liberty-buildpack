@@ -118,8 +118,22 @@ module LibertyBuildpack::Jre
           expect { compiled }.to output(/Avoid Trouble/).to_stdout
         end
 
+        it 'should fail when the license id is not provided', app_dir: '', license_ids: {} do
+          expect { compiled }.to raise_error
+        end
+
         it 'should fail when the license ids do not match', app_dir: '', license_ids: { 'IBM_JVM_LICENSE' => 'Incorrect' } do
           expect { compiled }.to raise_error
+        end
+
+        it 'should not fail when the license url is not provided', app_dir: '', license_ids: {}, cache_fixture: 'stub-ibm-java.tar.gz' do
+          ibmjdk_config = [LibertyBuildpack::Util::TokenizedVersion.new(service_release), { 'uri' => uri }]
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(ibmjdk_config)
+
+          compiled
+
+          java = File.join(app_dir, '.java', 'jre', 'bin', 'java')
+          expect(File.exists?(java)).to eq(true)
         end
 
         it 'places the killjava script (with appropriately substituted content) in the diagnostics directory', cache_fixture: 'stub-ibm-java.bin' do

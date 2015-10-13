@@ -26,7 +26,7 @@ module LibertyBuildpack::Util
   # @param [String] license_id the license id provided by the user
   # @return [boolean] return true if the license id's match, false otherwise
   def self.check_license(license_uri, license_id)
-    raise 'The license URL has returned nil' if license_uri.nil?
+    return true if license_uri.nil?
 
     # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
     LibertyBuildpack::Util::Cache::ApplicationCache.new.get(license_uri) do |file|

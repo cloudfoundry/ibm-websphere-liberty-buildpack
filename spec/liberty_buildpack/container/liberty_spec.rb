@@ -350,6 +350,24 @@ module LibertyBuildpack::Container
         end
       end
 
+      it 'should fail if license id is not provided' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'WEB-INF')
+
+          set_liberty_fixture('spec/fixtures/wlp-stub.tar.gz')
+
+          expect do
+            Liberty.new(
+              app_dir: root,
+              lib_directory: '',
+              configuration: {},
+              environment: {},
+              license_ids: {}
+            ).compile
+          end.to raise_error(RuntimeError, '')
+        end
+      end
+
       it 'should fail if license ids do not match' do
         Dir.mktmpdir do |root|
           Dir.mkdir File.join(root, 'WEB-INF')
@@ -365,6 +383,30 @@ module LibertyBuildpack::Container
               license_ids: { 'IBM_LIBERTY_LICENSE' => 'Incorrect' }
             ).compile
           end.to raise_error(RuntimeError, '')
+        end
+      end
+
+      it 'should not fail when the license url is not provided' do
+        Dir.mktmpdir do |root|
+          Dir.mkdir File.join(root, 'WEB-INF')
+
+          set_liberty_fixture('spec/fixtures/wlp-stub.tar.gz')
+
+          test_details = [LIBERTY_VERSION, { 'uri' => LIBERTY_SINGLE_DOWNLOAD_URI, 'webProfile7' => LIBERTY_WEBPROFILE7_DOWNLOAD_URI }]
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+            .and_return(test_details)
+
+          Liberty.new(
+              app_dir: root,
+              lib_directory: '',
+              configuration: {},
+              environment: {},
+              license_ids: {}
+          ).compile
+
+          liberty_dir = File.join root, '.liberty'
+          bin_dir = File.join liberty_dir, 'bin'
+          expect(File.exists?(File.join bin_dir, 'server')).to eq(true)
         end
       end
 
