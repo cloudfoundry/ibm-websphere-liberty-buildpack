@@ -165,23 +165,23 @@ module LibertyBuildpack::Jre
     end
 
     def memory(configuration)
+      java_memory_opts = []
+      java_memory_opts.push '-Xtune:virtualized'
+
       mem = MemoryLimit.memory_limit
       if mem.nil?
         ## if no memory option has been set by cloudfoundry, we just assume defaults
-        java_memory_opts = []
-        java_memory_opts.push '-Xtune:virtualized'
-
         java_memory_opts
       else
-        java_memory_opts = []
-
-        new_heap_size = mem * HEAP_SIZE_RATIO
-
-        java_memory_opts.push '-Xtune:virtualized'
+        new_heap_size = mem * heap_size_ratio
         java_memory_opts.push "-Xmx#{new_heap_size}"
 
         java_memory_opts
       end
+    end
+
+    def heap_size_ratio
+      @configuration['heap_size_ratio'] || HEAP_SIZE_RATIO
     end
 
     # default options for -Xdump to disable dumps while routing to the default dumps location when it is enabled by the

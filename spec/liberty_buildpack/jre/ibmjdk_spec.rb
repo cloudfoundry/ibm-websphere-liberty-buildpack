@@ -164,16 +164,35 @@ module LibertyBuildpack::Jre
                                       '-Xdump:heap+java+snap:events=user')
         end
 
-        it 'should add extra memory options when a memory limit is set' do
+        it 'should add extra memory options when 512m memory limit is set' do
           ENV['MEMORY_LIMIT'] = '512m'
 
           expect(released).to include('-Xtune:virtualized')
           expect(released).to include('-Xmx384M')
         end
 
-        it 'should provide troubleshooting info for JVM shutdowns' do
+        it 'should add extra memory options when 512m memory limit is set with 50% ratio', configuration: { 'heap_size_ratio' => 0.50 } do
           ENV['MEMORY_LIMIT'] = '512m'
 
+          expect(released).to include('-Xtune:virtualized')
+          expect(released).to include('-Xmx256M')
+        end
+
+        it 'should add extra memory options when 1024m memory limit is set' do
+          ENV['MEMORY_LIMIT'] = '1024m'
+
+          expect(released).to include('-Xtune:virtualized')
+          expect(released).to include('-Xmx768M')
+        end
+
+        it 'should add extra memory options when 1024m memory limit is set with 12.% ratio', configuration: { 'heap_size_ratio' => 0.125 }  do
+          ENV['MEMORY_LIMIT'] = '1024m'
+
+          expect(released).to include('-Xtune:virtualized')
+          expect(released).to include('-Xmx128M')
+        end
+
+        it 'should provide troubleshooting info for JVM shutdowns' do
           expect(released).to include("-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{IBMJdk::KILLJAVA_FILE_NAME}")
         end
       end # end of release shared tests
