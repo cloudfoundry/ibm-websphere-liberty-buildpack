@@ -17,6 +17,23 @@ The JRE can be configured by modifying the [`config/ibmjdk.yml`][] file in the b
 | ---- | -----------
 | `repository_root` | The URL of the IBM JRE repository index ([details][repositories]).
 | `version` | The version of Java runtime to use.  Candidate versions can be found [here][index.yml].
+| `heap_size_ratio` | The ratio that is used to calculate the maximum heap size. The default heap size ratio is `0.75` (75% of the total available memory).
+
+## Common Configuration Overrides
+
+The IBM JRE [configuration can be overridden](configuration.md) with the `JBP_CONFIG_IBMJDK` environment variable. The value of the variable should be valid inline YAML. For example:
+
+1. Adjust heap size ratio:
+
+   ```bash
+   $ cf set-env myApplication JBP_CONFIG_IBMJDK 'heap_size_ratio: 0.90'
+   ```
+
+1. Use IBM JRE version 7:
+
+   ```bash
+   $ cf set-env myApplication JBP_CONFIG_IBMJDK 'version: 1.7.+'
+   ```
 
 [`config/ibmjdk.yml`]: ../config/ibmjdk.yml
 [index.yml]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/jre/index.yml
