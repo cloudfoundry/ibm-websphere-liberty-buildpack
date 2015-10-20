@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2014 the original author or authors.
+# Copyright 2014-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/util/xml_utils'
 require 'rexml/document'
 require 'rexml/xpath'
+require 'set'
 
 module LibertyBuildpack::Container
 
@@ -70,7 +71,7 @@ module LibertyBuildpack::Container
           features = get_features(server_xml)
           jvm_args = get_jvm_args
           cmd = File.join(liberty_home, 'bin', 'installUtility')
-          script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS=#{jvm_args} #{cmd} install --acceptLicense #{features}"
+          script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS=#{jvm_args} #{cmd} install --acceptLicense #{features.join(' ')}"
 
           @logger.debug("script invocation string is #{script_string}")
           output = `#{script_string} 2>&1`
@@ -102,7 +103,7 @@ module LibertyBuildpack::Container
         liberty_repository_properties = configuration['liberty_repository_properties']
         unless liberty_repository_properties.nil?
           use_liberty_repository = liberty_repository_properties['useRepository']
-          use_liberty_repository = false unless use_liberty_repository == true
+          use_liberty_repository = (use_liberty_repository == true)
         end
         use_liberty_repository
       end
@@ -155,16 +156,39 @@ module LibertyBuildpack::Container
         use_liberty_repository_with_properties_file
       end
 
-      # parse the given server.xml to find all features required and return a
-      # comma-separated list of these. User features are excluded by looking for
-      # features that do not contain a colon (user features specify a "product
-      # extension" location before the colon that indicates the location of the
-      # feature on disk, the default is to specify "usr").
+      # collect list of feature names from the server.xml and configDropins/
+      # directories.
+      #
+      # @return a String array of feature names.
       def get_features(server_xml)
-        @logger.debug('entry')
+        features = Set.new(read_features(server_xml))
+
+        # Check for any configuration files under configDrops/overrides and
+        # configDropins/defaults. Since featureManager's feature elements
+        # have multiple cardinality, the values will always be merged together.
+        # Reading or processing order does not matter.
+        server_dir = File.dirname(server_xml)
+        %w{defaults overrides}.each do | type |
+          Dir.glob("#{server_dir}/configDropins/#{type}/*.xml").each do |file|
+            features.merge(read_features(file))
+          end
+        end
+
+        features.to_a
+      end
+
+      # parse the given server.xml to find all features required. User features
+      # are excluded by looking for features that do not contain a colon
+      # (user features specify a "product extension" location before the colon
+      # that indicates the location of the feature on disk, the default is to s
+      # pecify "usr").
+      #
+      # @return a String array of feature names.
+      def read_features(server_xml)
+        @logger.debug('entry (#{server_xml})')
         server_xml_doc = LibertyBuildpack::Util::XmlUtils.read_xml_file(server_xml)
         features = REXML::XPath.match(server_xml_doc, '/server/featureManager/feature/text()[not(contains(., ":"))]')
-        features = features.join(' ')
+        features = features.map { | feature | feature.to_s }
         @logger.debug("exit (#{features})")
         features
       end

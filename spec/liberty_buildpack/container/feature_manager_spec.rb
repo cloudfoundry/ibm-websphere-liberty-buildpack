@@ -40,7 +40,7 @@ module LibertyBuildpack::Container
       feature_manager_script_file = File.join(liberty_bin_dir, 'installUtility')
       FileUtils.copy(test_feature_manager_script_file, feature_manager_script_file)
       system "chmod +x #{feature_manager_script_file}"
-      return app_dir, liberty_dir, liberty_bin_dir # rubocop:disable RedundantReturn
+      [app_dir, liberty_dir]
     end
 
     # invoke the buildpack feature manager code that eventually calls the
@@ -52,70 +52,54 @@ module LibertyBuildpack::Container
       feature_manager.download_and_install_features(server_xml_file, liberty_dir)
     end
 
+    def run(root_dir, repo_yml = nil, script_file = nil, server_xml_file = nil)
+      # fixture files to be used.
+      configuration_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, repo_yml || 'use_default_repo.yml')
+      feature_manager_script_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, script_file || 'test_feature_manager_good_script')
+      server_xml_file ||= File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_server.xml')
+
+      # call feature manager using desired configuration and server.xml files.
+      app_dir, liberty_dir = set_up_feature_manager_script(root_dir, feature_manager_script_file)
+      call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
+      [app_dir, liberty_dir]
+    end
+
     it 'should not use the liberty feature repository if not configured' do
       Dir.mktmpdir do |root_dir|
-        # fixture files to be used.
-        configuration_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'no_repo.yml')
-        feature_manager_script_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_feature_manager_good_script')
-        server_xml_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_server.xml')
-
-        # call feature manager using desired configuration and server.xml files.
-        app_dir, liberty_dir, liberty_bin_dir = set_up_feature_manager_script(root_dir, feature_manager_script_file)
-        call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
+        liberty_dir = run(root_dir, 'no_repo.yml')[1]
 
         # check liberty's featureManager was not called.
-        feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
+        feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
         expect(File.exists?(feature_manager_command_file)).to eq(false)
       end
     end
 
     it 'should not use the liberty feature repository if configured with false' do
       Dir.mktmpdir do |root_dir|
-        # fixture files to be used.
-        configuration_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'dont_use_repo.yml')
-        feature_manager_script_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_feature_manager_good_script')
-        server_xml_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_server.xml')
-
-        # call feature manager using desired configuration and server.xml files.
-        app_dir, liberty_dir, liberty_bin_dir = set_up_feature_manager_script(root_dir, feature_manager_script_file)
-        call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
+        liberty_dir = run(root_dir, 'dont_use_repo.yml')[1]
 
         # check liberty's featureManager was not called.
-        feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
+        feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
         expect(File.exists?(feature_manager_command_file)).to eq(false)
       end
     end
 
     it 'should not use the liberty feature repository if configured with invalid value' do
       Dir.mktmpdir do |root_dir|
-        # fixture files to be used.
-        configuration_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'junk_in_use_repo.yml')
-        feature_manager_script_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_feature_manager_good_script')
-        server_xml_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_server.xml')
-
-        # call feature manager using desired configuration and server.xml files.
-        app_dir, liberty_dir, liberty_bin_dir = set_up_feature_manager_script(root_dir, feature_manager_script_file)
-        call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
+        liberty_dir = run(root_dir, 'junk_in_use_repo.yml')[1]
 
         # check liberty's featureManager was not called.
-        feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
+        feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
         expect(File.exists?(feature_manager_command_file)).to eq(false)
       end
     end
 
     it 'should use the liberty feature repository if configured true' do
       Dir.mktmpdir do |root_dir|
-        # fixture files to be used.
-        configuration_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'use_default_repo.yml')
-        feature_manager_script_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_feature_manager_good_script')
-        server_xml_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_server.xml')
-
-        # call feature manager using desired configuration and server.xml files.
-        app_dir, liberty_dir, liberty_bin_dir = set_up_feature_manager_script(root_dir, feature_manager_script_file)
-        call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
+        app_dir, liberty_dir = run(root_dir)
 
         # check liberty's featureManager was called, with expected parameters.
-        feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
+        feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
         expect(File.exists?(feature_manager_command_file)).to eq(true)
         feature_manager_command = File.read feature_manager_command_file
         expect(feature_manager_command).to match(/jsp-2.2/)
@@ -135,17 +119,10 @@ module LibertyBuildpack::Container
 
     it 'should use the liberty feature repository with properties file if configured true with properties' do
       Dir.mktmpdir do |root_dir|
-        # fixture files to be used.
-        configuration_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'use_specified_repo.yml')
-        feature_manager_script_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_feature_manager_good_script')
-        server_xml_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_server.xml')
-
-        # call feature manager using desired configuration and server.xml files.
-        app_dir, liberty_dir, liberty_bin_dir = set_up_feature_manager_script(root_dir, feature_manager_script_file)
-        call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
+        app_dir, liberty_dir = run(root_dir, 'use_specified_repo.yml')
 
         # check liberty's featureManager was called, with expected parameters.
-        feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
+        feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
         expect(File.exists?(feature_manager_command_file)).to eq(true)
         feature_manager_command = File.read feature_manager_command_file
         expect(feature_manager_command).to match(/jsp-2.2/)
@@ -180,6 +157,21 @@ module LibertyBuildpack::Container
       end
     end
 
+    it 'should install features from configDropins' do
+      Dir.mktmpdir do |root_dir|
+        liberty_dir = run(root_dir, nil, nil, 'spec/fixtures/container_liberty_single_server/server.xml')[1]
+
+        # check liberty's featureManager was called, with expected parameters.
+        feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
+        expect(File.exists?(feature_manager_command_file)).to eq(true)
+
+        feature_manager_command = File.read feature_manager_command_file
+        expect(feature_manager_command).to match(/jsp-2.2/)
+        expect(feature_manager_command).to match(/couchdb-1.0/)
+        expect(feature_manager_command).to match(/mongodb-2.0/)
+      end
+    end
+
     context 'when JVM_ARGS is set by the user' do
 
       JVM_ARGS_KEY = 'JVM_ARGS'.freeze
@@ -198,17 +190,10 @@ module LibertyBuildpack::Container
         ENV[JVM_ARGS_KEY] = prev_jvm_args
 
         Dir.mktmpdir do |root_dir|
-          # fixture files to be used.
-          configuration_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'use_default_repo.yml')
-          feature_manager_script_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_feature_manager_good_script')
-          server_xml_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_server.xml')
-
-          # call feature manager using desired configuration and server.xml files.
-          app_dir, liberty_dir, liberty_bin_dir = set_up_feature_manager_script(root_dir, feature_manager_script_file)
-          call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
+          liberty_dir = run(root_dir)[1]
 
           # check liberty's featureManager was called, with expected parameters.
-          feature_manager_command_file = File.join(liberty_bin_dir, 'installUtility.txt')
+          feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
           expect(File.exists?(feature_manager_command_file)).to eq(true)
           feature_manager_command = File.read feature_manager_command_file
           expect(feature_manager_command).to match(/jvm args is \(\)/)
@@ -219,14 +204,7 @@ module LibertyBuildpack::Container
         ENV[JVM_ARGS_KEY] = prev_jvm_args
 
         Dir.mktmpdir do |root_dir|
-          # fixture files to be used.
-          configuration_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'use_default_repo.yml')
-          feature_manager_script_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_feature_manager_good_script')
-          server_xml_file = File.join(FEATURE_REPOSITORY_FIXTURE_DIR, 'test_server.xml')
-
-          # call feature manager using desired configuration and server.xml files.
-          app_dir, liberty_dir  = set_up_feature_manager_script(root_dir, feature_manager_script_file)
-          call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file)
+          run(root_dir)
 
           # check that the JVM_ARGS has the same value from prior to running feature manager
           expect(ENV['JVM_ARGS']).to match(prev_jvm_args)
