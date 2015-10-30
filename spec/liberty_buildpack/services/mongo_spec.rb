@@ -410,7 +410,7 @@ module LibertyBuildpack::Services
       end
 
       def get_lib_jar
-        'mongo-java-driver-2.12.3.jar'
+        'mongo-java-driver-2.13.3.jar'
       end
 
       def get_jndi
@@ -525,7 +525,7 @@ module LibertyBuildpack::Services
             # test that we return the url for the mongo client jar
             clients = obj.get_urls_for_client_jars([], urls)
             expect(clients.size).to eq(1)
-            expect(clients[0]).to eq('https://repo1.maven.org/maven2/org/mongodb/mongo-java-driver/2.12.3/mongo-java-driver-2.12.3.jar')
+            expect(clients[0]).to eq('https://repo1.maven.org/maven2/org/mongodb/mongo-java-driver/2.13.3/mongo-java-driver-2.13.3.jar')
             # test when user supplied client jar, return empty array
             clients = obj.get_urls_for_client_jars(['mongo-java-driver-2.11.3.jar'], urls)
             expect(clients.size).to eq(0)
