@@ -31,5 +31,5 @@ client_jars : 'postgresql-.*.jar'
 service_filter : 'postgresql|elephantsql'
 
 driver:
-  version: 9.3.+
+  version: 9.4.+
   repository_root: "https://download.run.pivotal.io/postgresql-jdbc"
