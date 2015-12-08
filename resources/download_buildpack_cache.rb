@@ -18,6 +18,7 @@ class BuildpackCache
   INDEX_PATH = '/index.yml'.freeze
   REPOSITORY_ROOT = 'repository_root'.freeze
   VERSION = 'version'.freeze
+  DRIVER = 'driver'.freeze
   URI_KEY = 'uri'.freeze
   LICENSE_KEY = 'license'.freeze
   TYPE_KEY = 'type'.freeze
@@ -152,11 +153,16 @@ class BuildpackCache
   # Returns array of config maps containing references to the root index.yml
   # of file sets to be included in the cache.
   #
-  # @param [Array<String>] config_files list of config files to check. By default it contains all yml files in buildpack config directory.
+  # @param [Array<String>] config_files list of config files to check. By default it contains all yml files in buildpack config and service config directories.
   # @param [Array<String>] cached_hosts list of host names which content should be cached. Collect all remote content by default.
-  def collect_configs(config_files = nil, cached_hosts = nil)
-    config_files = Dir[File.expand_path(File.join('..', '..', 'config', '*.yml'), __FILE__)] if config_files.nil?
+  # @param [Array<String>] exclude_files list of YML file names to exclude from collection. Exclude none by default.
+  def collect_configs(config_files = nil, cached_hosts = nil, exclude_files = nil)
+    if config_files.nil?
+      config_files = Dir[File.expand_path(File.join('..', '..', 'config', '*.yml'), __FILE__)]
+      config_files.concat(Dir[File.expand_path(File.join('..', '..', 'lib', 'liberty_buildpack', 'services', 'config', '*.yml'), __FILE__)])
+    end
     configs = []
+    config_files.reject! { |f| exclude_files.include?(File.basename(f)) } unless exclude_files.nil?
     config_files.each do |file|
       @logger.debug "Checking #{file}"
       begin
@@ -164,6 +170,7 @@ class BuildpackCache
       rescue => e
         abort "ERROR: Failed loading config #{file}: #{e}"
       end
+      config = config[DRIVER] || config
       if !config.nil? && config.has_key?(REPOSITORY_ROOT) && config.has_key?(VERSION) && (File.exists?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(repository_root(config)).host))
         configs.push(config)
       end
