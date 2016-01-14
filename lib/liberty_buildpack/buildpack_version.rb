@@ -95,6 +95,20 @@ module LibertyBuildpack
       s.join(human_readable ? ' ' : '-')
     end
 
+    # Creates a clean string representation of the buildpack version if the version exists or an empty string if not.
+    # The string representation looks like the following:
+    # +[buildpack-<VERSION>]+.  Examples:
+    #
+    # +buildpack-2.1.2+ (custom version number)
+    # +buildpack-abcdefg (default version number from git commit)
+    # nil (default version number, not part of a git repository)
+    #
+    # @return [String] a clean +String+ representation of the version for use in detect script output
+    def version_string
+      s = 'buildpack-'.concat(@version) if @version
+      s
+    end
+
     private
 
     GIT_DIR = (Pathname.new(__FILE__).dirname + '../../.git').freeze

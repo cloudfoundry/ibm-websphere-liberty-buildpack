@@ -34,6 +34,7 @@ module LibertyBuildpack
     let(:stub_framework2) { double('StubFramework2', detect: nil) }
     let(:stub_jre1) { double('StubJre1', detect: nil, compile: nil) }
     let(:stub_jre2) { double('StubJre2', detect: nil, compile: nil) }
+    let(:stub_buildpack_version) { double('stub-buildpack-version', detect: nil, compile: nil) }
 
     before do
       version_config_path = Pathname.new(File.expand_path('../../config/version.yml', File.dirname(__FILE__))).freeze
@@ -51,6 +52,9 @@ module LibertyBuildpack
            'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
            'jres'       => ['Test::StubJre1', 'Test::StubJre2']
       )
+
+      allow_any_instance_of(LibertyBuildpack::BuildpackVersion).to receive(:version_string)
+        .and_return('stub-buildpack-version')
 
       Test::StubContainer1.stub(:new).and_return(stub_container1)
       Test::StubContainer2.stub(:new).and_return(stub_container2)
@@ -89,6 +93,7 @@ module LibertyBuildpack
       stub_framework1.stub(:detect).and_return('stub-framework-1')
       stub_framework2.stub(:detect).and_return('stub-framework-2')
       stub_jre1.stub(:detect).and_return('stub-jre-1')
+      stub_buildpack_version.stub(:detect).and_return('stub-buildpack-version')
 
       stub_container1.should_receive(:detect)
       stub_container2.should_receive(:detect)
@@ -97,7 +102,7 @@ module LibertyBuildpack
       stub_jre1.should_receive(:detect)
 
       detected = with_buildpack { |buildpack| buildpack.detect }
-      expect(detected).to match_array(%w(stub-jre-1 stub-framework-1 stub-framework-2 stub-container-1))
+      expect(detected).to match_array(%w(stub-jre-1 stub-buildpack-version stub-framework-1 stub-framework-2 stub-container-1))
     end
 
     it 'should raise an error if more than one container can run an application' do
@@ -124,18 +129,29 @@ module LibertyBuildpack
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_jre1.stub(:detect).and_return('stub-jre-1')
       stub_jre2.stub(:detect).and_return('stub-jre-2')
+      stub_buildpack_version.stub(:detect).and_return('stub-buildpack-version')
 
       detected = with_buildpack { |buildpack| buildpack.detect }
-      expect(detected).to match_array(%w(stub-jre-1 stub-container-1))
+      expect(detected).to match_array(%w(stub-jre-1 stub-buildpack-version stub-container-1))
     end
 
     it 'should detect first JRE with non-null detect when more than one JRE can run an application' do
       stub_container1.stub(:detect).and_return('stub-container-1')
       stub_jre1.stub(:detect).and_return(nil)
       stub_jre2.stub(:detect).and_return('stub-jre-2')
+      stub_buildpack_version.stub(:detect).and_return('stub-buildpack-version')
 
       detected = with_buildpack { |buildpack| buildpack.detect }
-      expect(detected).to match_array(%w(stub-jre-2 stub-container-1))
+      expect(detected).to match_array(%w(stub-jre-2 stub-buildpack-version stub-container-1))
+    end
+
+    it 'should omit buildpack version when version is unknown' do
+      stub_container1.stub(:detect).and_return('stub-container-1')
+      stub_jre1.stub(:detect).and_return('stub-jre-1')
+      allow_any_instance_of(LibertyBuildpack::BuildpackVersion).to receive(:version_string).and_return(nil)
+
+      detected = with_buildpack { |buildpack| buildpack.detect }
+      expect(detected).to match_array(%w(stub-jre-1 stub-container-1))
     end
 
 #    it 'should raise an error when none of the JREs return a non-null version for detect' do
