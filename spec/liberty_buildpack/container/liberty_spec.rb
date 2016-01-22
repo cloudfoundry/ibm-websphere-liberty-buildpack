@@ -411,7 +411,7 @@ module LibertyBuildpack::Container
       end
 
       it 'should not write VCAP_SERVICES credentials as debug info' do
-        old_level = ENV['JBP_LOG_LEVEL']
+        previous_environment = ENV.to_hash
         begin
           Dir.mktmpdir do |root|
             Dir.mkdir File.join(root, 'WEB-INF')
@@ -421,6 +421,7 @@ module LibertyBuildpack::Container
             secret = 'VERY SECRET PHRASE'
             plaindata = 'PLAIN DATA'
             ENV['JBP_LOG_LEVEL'] = 'debug'
+            ENV['JBP_CONFIG_LOGGING'] = 'enable_log_file: true'
 
             LibertyBuildpack::Diagnostics::LoggerFactory.send :close # suppress warnings
             LibertyBuildpack::Diagnostics::LoggerFactory.create_logger root
@@ -443,7 +444,7 @@ module LibertyBuildpack::Container
             expect(log_content).to match(plaindata)
           end
         ensure
-          ENV['JBP_LOG_LEVEL'] = old_level
+          ENV.replace previous_environment
         end
       end
 

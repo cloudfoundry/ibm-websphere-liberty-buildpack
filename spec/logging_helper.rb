@@ -25,6 +25,7 @@ shared_context 'logging_helper' do
   include_context 'console_helper'
   include_context 'application_helper'
 
+  previous_log_config = ENV['JBP_CONFIG_LOGGING']
   previous_log_level = ENV['JBP_LOG_LEVEL']
   previous_debug_level = $DEBUG
   previous_verbose_level = $VERBOSE
@@ -34,6 +35,9 @@ shared_context 'logging_helper' do
   before do |example|
     log_level = example.metadata[:log_level]
     ENV['JBP_LOG_LEVEL'] = log_level if log_level
+
+    enable_log_file = example.metadata[:enable_log_file]
+    ENV['JBP_CONFIG_LOGGING'] = 'enable_log_file: true' if enable_log_file
 
     $DEBUG = example.metadata[:debug]
     $VERBOSE = example.metadata[:verbose]
@@ -45,6 +49,7 @@ shared_context 'logging_helper' do
   after do
     FileUtils.rm_rf LibertyBuildpack::Diagnostics.get_diagnostic_directory app_dir
 
+    ENV['JBP_CONFIG_LOGGING'] = previous_log_config
     ENV['JBP_LOG_LEVEL'] = previous_log_level
     $VERBOSE = previous_verbose_level
     $DEBUG = previous_debug_level

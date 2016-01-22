@@ -37,12 +37,11 @@ module LibertyBuildpack
     let(:stub_buildpack_version) { double('stub-buildpack-version', detect: nil, compile: nil) }
 
     before do
+      YAML.stub(:load_file).and_call_original
+
       version_config_path = Pathname.new(File.expand_path('../../config/version.yml', File.dirname(__FILE__))).freeze
       YAML.stub(:load_file).with(version_config_path).and_return({})
 
-      YAML.stub(:load_file).with(File.expand_path('config/logging.yml')).and_return(
-          'default_log_level' => 'DEBUG'
-      )
       YAML.stub(:load_file).with(File.expand_path('config/licenses.yml')).and_return(nil)
 
       allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).and_call_original
@@ -76,7 +75,7 @@ module LibertyBuildpack
     end
 
     it 'should not write VCAP_SERVICES credentials as debug info',
-       log_level: 'DEBUG' do
+       log_level: 'DEBUG',  enable_log_file: true do
       ENV['VCAP_SERVICES'] = '{"type":[{"credentials":"VERY SECRET PHRASE","plain":"PLAIN DATA"}]}'
       log_content = with_buildpack do |buildpack|
         app_dir = File.dirname buildpack.instance_variable_get(:@lib_directory)
@@ -287,14 +286,16 @@ module LibertyBuildpack
       expect($stderr.string).to match(/No components of type jres defined in components configuration/)
     end
 
-    it 'logs information about the git repository of a buildpack' do
+    it 'logs information about the git repository of a buildpack',
+       log_level: 'DEBUG' do
       with_buildpack { |buildpack| buildpack.detect }
       standard_error = $stderr.string
       expect(standard_error).to match(/git remotes/)
       expect(standard_error).to match(/git HEAD commit/)
     end
 
-    it 'realises when buildpack is not stored in a git repository' do
+    it 'realises when buildpack is not stored in a git repository',
+       log_level: 'DEBUG' do
       Dir.mktmpdir do |tmp_dir|
         Buildpack.stub(:git_dir).and_return(tmp_dir)
         with_buildpack { |buildpack| buildpack.detect }
