@@ -195,7 +195,8 @@ describe LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic do
 
   it 'should issue a warning when the specified maximum memory sizes imply the total memory size may be too large',
      memory_limit: '4096m',
-     sizes:        { 'heap' => '800m', 'permgen' => '800m' } do
+     sizes:        { 'heap' => '800m', 'permgen' => '800m' },
+     enable_log_file: true do
 
     output = heuristic.resolve
 
@@ -206,7 +207,8 @@ describe LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic do
 
   it 'should issue a warning when the specified maximum memory sizes, including native, imply the total memory size may be too large',
      memory_limit: '4096m',
-     sizes:        { 'heap' => '1m', 'permgen' => '1m', 'stack' => '2m', 'native' => '2000m' } do
+     sizes:        { 'heap' => '1m', 'permgen' => '1m', 'stack' => '2m', 'native' => '2000m' },
+     enable_log_file: true do
 
     output = heuristic.resolve
 
@@ -240,7 +242,8 @@ describe LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic do
 
   it 'should issue a warning when the specified maximum heap size is close to the default',
      memory_limit: '4096m',
-     sizes:        { 'heap' => '2049m' } do
+     sizes:        { 'heap' => '2049m' },
+     enable_log_file: true do
 
     heuristic.resolve
 
@@ -249,7 +252,8 @@ describe LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic do
 
   it 'should issue a warning when the specified maximum permgen size is close to the default',
      memory_limit: '4096m',
-     sizes:        { 'permgen' => '1339m' } do
+     sizes:        { 'permgen' => '1339m' },
+     enable_log_file: true do
 
     heuristic.resolve
 
@@ -258,7 +262,8 @@ describe LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic do
 
   it 'should not issue a warning when the specified maximum permgen size is not close to the default',
      memory_limit: '1G',
-     sizes:        { 'permgen' => '128M' } do
+     sizes:        { 'permgen' => '128M' },
+     enable_log_file: true do
 
     heuristic.resolve
 

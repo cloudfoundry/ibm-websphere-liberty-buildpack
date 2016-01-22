@@ -17,6 +17,7 @@
 require 'fileutils'
 require 'liberty_buildpack/diagnostics'
 require 'liberty_buildpack/diagnostics/common'
+require 'liberty_buildpack/util/configuration_utils'
 require 'logger'
 require 'monitor'
 require 'yaml'
@@ -30,9 +31,7 @@ module LibertyBuildpack::Diagnostics
     # @param [String] app_dir the root directory for diagnostics
     # @return [Logger] the created Logger instance
     def self.create_logger(app_dir)
-      diagnostics_directory = LibertyBuildpack::Diagnostics.get_diagnostic_directory app_dir
-      FileUtils.mkdir_p diagnostics_directory
-      log_file = File.join(diagnostics_directory, LibertyBuildpack::Diagnostics::LOG_FILE_NAME)
+      configuration = LibertyBuildpack::Util::ConfigurationUtils.load('logging', false)
 
       if (defined? @@logger) && (@@logger != nil)
         logger_recreated = true
@@ -41,13 +40,18 @@ module LibertyBuildpack::Diagnostics
         logger_recreated = false
       end
 
-      @@monitor.synchronize do
-        @@logger = Logger.new(LogSplitter.new(File.open(log_file, 'a'), $stderr))
+      delegates = [$stderr]
+      if configuration['enable_log_file']
+        log_file = log_file(app_dir)
+        delegates << File.open(log_file, 'a')
       end
 
-      set_log_level
+      @@monitor.synchronize do
+        @@logger = Logger.new(LogSplitter.new(*delegates))
+      end
 
-      @@logger.debug(log_file)
+      set_log_level(configuration)
+
       if logger_recreated
         @@logger.warn("Logger was re-created by #{caller[0]}")
       end
@@ -85,8 +89,7 @@ module LibertyBuildpack::Diagnostics
 
     @@monitor = Monitor.new
 
-    def self.set_log_level
-      logging_configuration = get_configuration
+    def self.set_log_level(logging_configuration)
       switched_log_level = $VERBOSE || $DEBUG ? DEBUG_SEVERITY_STRING : nil
       log_level = (ENV[LOG_LEVEL_ENVIRONMENT_VARIABLE] || switched_log_level || logging_configuration[DEFAULT_LOG_LEVEL_CONFIGURATION_KEY]).upcase
 
@@ -106,9 +109,11 @@ module LibertyBuildpack::Diagnostics
                                end
     end
 
-    def self.get_configuration
-      expanded_path = File.expand_path(LOGGING_CONFIG, File.dirname(__FILE__))
-      YAML.load_file(expanded_path)
+    def self.log_file(app_dir)
+      diagnostics_directory = LibertyBuildpack::Diagnostics.get_diagnostic_directory app_dir
+      FileUtils.mkdir_p diagnostics_directory
+      log_file = File.join(diagnostics_directory, LibertyBuildpack::Diagnostics::LOG_FILE_NAME)
+      log_file
     end
 
     def self.close

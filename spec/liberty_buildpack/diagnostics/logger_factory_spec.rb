@@ -21,6 +21,8 @@ module LibertyBuildpack::Diagnostics
 
   describe LoggerFactory do
 
+    previous_environment = ENV.to_hash
+
     LOG_MESSAGE = 'a log message'
 
     before do
@@ -28,6 +30,7 @@ module LibertyBuildpack::Diagnostics
     end
 
     after do
+      ENV.replace previous_environment
       $stderr = STDERR
     end
 
@@ -148,7 +151,7 @@ module LibertyBuildpack::Diagnostics
     end
 
     it 'should take the default log level from a YAML file' do
-      YAML.stub(:load_file).with(File.expand_path('config/logging.yml')).and_return(
+      LibertyBuildpack::Util::ConfigurationUtils.stub(:load).with('logging', false).and_return(
           'default_log_level' => 'DEBUG')
       Dir.mktmpdir do |app_dir|
         logger = new_logger app_dir
@@ -195,6 +198,7 @@ module LibertyBuildpack::Diagnostics
           logger = new_logger app_dir
           logger.debug(LOG_MESSAGE)
           expect($stderr.string).to match(/#{LOG_MESSAGE}/)
+          expect(File.exists?(log_file(app_dir))).to eq(false)
         ensure
           $VERBOSE = previous_value
         end
@@ -209,6 +213,7 @@ module LibertyBuildpack::Diagnostics
           logger = new_logger app_dir
           logger.debug(LOG_MESSAGE)
           expect($stderr.string).to match(/#{LOG_MESSAGE}/)
+          expect(File.exists?(log_file(app_dir))).to eq(false)
         ensure
           $DEBUG = previous_value
         end
@@ -217,10 +222,11 @@ module LibertyBuildpack::Diagnostics
 
     it 'should send info logs to buildpack.log when info is enabled' do
       Dir.mktmpdir do |app_dir|
+        ENV['JBP_CONFIG_LOGGING'] = 'enable_log_file: true'
         with_log_level('info') do
           logger = new_logger app_dir
           logger.info(LOG_MESSAGE)
-          file_contents = File.read File.join(LibertyBuildpack::Diagnostics.get_diagnostic_directory(app_dir), LibertyBuildpack::Diagnostics::LOG_FILE_NAME)
+          file_contents = File.read(log_file(app_dir))
           expect(file_contents).to match(/#{LOG_MESSAGE}/)
         end
       end
@@ -239,6 +245,10 @@ module LibertyBuildpack::Diagnostics
       ensure
         ENV['JBP_LOG_LEVEL'] = previous_value
       end
+    end
+
+    def log_file(app_dir)
+      File.join(LibertyBuildpack::Diagnostics.get_diagnostic_directory(app_dir), LibertyBuildpack::Diagnostics::LOG_FILE_NAME)
     end
 
     def info_method_caller(logger)

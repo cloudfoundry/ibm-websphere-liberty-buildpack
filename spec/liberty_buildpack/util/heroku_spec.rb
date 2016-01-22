@@ -112,7 +112,8 @@ module LibertyBuildpack::Util
       end
     end
 
-    it 'generate without service mappings', log_level: 'DEBUG' do
+    it 'generate without service mappings',
+       log_level: 'DEBUG', enable_log_file: true do
       env = {}
       env['DATABASE_URL'] = 'http://u:p@foo:500/bar'
       env['HEROKU_POSTGRESQL_RED_URL'] = 'postgre://doesnotexist.xyz'
@@ -148,7 +149,8 @@ module LibertyBuildpack::Util
       check_debug_output(env)
     end
 
-    it 'generate with service mappings', log_level: 'DEBUG' do
+    it 'generate with service mappings',
+       log_level: 'DEBUG', enable_log_file: true do
       env = {}
       env['DATABASE_URL'] = 'http://u:p@foo:500/bar'
       env['HEROKU_POSTGRESQL_RED_URL'] = 'postgre://doesnotexist.xyz'
