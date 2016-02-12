@@ -77,7 +77,6 @@ module LibertyBuildpack::Framework
       
       appdynamics_home = File.join(@app_dir, APPDYNAMICS_HOME_DIR)
       FileUtils.mkdir_p(appdynamics_home)
-      @logger.info(appdynamics_home)
       download_agent(@version, @uri, @appdynamics_jar, appdynamics_home)
       copy_agent_config(appdynamics_home)
   
