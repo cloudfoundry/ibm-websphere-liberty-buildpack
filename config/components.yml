@@ -28,3 +28,4 @@ frameworks:
   - "LibertyBuildpack::Framework::SpringAutoReconfiguration"
   - "LibertyBuildpack::Framework::NewRelicAgent"
   - "LibertyBuildpack::Framework::JRebelAgent"
+  - "LibertyBuildpack::Framework::DynaTraceAgent"
