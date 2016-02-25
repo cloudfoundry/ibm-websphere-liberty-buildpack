@@ -26,10 +26,10 @@ Users must provide their own DynaTrace service.  A user-provided DynaTrace servi
 
 The credentials payload of the service may contain the following entries:
 
- | Name | Description
- | ---- | -----------
- | `server` | The DynaTrace collector hostname to connect to.  Use `host:port` format for a specific port number.
- | `profile` | (Optional) The DynaTrace server profile this is associated with.  Uses `Monitoring` by default.
+| Name | Description
+| ---- | -----------
+| `server` | The DynaTrace collector hostname to connect to.  Use `host:port` format for a specific port number.
+| `profile` | (Optional) The DynaTrace server profile this is associated with.  Uses `Monitoring` by default.
 
 **NOTE**
 
@@ -60,9 +60,10 @@ For general information on configuring the buildpack, including how to specify c
 
 The framework can be configured by modifying the [`config/dynatraceagent.yml`][] file in the buildpack fork.  The framework uses the [`Repository` utility support][repositories] and so it supports the [version syntax][] defined there.
 
- | Name | Description
- | `repository_root` | The URL of the DynaTrace repository index ([details][repositories]).
- | `version` | The version of DynaTrace to use.  This buildpack framework has been tested on 6.3.0.
+| Name | Description
+| ---- | -----------
+| `repository_root` | The URL of the DynaTrace repository index ([details][repositories]).
+| `version` | The version of DynaTrace to use.  This buildpack framework has been tested on 6.3.0.
 
 ### Additional Configuration
 This buildpack supports adding additional DynaTrace Agent configuration options to the bound service through an options payload in the service.  The options payload should be a collection of name-value pairs similar to the following:
@@ -76,8 +77,9 @@ This buildpack supports adding additional DynaTrace Agent configuration options 
 Supported parameters are any parameters which the [DynaTrace agent supports][]
 
 [Configuration and Extension]: ./configuration.md
-[`config/dyna_trace_agent.yml`]: ../config/dyna_trace_agent.yml
+[`config/dynatraceagent.yml`]: ../config/dynatraceagent.yml
 [DynaTrace agent supports]: https://community.dynatrace.com/community/display/DOCDT62/Agent+Configuration
 [DynaTrace Service]: https://dynatrace.com
-[repositories]: extending-repositories.md
-[version syntax]: extending-repositories.md#version-syntax-and-ordering
+[repositories]: util-repositories.md
+[version syntax]: util-repositories.md#version-syntax-and-ordering
+
