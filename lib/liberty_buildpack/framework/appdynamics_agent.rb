@@ -73,10 +73,10 @@ module LibertyBuildpack::Framework
       elsif @version.nil? || @uri.nil? || @appdynamics_jar.nil?
         raise "Version #{@version}, uri #{@uri}, or Appdynamics agent jar name #{@appdynamics_jar} is not available, detect needs to be invoked"
       end
-      
-      appdynamics_home = File.join(@app_dir,APPDYNAMICS_HOME_DIR)
+
+      appdynamics_home = File.join(@app_dir, APPDYNAMICS_HOME_DIR)
       FileUtils.mkdir_p(appdynamics_home)
-      download_agent(@version, @uri, @appdynamics_jar,appdynamics_home)
+      download_agent(@version, @uri, @appdynamics_jar, appdynamics_home)
       copy_agent_config(appdynamics_home)
     end
 
@@ -89,7 +89,6 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def release
       appd_agent = getJavaAgent
-      agent_len = appd_agent.length
       appdynamics_home_dir = File.join(@app_dir, APPDYNAMICS_HOME_DIR)
       appdynamics_logs_dir = @common_paths.log_directory
       application_name = @vcap_application['application_name']
@@ -111,9 +110,7 @@ module LibertyBuildpack::Framework
       @java_opts << "-Dappdynamics.controller.port=#{port}"
       @java_opts << "-Dappdynamics.controller.ssl.enabled=#{ssl_enabled}"
       @java_opts << "-Dappdynamics.agent.tierName=#{tier_name}"
-      if agent_len >= 40
-        @java_opts << "-javaagent:/#{appd_agent}"
-      end
+      @java_opts << "-javaagent:/#{appd_agent}" if appd_agent.length >= 40
     end
 
     # Name of the Appdynamics service
