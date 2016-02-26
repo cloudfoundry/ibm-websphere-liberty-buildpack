@@ -22,7 +22,6 @@ require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/services/vcap_services'
 require 'liberty_buildpack/container/container_utils'
 
-
 module LibertyBuildpack::Framework
 
   #------------------------------------------------------------------------------------
@@ -75,27 +74,22 @@ module LibertyBuildpack::Framework
         raise "Version #{@version}, uri #{@uri}, or Appdynamics agent jar name #{@appdynamics_jar} is not available, detect needs to be invoked"
       end
       
-      appdynamics_home = File.join(@app_dir, APPDYNAMICS_HOME_DIR)
+      appdynamics_home = File.join(@app_dir,APPDYNAMICS_HOME_DIR)
       FileUtils.mkdir_p(appdynamics_home)
-      download_agent(@version, @uri, @appdynamics_jar, appdynamics_home)
+      download_agent(@version, @uri, @appdynamics_jar,appdynamics_home)
       copy_agent_config(appdynamics_home)
-  
     end
 
-    def getJavaAgent
-      return String.new(Dir["app/**/appdynamics_agent/**/javaagent.jar"].reject{ |file| file.include?('threadprofiler')}[0])
+    def get_java_agent
+      String.new(Dir['app/**/appdynamics_agent/**/javaagent.jar'].reject { |file| file.include?('threadprofiler') } [0])
     end
 
     #-----------------------------------------------------------------------------------------
     # Create the Appdynamics agent options appended as java_opts.
     #------------------------------------------------------------------------------------------
     def release
-      # Appdynamics paths within the droplet
-      app_dir = @common_paths.relative_location
-      appd_home_dir = File.join(@app_dir, APPDYNAMICS_HOME_DIR)
-      appd_agent = getJavaAgent()
+      appd_agent = getJavaAgent
       agent_len = appd_agent.length
-
       appdynamics_home_dir = File.join(@app_dir, APPDYNAMICS_HOME_DIR)
       appdynamics_logs_dir = @common_paths.log_directory
       application_name = @vcap_application['application_name']
@@ -106,7 +100,6 @@ module LibertyBuildpack::Framework
       port = @vcap_services['appdynamics'][0]['credentials']['port']
       ssl_enabled = @vcap_services['appdynamics'][0]['credentials']['ssl-enabled']
       tier_name = application_name
-
       @java_opts << "-Dappdynamics.home=#{appdynamics_home_dir}"
       @java_opts << "-Dappdynamics.config.app_name=#{vcap_app_name}"
       @java_opts << "-Dappdynamics.config.log_file_path=#{appdynamics_logs_dir}"
@@ -117,7 +110,7 @@ module LibertyBuildpack::Framework
       @java_opts << "-Dappdynamics.agent.nodeName=#{node_name}"
       @java_opts << "-Dappdynamics.controller.port=#{port}"
       @java_opts << "-Dappdynamics.controller.ssl.enabled=#{ssl_enabled}"
-      @java_opts << "-Dappdynamics.agent.tierName=#{tier_name}"  
+      @java_opts << "-Dappdynamics.agent.tierName=#{tier_name}"
       if agent_len >= 40
         @java_opts << "-javaagent:/#{appd_agent}"
       end
@@ -135,7 +128,6 @@ module LibertyBuildpack::Framework
 
     # Appdynamics's directory of artifacts in the droplet
     APPDYNAMICS_HOME_DIR = 'appdynamics_agent'.freeze
-
 
     #-----------------------------------------------------------------------------------------
     # Determines if the Appdynamics service is included in VCAP_SERVICES based on whether the
@@ -176,7 +168,7 @@ module LibertyBuildpack::Framework
     def process_config
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
-        id_pattern = "app-dynamics"
+        id_pattern = 'app-dynamics'
         jar_pattern = "#{id_pattern}-#{@version}.zip"
 
         # get the jar name from the uri, ensuring that the jar is a new-relic jar eg: new-relic-3.11.0.jar
@@ -206,10 +198,9 @@ module LibertyBuildpack::Framework
     #-----------------------------------------------------------------------------------------
     # Download the agent library from the repository as specified in the Appdynamics configuration.
     #------------------------------------------------------------------------------------------
-    def download_agent(version_desc, uri_source, target_jar_name, target_dir)    
-
+    def download_agent(version_desc, uri_source, target_jar_name, target_dir)
       LibertyBuildpack::Util.download(version_desc, uri_source, target_jar_name, target_jar_name, target_dir)
-      LibertyBuildpack::Container::ContainerUtils.unzip(File.join(target_dir,'app-dynamics-3.8.4.zip'), target_dir)
+      LibertyBuildpack::Container::ContainerUtils.unzip(File.join(target_dir, 'app-dynamics-3.8.4.zip'), target_dir)
     rescue => e
       raise "Unable to download the Appdynamics Agent jar. Ensure that the agent jar at #{uri_source} is available and accessible. #{e.message}"
     end
