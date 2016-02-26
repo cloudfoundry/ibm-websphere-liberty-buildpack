@@ -49,7 +49,6 @@ module LibertyBuildpack::Framework
       @vcap_services = context[:vcap_services]
       @services = @vcap_services ? LibertyBuildpack::Services::VcapServices.new(@vcap_services) : LibertyBuildpack::Services::VcapServices.new({})
       @java_opts = context[:java_opts]
-
     end
 
     #-----------------------------------------------------------------------------------------
@@ -121,7 +120,7 @@ module LibertyBuildpack::Framework
 
     # VCAP_SERVICES keys
     LICENSE_KEY = 'licenseKey'.freeze
-    
+
     # VCAP_APPLICATION keys
     APPLICATION_NAME_KEY = 'application_name'.freeze
 
@@ -169,7 +168,6 @@ module LibertyBuildpack::Framework
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
         id_pattern = 'app-dynamics'
         jar_pattern = "#{id_pattern}-#{@version}.zip"
-
         # get the jar name from the uri, ensuring that the jar is a new-relic jar eg: new-relic-3.11.0.jar
         if !@uri.nil? && @uri.split('/').last.match(/#{jar_pattern}/)
           @appdynamics_jar = jar_pattern
@@ -205,4 +203,3 @@ module LibertyBuildpack::Framework
     end
   end
 end
-
