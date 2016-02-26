@@ -80,6 +80,9 @@ module LibertyBuildpack::Framework
       copy_agent_config(appdynamics_home)
     end
 
+    #-----------------------------------------------------------------------------------------
+    # Determines the location of javaagent for Appdynamics.
+    #------------------------------------------------------------------------------------------
     def get_java_agent
       String.new(Dir['app/**/appdynamics_agent/**/javaagent.jar'].reject { |file| file.include?('threadprofiler') } [0])
     end
@@ -118,8 +121,7 @@ module LibertyBuildpack::Framework
 
     # VCAP_SERVICES keys
     LICENSE_KEY = 'licenseKey'.freeze
-    CREDENTIALS_KEY = 'credentials'.freeze
-
+    
     # VCAP_APPLICATION keys
     APPLICATION_NAME_KEY = 'application_name'.freeze
 
