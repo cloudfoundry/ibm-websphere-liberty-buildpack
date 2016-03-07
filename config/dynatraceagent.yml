@@ -15,5 +15,5 @@
 
 # Service configuration
 ---
-version: 6.3.0_+
+version: 6.+
 repository_root: ""

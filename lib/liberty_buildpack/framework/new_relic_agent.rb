@@ -68,8 +68,8 @@ module LibertyBuildpack::Framework
     def compile
       if @app_dir.nil?
         raise 'app directory must be provided'
-      elsif @version.nil? || @uri.nil? || @nr_jar.nil?
-        raise "Version #{@version}, uri #{@uri}, or new relic agent jar name #{@nr_jar} is not available, detect needs to be invoked"
+      elsif @version.nil? || @uri.nil?
+        raise "Version #{@version} or uri #{@uri} is not available, detect needs to be invoked"
       end
 
       # create a new relic home dir in the droplet
@@ -78,7 +78,7 @@ module LibertyBuildpack::Framework
 
       # place new relic resources in newrelic's home dir
       copy_agent_config(nr_home)
-      download_agent(@version, @uri, @nr_jar, nr_home)
+      download_agent(@version, @uri, NR_JAR, nr_home)
     end
 
     #-----------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ module LibertyBuildpack::Framework
       # new relic paths within the droplet
       app_dir = @common_paths.relative_location
       nr_home_dir = File.join(app_dir, NR_HOME_DIR)
-      nr_agent = File.join(nr_home_dir, @nr_jar)
+      nr_agent = File.join(nr_home_dir, NR_JAR)
       nr_logs_dir = @common_paths.log_directory
 
       # create the new relic agent command as java_opts
@@ -100,6 +100,9 @@ module LibertyBuildpack::Framework
     end
 
     private
+
+    # Name of the new relic jar file
+    NR_JAR = 'new-relic.jar'.freeze
 
     # Name of the new relic service
     NR_SERVICE_NAME = 'newrelic'.freeze
@@ -162,21 +165,12 @@ module LibertyBuildpack::Framework
     def process_config
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
-        id_pattern = "new-relic-#{@version}"
-        jar_pattern = "#{id_pattern}.jar"
-
-        # get the jar name from the uri, ensuring that the jar is a new-relic jar eg: new-relic-3.11.0.jar
-        if !@uri.nil? && @uri.split('/').last.match(/#{jar_pattern}/)
-          @nr_jar = jar_pattern
-        else
-          @logger.error("The #{id_pattern}.jar format could not be matched from the uri #{@uri}")
-        end
       rescue => e
         @logger.debug("Contents of the New Relic Agent configuration #{@configuration}")
         @logger.error("Unable to process the configuration for the New Relic Agent framework. #{e.message}")
       end
 
-      @nr_jar.nil? ? nil : id_pattern
+      @version.nil? ? nil : "new-relic-#{@version}"
     end
 
     #-----------------------------------------------------------------------------------------
