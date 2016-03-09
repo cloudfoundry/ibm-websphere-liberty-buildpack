@@ -68,8 +68,8 @@ module LibertyBuildpack::Framework
     def compile
       if @app_dir.nil?
         raise 'app directory must be provided'
-      elsif @version.nil? || @uri.nil? || @dt_jar.nil?
-        raise "Version #{@version}, uri #{@uri}, or dynatrace agent jar name #{@dt_jar} is not available, detect needs to be invoked"
+      elsif @version.nil? || @uri.nil?
+        raise "Version #{@version} or uri #{@uri} is not available, detect needs to be invoked"
       end
 
       # create a dynatrace home dir in the droplet
@@ -77,10 +77,9 @@ module LibertyBuildpack::Framework
       FileUtils.mkdir_p(dt_home)
 
       @logger.debug("Dynatrace home directory: #{dt_home}")
-      @logger.debug("Dynatrace jar file: #{@dt_jar}")
-      full_jar_path = File.join(dt_home, @dt_jar)
+      full_jar_path = File.join(dt_home, DT_JAR)
 
-      download_agent(@version, @uri, @dt_jar, dt_home)
+      download_agent(@version, @uri, DT_JAR, dt_home)
       expand full_jar_path
     end
 
@@ -105,6 +104,9 @@ module LibertyBuildpack::Framework
 
     # Name of the default dynatrace profile
     DT_DEFAULT_PROFILE_NAME = 'Monitoring'.freeze
+
+    # Name of the dynatrace jar file
+    DT_JAR = 'dynatrace-agent-unix.jar'.freeze
 
     # VCAP_SERVICES keys
     CREDENTIALS_KEY = 'credentials'.freeze
@@ -204,21 +206,11 @@ module LibertyBuildpack::Framework
     def process_config
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
-
-        id_pattern = "dynatrace-agent-#{@version}"
-        jar_pattern = "#{id_pattern}-unix.jar"
-
-        # get the jar name from the uri, ensuring that it is a dynatrace jar eg: dynatrace-agent-6.2.0.1225-unix.jar
-        if !@uri.nil? && @uri.split('/').last.match(/#{jar_pattern}/)
-          @dt_jar = jar_pattern
-        else
-          @logger.error("The #{jar_pattern} format could not be matched from the uri #{@uri}")
-        end
       rescue => e
         @logger.error("Unable to process the configuration for the DynaTrace Agent framework. #{e.message}")
       end
 
-      @dt_jar.nil? ? nil : id_pattern
+      @version.nil? ? nil : "dynatrace-agent-#{@version}"
     end
 
     #-----------------------------------------------------------------------------------------

@@ -28,8 +28,8 @@ module LibertyBuildpack::Framework
     let(:dynatrace_home) { '.dynatrace_agent' }   # the expected staged dynatrace agent directory
     let(:application_cache) { double('ApplicationCache') }
     let(:version) { '6.2.0_1238' }
-    let(:versionid) { "dynatrace-agent-#{version}" }
-    let(:fullversionid) { "#{versionid}-unix" }
+    let(:jar_name) { 'dynatrace-agent-unix.jar' }
+    let(:detect_string) { "dynatrace-agent-#{version}" }
 
     before do | example |
       # an index.yml entry returned from the index.yml of the dynatrace repository
@@ -40,7 +40,7 @@ module LibertyBuildpack::Framework
       else
          # default values for the dynatrace index.yml info for tests
          index_version = version
-         index_uri =  "https://downloadsite/dynatrace/#{versionid}-unix.jar"
+         index_uri =  'https://downloadsite/dynatrace/dynatrace-agent-unix.jar'
       end
 
       # By default, always stub the return of a valid index.yml entry
@@ -85,7 +85,7 @@ module LibertyBuildpack::Framework
         it 'should be detected when the service name includes dynatrace substring',
            vcap_services_context: { def_type => [{ 'name' => 'dynatrace', 'label' => def_label, 'tags' => def_tags,
                                                    'credentials' => def_credentials }] } do
-          expect(detected).to eq(versionid)
+          expect(detected).to eq(detect_string)
         end
 
         it 'should raise a runtime error for multiple valid dynatrace user services',
@@ -100,7 +100,7 @@ module LibertyBuildpack::Framework
         it 'should be detected when the tag includes dynatrace substring',
            vcap_services_context: { def_type => [{ 'name' => def_name, 'label' => def_label, 'tags' => ['dynatracetag'],
                                                    'credentials' => def_credentials }] } do
-          expect(detected).to eq(versionid)
+          expect(detected).to eq(detect_string)
         end
 
         it 'should not be detected unless the name or tag includes dynatrace substring',
@@ -124,7 +124,7 @@ module LibertyBuildpack::Framework
            vcap_services_context: { 'dynatrace' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace',
                                                      'credentials' => def_credentials }] } do
 
-          expect(detected).to eq(versionid)
+          expect(detected).to eq(detect_string)
         end
 
         it 'should not be detected if dynatrace service does not exist',
@@ -151,7 +151,7 @@ module LibertyBuildpack::Framework
                                     'dynatrace' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace',
                                                   'credentials' => def_credentials }] } do
 
-          expect(detected).to eq(versionid)
+          expect(detected).to eq(detect_string)
         end
 
         it 'should raise a runtime error if multiple dynatrace services exist',
@@ -177,25 +177,11 @@ module LibertyBuildpack::Framework
               vcap_services_context: { 'dynatrace' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace',
                                        'credentials' => { 'profile' => 'Monitoring', 'server' => '127.0.0.1' } }] } do
 
-        it 'should raise an error if the uri does not include a dynatrace jar name format with a version',
-           index_version: '6.2.0_1238', index_uri: 'https://downloadsite/dynatrace/dynatrace.jar' do
-          expect(detected).to eq(nil)
-        end
-
         it 'should raise an error including the underlying failure if the index.yml could not be processed',
            return_find_item: false, raise_error_message: 'underlying index.yml error' do
           expect(detected).to eq(nil)
         end
 
-        it 'should raise an error if the agent jar has a jar version different from from the version key',
-           index_version: '6.2.0_1238', index_uri: 'https://downloadsite/dynatrace/dynatrace-4.1.0.jar' do
-          expect(detected).to eq(nil)
-        end
-
-        it 'should raise an error if the uri does not include a jar in the index.yml uri of the index.yml entry',
-           index_version: '6.2.0_1238', index_uri: 'https://downloadsite/dynatrace' do
-          expect(detected).to eq(nil)
-        end
       end
 
     end # end of detect tests
@@ -219,12 +205,12 @@ module LibertyBuildpack::Framework
 
       describe 'download agent jar based on index.yml information' do
         it 'should download the agent with a matching key and jar version' do
-          expect { compiled }.to output(%r{Downloading dynatrace-agent-#{version}-unix.jar #{version} from https://downloadsite/dynatrace/dynatrace-agent-#{version}-unix.jar}).to_stdout
-          expect(File.exists?(File.join(app_dir, dynatrace_home, "dynatrace-agent-#{version}-unix.jar"))).to eq(true)
+          expect { compiled }.to output(%r{Downloading #{jar_name} #{version} from https://downloadsite/dynatrace/dynatrace-agent-unix.jar}).to_stdout
+          expect(File.exists?(File.join(app_dir, dynatrace_home, jar_name))).to eq(true)
         end
 
         it 'should raise an error with original exception if the jar could not be downloaded',
-           index_version: '6.2.0_1238', index_uri: 'https://downloadsite/dynatrace/dynatrace-agent-6.2.0_1238-unix.jar' do
+           index_version: '6.2.0_1238', index_uri: 'https://downloadsite/dynatrace/dynatrace-agent-unix.jar' do
           allow(LibertyBuildpack::Util).to receive(:download).and_raise('underlying download error')
           expect { compiled }.to raise_error(/Unable to download the DynaTrace Agent jar..+underlying download error/)
         end

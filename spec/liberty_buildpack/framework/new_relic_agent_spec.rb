@@ -29,6 +29,7 @@ module LibertyBuildpack::Framework
     let(:application_cache) { double('ApplicationCache') }
     let(:version) { '3.12.0' }
     let(:versionid) { "new-relic-#{version}" }
+    let(:jar_name) { 'new-relic.jar' }
 
     before do | example |
       # an index.yml entry returned from the index.yml of the new relic repository
@@ -173,25 +174,11 @@ module LibertyBuildpack::Framework
               vcap_services_context: { 'newrelic' => [{ 'name' => 'test-newrelic', 'label' => 'newrelic',
                                        'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
 
-        it 'should raise an error if the uri does not include a newrelic jar name format with a version',
-           index_version: '3.11.0', index_uri: 'https://downloadsite/new-relic/new-relic.jar' do
-          expect(detected).to eq(nil)
-        end
-
         it 'should raise an error including the underlying failure if the index.yml could not be processed',
            return_find_item: false, raise_error_message: 'underlying index.yml error' do
           expect(detected).to eq(nil)
         end
 
-        it 'should raise an error if the agent jar has a jar version different from from the version key',
-           index_version: '3.11.0', index_uri: 'https://downloadsite/new-relic/new-relic-4.1.0.jar' do
-          expect(detected).to eq(nil)
-        end
-
-        it 'should raise an error if the uri does not include a jar in the index.yml uri of the index.yml entry',
-           index_version: '3.11.0', index_uri: 'https://downloadsite/new-relic' do
-          expect(detected).to eq(nil)
-        end
       end
 
     end # end of detect tests
@@ -220,8 +207,8 @@ module LibertyBuildpack::Framework
 
       describe 'download agent jar based on index.yml information' do
         it 'should download the agent with a matching key and jar version' do
-          expect { compiled }.to output(%r{Downloading new-relic-#{version}.jar #{version} from https://downloadsite/new-relic/new-relic-#{version}.jar}).to_stdout
-          expect(File.exists?(File.join(app_dir, newrelic_home, "new-relic-#{version}.jar"))).to eq(true)
+          expect { compiled }.to output(%r{Downloading #{jar_name} #{version} from https://downloadsite/new-relic/new-relic-#{version}.jar}).to_stdout
+          expect(File.exists?(File.join(app_dir, newrelic_home, jar_name))).to eq(true)
         end
 
         it 'should raise an error with original exception if the jar could not be downloaded',
@@ -246,7 +233,7 @@ module LibertyBuildpack::Framework
       end
 
       it 'should return command line options for a valid service in a default container' do
-        expect(released).to include("-javaagent:./#{newrelic_home}/#{versionid}.jar")
+        expect(released).to include("-javaagent:./#{newrelic_home}/#{jar_name}")
         expect(released).to include("-Dnewrelic.home=./#{newrelic_home}")
         expect(released).to include('-Dnewrelic.config.license_key=abcdefghijklmnop1234')
         expect(released).to include('-Dnewrelic.config.app_name=TestApp')
@@ -258,7 +245,7 @@ module LibertyBuildpack::Framework
 
         example.metadata[:common_paths].relative_location = 'custom/container/dir'
 
-        expect(released).to include("-javaagent:../../../#{newrelic_home}/#{versionid}.jar")
+        expect(released).to include("-javaagent:../../../#{newrelic_home}/#{jar_name}")
         expect(released).to include("-Dnewrelic.home=../../../#{newrelic_home}")
         expect(released).to include('-Dnewrelic.config.license_key=abcdefghijklmnop1234')
         expect(released).to include('-Dnewrelic.config.app_name=TestApp')
