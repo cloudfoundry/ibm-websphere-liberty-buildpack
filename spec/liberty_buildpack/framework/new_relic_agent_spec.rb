@@ -29,7 +29,7 @@ module LibertyBuildpack::Framework
     let(:application_cache) { double('ApplicationCache') }
     let(:version) { '3.12.0' }
     let(:versionid) { "new-relic-#{version}" }
-    let(:jar_name) { 'new-relic.jar' }
+    let(:jar_name) { "new-relic-#{version}.jar" }
 
     before do | example |
       # an index.yml entry returned from the index.yml of the new relic repository
@@ -207,7 +207,7 @@ module LibertyBuildpack::Framework
 
       describe 'download agent jar based on index.yml information' do
         it 'should download the agent with a matching key and jar version' do
-          expect { compiled }.to output(%r{Downloading #{jar_name} #{version} from https://downloadsite/new-relic/new-relic-#{version}.jar}).to_stdout
+          expect { compiled }.to output(%r{Downloading New Relic Agent #{version} from https://downloadsite/new-relic/new-relic-#{version}.jar}).to_stdout
           expect(File.exists?(File.join(app_dir, newrelic_home, jar_name))).to eq(true)
         end
 

@@ -77,10 +77,8 @@ module LibertyBuildpack::Framework
       FileUtils.mkdir_p(dt_home)
 
       @logger.debug("Dynatrace home directory: #{dt_home}")
-      full_jar_path = File.join(dt_home, DT_JAR)
 
-      download_agent(@version, @uri, DT_JAR, dt_home)
-      expand full_jar_path
+      download_and_install_agent(dt_home)
     end
 
     #-----------------------------------------------------------------------------------------
@@ -104,9 +102,6 @@ module LibertyBuildpack::Framework
 
     # Name of the default dynatrace profile
     DT_DEFAULT_PROFILE_NAME = 'Monitoring'.freeze
-
-    # Name of the dynatrace jar file
-    DT_JAR = 'dynatrace-agent-unix.jar'.freeze
 
     # VCAP_SERVICES keys
     CREDENTIALS_KEY = 'credentials'.freeze
@@ -138,10 +133,10 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     # Download the agent library from the repository as specified in the dynatrace configuration.
     #------------------------------------------------------------------------------------------
-    def download_agent(version_desc, uri_source, target_jar_name, target_dir)
-      LibertyBuildpack::Util.download(version_desc, uri_source, target_jar_name, target_jar_name, target_dir)
+    def download_and_install_agent(dt_home)
+      LibertyBuildpack::Util.download_zip(@version, @uri, 'Dynatrace Agent', dt_home)
     rescue => e
-      raise "Unable to download the DynaTrace Agent jar. Ensure that the agent jar at #{uri_source} is available and accessible. #{e.message}"
+      raise "Unable to download the Dynatrace Agent jar. Ensure that the agent jar at #{@uri} is available and accessible. #{e.message}"
     end
 
     #------------------------------------------------------------------------------------------
@@ -152,12 +147,6 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def dt_service_exist?
       @services.one_service?(DT_SERVICE_NAME, SERVER_KEY)
-    end
-
-    def expand(file)
-      Dir.mktmpdir do |root|
-        `unzip -qq #{file} -d ./app/#{DT_HOME_DIR}/ 2>&1`
-      end
     end
 
     #------------------------------------------------------------------------------------------

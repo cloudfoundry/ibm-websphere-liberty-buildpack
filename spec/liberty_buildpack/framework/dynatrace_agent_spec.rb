@@ -205,14 +205,16 @@ module LibertyBuildpack::Framework
 
       describe 'download agent jar based on index.yml information' do
         it 'should download the agent with a matching key and jar version' do
-          expect { compiled }.to output(%r{Downloading #{jar_name} #{version} from https://downloadsite/dynatrace/dynatrace-agent-unix.jar}).to_stdout
-          expect(File.exists?(File.join(app_dir, dynatrace_home, jar_name))).to eq(true)
+          expect { compiled }.to output(%r{Downloading Dynatrace Agent #{version} from https://downloadsite/dynatrace/dynatrace-agent-unix.jar}).to_stdout
+          # jar file should not be there - just contents of it
+          expect(File.exists?(File.join(app_dir, dynatrace_home, jar_name))).to eq(false)
+          expect(File.exists?(File.join(app_dir, dynatrace_home, 'agent', 'linux-x86-64', 'agent', 'lib64', 'libdtagent.so'))).to eq(true)
         end
 
         it 'should raise an error with original exception if the jar could not be downloaded',
            index_version: '6.2.0_1238', index_uri: 'https://downloadsite/dynatrace/dynatrace-agent-unix.jar' do
-          allow(LibertyBuildpack::Util).to receive(:download).and_raise('underlying download error')
-          expect { compiled }.to raise_error(/Unable to download the DynaTrace Agent jar..+underlying download error/)
+          allow(LibertyBuildpack::Util).to receive(:download_zip).and_raise('underlying download error')
+          expect { compiled }.to raise_error(/Unable to download the Dynatrace Agent jar..+underlying download error/)
         end
       end
     end # end compile

@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 require 'liberty_buildpack/diagnostics/common'
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/framework'
@@ -93,13 +94,9 @@ module LibertyBuildpack::Framework
     # Downloads ZIP file from specified url
     def download_and_unzip(base_url, system_id, filename, save_to_dir)
       download_url = File.join(base_url, system_id, filename)
-      begin
-        LibertyBuildpack::Util.download('3.+', download_url, 'DynamicPULSE Agent', filename, save_to_dir)
-      rescue
-        @logger.error("[DynamicPULSE] Can't download #{filename} from #{download_url}. Please check dynamicpulse-remote.xml.")
-        raise
-      end
-      LibertyBuildpack::Container::ContainerUtils.unzip(File.join(save_to_dir, filename), save_to_dir)
+      LibertyBuildpack::Util.download_zip('3.+', download_url, 'DynamicPULSE Agent', save_to_dir)
+    rescue => e
+      raise "[DynamicPULSE] Can't download #{filename} from #{download_url}. Please check dynamicpulse-remote.xml. #{e.message}"
     end
 
   end
