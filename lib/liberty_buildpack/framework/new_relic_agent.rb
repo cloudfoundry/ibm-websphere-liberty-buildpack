@@ -78,7 +78,7 @@ module LibertyBuildpack::Framework
 
       # place new relic resources in newrelic's home dir
       copy_agent_config(nr_home)
-      download_agent(@version, @uri, NR_JAR, nr_home)
+      download_agent(@version, @uri, jar_name, nr_home)
     end
 
     #-----------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ module LibertyBuildpack::Framework
       # new relic paths within the droplet
       app_dir = @common_paths.relative_location
       nr_home_dir = File.join(app_dir, NR_HOME_DIR)
-      nr_agent = File.join(nr_home_dir, NR_JAR)
+      nr_agent = File.join(nr_home_dir, jar_name)
       nr_logs_dir = @common_paths.log_directory
 
       # create the new relic agent command as java_opts
@@ -100,9 +100,6 @@ module LibertyBuildpack::Framework
     end
 
     private
-
-    # Name of the new relic jar file
-    NR_JAR = 'new-relic.jar'.freeze
 
     # Name of the new relic service
     NR_SERVICE_NAME = 'newrelic'.freeze
@@ -116,6 +113,10 @@ module LibertyBuildpack::Framework
 
     # new relic's directory of artifacts in the droplet
     NR_HOME_DIR = '.new_relic_agent'.freeze
+
+    def jar_name
+      "new-relic-#{@version}.jar"
+    end
 
     #-----------------------------------------------------------------------------------------
     # Determines if the New Relic service is included in VCAP_SERVICES based on whether the
@@ -166,7 +167,6 @@ module LibertyBuildpack::Framework
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
       rescue => e
-        @logger.debug("Contents of the New Relic Agent configuration #{@configuration}")
         @logger.error("Unable to process the configuration for the New Relic Agent framework. #{e.message}")
       end
 
@@ -187,7 +187,7 @@ module LibertyBuildpack::Framework
     # Download the agent library from the repository as specified in the new relic configuration.
     #------------------------------------------------------------------------------------------
     def download_agent(version_desc, uri_source, target_jar_name, target_dir)
-      LibertyBuildpack::Util.download(version_desc, uri_source, target_jar_name, target_jar_name, target_dir)
+      LibertyBuildpack::Util.download(version_desc, uri_source, 'New Relic Agent', target_jar_name, target_dir)
     rescue => e
       raise "Unable to download the New Relic Agent jar. Ensure that the agent jar at #{uri_source} is available and accessible. #{e.message}"
     end

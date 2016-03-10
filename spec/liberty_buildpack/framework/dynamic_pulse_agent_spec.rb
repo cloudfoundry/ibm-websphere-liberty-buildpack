@@ -101,12 +101,14 @@ module LibertyBuildpack::Framework
       it 'should download the agent with a matching centerUrl and systemId' do
         FileUtils.cp(File.join(remote_dir, 'dynamicpulse-remote.xml'), File.join(webinf_dir, 'dynamicpulse-remote.xml'))
         expect { compiled }.to output(%r{Downloading DynamicPULSE Agent 3.+ from http://downloadsite/dynamicpulse/SampleWebApp/dynamicpulse-agent.zip}).to_stdout
-        expect(File.exists?(File.join(app_dir, '.dynamic_pulse_agent', 'dynamicpulse-agent.zip'))).to eq(true)
+        # zip file should not be there - just contents of it
+        expect(File.exists?(File.join(app_dir, '.dynamic_pulse_agent', 'dynamicpulse-agent.zip'))).to eq(false)
       end
 
       it 'should raise an error if the illegal centerUrl is in the dynamicpulse-remote.xml' do
         FileUtils.cp(File.join(remote_dir, 'dynamicpulse-remote_illegalCenterUrl.xml'), File.join(webinf_dir, 'dynamicpulse-remote.xml'))
-        allow(LibertyBuildpack::Util).to receive(:download).and_raise('underlying download error')
+        allow(LibertyBuildpack::Util).to receive(:download_zip).and_raise('underlying download error')
+        expect { compiled }.to raise_error(/Can't download dynamicpulse-agent.zip from..+underlying download error/)
       end
 
       it 'should raise an error if the centerUrl is not in the dynamicpulse-remote.xml' do

@@ -18,9 +18,7 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/framework'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/download'
-require 'liberty_buildpack/util/cache/application_cache'
 require 'liberty_buildpack/container/common_paths'
-require 'liberty_buildpack/container/container_utils'
 
 module LibertyBuildpack::Framework
 
@@ -122,21 +120,9 @@ module LibertyBuildpack::Framework
     # Download the JRebel zip from the repository as specified in the JRebel configuration.
     #------------------------------------------------------------------------------------------
     def download_and_install_agent(jr_home)
-      download_start_time = Time.now
-      print "-----> Downloading JRebel Agent #{@version} from #{@uri} "
-      LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file|
-        puts "(#{(Time.now - download_start_time).duration})"
-        install_agent(file, jr_home)
-      end
+      LibertyBuildpack::Util.download_zip(@version, @uri, 'JRebel Agent', jr_home)
     rescue => e
       raise "Unable to download the JRebel zip. Ensure that the zip at #{@uri} is available and accessible. #{e.message}"
-    end
-
-    def install_agent(file, jr_home)
-      print '         Installing archive ... '
-      install_start_time = Time.now
-      LibertyBuildpack::Container::ContainerUtils.unzip(file, jr_home)
-      puts "(#{(Time.now - install_start_time).duration})\n"
     end
 
     def openjdk?
