@@ -172,12 +172,16 @@ class BuildpackCache
       end
       unless config.nil?
         config = config[DRIVER] || config
-        if config.has_key?(REPOSITORY_ROOT) && config.has_key?(VERSION) && (File.exists?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(repository_root(config)).host))
+        if repository_configuration?(config) && (File.exists?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(repository_root(config)).host))
           configs.push(config)
         end
       end
     end
     configs
+  end
+
+  def repository_configuration?(configuration)
+    configuration.has_key?(VERSION) && configuration.has_key?(REPOSITORY_ROOT) && !configuration[REPOSITORY_ROOT].empty?
   end
 
   def default_repository_root
