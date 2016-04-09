@@ -25,9 +25,9 @@ require 'liberty_buildpack/container/container_utils'
 module LibertyBuildpack::Framework
 
   #------------------------------------------------------------------------------------
-  # The AppdynamicsAgent class that provides Appdynamics Agent resources as a framework to applications
+  # The AppDynamicsAgent class that provides Appdynamics Agent resources as a framework to applications
   #------------------------------------------------------------------------------------
-  class AppdynamicsAgent
+  class AppDynamicsAgent
 
     #-----------------------------------------------------------------------------------------
     # Creates an instance, passing in a context of information available to the component
@@ -75,8 +75,8 @@ module LibertyBuildpack::Framework
 
       appdynamics_home = File.join(@app_dir, APPDYNAMICS_HOME_DIR)
       FileUtils.mkdir_p(appdynamics_home)
+      download_and_install_agent(appdynamics_home)
       copy_agent_config(appdynamics_home)
-      download_agent(@version, @uri, @appdynamics_zip, appdynamics_home)
     end
 
     #-----------------------------------------------------------------------------------------
@@ -86,34 +86,27 @@ module LibertyBuildpack::Framework
       app_dir = @common_paths.relative_location
       appdynamics_home_dir = File.join(app_dir, APPDYNAMICS_HOME_DIR)
       appd_agent = File.join(appdynamics_home_dir, 'javaagent.jar')
-      application_name = @vcap_application['application_name']
-      account_access_key = @vcap_services['appdynamics'][0]['credentials']['account-access-key']
-      account_name = @vcap_services['appdynamics'][0]['credentials']['account-name']
-      host_name = @vcap_services['appdynamics'][0]['credentials']['host-name']
-      node_name = application_name
-      port = @vcap_services['appdynamics'][0]['credentials']['port']
-      ssl_enabled = @vcap_services['appdynamics'][0]['credentials']['ssl-enabled']
-      tier_name = application_name
-      @java_opts << '-Dorg.osgi.framework.bootdelegation=com.sun.btrace, com.singularity.*'
-      @java_opts << "-Dappdynamics.agent.applicationName=#{application_name}"
-      @java_opts << "-Dappdynamics.agent.accountAccessKey=#{account_access_key}"
-      @java_opts << "-Dappdynamics.agent.accountName=#{account_name}"
-      @java_opts << "-Dappdynamics.controller.hostName=#{host_name}"
-      @java_opts << "-Dappdynamics.agent.nodeName=#{node_name}"
-      @java_opts << "-Dappdynamics.controller.port=#{port}"
-      @java_opts << "-Dappdynamics.controller.ssl.enabled=#{ssl_enabled}"
-      @java_opts << "-Dappdynamics.agent.tierName=#{tier_name}"
+
       @java_opts << "-javaagent:#{appd_agent}"
+      @java_opts << '-Dorg.osgi.framework.bootdelegation=com.sun.btrace, com.singularity.*'
+
+      credentials = @services.find_service(FILTER)['credentials']
+
+      application_name @java_opts, credentials
+      tier_name @java_opts, credentials
+      node_name @java_opts, credentials
+      account_access_key @java_opts, credentials
+      account_name @java_opts, credentials
+      host_name @java_opts, credentials
+      port @java_opts, credentials
+      ssl_enabled @java_opts, credentials
+      @java_opts
     end
 
+    private
+
     # Name of the Appdynamics service
-    APPDYNAMICS_SERVICE_NAME = 'appdynamics'.freeze
-
-    # VCAP_SERVICES keys
-    LICENSE_KEY = 'licenseKey'.freeze
-
-    # VCAP_APPLICATION keys
-    APPLICATION_NAME_KEY = 'application_name'.freeze
+    FILTER = /app[-]?dynamics/.freeze
 
     # Appdynamics's directory of artifacts in the droplet
     APPDYNAMICS_HOME_DIR = '.appdynamics_agent'.freeze
@@ -125,7 +118,7 @@ module LibertyBuildpack::Framework
     # @return [Boolean]  true if the app is bound to a Appdynamics service
     #------------------------------------------------------------------------------------------
     def appdynamics_service_exist?
-      @services.one_service?(APPDYNAMICS_SERVICE_NAME)
+      @services.one_service?(FILTER, 'host-name')
     end
 
     #-----------------------------------------------------------------------------------------
@@ -134,7 +127,7 @@ module LibertyBuildpack::Framework
     # @return [Boolean]  true if the app is bound to a Appdynamics service
     #------------------------------------------------------------------------------------------
     def app_has_name?
-      !@vcap_application.nil? && !@vcap_application[APPLICATION_NAME_KEY].nil? && !@vcap_application[APPLICATION_NAME_KEY].empty?
+      !@vcap_application.nil? && !vcap_app_name.nil? && !vcap_app_name.empty?
     end
 
     #-----------------------------------------------------------------------------------------
@@ -143,7 +136,51 @@ module LibertyBuildpack::Framework
     # @return [String] the application name from VCAP_APPLICATION
     #------------------------------------------------------------------------------------------
     def vcap_app_name
-      @vcap_application[APPLICATION_NAME_KEY]
+      @vcap_application['application_name']
+    end
+
+    def application_name(java_opts, credentials)
+      name = credentials['application-name'] || @configuration['default_application_name'] ||
+        vcap_app_name
+      java_opts << "-Dappdynamics.agent.applicationName=#{name}"
+    end
+
+    def account_access_key(java_opts, credentials)
+      account_access_key = credentials['account-access-key']
+      java_opts << "-Dappdynamics.agent.accountAccessKey=#{account_access_key}" if account_access_key
+    end
+
+    def account_name(java_opts, credentials)
+      account_name = credentials['account-name']
+      java_opts << "-Dappdynamics.agent.accountName=#{account_name}" if account_name
+    end
+
+    def host_name(java_opts, credentials)
+      host_name = credentials['host-name']
+      fail "'host-name' credential must be set" unless host_name
+      java_opts << "-Dappdynamics.controller.hostName=#{host_name}"
+    end
+
+    def node_name(java_opts, credentials)
+      name = credentials['node-name'] || @configuration['default_node_name'] ||
+        vcap_app_name
+      java_opts << "-Dappdynamics.agent.nodeName=#{name}"
+    end
+
+    def port(java_opts, credentials)
+      port = credentials['port']
+      java_opts << "-Dappdynamics.controller.port=#{port}" if port
+    end
+
+    def ssl_enabled(java_opts, credentials)
+      ssl_enabled = credentials['ssl-enabled']
+      java_opts << "-Dappdynamics.controller.ssl.enabled=#{ssl_enabled}" if ssl_enabled
+    end
+
+    def tier_name(java_opts, credentials)
+      name = credentials['tier-name'] || @configuration['default_tier_name'] ||
+        vcap_app_name
+      java_opts << "-Dappdynamics.agent.tierName=#{name}"
     end
 
     #-----------------------------------------------------------------------------------------
@@ -157,18 +194,11 @@ module LibertyBuildpack::Framework
     def process_config
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
-        id_pattern = 'app-dynamics'
-        zip_pattern = "#{id_pattern}-#{@version}.zip"
-
-        if !@uri.nil? && @uri.split('/').last.match(/#{zip_pattern}/)
-          @appdynamics_zip = zip_pattern
-        else
-          @logger.error("The #{id_pattern}.zip  #{zip_pattern}  format could not be matched from the uri #{@uri}")
-        end
       rescue => e
-        @logger.error("Unable to process the configuration for the Appdynamics Agent framework. #{e.message}")
+        @logger.error("Unable to process the configuration for the AppDynamics Agent framework. #{e.message}")
       end
-      @appdynamics_zip.nil? ? nil : id_pattern
+
+      @version.nil? ? nil : "app-dynamics-#{@version}"
     end
 
     #-----------------------------------------------------------------------------------------
@@ -185,11 +215,10 @@ module LibertyBuildpack::Framework
     #-----------------------------------------------------------------------------------------
     # Download the agent library from the repository as specified in the Appdynamics configuration.
     #------------------------------------------------------------------------------------------
-    def download_agent(version_desc, uri_source, target_zip_name, target_dir)
-      LibertyBuildpack::Util.download(version_desc, uri_source, target_zip_name, target_zip_name, target_dir)
-      LibertyBuildpack::Container::ContainerUtils.unzip(File.join(target_dir, target_zip_name), target_dir)
+    def download_and_install_agent(home)
+      LibertyBuildpack::Util.download_zip(@version, @uri, 'AppDynamics Agent', home)
     rescue => e
-      raise "Unable to download the Appdynamics Agent zip. Ensure that the agent zip at #{uri_source} is available and accessible. #{e.message}"
+      raise "Unable to download the AppDynamics Agent zip. Ensure that the agent zip at #{@uri} is available and accessible. #{e.message}"
     end
   end
 end
