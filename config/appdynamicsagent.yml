@@ -16,7 +16,7 @@
 # Service configuration
 ---
 version: 4.1.+
-repository_root: ! '{default.repository.root}/app-dynamics'
+repository_root: "{default.repository.root}/app-dynamics"
 default_application_name:
-default_node_name: ! '$(expr "$VCAP_APPLICATION" : ''.*instance_index[": ]*\([[:digit:]]*\).*'')'
+default_node_name:
 default_tier_name:

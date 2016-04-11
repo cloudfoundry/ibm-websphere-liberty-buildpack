@@ -26,7 +26,7 @@ frameworks:
   - "LibertyBuildpack::Framework::Env"
   - "LibertyBuildpack::Framework::JavaOpts"
   - "LibertyBuildpack::Framework::SpringAutoReconfiguration"
-  - "LibertyBuildpack::Framework::AppdynamicsAgent"
+  - "LibertyBuildpack::Framework::AppDynamicsAgent"
   - "LibertyBuildpack::Framework::NewRelicAgent"
   - "LibertyBuildpack::Framework::JRebelAgent"
   - "LibertyBuildpack::Framework::DynaTraceAgent"
