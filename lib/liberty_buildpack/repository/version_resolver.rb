@@ -16,6 +16,7 @@
 
 require 'liberty_buildpack/repository'
 require 'liberty_buildpack/util/tokenized_version'
+require 'liberty_buildpack/diagnostics/logger_factory'
 
 module LibertyBuildpack
   module Repository
@@ -38,9 +39,7 @@ module LibertyBuildpack
         # @return [TokenizedVersion] the resolved version or nil if no matching version is found
         def resolve(candidate_version, versions)
           tokenized_candidate_version = safe_candidate_version candidate_version
-          tokenized_versions          = versions.map do |version|
-            LibertyBuildpack::Util::TokenizedVersion.new(version, false)
-          end
+          tokenized_versions          = versions.map { |version| create_token(version) }.compact
 
           version = tokenized_versions
                       .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
@@ -54,6 +53,14 @@ module LibertyBuildpack
         TOKENIZED_WILDCARD = LibertyBuildpack::Util::TokenizedVersion.new('+').freeze
 
         private_constant :TOKENIZED_WILDCARD
+
+        def create_token(version)
+          LibertyBuildpack::Util::TokenizedVersion.new(version, false)
+        rescue StandardError => e
+          logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
+          logger.warn { "Discarding illegal version #{version}: #{e.message}" }
+          nil
+        end
 
         def safe_candidate_version(candidate_version)
           if candidate_version.nil?
