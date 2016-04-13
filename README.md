@@ -39,10 +39,13 @@ All Documentation is available in the Docs folder of the buildpack.
     * [Java Main (for jars with a main() class)](docs/java-main.md)
     * [DistZip](docs/container-distZip.md)
 * Frameworks
-	* [Java Opts Framework](docs/framework-java_opts.md)
-	* [Spring Auto Reconfiguration Framework](docs/framework-spring-auto-reconfiguration.md)
-	* [New Relic Agent Framework](docs/framework-new-relic-agent.md)
-	* [JRebel Agent Framework](docs/framework-jrebel-agent.md)
+    * [AppDynamics Agent](docs/framework-app_dynamics_agent.md)
+    * [DynaTrace Agent](docs/framework-dynatrace-agent.md)
+    * [DynamicPULSE Agent](docs/framework-dynamic_pulse_agent.md)
+    * [Java Options](docs/framework-java_opts.md)
+    * [JRebel Agent](docs/framework-jrebel-agent.md)
+    * [New Relic Agent](docs/framework-new-relic-agent.md)
+    * [Spring Auto Reconfiguration](docs/framework-spring-auto-reconfiguration.md)
 * JREs
     * [IBM JRE](docs/ibm-jdk.md)
     * [OpenJDK](docs/open-jdk.md)
@@ -94,6 +97,6 @@ bundle install --gemfile Gemfile.rubymine-debug
 [tuning options]: docs/tuning.md
 [java main push]: docs/java-main.md
 
-[Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.7/lafiles/runtime/en.html
+[Liberty-License]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.9/lafiles/runtime/en.html
 [JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-JWOD-9SYNCP&title=IBM%C2%AE+SDK%2C+Java+Technology+Edition%2C+Version+8.0&l=en
 [manifest documentation]: http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html
