@@ -1544,6 +1544,24 @@ module LibertyBuildpack::Container
           expect(server_jvm_opts).to match(/test-opt-2\n(.*\n)*provided-opt-1\n/)
         end
 
+        it 'should not duplicate options when using provided jvm.options.' do
+          server_jvm_opts = jvm_opt_test(File.join('wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context, liberty_home|
+            Dir.mkdir File.join(root, 'WEB-INF')
+            FileUtils.mkdir_p File.join(liberty_home, 'usr', 'servers', 'defaultServer')
+            create_server_xml(root)
+            create_jvm_options(root, 'provided-opt-1')
+
+            context[:java_opts] = %w(provided-opt-1) # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
+          end
+
+          expect(server_jvm_opts).to match(/provided-opt-1/)
+          expect(server_jvm_opts).to match(DISABLE_2PC_JAVA_OPT_REGEX)
+          # default options before user options to allow overriding, each on it's own line.
+          # skip options in the regex by allowing multiple or zero collections of : any
+          # normal character zero or more times followed by a newline.
+          expect(server_jvm_opts).not_to match(/provided-opt-1\n(.*\n)*provided-opt-1\n/)
+        end
+
         it 'should use server jvm.options file instead of the root one if both are provided.' do
           jvm_opts = jvm_opt_test(File.join('wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context, liberty_home|
             Dir.mkdir File.join(root, 'WEB-INF')

@@ -188,10 +188,15 @@ module LibertyBuildpack::Container
       @java_opts << '-Dcom.ibm.tx.jta.disable2PC=true'
 
       # add existing options from the jvm.options file, if there is one, to the current
-      # options.
+      # options, without duplicating options.
       jvm_options_src = File.join(current_server_dir, JVM_OPTIONS)
       if File.exists?(jvm_options_src)
-        File.open(jvm_options_src, 'rb') { |f| @java_opts << f.read }
+
+        File.open(jvm_options_src, 'rb') do |file|
+          file.each_line do |line|
+            @java_opts << line unless @java_opts.include?(line)
+          end
+        end
       end
 
       # re-write the file with all the options.
