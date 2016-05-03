@@ -36,6 +36,6 @@ The IBM JRE [configuration can be overridden](configuration.md) with the `JBP_CO
    ```
 
 [`config/ibmjdk.yml`]: ../config/ibmjdk.yml
-[index.yml]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/jre/index.yml
+[index.yml]: http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/meta/jre/linux/x86_64/index.yml
 [repositories]: util-repositories.md
 
