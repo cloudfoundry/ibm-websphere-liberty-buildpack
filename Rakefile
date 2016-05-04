@@ -89,6 +89,8 @@ task :package, [:zipfile, :hosts, :version] do |t, args|
       file.puts "hash: ''"
     end unless args.version.nil?
 
+    ENV['JBP_LOG_LEVEL'] = 'DEBUG' if ENV['JBP_LOG_LEVEL'].nil?
+
     bc = BuildpackCache.new(File.join(dest, 'admin_cache'))
     # Collect all remote content using all config files
     configs = bc.collect_configs nil, cache_hosts 

@@ -11,6 +11,7 @@ $LOAD_PATH.unshift File.expand_path(File.join('..', '..', 'lib'), __FILE__)
 require 'liberty_buildpack/repository/version_resolver'
 require 'liberty_buildpack/util/configuration_utils'
 require 'liberty_buildpack/util/tokenized_version'
+require 'liberty_buildpack/diagnostics/logger_factory'
 
 # Utility class to download remote resources into local cache directory
 class BuildpackCache
@@ -30,7 +31,7 @@ class BuildpackCache
   def initialize(cache_dir, logger = nil)
     @cache_dir = cache_dir
     @default_repository_root = default_repository_root
-    @logger = logger || Logger.new(STDOUT)
+    @logger = logger || LibertyBuildpack::Diagnostics::LoggerFactory.create_logger('.')
   end
 
   # Downloads remote resources into the cache directory
@@ -57,6 +58,10 @@ class BuildpackCache
       end
       candidate = LibertyBuildpack::Util::TokenizedVersion.new(config[VERSION])
       version = LibertyBuildpack::Repository::VersionResolver.resolve(candidate, index.keys)
+      if version.nil?
+        @logger.warn "No matches found for #{candidate} version in #{index_uri}."
+        next
+      end
       file_uri = download_license(index[version.to_s], config[TYPE_KEY])
       file = File.join(@cache_dir, filename(file_uri))
       download(file_uri, file)
