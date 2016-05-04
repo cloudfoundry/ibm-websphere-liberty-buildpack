@@ -17,6 +17,7 @@
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/repository'
 require 'liberty_buildpack/repository/version_resolver'
+require 'liberty_buildpack/repository/repository_utils'
 require 'liberty_buildpack/util/cache'
 require 'liberty_buildpack/util/cache/download_cache'
 require 'liberty_buildpack/util/configuration_utils'
@@ -27,20 +28,15 @@ module LibertyBuildpack
   module Repository
 
     # A repository index represents the index of repository containing various versions of a file.
-    class RepositoryIndex
+    class RepositoryIndex < RepositoryUtils
 
       # Creates a new repository index, populating it with values from an index file.
       #
       # @param [String] repository_root the root of the repository to create the index for
       def initialize(repository_root)
-        @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
+        super()
 
-        @@platform ||= platform
-        @@architecture ||= architecture
-        @@default_repository_root ||= LibertyBuildpack::Util::ConfigurationUtils.load('repository')['default_repository_root']
-                                     .chomp('/')
-
-        cache.get("#{canonical repository_root}#{INDEX_PATH}") do |file|
+        cache.get("#{resolve_uri repository_root}#{INDEX_PATH}") do |file|
           @index = YAML.load_file(file)
           @logger.debug { @index }
         end
@@ -64,38 +60,9 @@ module LibertyBuildpack
 
       private_constant :INDEX_PATH
 
-      def architecture
-        `uname -m`.strip
-      end
-
       def cache
         LibertyBuildpack::Util::Cache::DownloadCache.new(Pathname.new(Dir.tmpdir),
                                                          LibertyBuildpack::Util::Cache::CACHED_RESOURCES_DIRECTORY)
-      end
-
-      def canonical(raw)
-        cooked = raw
-                   .gsub(/\{default.repository.root\}/, @@default_repository_root)
-                   .gsub(/\{platform\}/, @@platform)
-                   .gsub(/\{architecture\}/, @@architecture)
-                   .chomp('/')
-        @logger.debug { "#{raw} expanded to #{cooked}" }
-        cooked
-      end
-
-      def platform
-        redhat_release = Pathname.new('/etc/redhat-release')
-
-        if redhat_release.exist?
-          tokens = redhat_release.read.match(/(\w+) (?:Linux )?release (\d+)/)
-          "#{tokens[1].downcase}#{tokens[2]}"
-        elsif `uname -s` =~ /Darwin/
-          'mountainlion'
-        elsif !`which lsb_release 2> /dev/null`.empty?
-          `lsb_release -cs`.strip
-        else
-          fail 'Unable to determine platform'
-        end
       end
 
     end

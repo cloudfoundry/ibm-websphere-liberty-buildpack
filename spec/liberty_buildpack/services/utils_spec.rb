@@ -573,6 +573,16 @@ module LibertyBuildpack::Services
         expect(result).to include(config['client_jar_url'])
       end
 
+      it 'via client_jar_url with variable' do
+        config = {}
+        config['client_jar_url'] = '{default_repository_root}/myPath'
+        urls = {}
+
+        result = Utils.get_urls_for_client_jars(config, urls)
+        expected = 'https://download.run.pivotal.io/myPath'
+        expect(result).to include(expected)
+      end
+
       it 'via driver' do
         data = [LibertyBuildpack::Util::TokenizedVersion.new('1.5.0'), 'http://myHost/myPath']
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(data)

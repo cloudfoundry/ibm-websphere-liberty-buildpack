@@ -16,6 +16,7 @@
 
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/repository/configured_item'
+require 'liberty_buildpack/repository/repository_utils'
 
 module LibertyBuildpack::Services
 
@@ -315,7 +316,8 @@ module LibertyBuildpack::Services
         else
           # client_jar_url found
           logger.debug("Found client_jar_url: #{client_jar_url}")
-          return [client_jar_url]
+          utils = LibertyBuildpack::Repository::RepositoryUtils.new
+          return [utils.resolve_uri(client_jar_url)]
         end
       else
         # client_jar_key found
