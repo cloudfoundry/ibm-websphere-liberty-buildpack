@@ -15,7 +15,7 @@
 
 # Configuration for JRE repository
 ---
-repository_root: "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/jre"
+repository_root: "https://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/meta/jre/linux/x86_64/"
 version: 1.8.+
 
 heap_size_ratio: 0.75
