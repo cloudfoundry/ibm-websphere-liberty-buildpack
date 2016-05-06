@@ -30,11 +30,19 @@ describe LibertyBuildpack::Repository::RepositoryIndex do
 
   let(:application_cache) { double('ApplicationCache') }
 
-  before do
-    allow(LibertyBuildpack::Util::Cache::DownloadCache).to receive(:new).and_return(application_cache)
+  def reset_variables
     LibertyBuildpack::Repository::RepositoryIndex.class_variable_set(:@@platform, nil)
     LibertyBuildpack::Repository::RepositoryIndex.class_variable_set(:@@architecture, nil)
     LibertyBuildpack::Repository::RepositoryIndex.class_variable_set(:@@default_repository_root, nil)
+  end
+
+  before do
+    allow(LibertyBuildpack::Util::Cache::DownloadCache).to receive(:new).and_return(application_cache)
+    reset_variables
+  end
+
+  after do
+    reset_variables
   end
 
   it 'loads index' do
