@@ -59,17 +59,19 @@ module LibertyBuildpack::Services
       if conn_uri.nil?
         raise "Resource #{@service_name} does not contain a #{conn_prefix}uri property"
       end
-      uri = URI.parse(conn_uri)
+      map = RelationalDatabasePlugin.parse_url(conn_uri)
 
-      @db_name = get_cloud_property(properties, element, "#{conn_prefix}name", uri.path[1..-1])
-      @host = get_cloud_property(properties, element, "#{conn_prefix}host", uri.host)
-      @port = get_cloud_property(properties, element, "#{conn_prefix}port", uri.port)
-      @user = get_cloud_property(properties, element, "#{conn_prefix}user", uri.user)
-      @password =  get_cloud_property(properties, element, "#{conn_prefix}password", uri.password)
+      @db_name = get_cloud_property(properties, element, "#{conn_prefix}name",  map['db'])
+      @host = get_cloud_property(properties, element, "#{conn_prefix}host", map['host'])
+      @port = get_cloud_property(properties, element, "#{conn_prefix}port", map['port'])
+      @user = get_cloud_property(properties, element, "#{conn_prefix}user", map['user'])
+      @password =  get_cloud_property(properties, element, "#{conn_prefix}password", map['password'])
+      # parameters will NOT be passed as a cloud variable - no way to pass as a single string
+      @params = map['params']
 
       # ensure all the cloud properties are always set
-      get_cloud_property(properties, element, "#{conn_prefix}hostname", uri.host)
-      get_cloud_property(properties, element, "#{conn_prefix}username", uri.user)
+      get_cloud_property(properties, element, "#{conn_prefix}hostname", map['host'])
+      get_cloud_property(properties, element, "#{conn_prefix}username", map['user'])
 
       # default JNDI name for DB is jdbc/service_name
       @jndi_name = "jdbc/#{@service_name}"
@@ -80,6 +82,39 @@ module LibertyBuildpack::Services
       @jdbc_driver_id = "#{@config_type}-driver"
       @lib_id = "#{@config_type}-library"
       @fileset_id = "#{@config_type}-fileset"
+    end
+
+    # Parse jdbc mysql/posgresql URL.
+    # URL syntax:
+    # jdbc:*sql://[host][:port][/[database]][?property1=value1[&property2=value2]
+    def self.parse_url(jdbc_url)
+      map = {}
+
+      url = URI.parse(jdbc_url[1..-1])
+      map['host'] = url.host
+      map['port'] = url.port.to_s unless url.port.to_s.empty?
+      map['user'] = url.user
+      map['password'] = url.password
+
+      params = {}
+      map['params'] = params
+
+      index = url.path.index('?')
+      if index.nil?
+        map['db'] = url.path[1..-1]
+      else
+        map['db'] = url.path[1..index - 1]
+      end
+
+      params_string = url.query.to_s
+        unless params_string.empty?
+          params_array = params_string.split('&')
+          params_array.each do | param_string |
+          parts = param_string.split('=')
+          params.store(parts[0], parts[1])
+          end
+        end
+      map
     end
 
     #-----------------------------------------------------------------------------------
@@ -176,6 +211,12 @@ module LibertyBuildpack::Services
         update_element_attribute(properties_element, 'password', @password)
         update_element_attribute(properties_element, 'serverName', @host)
         update_element_attribute(properties_element, 'portNumber', @port)
+        @params.each do | attrName, attrValue |
+          # set attribute only if not specified
+          if properties_element.attribute(attrName).nil?
+            properties_element.add_attribute(attrName, attrValue)
+          end
+        end
         Utils.add_features(doc, @features)
       end
     end
@@ -260,6 +301,9 @@ module LibertyBuildpack::Services
       props.add_attribute('password', @password)
       props.add_attribute('portNumber', @port)
       props.add_attribute('serverName', @host)
+      @params.each do | attrName, attrValue |
+        props.add_attribute(attrName, attrValue)
+      end
       # allow types that need it to add a ConnectionManager
       create_connection_manager(ds)
       # create the JDBC driver. The JDBC driver will create the shared library.

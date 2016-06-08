@@ -101,7 +101,7 @@ module LibertyBuildpack::Services
         expected_vars << '<variable name=\'cloud.services.myDatabase.connection.port\' value=\'5432\'/>'
         expected_vars << '<variable name=\'cloud.services.myDatabase.connection.user\' value=\'myUser\'/>'
         expected_vars << '<variable name=\'cloud.services.myDatabase.connection.password\' value=\'myPassword\'/>'
-        expected_vars << '<variable name=\'cloud.services.myDatabase.connection.uri\' value=\'mysql://myUser:myPassword@myHost.com:5432/myDb\'/>'
+        expected_vars << '<variable name=\'cloud.services.myDatabase.connection.uri\' value=\'mysql://myUser:myPassword@myHost.com:5432/myDb?reconnect=true&amp;myparam=value\'/>'
 
         runtime_vars = File.join(root, 'runtime-vars.xml')
         validate_xml(runtime_vars, expected_vars)
@@ -116,7 +116,7 @@ module LibertyBuildpack::Services
         expected_config = []
         expected_config << '<feature>jdbc-4.0</feature>'
         t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='#{get_driver_id}' jndiName='#{get_jndi}' transactional='true' type='javax.sql.ConnectionPoolDataSource'>"
-        t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' user='#{get_user}'/>"
+        t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' myparam='value' password='#{get_password}' portNumber='#{get_port}' reconnect='true' serverName='#{get_host}' user='#{get_user}'/>"
         t3 = '</dataSource>'
         expected_config << t1 + t2 + t3
         driver_info = "javax.sql.ConnectionPoolDataSource='org.mariadb.jdbc.MySQLDataSource' javax.sql.XADataSource='org.mariadb.jdbc.MySQLDataSource'"
@@ -150,7 +150,7 @@ module LibertyBuildpack::Services
         expected_config << '<feature>jsp-2.2</feature>'
         expected_config << '<feature>jdbc-4.0</feature>'
         t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='myDriver' jndiName='myJndi' transactional='true'>"
-        t2 = "<properties databaseName='#{get_name}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' user='#{get_user}'/>"
+        t2 = "<properties databaseName='#{get_name}' myparam='value' password='#{get_password}' portNumber='#{get_port}' reconnect='true' serverName='#{get_host}' user='#{get_user}'/>"
         t3 = '</dataSource>'
         expected_config << t1 + t2 + t3
         expected_config << "<jdbcDriver id='myDriver' #{driver_info} libraryRef='myLibrary'/>"
@@ -180,7 +180,7 @@ module LibertyBuildpack::Services
         mysql_credentials['user'] = 'myUser'
         mysql_credentials['username'] = 'myUser'
         mysql_credentials['password'] = 'myPassword'
-        mysql_credentials['uri'] = 'mysql://myUser:myPassword@myHost.com:5432/myDb'
+        mysql_credentials['uri'] = 'mysql://myUser:myPassword@myHost.com:5432/myDb?reconnect=true&myparam=value'
         mysql['credentials'] = mysql_credentials
         vcap_services['mysql-5.5'] = [mysql]
 
@@ -200,7 +200,7 @@ module LibertyBuildpack::Services
         cleardb_credentials['user'] = 'myUser'
         cleardb_credentials['username'] = 'myUser'
         cleardb_credentials['password'] = 'myPassword'
-        cleardb_credentials['uri'] = 'mysql://myUser:myPassword@myHost.com:5432/myDb'
+        cleardb_credentials['uri'] = 'mysql://myUser:myPassword@myHost.com:5432/myDb?reconnect=true&myparam=value'
         cleardb['credentials'] = cleardb_credentials
         vcap_services['cleardb'] = [cleardb]
 
@@ -219,7 +219,7 @@ module LibertyBuildpack::Services
         cleardb_credentials['port'] = '5432'
         cleardb_credentials['username'] = 'myUser'
         cleardb_credentials['password'] = 'myPassword'
-        cleardb_credentials['uri'] = 'mysql://myUser:myPassword@myHost.com:5432/myDb'
+        cleardb_credentials['uri'] = 'mysql://myUser:myPassword@myHost.com:5432/myDb?reconnect=true&myparam=value'
         cleardb['credentials'] = cleardb_credentials
         vcap_services['cleardb'] = [cleardb]
 
@@ -228,7 +228,7 @@ module LibertyBuildpack::Services
 
       it 'on Heroku' do
         env = {}
-        env['CLEARDB_DATABASE_URL'] = 'mysql://myUser:myPassword@myHost.com:5432/myDb'
+        env['CLEARDB_DATABASE_URL'] = 'mysql://myUser:myPassword@myHost.com:5432/myDb?reconnect=true&myparam=value'
         env['SERVICE_NAME_MAP'] = 'CLEARDB_DATABASE_URL=myDatabase'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
@@ -240,7 +240,7 @@ module LibertyBuildpack::Services
       #--------------------------------------------------------------
       it 'on Heroku, no port' do
         env = {}
-        env['CLEARDB_DATABASE_URL'] = 'mysql://myUser:myPassword@myHost.com/myDb'
+        env['CLEARDB_DATABASE_URL'] = 'mysql://myUser:myPassword@myHost.com/myDb?reconnect=true&myparam=value'
         env['SERVICE_NAME_MAP'] = 'CLEARDB_DATABASE_URL=myDatabase'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
@@ -254,7 +254,7 @@ module LibertyBuildpack::Services
           expected_vars << '<variable name=\'cloud.services.myDatabase.connection.host\' value=\'myHost.com\'/>'
           expected_vars << '<variable name=\'cloud.services.myDatabase.connection.user\' value=\'myUser\'/>'
           expected_vars << '<variable name=\'cloud.services.myDatabase.connection.password\' value=\'myPassword\'/>'
-          expected_vars << '<variable name=\'cloud.services.myDatabase.connection.uri\' value=\'mysql://myUser:myPassword@myHost.com/myDb\'/>'
+          expected_vars << '<variable name=\'cloud.services.myDatabase.connection.uri\' value=\'mysql://myUser:myPassword@myHost.com/myDb?reconnect=true&amp;myparam=value\'/>'
           validate_xml(runtime_vars, expected_vars)
 
           # port cloud property should not et set
@@ -270,7 +270,7 @@ module LibertyBuildpack::Services
           expected_config = []
           expected_config << '<feature>jdbc-4.0</feature>'
           t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='#{get_driver_id}' jndiName='#{get_jndi}' transactional='true' type='javax.sql.ConnectionPoolDataSource'>"
-          t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' password='#{get_password}' serverName='#{get_host}' user='#{get_user}'/>"
+          t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' myparam='value' password='#{get_password}' reconnect='true' serverName='#{get_host}' user='#{get_user}'/>"
           t3 = '</dataSource>'
           expected_config << t1 + t2 + t3
           driver_info = "javax.sql.ConnectionPoolDataSource='org.mariadb.jdbc.MySQLDataSource' javax.sql.XADataSource='org.mariadb.jdbc.MySQLDataSource'"
