@@ -75,7 +75,7 @@ describe LibertyBuildpack::Jre::MemorySize do
   end
 
   it 'should fail when a memory size is compared to a non-zero numeric' do
-    expect { described_class.new('1B') < 2 }.to raise_error(/Cannot compare/)
+    expect { described_class.new('1B') < 2 }.to raise_error(ArgumentError)
   end
 
   it 'should multiply values correctly' do

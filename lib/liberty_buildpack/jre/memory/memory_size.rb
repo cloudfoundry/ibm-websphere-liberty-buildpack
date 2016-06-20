@@ -80,8 +80,7 @@ module LibertyBuildpack
       def <=>(other)
         if other == 0
           @bytes <=> 0
-        else
-          fail "Cannot compare a MemorySize to an instance of #{other.class}" unless other.is_a? MemorySize
+        elsif other.is_a? MemorySize
           @bytes <=> other.bytes
         end
       end
