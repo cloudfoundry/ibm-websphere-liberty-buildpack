@@ -75,13 +75,12 @@ module LibertyBuildpack::Framework
       # create a ruxit home dir in the droplet
       ruxit_home = File.join(@app_dir, RUXIT_HOME_DIR)
       FileUtils.mkdir_p(ruxit_home)
-
       @logger.debug("Ruxit home directory: #{ruxit_home}")
-
-      download_and_install_agent(ruxit_home)
 
       # export ruxit specific environment variables
       export_ruxit_environment_variables
+
+      download_and_install_agent(ruxit_home)
     end
 
     #-----------------------------------------------------------------------------------------
@@ -207,7 +206,7 @@ module LibertyBuildpack::Framework
       env_file_name = File.join(profiled_dir, '0ruxit-env.sh')
       env_file = File.new(env_file_name, 'w')
       variables.each do | key, value |
-        env_file.puts("export #{key}=\"${#{key}:-#{value}}\"") #"${VAR1:-default value}"
+        env_file.puts("export #{key}=\"${#{key}:-#{value}}\"") # "${VAR1:-default value}"
       end
       env_file.close
     end

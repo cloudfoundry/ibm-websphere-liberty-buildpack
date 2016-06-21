@@ -208,13 +208,13 @@ module LibertyBuildpack::Framework
           expect { compiled }.to output(%r{Downloading Ruxit Agent #{version} from https://downloadsite/ruxit/ruxit-agent.zip}).to_stdout
           # zip file should not be there - just contents of it
           expect(File.exists?(File.join(app_dir, ruxit_home, jar_name))).to eq(false)
-          expect(File.exists?(File.join(app_dir, ruxit_home, 'agent', 'agent', 'lib64', 'libruxitagentloader.so'))).to eq(true)
+          expect(File.exists?(File.join(app_dir, ruxit_home, 'agent', 'lib64', 'libruxitagentloader.so'))).to eq(true)
         end
 
         it 'should raise an error with original exception if the zip could not be downloaded',
            index_version: '1.95.0', index_uri: 'https://downloadsite/ruxit/ruxit-agent.zip' do
           allow(LibertyBuildpack::Util).to receive(:download_zip).and_raise('underlying download error')
-          expect { compiled }.to raise_error(/Unable to download the Ruxit Agent zip..+underlying download error/)
+          expect { compiled }.to raise_error(/Unable to download the Ruxit Agent..+underlying download error/)
         end
       end
     end # end compile
