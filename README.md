@@ -40,7 +40,8 @@ All Documentation is available in the Docs folder of the buildpack.
     * [DistZip](docs/container-distZip.md)
 * Frameworks
     * [AppDynamics Agent](docs/framework-app_dynamics_agent.md)
-    * [DynaTrace Agent](docs/framework-dynatrace-agent.md)
+    * [DynaTrace Application Monitoring Agent](docs/framework-dynatrace-agent.md)
+    * [Dynatrace Ruxit Cloud Native Agent](docs/framework-ruxit_agent.md)
     * [DynamicPULSE Agent](docs/framework-dynamic_pulse_agent.md)
     * [Java Options](docs/framework-java_opts.md)
     * [JRebel Agent](docs/framework-jrebel-agent.md)
@@ -66,7 +67,7 @@ All Documentation is available in the Docs folder of the buildpack.
 	* [Utility: Repositories](docs/util-repositories.md)
 	* [Utility: Repository Builder](docs/util-repository-builder.md)
 	* [Utility: Test Applications](docs/util-test-applications.md)
-	    
+
 ## Running Tests
 To run the tests, do the following:
 

@@ -30,4 +30,5 @@ frameworks:
   - "LibertyBuildpack::Framework::NewRelicAgent"
   - "LibertyBuildpack::Framework::JRebelAgent"
   - "LibertyBuildpack::Framework::DynaTraceAgent"
+  - "LibertyBuildpack::Framework::RuxitAgent"
   - "LibertyBuildpack::Framework::DynamicPULSEAgent"
