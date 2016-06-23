@@ -40,7 +40,7 @@ The framework can be configured by modifying the [`config/ruxit_agent.yml`][] fi
 | `version` | The version of Ruxit to use. Candidate versions can be found in [this listing][].
 
 ## Support
-This buildpack is currently Beta. If you have any questions or problems regarding the build pack itself please don't hesitate to contact Dynatrace Ruxit on https://answers.ruxit.com/, be sure to use "cloudfoundry" as a topic.
+The Ruxit integration with this buildpack is currently Beta. If you have any questions or problems regarding the build pack integration please don't hesitate to contact Dynatrace Ruxit on https://answers.ruxit.com/, be sure to use "cloudfoundry" as a topic.
 
 [Configuration and Extension]: ../README.md#configuration-and-extension
 [`config/ruxit_agent.yml`]: ../config/ruxit_agent.yml
