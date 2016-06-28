@@ -46,7 +46,7 @@ module LibertyBuildpack::Framework
       #                                      an +Array<String>+ that uniquely identifies the component (e.g.
       #                                      +open_jdk=1.7.0_40+).  Otherwise, +nil+.
       def detect
-        supports_local_certificates ? id(certificates.length) : nil
+        supports_local_certificates? ? id(certificates.length) : nil
       end
 
       # Modifies the application's file system.  The component is expected to transform the application's file system in
@@ -79,7 +79,7 @@ module LibertyBuildpack::Framework
       def release
         unless used_trust_store == 'jvm'
           # Hardcoded truststore location since @app_dir changes from staging to runtime and the java opts are set on staging.
-          @java_opts << '-Djavax.net.ssl.trustStore=/home/vcap/app/.container_certificate_trust_store/truststore.jks'
+          @java_opts << "-Djavax.net.ssl.trustStore=/home/vcap/app/#{NEW_TRUST_STORE}"
           @java_opts << "-Djavax.net.ssl.trustStorePassword=#{password}"
         end
       end
@@ -93,6 +93,8 @@ module LibertyBuildpack::Framework
       LOCAL_CERTS_ENABLED = 'enabled'.freeze
 
       TRUST_STORE_USED = 'trust_store'.freeze
+
+      NEW_TRUST_STORE = '.container_certificate_trust_store/truststore.jks'
 
       private_constant :CA_CERTIFICATES
 
@@ -159,7 +161,7 @@ module LibertyBuildpack::Framework
         ca_certificates.exist?
       end
 
-      def supports_local_certificates
+      def supports_local_certificates?
         supports_configuration? && supports_file?
       end
 
@@ -171,7 +173,7 @@ module LibertyBuildpack::Framework
         if used_trust_store == 'jvm'
           JVM_KEY_STORE
         else
-          @app_dir + '.container_certificate_trust_store/truststore.jks'
+          @app_dir + NEW_TRUST_STORE
         end
       end
 
