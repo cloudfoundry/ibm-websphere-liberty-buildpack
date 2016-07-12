@@ -92,7 +92,7 @@ module LibertyBuildpack::Framework
 
       LOCAL_CERTS_ENABLED = 'enabled'.freeze
 
-      USE_JVM_TRUST_STORE = 'use_jvm_trust_store'.freeze
+      USE_JVM_TRUST_STORE = 'jvm_trust_store'.freeze
 
       NEW_TRUST_STORE_DIRECTORY = '.container_certificate_trust_store/'
 

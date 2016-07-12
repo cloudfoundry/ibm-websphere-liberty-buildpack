@@ -14,8 +14,8 @@
 # limitations under the License.
 
 # Container certificate truststore configuration
-# enabled: [true|false] if none assumes false.
-# use_jvm_trust_store: [true|false] if none assumes new.
+# enabled: [true|false]
+# jvm_trust_store: [true|false]
 ---
 enabled: false
-use_jvm_trust_store: false
+jvm_trust_store: false

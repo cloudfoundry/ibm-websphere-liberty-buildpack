@@ -21,7 +21,7 @@ The framework can be configured by creating or modifying the [`config/container_
 | Name | Description
 | ---- | -----------
 | `enabled` | Whether to enable the trust store
-| `use_jvm_trust_store` | Whether to use the JVM trust store or not
+| `jvm_trust_store` | Whether to use the JVM trust store or not
 
 [`config/container_certificate_trust_store.yml`]: ../config/container_certificate_trust_store.yml
 [Configuration and Extension]: ../README.md#configuration-and-extension
