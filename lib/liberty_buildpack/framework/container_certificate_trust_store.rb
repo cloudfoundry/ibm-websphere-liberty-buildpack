@@ -59,8 +59,8 @@ module LibertyBuildpack::Framework
 
         resolved_certificates = certificates
         with_timing(caption(resolved_certificates)) do
-          unless used_trust_store == 'jvm'
-            FileUtils.mkdir_p @app_dir + '.container_certificate_trust_store'
+          unless use_jvm_trust_store?
+            FileUtils.mkdir_p @app_dir + NEW_TRUST_STORE_DIRECTORY
           end
           resolved_certificates.each_with_index { |certificate, index| add_certificate certificate, index }
         end
@@ -77,9 +77,9 @@ module LibertyBuildpack::Framework
       #                        Container and JRE components are expected to return a command required to run the
       #                        application.
       def release
-        unless used_trust_store == 'jvm'
+        unless use_jvm_trust_store?
           # Hardcoded truststore location since @app_dir changes from staging to runtime and the java opts are set on staging.
-          @java_opts << "-Djavax.net.ssl.trustStore=/home/vcap/app/#{NEW_TRUST_STORE}"
+          @java_opts << "-Djavax.net.ssl.trustStore=/home/vcap/app/#{NEW_TRUST_STORE_DIRECTORY}#{NEW_TRUST_STORE_FILE}"
           @java_opts << "-Djavax.net.ssl.trustStorePassword=#{password}"
         end
       end
@@ -92,9 +92,11 @@ module LibertyBuildpack::Framework
 
       LOCAL_CERTS_ENABLED = 'enabled'.freeze
 
-      TRUST_STORE_USED = 'trust_store'.freeze
+      USE_JVM_TRUST_STORE = 'use_jvm_trust_store'.freeze
 
-      NEW_TRUST_STORE = '.container_certificate_trust_store/truststore.jks'
+      NEW_TRUST_STORE_DIRECTORY ='.container_certificate_trust_store/'
+
+      NEW_TRUST_STORE_FILE = 'truststore.jks'
 
       private_constant :CA_CERTIFICATES
 
@@ -165,15 +167,15 @@ module LibertyBuildpack::Framework
         supports_configuration? && supports_file?
       end
 
-      def used_trust_store
-        @configuration[TRUST_STORE_USED] unless @configuration.nil?
+      def use_jvm_trust_store?
+        @configuration[USE_JVM_TRUST_STORE] unless @configuration.nil?
       end
 
       def trust_store
-        if used_trust_store == 'jvm'
+        if use_jvm_trust_store?
           JVM_KEY_STORE
         else
-          @app_dir + NEW_TRUST_STORE
+          @app_dir + NEW_TRUST_STORE_DIRECTORY + NEW_TRUST_STORE_FILE
         end
       end
 
