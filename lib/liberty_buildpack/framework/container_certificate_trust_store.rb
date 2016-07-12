@@ -94,7 +94,7 @@ module LibertyBuildpack::Framework
 
       USE_JVM_TRUST_STORE = 'use_jvm_trust_store'.freeze
 
-      NEW_TRUST_STORE_DIRECTORY ='.container_certificate_trust_store/'
+      NEW_TRUST_STORE_DIRECTORY = '.container_certificate_trust_store/'
 
       NEW_TRUST_STORE_FILE = 'truststore.jks'
 

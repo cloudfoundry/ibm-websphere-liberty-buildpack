@@ -47,7 +47,7 @@ describe LibertyBuildpack::Framework::ContainerCertificateTrustStore do
     expect(component.detect).to be_nil
   end
 
-  it 'detects with ca-certificates file when trust_store is set' , configuration: { 'enabled' => true} do
+  it 'detects with ca-certificates file when trust_store is set' , configuration: { 'enabled' => true } do
     allow(component).to receive(:ca_certificates).and_return(ca_certificates)
 
     expect(component.detect).to eq('container-certificate-trust-store=3')
