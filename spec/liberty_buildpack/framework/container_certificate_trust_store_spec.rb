@@ -53,28 +53,30 @@ describe LibertyBuildpack::Framework::ContainerCertificateTrustStore do
     expect(component.detect).to eq('container-certificate-trust-store=3')
   end
 
-  it 'creates truststore' , java_home: '/my/java_home/',  configuration: { 'enabled' => true, 'jvm_trust_store' => false } do
+  it 'creates truststore' , java_home: '/my/java_home',  configuration: { 'enabled' => true, 'jvm_trust_store' => false } do
     app_dir = component.instance_variable_get('@app_dir')
 
     allow(component).to receive(:ca_certificates).and_return(ca_certificates)
     allow(component).to receive(:write_certificate).and_return(Pathname.new('/certificate-0'),
                                                                Pathname.new('/certificate-1'),
                                                                Pathname.new('/certificate-2'))
-    allow(component).to receive(:shell).with("/my/java_home/bin/keytool -importcert -noprompt -keystore #{app_dir}/.container_certificate_trust_store/truststore.jks -storepass java-buildpack-trust-store-password -file /certificate-0 -alias certificate-0")
-    allow(component).to receive(:shell).with("/my/java_home/bin/keytool -importcert -noprompt -keystore #{app_dir}/.container_certificate_trust_store/truststore.jks -storepass java-buildpack-trust-store-password -file /certificate-1 -alias certificate-1")
-    allow(component).to receive(:shell).with("/my/java_home/bin/keytool -importcert -noprompt -keystore #{app_dir}/.container_certificate_trust_store/truststore.jks -storepass java-buildpack-trust-store-password -file /certificate-2 -alias certificate-2")
+    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore #{app_dir}/.container_certificate_trust_store/truststore.jks -storepass java-buildpack-trust-store-password -file /certificate-0 -alias certificate-0")
+    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore #{app_dir}/.container_certificate_trust_store/truststore.jks -storepass java-buildpack-trust-store-password -file /certificate-1 -alias certificate-1")
+    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore #{app_dir}/.container_certificate_trust_store/truststore.jks -storepass java-buildpack-trust-store-password -file /certificate-2 -alias certificate-2")
 
     component.compile
   end
 
-  it 'replaces jvm trustStore with system cert' , java_home: '/my/java_home/',  configuration: { 'enabled' => true, 'jvm_trust_store' => true } do
+  it 'replaces jvm trustStore with system cert' , java_home: '/my/java_home',  configuration: { 'enabled' => true, 'jvm_trust_store' => true } do
+    app_dir = component.instance_variable_get('@app_dir')
+
     allow(component).to receive(:ca_certificates).and_return(ca_certificates)
     allow(component).to receive(:write_certificate).and_return(Pathname.new('/certificate-0'),
                                                                Pathname.new('/certificate-1'),
                                                                Pathname.new('/certificate-2'))
-    allow(component).to receive(:shell).with('/my/java_home/bin/keytool -importcert -noprompt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass java-buildpack-trust-store-password -file /certificate-0 -alias certificate-0')
-    allow(component).to receive(:shell).with('/my/java_home/bin/keytool -importcert -noprompt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass java-buildpack-trust-store-password -file /certificate-1 -alias certificate-1')
-    allow(component).to receive(:shell).with('/my/java_home/bin/keytool -importcert -noprompt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass java-buildpack-trust-store-password -file /certificate-2 -alias certificate-2')
+    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass java-buildpack-trust-store-password -file /certificate-0 -alias certificate-0")
+    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass java-buildpack-trust-store-password -file /certificate-1 -alias certificate-1")
+    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass java-buildpack-trust-store-password -file /certificate-2 -alias certificate-2")
 
     component.compile
   end

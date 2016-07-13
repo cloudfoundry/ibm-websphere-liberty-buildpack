@@ -18,6 +18,7 @@ require 'liberty_buildpack/framework'
 require 'liberty_buildpack/util/dash_case'
 require 'liberty_buildpack/util/format_duration'
 require 'fileutils'
+require 'open3'
 require 'shellwords'
 require 'tempfile'
 
@@ -60,7 +61,7 @@ module LibertyBuildpack::Framework
         resolved_certificates = certificates
         with_timing(caption(resolved_certificates)) do
           unless use_jvm_trust_store?
-            FileUtils.mkdir_p @app_dir + NEW_TRUST_STORE_DIRECTORY
+            FileUtils.mkdir_p File.join(@app_dir, NEW_TRUST_STORE_DIRECTORY)
           end
           resolved_certificates.each_with_index { |certificate, index| add_certificate certificate, index }
         end
@@ -148,7 +149,7 @@ module LibertyBuildpack::Framework
       end
 
       def keytool
-        instance_variable_get('@java_home') + 'bin/keytool'
+        File.join(@app_dir, @java_home, '/jre/bin/keytool')
       end
 
       def password
@@ -175,7 +176,7 @@ module LibertyBuildpack::Framework
         if use_jvm_trust_store?
           JVM_KEY_STORE
         else
-          @app_dir + NEW_TRUST_STORE_DIRECTORY + NEW_TRUST_STORE_FILE
+          File.join(@app_dir, NEW_TRUST_STORE_DIRECTORY, NEW_TRUST_STORE_FILE)
         end
       end
 
@@ -184,6 +185,22 @@ module LibertyBuildpack::Framework
         file.write(certificate)
         file.fsync
         file
+      end
+
+      # A +system()+-like command that ensure that the execution fails if the command returns a non-zero exit code
+      #
+      # @param [Object] args The command to run
+      # @return [Void]
+      def shell(*args)
+        Open3.popen3(*args) do |_stdin, stdout, stderr, wait_thr|
+          if wait_thr.value != 0
+            puts "\nCommand '#{args.join ' '}' has failed"
+            puts "STDOUT: #{stdout.gets nil}"
+            puts "STDERR: #{stderr.gets nil}"
+
+            fail
+          end
+        end
       end
 
     end
