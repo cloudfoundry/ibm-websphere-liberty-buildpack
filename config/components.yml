@@ -32,3 +32,4 @@ frameworks:
   - "LibertyBuildpack::Framework::DynaTraceAgent"
   - "LibertyBuildpack::Framework::RuxitAgent"
   - "LibertyBuildpack::Framework::DynamicPULSEAgent"
+  - "LibertyBuildpack::Framework::ContainerCertificateTrustStore"
