@@ -585,17 +585,15 @@ module LibertyBuildpack::Container
     end
 
     def list_configured_features_from_component(component)
-      features_xpath = OptionalComponents.feature_xpath(component)
-      if !features_xpath
+      feature_names = OptionalComponents.feature_names(component)
+      if !feature_names
         # no such component
         []
       elsif (server_xml = Liberty.server_xml(@app_dir))
-        # server.xml is supplied, so check requested features.
-        server_xml_doc = XmlUtils.read_xml_file(server_xml)
-        REXML::XPath.match(server_xml_doc, features_xpath)
+        feature_manager = FeatureManager.new(@app_dir, @java_home, @configuration)
+        feature_names & feature_manager.get_features(server_xml)
       else
         # no server.xml supplied, so check default features.
-        feature_names = OptionalComponents.feature_names(component)
 
         default_config = @configuration['app_archive']
         default_features = default_config.nil? ? [] : default_config['features'] || []
