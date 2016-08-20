@@ -1831,6 +1831,29 @@ module LibertyBuildpack::Container
         end
       end
 
+      it 'should extract extended features if they are enabled and required by the configDropins' do
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          config_dropins_folder = File.join(root, 'configDropins/defaults')
+
+          FileUtils.mkdir_p root
+          FileUtils.mkdir_p config_dropins_folder
+
+          File.open(File.join(root, 'server.xml'), 'w') do |file|
+            file.write('<server><featureManager><feature>jsp-2.0</feature></featureManager></server>')
+          end
+
+          File.open(File.join(config_dropins_folder, 'libertyExtendedFeature.xml'), 'w') do |file|
+            file.write('<server><featureManager><feature>mongodb-2.0</feature></featureManager></server>')
+          end
+
+          run(root)
+
+          feature = File.join root, '.liberty', 'lib', 'features', 'mongodb-2.0.mf'
+          expect(File).to exist(feature)
+        end
+      end
+
       it 'should NOT extract extended features if NOT specifed in server.xml' do
         Dir.mktmpdir do |root|
           root = File.join(root, 'app')

@@ -88,6 +88,27 @@ module LibertyBuildpack::Container
         @logger.debug('exit')
       end
 
+      # collect list of feature names from the server.xml and configDropins/
+      # directories.
+      #
+      # @return a String array of feature names.
+      def get_features(server_xml)
+        features = Set.new(read_features(server_xml))
+
+        # Check for any configuration files under configDrops/overrides and
+        # configDropins/defaults. Since featureManager's feature elements
+        # have multiple cardinality, the values will always be merged together.
+        # Reading or processing order does not matter.
+        server_dir = File.dirname(server_xml)
+        %w{defaults overrides}.each do | type |
+          Dir.glob("#{server_dir}/configDropins/#{type}/*.xml").each do |file|
+            features.merge(read_features(file))
+          end
+        end
+
+        features.to_a
+      end
+
     private
 
       FEATURES_ALREADY_PRESENT_EXIT_CODE = 22
@@ -154,27 +175,6 @@ module LibertyBuildpack::Container
         end
         @logger.debug("exit (#{use_liberty_repository_with_properties_file})")
         use_liberty_repository_with_properties_file
-      end
-
-      # collect list of feature names from the server.xml and configDropins/
-      # directories.
-      #
-      # @return a String array of feature names.
-      def get_features(server_xml)
-        features = Set.new(read_features(server_xml))
-
-        # Check for any configuration files under configDrops/overrides and
-        # configDropins/defaults. Since featureManager's feature elements
-        # have multiple cardinality, the values will always be merged together.
-        # Reading or processing order does not matter.
-        server_dir = File.dirname(server_xml)
-        %w{defaults overrides}.each do | type |
-          Dir.glob("#{server_dir}/configDropins/#{type}/*.xml").each do |file|
-            features.merge(read_features(file))
-          end
-        end
-
-        features.to_a
       end
 
       # parse the given server.xml to find all features required. User features
