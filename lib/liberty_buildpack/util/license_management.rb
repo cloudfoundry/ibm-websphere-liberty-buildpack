@@ -30,7 +30,13 @@ module LibertyBuildpack::Util
 
     # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
     LibertyBuildpack::Util::Cache::ApplicationCache.new.get(license_uri) do |file|
-      license = file.read.force_encoding('ISO-8859-1').scan(/D\/N:\s*(.*?)\s*\</m).last.first
+      scanned_license = file.read.force_encoding('ISO-8859-1').scan(/D\/N:\s*(.*?)\s*\</m)
+      if scanned_license.empty?
+        raise 'No D/N code found in the license file'
+      else
+        license = scanned_license.first.last
+      end
+
       return license_id == license
     end
   end

@@ -2004,5 +2004,35 @@ module LibertyBuildpack::Container
 
     end
 
+    describe 'Expect license error if not in license html' do
+
+      def run(root, env = {})
+        set_liberty_fixture('spec/fixtures/wlp-stub.tar.gz')
+
+        Liberty.new(
+          app_dir: root,
+          lib_directory: '',
+          configuration: default_configuration,
+          environment: env,
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+        ).compile
+      end
+
+      before do
+        # return license file by default
+        application_cache.stub(:get).and_yield(File.open('spec/fixtures/license2.html'))
+      end
+
+      it 'should raise error' do
+        Dir.mktmpdir do |root|
+          FileUtils.cp_r('spec/fixtures/container_liberty/.', root)
+          env = { 'JBP_CONFIG_LIBERTY' => '[features: blah, app_archive: {feature: [jsp-2.2]}]' }
+          expect { run(root, env) }.to raise_error(/No\ D\/N\ code\ found\ in\ the\ license\ file/)
+
+        end
+      end
+
+    end
+
   end
 end
