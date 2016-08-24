@@ -30,7 +30,6 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 module LibertyBuildpack::Container
   # The class that encapsulate access to services and services information.
   class ServicesManager
-
     def initialize(vcap_services, server_dir, opt_out_string)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @logger.debug("init: server dir is #{server_dir}, vcap_services is #{LibertyBuildpack::Util.safe_vcap_services(vcap_services)} and opt_out is #{opt_out_string}")
@@ -164,7 +163,7 @@ module LibertyBuildpack::Container
       # The opt-out string may contain multiple entries of form service-level with entries separated by white space.
       parts = string.split
       @logger.debug("opt-out string after split is #{parts}")
-      parts.each { |part|  process_opt_out(part, retval) }
+      parts.each { |part| process_opt_out(part, retval) }
       retval
     end
 
@@ -295,15 +294,14 @@ module LibertyBuildpack::Container
       @logger.debug("processing service instances of type #{type}. Config is #{config}")
       service_data.each do |instance|
         service_instance = create_instance(element, type, config, instance)
-        unless service_instance.nil?
-          instance_hash = { INSTANCE => service_instance, CONFIG => config }
-          target_array.push(instance_hash)
-          if @service_type_instances[xml_element].nil?
-            @service_type_instances[xml_element] = 1
-          else
-            @service_type_instances[xml_element] = @service_type_instances[xml_element] + 1
-          end
-        end
+        next if service_instance.nil?
+        instance_hash = { INSTANCE => service_instance, CONFIG => config }
+        target_array.push(instance_hash)
+        @service_type_instances[xml_element] = if @service_type_instances[xml_element].nil?
+                                                 1
+                                               else
+                                                 @service_type_instances[xml_element] + 1
+                                               end
       end
     end
 
@@ -316,13 +314,12 @@ module LibertyBuildpack::Container
     #------------------------------------------------------
     def process_user_provided_services(runtime_vars_doc, service_data)
       service_data.each do |service|
-        unless service['name'].nil?
-          usrp_service_type = service['name']
-          usrp_service_data = []
-          usrp_service_data << service
-          @logger.debug("processing service type #{usrp_service_type} and data #{LibertyBuildpack::Util.safe_service_data(service_data)}")
-          process_service_type(runtime_vars_doc.root, usrp_service_type, usrp_service_data)
-        end
+        next if service['name'].nil?
+        usrp_service_type = service['name']
+        usrp_service_data = []
+        usrp_service_data << service
+        @logger.debug("processing service type #{usrp_service_type} and data #{LibertyBuildpack::Util.safe_service_data(service_data)}")
+        process_service_type(runtime_vars_doc.root, usrp_service_type, usrp_service_data)
       end
     end
 
@@ -330,15 +327,14 @@ module LibertyBuildpack::Container
     # find the service type by checking the tags against filter defined by the plugin
     #-----------------------------------
     def find_service_plugin_by_tags(service_data)
-      candidates =  Set.new
-      @config.each do | key, value |
+      candidates = Set.new
+      @config.each do |key, value|
         filter = value['service_filter']
-        unless filter.nil?
-          filter = Regexp.new(filter) unless filter.kind_of?(Regexp)
-          service_data.each do | service |
-            if !service['tags'].nil? && service['tags'].any? { |tag| tag =~ filter }
-              candidates.add(key)
-            end
+        next if filter.nil?
+        filter = Regexp.new(filter) unless filter.is_a?(Regexp)
+        service_data.each do |service|
+          if !service['tags'].nil? && service['tags'].any? { |tag| tag =~ filter }
+            candidates.add(key)
           end
         end
       end
@@ -352,7 +348,7 @@ module LibertyBuildpack::Container
     # @param service_data - the array holding the instances data
     #-----------------------------------
     def get_service_type(name, service_data)
-      candidates =  []
+      candidates = []
       # Use filters to find the plugin. Give precedence to a search against the label. If no matches using the label search against the tags.
       candidates = find_service_plugin_by_label(name)
       candidates = find_service_plugin_by_tags(service_data) if candidates.empty?
@@ -369,10 +365,10 @@ module LibertyBuildpack::Container
     #-----------------------------------
     def find_service_plugin_by_label(name)
       candidates =  []
-      @config.each do | key, value |
+      @config.each do |key, value|
         filter = value['service_filter']
         unless filter.nil?
-          filter = Regexp.new(filter) unless filter.kind_of?(Regexp)
+          filter = Regexp.new(filter) unless filter.is_a?(Regexp)
           candidates.push(key) if name =~ filter
         end
       end
@@ -391,6 +387,7 @@ module LibertyBuildpack::Container
       return @services_no_xml_updates if option == 'config'
       @services_no_autoconfig
     end
+
     #------------------------------------------------
     # Create a service instance
     #
@@ -483,5 +480,5 @@ module LibertyBuildpack::Container
       end # end do |file|
       puts "(#{(Time.now - download_start_time).duration})"
     end
-  end  # class
+  end # class
 end

@@ -16,24 +16,20 @@
 
 # A mixin that adds the ability to turn a +String+ into a boolean
 class String
-
   # Converts a +String+ to a boolean
   #
   # @return [Boolean] +true+ if +<STRING>.downcase == 'true'+.  +false+ otherwise
   def to_b
     downcase == 'true'
   end
-
 end
 
 # A mixin that adds the ability to turn a +nil+ into a boolean
 class NilClass
-
   # Converts a +nil+ to a boolean
   #
   # @return [Boolean] +false+ always
   def to_b
     false
   end
-
 end

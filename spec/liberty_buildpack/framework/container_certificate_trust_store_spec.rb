@@ -23,13 +23,13 @@ describe LibertyBuildpack::Framework::ContainerCertificateTrustStore do
 
   let(:ca_certificates) { Pathname.new('spec/fixtures/ca-certificates.crt') }
 
-  it 'detects with ca-certificates file' , configuration: { 'enabled' => 'true' } do
+  it 'detects with ca-certificates file', configuration: { 'enabled' => 'true' } do
     allow(component).to receive(:ca_certificates).and_return(ca_certificates)
 
     expect(component.detect).to eq('container-certificate-trust-store=3')
   end
 
-  it 'detects with ca-certificates file' , configuration: { 'enabled' => 'true' } do
+  it 'detects with ca-certificates file', configuration: { 'enabled' => 'true' } do
     allow(component).to receive(:ca_certificates).and_return(ca_certificates)
 
     expect(component.detect).to eq('container-certificate-trust-store=3')
@@ -41,19 +41,19 @@ describe LibertyBuildpack::Framework::ContainerCertificateTrustStore do
     expect(component.detect).to be_nil
   end
 
-  it 'does not detect when disabled and trust_store set' , configuration: { 'enabled' => false } do
+  it 'does not detect when disabled and trust_store set', configuration: { 'enabled' => false } do
     allow(component).to receive(:ca_certificates).and_return(ca_certificates)
 
     expect(component.detect).to be_nil
   end
 
-  it 'detects with ca-certificates file when trust_store is set' , configuration: { 'enabled' => true } do
+  it 'detects with ca-certificates file when trust_store is set', configuration: { 'enabled' => true } do
     allow(component).to receive(:ca_certificates).and_return(ca_certificates)
 
     expect(component.detect).to eq('container-certificate-trust-store=3')
   end
 
-  it 'creates truststore' , java_home: '/my/java_home',  configuration: { 'enabled' => true, 'jvm_trust_store' => false } do
+  it 'creates truststore', java_home: '/my/java_home', configuration: { 'enabled' => true, 'jvm_trust_store' => false } do
     app_dir = component.instance_variable_get('@app_dir')
 
     allow(component).to receive(:ca_certificates).and_return(ca_certificates)
@@ -67,7 +67,7 @@ describe LibertyBuildpack::Framework::ContainerCertificateTrustStore do
     component.compile
   end
 
-  it 'replaces jvm trustStore with system cert' , java_home: '/my/java_home',  configuration: { 'enabled' => true, 'jvm_trust_store' => true } do
+  it 'replaces jvm trustStore with system cert', java_home: '/my/java_home', configuration: { 'enabled' => true, 'jvm_trust_store' => true } do
     app_dir = component.instance_variable_get('@app_dir')
 
     allow(component).to receive(:ca_certificates).and_return(ca_certificates)
@@ -88,5 +88,4 @@ describe LibertyBuildpack::Framework::ContainerCertificateTrustStore do
     expect(java_opts).to include('-Djavax.net.ssl.trustStore=/home/vcap/app/.container_certificate_trust_store/truststore.jks')
     expect(java_opts).to include('-Djavax.net.ssl.trustStorePassword=java-buildpack-trust-store-password')
   end
-
 end

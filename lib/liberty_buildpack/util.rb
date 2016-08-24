@@ -20,7 +20,6 @@ require 'json'
 
 # A module encapsulating all of the utility code for the Java buildpack
 module LibertyBuildpack::Util
-
   # Get services as either hash or string and return as the same object but
   # with credentials info masked out as PRIVATE DATA HIDDEN string
   #
@@ -54,7 +53,7 @@ module LibertyBuildpack::Util
     safe_array = []
     vcap_service_data.each do |instance|
       safe_instance = instance.clone
-      if safe_instance.class == Hash && safe_instance.has_key?('credentials')
+      if safe_instance.class == Hash && safe_instance.key?('credentials')
         safe_instance['credentials'] = ['PRIVATE DATA HIDDEN']
       end
       safe_array << safe_instance
@@ -75,7 +74,7 @@ module LibertyBuildpack::Util
   #
   # @return [Hash] return env back with the data
   def self.safe_heroku_env!(env)
-    env.each do |key, value|
+    env.each do |key, _value|
       if key.end_with?(Heroku::URL_SUFFIX) || key.end_with?(Heroku::URI_SUFFIX)
         env[key] = '[PRIVATE DATA HIDDEN]'
       end

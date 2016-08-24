@@ -17,10 +17,8 @@
 require 'liberty_buildpack'
 
 module LibertyBuildpack::Util
-
   # XML-based utilities
   class XmlUtils
-
     #---------------------------------------------------------------------
     # A utility method that can be used to read XML file.
     #
@@ -54,7 +52,5 @@ module LibertyBuildpack::Util
     def self.write_formatted_xml_file(doc, filename)
       File.open(filename, 'w:utf-8') { |file| xml_formatter.write(doc, file) }
     end
-
   end
-
 end

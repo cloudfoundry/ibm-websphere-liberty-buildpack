@@ -18,9 +18,7 @@ require 'spec_helper'
 require 'liberty_buildpack/framework/java_opts'
 
 module LibertyBuildpack::Framework
-
   describe JavaOpts do
-
     let(:java_opts) { [] }
 
     it 'should detect with java.opts configuration' do
@@ -107,7 +105,5 @@ module LibertyBuildpack::Framework
       expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-XX:MaxPermSize=128M', app_dir: 'root' }, jvm_type: 'openjdk').compile }.to raise_error(/-XX:MaxPermSize/)
       expect { JavaOpts.new(java_opts: java_opts, configuration: { 'java_opts' => '-Xss1M', app_dir: 'root' }, jvm_type: 'openjdk').compile }.to raise_error(/-Xss/)
     end
-
   end
-
 end

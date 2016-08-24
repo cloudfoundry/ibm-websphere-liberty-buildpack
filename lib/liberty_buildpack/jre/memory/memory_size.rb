@@ -18,7 +18,6 @@ require 'liberty_buildpack/jre'
 
 module LibertyBuildpack
   module Jre
-
     # A class representing the size of a category of memory.
     class MemorySize
       include Comparable
@@ -30,10 +29,10 @@ module LibertyBuildpack
         if size == '0'
           @bytes = 0
         else
-          fail "Invalid memory size '#{size}'" if !size || size.length < 2
+          raise "Invalid memory size '#{size}'" if !size || size.length < 2
           unit = size[-1]
           v    = size[0..-2]
-          fail "Invalid memory size '#{size}'" unless integer? v
+          raise "Invalid memory size '#{size}'" unless integer? v
           v = size.to_i
 
           # Store the number of bytes.
@@ -47,7 +46,7 @@ module LibertyBuildpack
           when 'g', 'G'
             @bytes = KILO * KILO * KILO * v
           else
-            fail "Invalid unit '#{unit}' in memory size '#{size}'"
+            raise "Invalid unit '#{unit}' in memory size '#{size}'"
           end
         end
       end
@@ -100,7 +99,7 @@ module LibertyBuildpack
       # @param [Numeric] other the factor to multiply by
       # @return [MemorySize] the result
       def *(other)
-        fail "Cannot multiply a Memory size by an instance of #{other.class}" unless other.is_a? Numeric
+        raise "Cannot multiply a Memory size by an instance of #{other.class}" unless other.is_a? Numeric
         from_numeric((@bytes * other).round)
       end
 
@@ -122,7 +121,7 @@ module LibertyBuildpack
       def /(other)
         return @bytes / other.bytes.to_f if other.is_a? MemorySize
         return from_numeric((@bytes / other.to_f).round) if other.is_a? Numeric
-        fail "Cannot divide a MemorySize by an instance of #{other.class}"
+        raise "Cannot divide a MemorySize by an instance of #{other.class}"
       end
 
       # @!attribute [r] bytes
@@ -133,10 +132,10 @@ module LibertyBuildpack
 
       private
 
-      KILO = 1024.freeze
+      KILO = 1024
 
       def memory_size_operation(other)
-        fail "Invalid parameter: instance of #{other.class} is not a MemorySize" unless other.is_a? MemorySize
+        raise "Invalid parameter: instance of #{other.class} is not a MemorySize" unless other.is_a? MemorySize
         from_numeric(yield @bytes, other.bytes)
       end
 
@@ -154,6 +153,5 @@ module LibertyBuildpack
       # Zero byte memory size
       ZERO = MemorySize.new('0B').freeze
     end
-
   end
 end

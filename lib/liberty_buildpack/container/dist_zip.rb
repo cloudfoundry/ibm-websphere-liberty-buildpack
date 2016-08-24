@@ -24,7 +24,6 @@ require 'liberty_buildpack/container/container_utils'
 module LibertyBuildpack::Container
   # Encapsulates the detect, compile, and release functionality for dist_zip applications.
   class DistZip
-
     include LibertyBuildpack::Util
 
     # Creates an instance, passing in an arbitrary collection of options.
@@ -59,7 +58,7 @@ module LibertyBuildpack::Container
     #
     # @return [Void]
     def compile
-      File.chmod(0755, start_script(root))
+      File.chmod(0o755, start_script(root))
       augment_classpath_content
     end
 
@@ -78,7 +77,7 @@ module LibertyBuildpack::Container
         "JAVA_HOME=#{check_jre_path}",
         'SERVER_PORT=$PORT',
         as_env_var(java_opts),
-        qualify_path(start_script(root), @app_dir),
+        qualify_path(start_script(root), @app_dir)
       ].flatten.compact.join(' ')
     end
 
@@ -100,7 +99,7 @@ module LibertyBuildpack::Container
 
     def supports?
       start_script(root) &&
-      File.exist?(start_script(root)) &&
+        File.exist?(start_script(root)) &&
         jars?
     end
 
@@ -135,7 +134,7 @@ module LibertyBuildpack::Container
 
     PATTERN_APP_CLASSPATH = /^declare -r app_classpath=\"(.*)\"$/
 
-    PATTERN_CLASSPATH = /^CLASSPATH=(.*)$/.freeze
+    PATTERN_CLASSPATH = /^CLASSPATH=(.*)$/
 
     # private_constant :PATTERN_APP_CLASSPATH, :PATTERN_CLASSPATH
 

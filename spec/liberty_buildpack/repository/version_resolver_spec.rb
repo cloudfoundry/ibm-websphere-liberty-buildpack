@@ -65,5 +65,4 @@ describe LibertyBuildpack::Repository::VersionResolver do
   def tokenized_version(s)
     LibertyBuildpack::Util::TokenizedVersion.new(s)
   end
-
 end

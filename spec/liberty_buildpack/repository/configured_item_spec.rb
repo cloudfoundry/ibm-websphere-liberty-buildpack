@@ -20,7 +20,6 @@ require 'liberty_buildpack/repository/repository_index'
 require 'liberty_buildpack/util/tokenized_version'
 
 describe LibertyBuildpack::Repository::ConfiguredItem do
-
   let(:repository_index) { double('RepositoryIndex', find_item: [resolved_version, resolved_uri]) }
 
   let(:resolved_uri) { 'resolved-uri' }
@@ -69,5 +68,4 @@ describe LibertyBuildpack::Repository::ConfiguredItem do
     expect(details[0]).to eq(resolved_version)
     expect(details[1]).to eq(resolved_uri)
   end
-
 end

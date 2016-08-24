@@ -18,7 +18,6 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/services/utils'
 
 module LibertyBuildpack::Services
-
   #------------------------------------------------------------------------------------
   # The Default class is used as the plugin for services that don't provide a plugin.
   # The Default class will attempt to generate cloud variables for the service, and
@@ -26,7 +25,6 @@ module LibertyBuildpack::Services
   #------------------------------------------------------------------------------------
 
   class Default
-
     #------------------------------------------------------------------------------------
     # Initialize
     #
@@ -72,7 +70,7 @@ module LibertyBuildpack::Services
     # @param urls - an array containing the available download urls for client jars
     # return - a non-null array of urls. Will be empty if nothing needs to be downloaded.
     #-----------------------------------------------------------------------------------------
-    def get_urls_for_client_jars(existing, urls)
+    def get_urls_for_client_jars(_existing, _urls)
       []
     end
 
@@ -82,7 +80,7 @@ module LibertyBuildpack::Services
     # @param uris - the hash containing the <key, uri> information from the repository
     # @param components - the non-null RequiredComponents to update.
     #---------------------------------------------
-    def get_required_esas(uris, components)
+    def get_required_esas(_uris, _components)
       false
     end
 

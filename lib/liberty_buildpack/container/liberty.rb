@@ -40,7 +40,6 @@ require 'open-uri'
 module LibertyBuildpack::Container
   # Encapsulates the detect, compile, and release functionality for Liberty applications.
   class Liberty
-
     include LibertyBuildpack::Util
 
     # Creates an instance, passing in an arbitrary collection of options.
@@ -209,7 +208,7 @@ module LibertyBuildpack::Container
       # already in the runtime defaultServer directory (if a server.xml was
       # pushed, jvm options will be in the same location, and both are linked
       # to from the runtime).
-      if File.exists?(default_server_path) && ! File.exists?(File.join(default_server_path, JVM_OPTIONS))
+      if File.exists?(default_server_path) && !File.exists?(File.join(default_server_path, JVM_OPTIONS))
         default_server_pathname = Pathname.new(default_server_path)
         FileUtils.ln_sf(Pathname.new(jvm_options_src).relative_path_from(default_server_pathname), default_server_path)
       end
@@ -247,14 +246,14 @@ module LibertyBuildpack::Container
     end
 
     def java_present?
-      ! @java_home.nil? && File.directory?(File.join(@app_dir, @java_home))
+      !@java_home.nil? && File.directory?(File.join(@app_dir, @java_home))
     end
 
     def set_liberty_system_properties
       resources_dir = File.expand_path(RESOURCES, File.dirname(__FILE__))
       create_vars_destination = File.join(liberty_home, 'create_vars.rb')
       FileUtils.cp(File.join(resources_dir, 'create_vars.rb'), create_vars_destination)
-      File.chmod(0755, create_vars_destination)
+      File.chmod(0o755, create_vars_destination)
     end
 
     KEY_HTTP_PORT = 'port'.freeze
@@ -310,7 +309,7 @@ module LibertyBuildpack::Container
           if !config_features(value).nil?
             return true
           elsif value.is_a?(Array)
-            value.each do | item |
+            value.each do |item|
               return true unless config_features(item).nil?
             end
           end
@@ -327,7 +326,7 @@ module LibertyBuildpack::Container
 
     def update_provided_server_xml(server_xml)
       # Preserve the original configuration before we start modifying it
-      FileUtils.cp "#{server_xml}", "#{server_xml}.org"
+      FileUtils.cp server_xml.to_s, "#{server_xml}.org"
 
       server_xml_doc = XmlUtils.read_xml_file(server_xml)
 
@@ -351,7 +350,7 @@ module LibertyBuildpack::Container
       feature_manager = REXML::Element.new('featureManager', server_xml_doc.root)
       unless default_config.nil?
         features = default_config['features'] || []
-        features.each do | feature |
+        features.each do |feature|
           feature_element = REXML::Element.new('feature', feature_manager)
           feature_element.text = feature
         end
@@ -419,11 +418,11 @@ module LibertyBuildpack::Container
 
     def update_web_container(server_xml_doc)
       webcontainers = REXML::XPath.match(server_xml_doc, '/server/webContainer')
-      if webcontainers.empty?
-        webcontainer = REXML::Element.new('webContainer', server_xml_doc.root)
-      else
-        webcontainer = webcontainers[0]
-      end
+      webcontainer = if webcontainers.empty?
+                       REXML::Element.new('webContainer', server_xml_doc.root)
+                     else
+                       webcontainers[0]
+                     end
       webcontainer.add_attribute('trustHostHeaderPort', 'true')
       webcontainer.add_attribute('extractHostHeaderPort', 'true')
     end
@@ -435,11 +434,11 @@ module LibertyBuildpack::Container
 
     def update_logs_dir(server_xml_doc)
       elements = REXML::XPath.match(server_xml_doc, '/server/logging')
-      if elements.empty?
-        logging = REXML::Element.new('logging', server_xml_doc.root)
-      else
-        logging = elements.last
-      end
+      logging = if elements.empty?
+                  REXML::Element.new('logging', server_xml_doc.root)
+                else
+                  elements.last
+                end
       logging.add_attribute('logDirectory', '${application.log.dir}')
       logging.add_attribute('consoleLogLevel', 'INFO') if logging.attribute('consoleLogLevel').nil?
     end
@@ -486,11 +485,11 @@ module LibertyBuildpack::Container
       if apps.size == 1 && !apps[0].attributes['name'].nil?
         # Add appstate-1.0 feature
         feature_managers = REXML::XPath.match(server_xml_doc, '/server/featureManager')
-        if feature_managers.empty?
-          feature_manager = REXML::Element.new('featureManager', server_xml_doc.root)
-        else
-          feature_manager = feature_managers[0]
-        end
+        feature_manager = if feature_managers.empty?
+                            REXML::Element.new('featureManager', server_xml_doc.root)
+                          else
+                            feature_managers[0]
+                          end
         appstate_feature = REXML::Element.new('feature', feature_manager)
         appstate_feature.text = 'appstate-1.0'
 
@@ -511,9 +510,9 @@ module LibertyBuildpack::Container
     end
 
     def make_server_script_runnable
-      %w{server featureManager productInfo installUtility}.each do | name |
+      %w(server featureManager productInfo installUtility).each do |name|
         script = File.join(liberty_home, 'bin', name)
-        File.chmod(0755, script) if File.exists?(script)
+        File.chmod(0o755, script) if File.exists?(script)
       end
     end
 
@@ -543,7 +542,7 @@ module LibertyBuildpack::Container
 
         # download and extract the server to a temporary location.
         uri = @liberty_components_and_uris[COMPONENT_LIBERTY_CORE]
-        fail 'No Liberty download defined in buildpack.' if uri.nil?
+        raise 'No Liberty download defined in buildpack.' if uri.nil?
         download_and_unpack_archive(uri, root)
 
         # read opt-out of service bindings information from env (manifest.yml), and initialise
@@ -694,9 +693,9 @@ module LibertyBuildpack::Container
       cmd = File.join(root, WLP_PATH, 'bin', 'featureManager')
       script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS="" #{cmd} install #{file.path} #{options} 2>&1"
       output = `#{script_string}`
-      if  $CHILD_STATUS.to_i != 0
+      if $CHILD_STATUS.to_i != 0
         puts 'FAILED'
-        puts "#{output}"
+        puts output.to_s
       else
         puts "(#{(Time.now - install_start_time).duration})."
       end
@@ -707,7 +706,7 @@ module LibertyBuildpack::Container
         location = element.attributes['location']
         optional = element.attributes['optional']
         if location.start_with? 'http:'
-          fail 'Configuration files accessible via HTTP are not supported.'
+          raise 'Configuration files accessible via HTTP are not supported.'
         else
           location = location_resolver.absolute_path(location, server_xml_dir)
           if File.exist? location
@@ -716,7 +715,7 @@ module LibertyBuildpack::Container
             included_xml_doc.root.elements.each { |nested| server_xml_doc.root.insert_after element, nested }
             server_xml_doc.root.delete_element element
           elsif optional !~ /^true$/i
-            fail "Configuration file could not be located: #{location}"
+            raise "Configuration file could not be located: #{location}"
           end
         end
       end
@@ -728,12 +727,12 @@ module LibertyBuildpack::Container
     def self.find_liberty_files(app_dir, configuration)
       config_uri, license = Liberty.find_liberty_item(app_dir, configuration).drop(1)
       # Back to the future. Temporary hack to handle all-in-one liberty core for open source buildpack while the repository is being restructured.
-      if config_uri.end_with?('.jar') || config_uri.end_with?('.zip')
-        components_and_uris = { COMPONENT_LIBERTY_CORE => config_uri }
-      else
-        components_and_uris = LibertyBuildpack::Repository::ComponentIndex.new(config_uri).components
-      end
-      fail "Failed to locate a repository containing a component_index and installable components using uri #{config_uri}." if components_and_uris.nil?
+      components_and_uris = if config_uri.end_with?('.jar') || config_uri.end_with?('.zip')
+                              { COMPONENT_LIBERTY_CORE => config_uri }
+                            else
+                              LibertyBuildpack::Repository::ComponentIndex.new(config_uri).components
+                            end
+      raise "Failed to locate a repository containing a component_index and installable components using uri #{config_uri}." if components_and_uris.nil?
       [components_and_uris, license]
     end
 
@@ -744,11 +743,11 @@ module LibertyBuildpack::Container
     def self.find_liberty_item(app_dir, configuration)
       if server_xml(app_dir) || web_inf(app_dir) || meta_inf(app_dir)
         version, entry = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
-          fail "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
+          raise "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
         if entry.is_a?(Hash)
           type = runtime_type(configuration)
-          fail "Runtime type not supported: #{type}" if entry[type].nil?
+          raise "Runtime type not supported: #{type}" if entry[type].nil?
           return version, entry[type], entry['license']
         else
           return version, entry, nil
@@ -770,17 +769,17 @@ module LibertyBuildpack::Container
     end
 
     def liberty_type
-      if Liberty.web_inf(@app_dir)
-         type = 'WAR'
-      elsif Liberty.meta_inf(@app_dir)
-         type = 'EAR'
-      elsif Liberty.liberty_directory(@app_dir)
-         type = 'SVR-PKG'
-      elsif Liberty.server_directory(@app_dir)
-         type = 'SVR-DIR'
-      else
-         type = 'unknown'
-      end
+      type = if Liberty.web_inf(@app_dir)
+               'WAR'
+             elsif Liberty.meta_inf(@app_dir)
+               'EAR'
+             elsif Liberty.liberty_directory(@app_dir)
+               'SVR-PKG'
+             elsif Liberty.server_directory(@app_dir)
+               'SVR-DIR'
+             else
+               'unknown'
+             end
     end
 
     def liberty_id(version)
@@ -816,9 +815,9 @@ module LibertyBuildpack::Container
       return unless Dir.exists?(features_dir)
       FileUtils.mkdir_p(File.join(@app_dir, WLP_PATH, USR_PATH, 'extension', 'lib', 'features'))
       output = `cp #{features_dir}/*.mf #{@app_dir}/wlp/usr/extension/lib/features`
-      @logger.warn("copy_user_features copy manifests returned #{output}") if  $CHILD_STATUS.to_i != 0
+      @logger.warn("copy_user_features copy manifests returned #{output}") if $CHILD_STATUS.to_i != 0
       output = `cp #{extension_lib_dir}/*.jar #{@app_dir}/wlp/usr/extension/lib`
-      @logger.warn("copy_user_features copy jars returned #{output}") if  $CHILD_STATUS.to_i != 0
+      @logger.warn("copy_user_features copy jars returned #{output}") if $CHILD_STATUS.to_i != 0
     end
 
     def overlay_java
@@ -893,7 +892,7 @@ module LibertyBuildpack::Container
       if File.exist?(manifest_file)
         props = LibertyBuildpack::Util::Properties.new(manifest_file)
         main_class = props['Main-Class']
-        main_class != nil
+        !main_class.nil?
       else
         false
       end
@@ -975,15 +974,12 @@ module LibertyBuildpack::Container
 
     def self.expand_apps(apps)
       apps.each do |app|
-        if File.file? app
-          temp_directory = "#{app}.tmp"
-          ContainerUtils.unzip(app, temp_directory)
-          File.delete(app)
-          File.rename(temp_directory, app)
-        end
+        next unless File.file? app
+        temp_directory = "#{app}.tmp"
+        ContainerUtils.unzip(app, temp_directory)
+        File.delete(app)
+        File.rename(temp_directory, app)
       end
     end
-
   end
-
 end

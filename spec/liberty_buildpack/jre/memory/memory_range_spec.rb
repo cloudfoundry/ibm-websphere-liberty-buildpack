@@ -20,7 +20,6 @@ require 'liberty_buildpack/jre/memory/memory_range'
 require 'liberty_buildpack/jre/memory/memory_size'
 
 describe LibertyBuildpack::Jre::MemoryRange do
-
   let(:low) { LibertyBuildpack::Jre::MemorySize.new('1m') }
 
   let(:mid) { LibertyBuildpack::Jre::MemorySize.new('4m') }
@@ -158,5 +157,4 @@ describe LibertyBuildpack::Jre::MemoryRange do
   it 'should compare unbounded ranges correctly for equality' do
     expect(described_class.new('3m..')).to eq(described_class.new(test_lower_bound))
   end
-
 end

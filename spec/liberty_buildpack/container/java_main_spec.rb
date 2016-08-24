@@ -20,7 +20,6 @@ require 'liberty_buildpack/container/java_main'
 require 'liberty_buildpack/container/container_utils'
 
 module LibertyBuildpack::Container
-
   describe JavaMain do
     include_context 'component_helper'
 
@@ -39,8 +38,7 @@ module LibertyBuildpack::Container
     end
 
     describe 'detect', configuration: {} do
-
-      subject(:detected) do |example|
+      subject(:detected) do |_example|
         JavaMain.new(context).detect
       end
 
@@ -80,9 +78,9 @@ module LibertyBuildpack::Container
             configuration: { 'java_main_class' => 'com.ibm.rspec.test' }
           ).compile
 
-          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to eq(true)
-          expect(File.exists?(File.join root, '.java', 'test.txt')).to eq(true)
-          expect(Dir.exists?(File.join root, 'resources', '.java-overlay')).to eq(false)
+          expect(File.exists?(File.join(root, '.java', 'overlay.txt'))).to eq(true)
+          expect(File.exists?(File.join(root, '.java', 'test.txt'))).to eq(true)
+          expect(Dir.exists?(File.join(root, 'resources', '.java-overlay'))).to eq(false)
         end
       end
     end
@@ -109,8 +107,9 @@ module LibertyBuildpack::Container
 
       it 'should return command line arguments when they are specified',
          configuration: {
-            'java_main_class' => 'com.ibm.rspec.test',
-            'arguments' => 'some arguments' } do
+           'java_main_class' => 'com.ibm.rspec.test',
+           'arguments' => 'some arguments'
+         } do
 
         expect(released).to include('com.ibm.rspec.test some arguments')
       end
@@ -158,7 +157,6 @@ module LibertyBuildpack::Container
       end
 
       context 'default path which has jre in it' do
-
         before do
           allow(File).to receive(:exists?).with(%r{.java/jre/bin/java}).and_return(true)
           allow(File).to receive(:exists?).with(%r{.java/bin/java}).and_return(false)
@@ -169,11 +167,9 @@ module LibertyBuildpack::Container
 
           expect(released).to include('$PWD/.java/jre/bin/java')
         end
-
       end # end of default jre context
 
       context 'paths that do not have jre in it' do
-
         before do
           allow(File).to receive(:exists?).with(%r{.java/jre/bin/java}).and_return(false)
           allow(File).to receive(:exists?).with(%r{.java/bin/java}).and_return(true)
@@ -186,7 +182,5 @@ module LibertyBuildpack::Container
         end
       end
     end # end of release describe
-
   end
-
 end

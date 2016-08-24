@@ -22,12 +22,10 @@ require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/services/vcap_services'
 
 module LibertyBuildpack::Framework
-
   #------------------------------------------------------------------------------------
   # The NewRelicAgent class that provides New Relic Agent resources as a framework to applications
   #------------------------------------------------------------------------------------
   class NewRelicAgent
-
     #-----------------------------------------------------------------------------------------
     # Creates an instance, passing in a context of information available to the component
     #
@@ -193,4 +191,3 @@ module LibertyBuildpack::Framework
     end
   end
 end
-

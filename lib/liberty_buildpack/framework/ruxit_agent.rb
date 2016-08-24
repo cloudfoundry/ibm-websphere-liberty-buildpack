@@ -22,12 +22,10 @@ require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/services/vcap_services'
 
 module LibertyBuildpack::Framework
-
   #------------------------------------------------------------------------------------
   # The RuxitAgent class that provides Dynatrace Ruxit Agent resources as a framework to applications
   #------------------------------------------------------------------------------------
   class RuxitAgent
-
     #-----------------------------------------------------------------------------------------
     # Creates an instance, passing in a context of information available to the component
     #
@@ -102,7 +100,7 @@ module LibertyBuildpack::Framework
     private
 
     # Name of the dynatrace service
-    RUXIT_SERVICE_NAME = /ruxit/.freeze
+    RUXIT_SERVICE_NAME = /ruxit/
 
     # VCAP_SERVICES keys
     CREDENTIALS_KEY = 'credentials'.freeze
@@ -205,7 +203,7 @@ module LibertyBuildpack::Framework
 
       env_file_name = File.join(profiled_dir, '0ruxit-env.sh')
       env_file = File.new(env_file_name, 'w')
-      variables.each do | key, value |
+      variables.each do |key, value|
         env_file.puts("export #{key}=\"${#{key}:-#{value}}\"") # "${VAR1:-default value}"
       end
       env_file.close
@@ -234,6 +232,5 @@ module LibertyBuildpack::Framework
     def tenanttoken(credentials)
       credentials[TENANTTOKEN]
     end
-
   end
 end

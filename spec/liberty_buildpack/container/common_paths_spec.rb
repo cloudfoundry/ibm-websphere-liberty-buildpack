@@ -18,9 +18,7 @@ require 'spec_helper'
 require 'liberty_buildpack/container/common_paths'
 
 module LibertyBuildpack::Container
-
   describe CommonPaths do
-
     HEROKU_ENV_VAR = 'DYNO'.freeze
 
     before do
@@ -51,7 +49,7 @@ module LibertyBuildpack::Container
       end
 
       # user home and app root are both the same, such as /home/dynouser is the default behavior
-      [nil, '.'].each do | test_app_root |
+      [nil, '.'].each do |test_app_root|
         subject(:common_paths) { CommonPaths.new(test_app_root) }
 
         # standalone java container
@@ -85,12 +83,11 @@ module LibertyBuildpack::Container
             expect(common_paths.dump_directory).to eq('../../../../dumps')
           end
         end
-      end  # end of each test_app_root test
+      end # end of each test_app_root test
     end # end of Heroku
 
     # CFv2 - Do not stub Heroku.heroku? method to ensure the default behavior is tested
     context 'For a PaaS that provides an app root separate from the container user root' do
-
       it 'should use a relative path calculated from app as the app_dir value by default' do
         common_paths = CommonPaths.new
 
@@ -98,7 +95,7 @@ module LibertyBuildpack::Container
         expect(common_paths.relative_location).to eq('.')
       end
 
-      [nil, 'app', 'app/', './app', './app/', './app/another/..'].each do | test_app_root |
+      [nil, 'app', 'app/', './app', './app/', './app/another/..'].each do |test_app_root|
         # user root is /home/vcap while app root is /home/vcap/app
         subject(:common_paths) { CommonPaths.new(test_app_root) }
 
@@ -133,34 +130,31 @@ module LibertyBuildpack::Container
             expect(common_paths.dump_directory).to eq('../../../../../dumps')
           end
         end
-      end  # end of each test_app_root test
+      end # end of each test_app_root test
     end # end of CFv2 Context
 
     describe 'invalid paths' do
       INVALID_PATH_ERROR = 'relative_location provided to common_paths must be nonempty and without spaces'.freeze
       INVALID_RELATIVE_PATH_ERROR = 'paths provided to CommonPaths must be a relative, subdirectory, and a valid Pathname'.freeze
 
-      ['', ' ', 'includes space'].each do | test_app_root |
+      ['', ' ', 'includes space'].each do |test_app_root|
         it 'should raise an error for invalid relative_location' do
           expect { CommonPaths.new(test_app_root) }.to raise_error(INVALID_PATH_ERROR)
         end
       end
 
-      ['/', '/absolute/path', '../from/parent'].each do | test_app_root |
+      ['/', '/absolute/path', '../from/parent'].each do |test_app_root|
         it 'should raise an error for invalid relative_location' do
           expect { CommonPaths.new(test_app_root) }.to raise_error(INVALID_RELATIVE_PATH_ERROR)
         end
       end
 
-      [nil, '', ' '].each do | test_relative_location |
+      [nil, '', ' '].each do |test_relative_location|
         it 'should raise an error for invalid relative_location' do
-          common_paths =  CommonPaths.new
+          common_paths = CommonPaths.new
           expect { common_paths.relative_location = test_relative_location }.to raise_error(INVALID_PATH_ERROR)
         end
       end
     end # end of invalid paths tests
-
   end
-
 end
-

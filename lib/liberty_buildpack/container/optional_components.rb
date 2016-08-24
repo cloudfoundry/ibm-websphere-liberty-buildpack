@@ -25,7 +25,6 @@ module LibertyBuildpack::Container
   # buildpack's liberty.yml file.
 
   class OptionalComponents
-
     private
 
       CONFIG_FILE = '../../../config/liberty.yml'.freeze
@@ -71,7 +70,5 @@ module LibertyBuildpack::Container
       def self.feature_xpath(component_name)
         feature_names_to_feature_xpath(feature_names(component_name))
       end
-
   end
-
 end

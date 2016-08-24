@@ -20,14 +20,11 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 
 module LibertyBuildpack
   module Repository
-
     # A resolver that selects values from a collection based on a set of rules governing wildcards
     class VersionResolver
-
       private_class_method :new
 
       class << self
-
         # Resolves a version from a collection of versions.  The +candidate_version+ must be structured like:
         #   * up to three numeric components, followed by an optional string component
         #   * the final component may be a +
@@ -42,8 +39,8 @@ module LibertyBuildpack
           tokenized_versions          = versions.map { |version| create_token(version) }.compact
 
           version = tokenized_versions
-                      .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
-                      .max { |a, b| a <=> b }
+                    .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
+                    .max { |a, b| a <=> b }
 
           version
         end
@@ -67,7 +64,7 @@ module LibertyBuildpack
             TOKENIZED_WILDCARD
           else
             unless candidate_version.is_a?(LibertyBuildpack::Util::TokenizedVersion)
-              fail "Invalid TokenizedVersion '#{candidate_version}'"
+              raise "Invalid TokenizedVersion '#{candidate_version}'"
             end
 
             candidate_version
@@ -81,10 +78,7 @@ module LibertyBuildpack
               tokenized_candidate_version[i] == tokenized_version[i]
           end
         end
-
       end
-
     end
-
   end
 end

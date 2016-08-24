@@ -19,11 +19,9 @@ require 'liberty_buildpack/util/dash_case'
 require 'shellwords'
 
 module LibertyBuildpack::Framework
-
   # Encapsulates the detect, compile, and release functionality for contributing custom Java options to an application
   # at runtime.
   class JavaOpts
-
     # Creates an instance, passing in an arbitrary collection of options.
     #
     # @param [Hash] context the context that is provided to the instance
@@ -70,7 +68,7 @@ module LibertyBuildpack::Framework
 
     def memory_option?(option)
       option =~ /-Xms/ || option =~ /-Xmx/ || option =~ /-XX:MaxMetaspaceSize/ || option =~ /-XX:MaxPermSize/ ||
-        option =~ /-Xss/ || option =~ /-XX:MetaspaceSize/ || option =~ /-XX:PermSize/ if @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
+        option =~ /-Xss/ || option =~ /-XX:MetaspaceSize/ || option =~ /-XX:PermSize/ if !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
     end
 
     def parsed_java_opts
@@ -89,7 +87,5 @@ module LibertyBuildpack::Framework
     def supports_environment?
       @configuration[ENVIRONMENT_PROPERTY] && @environment.key?(ENVIRONMENT_VARIABLE)
     end
-
   end
-
 end

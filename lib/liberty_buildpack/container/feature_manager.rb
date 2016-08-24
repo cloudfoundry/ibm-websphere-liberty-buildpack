@@ -24,12 +24,10 @@ require 'rexml/xpath'
 require 'set'
 
 module LibertyBuildpack::Container
-
   # A class that encapsulates the interactions with Liberty's festureManager
   # to install features listed in a Liberty server.xml file. featureManager
   # obtains any missing features from the Liberty Repository.
   class FeatureManager
-
     public
 
       # constructor, note that java_home is relative to app_dir, and
@@ -100,7 +98,7 @@ module LibertyBuildpack::Container
         # have multiple cardinality, the values will always be merged together.
         # Reading or processing order does not matter.
         server_dir = File.dirname(server_xml)
-        %w{defaults overrides}.each do | type |
+        %w(defaults overrides).each do |type|
           Dir.glob("#{server_dir}/configDropins/#{type}/*.xml").each do |file|
             features.merge(read_features(file))
           end
@@ -188,7 +186,7 @@ module LibertyBuildpack::Container
         @logger.debug('entry (#{server_xml})')
         server_xml_doc = LibertyBuildpack::Util::XmlUtils.read_xml_file(server_xml)
         features = REXML::XPath.match(server_xml_doc, '/server/featureManager/feature/text()[not(contains(., ":"))]')
-        features = features.map { | feature | feature.to_s }
+        features = features.map(&:to_s)
         @logger.debug("exit (#{features})")
         features
       end
@@ -200,15 +198,13 @@ module LibertyBuildpack::Container
       # string).
       def get_jvm_args
         @logger.debug('entry')
-        if use_liberty_repository_with_properties_file?
-          jvm_args = "-DWLP_REPOSITORIES_PROPS=#{@repository_description_properties_file}"
-        else
-          jvm_args = ''
-        end
+        jvm_args = if use_liberty_repository_with_properties_file?
+                     "-DWLP_REPOSITORIES_PROPS=#{@repository_description_properties_file}"
+                   else
+                     ''
+                   end
         @logger.debug("exit (#{jvm_args})")
         jvm_args
       end
-
   end # class
-
 end # module

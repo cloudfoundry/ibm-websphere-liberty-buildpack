@@ -20,9 +20,7 @@ require 'spec_helper'
 require 'tmpdir'
 
 module LibertyBuildpack::Container
-
   describe FeatureManager do
-
     FEATURE_REPOSITORY_FIXTURE_DIR = 'spec/fixtures/liberty_feature_repository'.freeze
 
     # buildpack feature manager code will call liberty's featureManager script,
@@ -173,7 +171,6 @@ module LibertyBuildpack::Container
     end
 
     context 'when JVM_ARGS is set by the user' do
-
       JVM_ARGS_KEY = 'JVM_ARGS'.freeze
 
       let(:prev_jvm_args) { 'user_jvm_args' }
@@ -210,9 +207,6 @@ module LibertyBuildpack::Container
           expect(ENV['JVM_ARGS']).to match(prev_jvm_args)
         end
       end
-
     end # end of JVM_ARGS context
-
   end # describe
-
 end # module

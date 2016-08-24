@@ -24,7 +24,6 @@ require 'fileutils'
 module LibertyBuildpack::Container
   # Encapsulates the detect, compile, and release functionality for Java-Main applications.
   class JavaMain
-
     include LibertyBuildpack::Util
 
     # Creates an instance, passing in an arbitrary collection of options.
@@ -63,7 +62,7 @@ module LibertyBuildpack::Container
       java_opts = @java_opts.nil? || @java_opts.empty? ? nil : @java_opts
 
       [
-        "#{java_bin}",
+        java_bin.to_s,
         manifest_class_path,
         java_opts,
         '$JVM_ARGS',
@@ -114,6 +113,5 @@ module LibertyBuildpack::Container
         File.join(java_home, alt_java_path)
       end
     end
-
   end
 end

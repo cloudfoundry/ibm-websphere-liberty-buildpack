@@ -21,7 +21,6 @@ require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/container/container_utils'
 
 module LibertyBuildpack::Util
-
   # Downloads a given item using the application cache.
   #
   # @param [LibertyBuildpack::Util::TokenizedVersion] version the version of the item
@@ -55,5 +54,4 @@ module LibertyBuildpack::Util
       puts "(#{(Time.now - install_start_time).duration})\n"
     end
   end
-
 end

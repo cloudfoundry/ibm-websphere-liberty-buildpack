@@ -20,26 +20,25 @@ require 'liberty_buildpack/framework/appdynamics_agent'
 require 'liberty_buildpack/container/common_paths'
 
 module LibertyBuildpack::Framework
-
   describe 'AppDynamicsAgent' do
-    include_context 'component_helper'    # component context
+    include_context 'component_helper' # component context
 
     # test data
-    let(:appdynamics_home) { '.appdynamics_agent' }   # the expected staged appdynamics agent directory
+    let(:appdynamics_home) { '.appdynamics_agent' } # the expected staged appdynamics agent directory
     let(:application_cache) { double('ApplicationCache') }
     let(:version) { '4.2.1_2' }
     let(:detect_string) { "app-dynamics-#{version}" }
 
-    before do | example |
+    before do |example|
       # an index.yml entry returned from the index.yml of the appdynamics repository
       if example.metadata[:index_version]
-         # appdynamics index.yml info provided by tests
-         index_version = example.metadata[:index_version]
-         index_uri = example.metadata[:index_uri]
+        # appdynamics index.yml info provided by tests
+        index_version = example.metadata[:index_version]
+        index_uri = example.metadata[:index_uri]
       else
-         # default values for the appdynamics index.yml info for tests
-         index_version = version
-         index_uri =  'https://downloadsite/appdynamics/app-dynamics.zip'
+        # default values for the appdynamics index.yml info for tests
+        index_version = version
+        index_uri = 'https://downloadsite/appdynamics/app-dynamics.zip'
       end
 
       # By default, always stub the return of a valid index.yml entry
@@ -59,7 +58,7 @@ module LibertyBuildpack::Framework
 
     describe 'detect',
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
-                                 'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] } do
+                                         'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] } do
 
       subject(:detected) { AppDynamicsAgent.new(context).detect }
 
@@ -86,13 +85,12 @@ module LibertyBuildpack::Framework
                                                    'credentials' => { 'a' => 'b' } }] } do
           expect(detected).to eq(nil)
         end
-
       end
 
       context 'application with no services' do
         it 'should not detect the appdynamics service',
            vcap_services_context: {} do
-           expect(detected).to eq(nil)
+          expect(detected).to eq(nil)
         end
       end
 
@@ -108,28 +106,26 @@ module LibertyBuildpack::Framework
 
         it 'should be detected when an application has a valid service attribute that includes app-dynamics',
            vcap_services_context: { 'app-dynamics' => [{ 'name' => 'test-appdynamics', 'label' => 'app-dynamics',
-                                                        'credentials' => def_credentials }] } do
+                                                         'credentials' => def_credentials }] } do
 
           expect(detected).to eq(detect_string)
         end
 
         it 'should not be detected when the service name includes app-dynamics substring but credentials do not have host-name',
            vcap_services_context: { 'app-dynamics' => [{ 'name' => 'test-appdynamics', 'label' => 'app-dynamics',
-                                                        'credentials' => { 'a' => 'b' } }] } do
+                                                         'credentials' => { 'a' => 'b' } }] } do
           expect(detected).to eq(nil)
         end
-
       end
 
       context 'invalid index.yml entry with a valid appdynamics service',
               vcap_services_context: { 'appdynamics' => [{ 'name' => 'test-appdynamics', 'label' => 'appdynamics',
-                                       'credentials' => { 'host-name' => '127.0.0.1' } }] } do
+                                                           'credentials' => { 'host-name' => '127.0.0.1' } }] } do
 
         it 'should raise an error including the underlying failure if the index.yml could not be processed',
            return_find_item: false, raise_error_message: 'underlying index.yml error' do
           expect(detected).to eq(nil)
         end
-
       end
     end # end of detect tests
 
@@ -137,7 +133,7 @@ module LibertyBuildpack::Framework
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
                                          'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
              vcap_services_context: { 'appdynamics' => [{ 'name' => 'test-appdynamics', 'label' => 'appdynamics',
-                                      'credentials' => { 'host-name' => '127.0.0.1' } }] } do
+                                                          'credentials' => { 'host-name' => '127.0.0.1' } }] } do
 
       subject(:compiled) do
         appdynamics = AppDynamicsAgent.new(context)

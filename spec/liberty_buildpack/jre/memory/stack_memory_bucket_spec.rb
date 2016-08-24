@@ -34,5 +34,4 @@ describe LibertyBuildpack::Jre::StackMemoryBucket do
     stack_memory_bucket = described_class.new(test_stack_bucket_weighting, test_stack_size_range)
     expect(stack_memory_bucket.range).to eq(test_stack_size_range)
   end
-
 end

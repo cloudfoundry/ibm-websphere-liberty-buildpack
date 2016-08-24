@@ -39,5 +39,4 @@ module LibertyBuildpack::Diagnostics
   def self.get_buildpack_log(app_dir)
     File.join(get_diagnostic_directory(app_dir), LOG_FILE_NAME)
   end
-
 end

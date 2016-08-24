@@ -16,7 +16,6 @@
 
 # A mixin that adds the ability to turn a +String+ into a constant.
 class String
-
   # Tries to find a constant with the name specified by this +String+:
   #
   #   "Module".constantize     # => Module

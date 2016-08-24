@@ -30,10 +30,9 @@ describe LibertyBuildpack::Util::Cache::InternetAvailability do
   end
 
   context do
-
     before do
       allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).with('cache')
-                                                          .and_return('remote_downloads' => 'disabled')
+        .and_return('remote_downloads' => 'disabled')
       described_class.instance.send :initialize
     end
 
@@ -75,5 +74,4 @@ describe LibertyBuildpack::Util::Cache::InternetAvailability do
 
     expect(described_class.instance.available?).not_to be
   end
-
 end

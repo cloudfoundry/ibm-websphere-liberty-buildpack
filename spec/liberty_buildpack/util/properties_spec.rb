@@ -18,9 +18,7 @@ require 'spec_helper'
 require 'liberty_buildpack/util/properties'
 
 module LibertyBuildpack::Util
-
   describe Properties do
-
     let(:properties) { Properties.new('spec/fixtures/test.properties') }
 
     it 'should parse properties' do
@@ -33,7 +31,5 @@ module LibertyBuildpack::Util
       expect(properties['lima']).to eq('-XX:mike="november oscar"')
       expect(properties['poppa']).to eq('quebec')
     end
-
   end
-
 end

@@ -22,12 +22,10 @@ require 'liberty_buildpack/container/common_paths'
 require 'liberty_buildpack/services/vcap_services'
 
 module LibertyBuildpack::Framework
-
   #------------------------------------------------------------------------------------
   # The DynaTraceAgent class that provides Dyna Trace Agent resources as a framework to applications
   #------------------------------------------------------------------------------------
   class DynaTraceAgent
-
     #-----------------------------------------------------------------------------------------
     # Creates an instance, passing in a context of information available to the component
     #
@@ -159,7 +157,7 @@ module LibertyBuildpack::Framework
         @dt_service = @services.find_service(DT_SERVICE_NAME)
         dt_profile_name = vcap_dt_profile ? vcap_dt_profile : DT_DEFAULT_PROFILE_NAME
         if vcap_dt_server.nil?
-          fail 'DynaTrace server is not set, server must be set in service credentials.'
+          raise 'DynaTrace server is not set, server must be set in service credentials.'
         end
         @dt_options = "name=#{dt_profile_name},server=#{vcap_dt_server}"
 
@@ -219,7 +217,5 @@ module LibertyBuildpack::Framework
     def vcap_dt_server
       @services.find_service(DT_SERVICE_NAME)[CREDENTIALS_KEY][SERVER_KEY]
     end
-
   end
 end
-

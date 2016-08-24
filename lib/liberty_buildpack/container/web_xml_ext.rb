@@ -18,10 +18,8 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/util/xml_utils'
 
 module LibertyBuildpack::Container
-
   # The class that provides abstractions for ibm-web-ext.xml file.
   class WebXmlExt
-
     # Reads ibm-web-ext.xml file.
     #
     # @return [WebXmlExt] returns +nil+ if file does not exist or is malformed.
@@ -51,6 +49,5 @@ module LibertyBuildpack::Container
       end
       nil
     end
-
   end
 end

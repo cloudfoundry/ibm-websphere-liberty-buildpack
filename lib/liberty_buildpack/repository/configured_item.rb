@@ -20,14 +20,11 @@ require 'liberty_buildpack/util/tokenized_version'
 
 module LibertyBuildpack
   module Repository
-
     # A class encapsulating details of a file stored in a versioned repository.
     class ConfiguredItem
-
       private_class_method :new
 
       class << self
-
         # Finds an instance of the file based on the configuration and wraps any exceptions
         # to identify the component.
         #
@@ -64,7 +61,7 @@ module LibertyBuildpack
 
         def repository_root(configuration)
           unless configuration.key? KEY_REPOSITORY_ROOT
-            fail "A repository root must be specified as a key-value pair of '#{KEY_REPOSITORY_ROOT}'' to the URI of the repository."
+            raise "A repository root must be specified as a key-value pair of '#{KEY_REPOSITORY_ROOT}'' to the URI of the repository."
           end
 
           configuration[KEY_REPOSITORY_ROOT]
@@ -73,10 +70,7 @@ module LibertyBuildpack
         def version(configuration)
           LibertyBuildpack::Util::TokenizedVersion.new(configuration[KEY_VERSION])
         end
-
       end
-
     end
-
   end
 end

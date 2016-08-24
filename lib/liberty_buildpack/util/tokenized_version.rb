@@ -17,13 +17,12 @@
 require 'liberty_buildpack/util'
 
 module LibertyBuildpack::Util
-
   # A utility for manipulating JRE version numbers.
   class TokenizedVersion < Array
     include Comparable
 
     # The wildcard component.
-    WILDCARD = '+'
+    WILDCARD = '+'.freeze
 
     # Create a tokenized version based on the input string.
     #
@@ -59,7 +58,7 @@ module LibertyBuildpack::Util
     # Convert this to a string
     #
     # @return [String] a string representation of this tokenized version
-    def to_s # rubocop:disable TrivialAccessors
+    def to_s
       @version
     end
 
@@ -73,7 +72,8 @@ module LibertyBuildpack::Util
 
     def major_or_minor_and_tail(s)
       if s.nil? || s.empty?
-        major_or_minor, tail = nil, nil
+        major_or_minor = nil
+        tail = nil
       else
         raise "Invalid version '#{s}': must not end in '.'" if s[-1] == '.'
         raise "Invalid version '#{s}': missing component" if s =~ /\.[\._]/
@@ -89,7 +89,8 @@ module LibertyBuildpack::Util
 
     def micro_and_qualifier(s)
       if s.nil? || s.empty?
-        micro, qualifier = nil, nil
+        micro = nil
+        qualifier = nil
       else
         raise "Invalid version '#{s}': must not end in '_'" if s[-1] == '_'
         tokens = s.match(/^([^\_]+)(?:_(.*))?/)
@@ -144,5 +145,4 @@ module LibertyBuildpack::Util
       qualifier.nil? || qualifier.empty? || qualifier =~ /^[-\.a-zA-Z\d]*$/ || qualifier =~ /^\+$/
     end
   end
-
 end

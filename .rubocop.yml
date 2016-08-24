@@ -1,7 +1,7 @@
 ---
 AllCops:
-  Excludes:
-    - vendor/**
+  Exclude:
+    - 'vendor/**/*'
 Documentation:
   Enabled: false
 LineLength:
@@ -10,5 +10,63 @@ MethodLength:
   Max: 25
 ParameterLists:
   Max: 10
-AvoidClassVars:
+ClassVars:
+  Enabled: false
+Casecmp:
+  Enabled: false
+DoubleStartEndWith:
+  Enabled: false
+AbcSize:
+  Enabled: false
+ParenthesesAsGroupedExpression:
+  Enabled: false
+ClassAndModuleChildren:
+  Enabled: false
+RegexpLiteral:
+  Enabled: false
+ModuleLength:
+  Enabled: false
+AccessorMethodName:
+  Enabled: false
+IneffectiveAccessModifier:
+  Enabled: false
+PerceivedComplexity:
+  Enabled: false
+CyclomaticComplexity:
+  Enabled: false
+ClassLength:
+  Enabled: false
+UselessAssignment:
+  Enabled: false
+IfInsideElse:
+  Enabled: false
+AmbiguousRegexpLiteral:
+  Enabled: false
+UselessAccessModifier:
+  Enabled: false
+IdenticalConditionalBranches:
+  Enabled: false
+GuardClause:
+  Enabled: false
+NonLocalExitFromIterator:
+  Enabled: false
+PredicateName:
+  Enabled: false
+VariableName:
+  Enabled: false
+FormatString:
+  Enabled: false
+DuplicatedKey:
+  Enabled: false
+For:
+  Enabled: false
+OptionalArguments:
+  Enabled: false
+NumericPredicate:
+  Enabled: false
+ZeroLengthPredicate:
+  Enabled: false
+DeprecatedClassMethods:
+  Enabled: false
+FrozenStringLiteralComment:
   Enabled: false

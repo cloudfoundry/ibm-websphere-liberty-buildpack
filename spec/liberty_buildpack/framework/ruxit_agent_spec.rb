@@ -20,27 +20,26 @@ require 'liberty_buildpack/framework/ruxit_agent'
 require 'liberty_buildpack/container/common_paths'
 
 module LibertyBuildpack::Framework
-
   describe 'RuxitAgent' do
-    include_context 'component_helper'    # component context
+    include_context 'component_helper' # component context
 
     # test data
-    let(:ruxit_home) { '.ruxit_agent' }   # the expected staged ruxit agent directory
+    let(:ruxit_home) { '.ruxit_agent' } # the expected staged ruxit agent directory
     let(:application_cache) { double('ApplicationCache') }
     let(:version) { '1.95.0' }
     let(:jar_name) { 'ruxit-agent.zip' }
     let(:detect_string) { "ruxit-agent-#{version}" }
 
-    before do | example |
+    before do |example|
       # an index.yml entry returned from the index.yml of the ruxit repository
       if example.metadata[:index_version]
-         # ruxit index.yml info provided by tests
-         index_version = example.metadata[:index_version]
-         index_uri = example.metadata[:index_uri]
+        # ruxit index.yml info provided by tests
+        index_version = example.metadata[:index_version]
+        index_uri = example.metadata[:index_uri]
       else
-         # default values for the ruxit index.yml info for tests
-         index_version = version
-         index_uri =  'https://downloadsite/ruxit/ruxit-agent.zip'
+        # default values for the ruxit index.yml info for tests
+        index_version = version
+        index_uri = 'https://downloadsite/ruxit/ruxit-agent.zip'
       end
 
       # By default, always stub the return of a valid index.yml entry
@@ -71,7 +70,7 @@ module LibertyBuildpack::Framework
 
     describe 'detect',
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
-                                 'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] } do
+                                         'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] } do
 
       subject(:detected) { RuxitAgent.new(context).detect }
 
@@ -91,8 +90,8 @@ module LibertyBuildpack::Framework
         it 'should raise a runtime error for multiple valid ruxit user services',
            vcap_services_context: { def_type => [{ 'name' => 'ruxit', 'label' => def_label, 'tags' => def_tags,
                                                    'credentials' => def_credentials }],
-                                  'servicetype2' => [{ 'name' => 'ruxit', 'label' => def_label, 'tags' => def_tags,
-                                                   'credentials' => def_credentials }] } do
+                                    'servicetype2' => [{ 'name' => 'ruxit', 'label' => def_label, 'tags' => def_tags,
+                                                         'credentials' => def_credentials }] } do
 
           expect { detected }.to raise_error(RuntimeError)
         end
@@ -113,7 +112,7 @@ module LibertyBuildpack::Framework
       context 'application with no services' do
         it 'should not detect the ruxit service',
            vcap_services_context: {} do
-           expect(detected).to eq(nil)
+          expect(detected).to eq(nil)
         end
       end
 
@@ -122,21 +121,21 @@ module LibertyBuildpack::Framework
 
         it 'should be detected when an application has a valid service attribute that includes ruxit',
            vcap_services_context: { 'ruxit' => [{ 'name' => 'test-ruxit', 'label' => 'ruxit',
-                                                     'credentials' => def_credentials }] } do
+                                                  'credentials' => def_credentials }] } do
 
           expect(detected).to eq(detect_string)
         end
 
         it 'should not be detected if ruxit service does not exist',
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-mysql', 'label' => 'mysql',
-                                                  'credentials' => def_credentials }] }do
+                                                  'credentials' => def_credentials }] } do
 
           expect(detected).to eq(nil)
         end
 
         it 'should not be detected since name is not used as a match check unless it is a user service',
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-ruxit', 'label' => 'mysql',
-                                                  'credentials' => def_credentials }] }do
+                                                  'credentials' => def_credentials }] } do
 
           expect(detected).to eq(nil)
         end
@@ -156,9 +155,9 @@ module LibertyBuildpack::Framework
 
         it 'should raise a runtime error if multiple ruxit services exist',
            vcap_services_context: { 'ruxitkey1' => [{ 'name' => 'test-name', 'label' => 'ruxit',
-                                                  'credentials' => def_credentials }],
+                                                      'credentials' => def_credentials }],
                                     'ruxitkey2' => [{ 'name' => 'test-name', 'label' => 'ruxit',
-                                                  'credentials' => def_credentials }] } do
+                                                      'credentials' => def_credentials }] } do
 
           expect { detected }.to raise_error(RuntimeError)
         end
@@ -175,22 +174,20 @@ module LibertyBuildpack::Framework
 
       context 'invalid index.yml entry with a valid ruxit service',
               vcap_services_context: { 'ruxit' => [{ 'name' => 'test-ruxit', 'label' => 'ruxit',
-                                       'credentials' => { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token' } }] } do
+                                                     'credentials' => { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token' } }] } do
 
         it 'should raise an error including the underlying failure if the index.yml could not be processed',
            return_find_item: false, raise_error_message: 'underlying index.yml error' do
           expect(detected).to eq(nil)
         end
-
       end
-
     end # end of detect tests
 
     describe 'compile',
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
-                                 'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
+                                         'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
              vcap_services_context: { 'ruxit' => [{ 'name' => 'test-ruxit', 'label' => 'ruxit',
-                                      'credentials' => { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token' } }] } do
+                                                    'credentials' => { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token' } }] } do
 
       subject(:compiled) do
         ruxit = RuxitAgent.new(context)
@@ -222,9 +219,9 @@ module LibertyBuildpack::Framework
     describe 'release',
              java_opts: [],
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
-                                 'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
+                                         'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
              vcap_services_context: { 'ruxit' => [{ 'name' => 'test-ruxit', 'label' => 'ruxit',
-                                      'credentials' => { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token' } }] } do
+                                                    'credentials' => { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token' } }] } do
 
       subject(:released) do
         ruxit = RuxitAgent.new(context)
@@ -239,6 +236,5 @@ module LibertyBuildpack::Framework
         expect(released[0]).to match(/#{pattern}/)
       end
     end # end of release
-
   end
 end # module

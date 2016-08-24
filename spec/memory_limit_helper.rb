@@ -18,7 +18,6 @@
 require 'spec_helper'
 
 shared_context 'memory_limit_helper' do
-
   previous_memory_limit = ENV['MEMORY_LIMIT']
 
   before do |example|
@@ -29,5 +28,4 @@ shared_context 'memory_limit_helper' do
   after do
     ENV['MEMORY_LIMIT'] = previous_memory_limit
   end
-
 end

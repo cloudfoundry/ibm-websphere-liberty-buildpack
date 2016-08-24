@@ -19,14 +19,13 @@ require 'open3'
 require 'tmpdir'
 
 describe 'compile script', :integration do
-
   before(:all) do
     @cache = File.join(Dir.tmpdir, 'compile_cache')
     FileUtils.rm_rf(@cache)
   end
 
   before(:each) do
-    ENV.update({ 'IBM_JVM_LICENSE' => 'L-PMAA-A3Z8P2', 'IBM_LIBERTY_LICENSE' => 'L-SWIS-A99U5C', 'USER_AGENT' => 'RSpec-Test' })
+    ENV.update('IBM_JVM_LICENSE' => 'L-PMAA-A3Z8P2', 'IBM_LIBERTY_LICENSE' => 'L-SWIS-A99U5C', 'USER_AGENT' => 'RSpec-Test')
   end
 
   after(:each) do
@@ -50,7 +49,7 @@ describe 'compile script', :integration do
     Dir.mktmpdir do |root|
       FileUtils.cp_r'spec/fixtures/container_liberty/.', root
       with_memory_limit('1G') do
-        Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
+        Open3.popen3("bin/compile #{root} #{@cache}") do |_stdin, stdout, stderr, wait_thr|
           result = wait_thr.value
           if result != 0
             puts "stdout: #{stdout.read}"
@@ -67,7 +66,7 @@ describe 'compile script', :integration do
       FileUtils.cp_r 'spec/fixtures/container_liberty_server/.', root
 
       with_memory_limit('1G') do
-        Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
+        Open3.popen3("bin/compile #{root} #{@cache}") do |_stdin, stdout, stderr, wait_thr|
           result = wait_thr.value
           if result != 0
             puts "stdout: #{stdout.read}"
@@ -88,7 +87,7 @@ describe 'compile script', :integration do
       FileUtils.cp_r 'spec/fixtures/container_liberty_server/.', root
 
       with_memory_limit('1G') do
-        Open3.popen3("bin/compile #{root} #{@cache} spec/fixtures/env") do |stdin, stdout, stderr, wait_thr|
+        Open3.popen3("bin/compile #{root} #{@cache} spec/fixtures/env") do |_stdin, stdout, stderr, wait_thr|
           result = wait_thr.value
           if result != 0
             puts "stdout: #{stdout.read}"
@@ -105,7 +104,7 @@ describe 'compile script', :integration do
       FileUtils.cp_r 'spec/fixtures/container_main_spring_boot_jar_launcher/.', root
 
       with_memory_limit('1G') do
-        Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
+        Open3.popen3("bin/compile #{root} #{@cache}") do |_stdin, stdout, stderr, wait_thr|
           result = wait_thr.value
           if result != 0
             puts "stdout: #{stdout.read}"

@@ -18,9 +18,7 @@ require 'spec_helper'
 require 'liberty_buildpack/container/install_components'
 
 module LibertyBuildpack::Container
-
   describe InstallComponents do
-
     before do
       $stdout = StringIO.new
       $stderr = StringIO.new
@@ -32,9 +30,8 @@ module LibertyBuildpack::Container
     end
 
     describe 'zip' do
-
       it 'add zip' do
-        install_components =  InstallComponents.new
+        install_components = InstallComponents.new
 
         install_components.add_zip('http://foo/bar')
         install_components.add_zip('https://bar/foo')
@@ -47,7 +44,7 @@ module LibertyBuildpack::Container
       end
 
       it 'add zip with directory' do
-        install_components =  InstallComponents.new
+        install_components = InstallComponents.new
 
         install_components.add_zip('http://foo/bar', '.foo')
         install_components.add_zip('https://bar/foo', '.bar')
@@ -58,13 +55,11 @@ module LibertyBuildpack::Container
         expect(install_components.zips[1][0]).to eq('https://bar/foo')
         expect(install_components.zips[1][1]).to eq('.bar')
       end
-
     end
 
     describe 'esa' do
-
       it 'add esa' do
-        install_components =  InstallComponents.new
+        install_components = InstallComponents.new
 
         install_components.add_esa('http://foo/bar.esa', '--acceptLicense')
         install_components.add_esa('https://bar/foo.esa', '--to=usr')
@@ -75,13 +70,11 @@ module LibertyBuildpack::Container
         expect(install_components.esas[1][0]).to eq('https://bar/foo.esa')
         expect(install_components.esas[1][1]).to eq('--to=usr')
       end
-
     end
 
     describe 'esa & zip' do
-
       it 'add both' do
-        install_components =  InstallComponents.new
+        install_components = InstallComponents.new
 
         install_components.add_zip('http://foo/bar')
         install_components.add_zip('https://bar/foo', '.bar')
@@ -97,9 +90,6 @@ module LibertyBuildpack::Container
         expect(install_components.esas[0][0]).to eq('http://foo/bar.esa')
         expect(install_components.esas[0][1]).to eq('--acceptLicense')
       end
-
     end
-
   end
-
 end

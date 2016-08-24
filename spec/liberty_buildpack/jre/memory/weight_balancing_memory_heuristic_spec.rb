@@ -436,5 +436,4 @@ describe LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic do
     expect(output).to include('-XX:MaxPermSize=26214K')
     expect(output).to include('-Xss1M')
   end
-
 end

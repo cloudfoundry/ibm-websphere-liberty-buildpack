@@ -19,7 +19,6 @@ require 'spec_helper'
 require 'yaml'
 
 shared_context 'application_helper' do
-
   YAML::ENGINE.yamler = 'psych' if RUBY_VERSION == '1.9.2'
 
   let(:app_dir) { Pathname.new Dir.mktmpdir }
@@ -48,5 +47,4 @@ shared_context 'application_helper' do
     ENV.replace previous_environment
     FileUtils.rm_rf app_dir
   end
-
 end

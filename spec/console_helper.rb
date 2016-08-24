@@ -19,7 +19,6 @@ require 'spec_helper'
 require 'tee'
 
 shared_context 'console_helper' do
-
   STDOUT.sync
   STDERR.sync
 
@@ -55,5 +54,4 @@ shared_context 'console_helper' do
       destination.flush
     end
   end
-
 end

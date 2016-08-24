@@ -23,4 +23,4 @@ require 'liberty_buildpack/buildpack'
 
 build_dir = ARGV[0]
 
-puts LibertyBuildpack::Buildpack.drive_buildpack_with_logger(build_dir, 'Release failed with exception %s') { |buildpack| buildpack.release }
+puts LibertyBuildpack::Buildpack.drive_buildpack_with_logger(build_dir, 'Release failed with exception %s', &:release)

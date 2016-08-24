@@ -19,7 +19,6 @@ require 'spec_helper'
 require 'liberty_buildpack/jre/memory/memory_size'
 
 describe LibertyBuildpack::Jre::MemorySize do
-
   let(:half_meg) { described_class.new('512K') }
 
   let(:one_meg) { described_class.new('1M') }
@@ -135,5 +134,4 @@ describe LibertyBuildpack::Jre::MemorySize do
     expect(described_class.new('1G').to_s).to eq('1G')
     expect(described_class.new('1g').to_s).to eq('1G')
   end
-
 end

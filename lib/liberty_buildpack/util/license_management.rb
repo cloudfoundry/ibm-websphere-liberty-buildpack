@@ -19,7 +19,6 @@ require 'liberty_buildpack/util/cache/application_cache'
 require 'liberty_buildpack/util/format_duration'
 
 module LibertyBuildpack::Util
-
   # Compares the provided license id with the id that is extracted from the license url.
   #
   # @param [String] license_uri the url of the license containing our license id
@@ -40,5 +39,4 @@ module LibertyBuildpack::Util
       return license_id == license
     end
   end
-
 end

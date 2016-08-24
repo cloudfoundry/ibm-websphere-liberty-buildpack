@@ -19,7 +19,6 @@ require 'rexml/document'
 require 'liberty_buildpack/util/xml_utils'
 
 describe LibertyBuildpack::Util do
-
   describe 'write_formatted_xml_file' do
     #----------------
     # Helper method to check an xml file against expected results.
@@ -31,7 +30,7 @@ describe LibertyBuildpack::Util do
       server_xml_contents = File.readlines(server_xml)
       # For each String in the expected array, make sure there is a corresponding entry in server.xml
       # make sure we consume all entries in the expected array.
-      for index in 0 ... expected.size # rubocop:disable AvoidFor
+      for index in 0...expected.size
         expect(server_xml_contents[index].strip).to include(expected[index])
       end
     end

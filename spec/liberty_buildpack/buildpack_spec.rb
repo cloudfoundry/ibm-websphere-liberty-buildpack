@@ -21,7 +21,6 @@ require 'liberty_buildpack/buildpack'
 require 'liberty_buildpack/diagnostics/logger_factory'
 
 module LibertyBuildpack
-
   APP_DIR = 'test-app-dir'.freeze
 
   describe Buildpack do
@@ -47,10 +46,10 @@ module LibertyBuildpack
       allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).and_call_original
       allow(LibertyBuildpack::Util::ConfigurationUtils)
         .to receive(:load).with('components').and_return(
-           'containers' => ['Test::StubContainer1', 'Test::StubContainer2'],
-           'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
-           'jres'       => ['Test::StubJre1', 'Test::StubJre2']
-      )
+          'containers' => ['Test::StubContainer1', 'Test::StubContainer2'],
+          'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
+          'jres'       => ['Test::StubJre1', 'Test::StubJre2']
+        )
 
       allow_any_instance_of(LibertyBuildpack::BuildpackVersion).to receive(:version_string)
         .and_return('stub-buildpack-version')
@@ -75,7 +74,7 @@ module LibertyBuildpack
     end
 
     it 'should not write VCAP_SERVICES credentials as debug info',
-       log_level: 'DEBUG',  enable_log_file: true do
+       log_level: 'DEBUG', enable_log_file: true do
       ENV['VCAP_SERVICES'] = '{"type":[{"credentials":"VERY SECRET PHRASE","plain":"PLAIN DATA"}]}'
       log_content = with_buildpack do |buildpack|
         app_dir = File.dirname buildpack.instance_variable_get(:@lib_directory)
@@ -100,7 +99,7 @@ module LibertyBuildpack
       stub_framework2.should_receive(:detect)
       stub_jre1.should_receive(:detect)
 
-      detected = with_buildpack { |buildpack| buildpack.detect }
+      detected = with_buildpack(&:detect)
       expect(detected).to match_array(%w(stub-jre-1 stub-buildpack-version stub-framework-1 stub-framework-2 stub-container-1))
     end
 
@@ -112,7 +111,7 @@ module LibertyBuildpack
     end
 
     it 'should return no detections if no container can run an application' do
-      detected = with_buildpack { |buildpack| buildpack.detect }
+      detected = with_buildpack(&:detect)
       expect(detected).to be_empty
     end
 
@@ -130,7 +129,7 @@ module LibertyBuildpack
       stub_jre2.stub(:detect).and_return('stub-jre-2')
       stub_buildpack_version.stub(:detect).and_return('stub-buildpack-version')
 
-      detected = with_buildpack { |buildpack| buildpack.detect }
+      detected = with_buildpack(&:detect)
       expect(detected).to match_array(%w(stub-jre-1 stub-buildpack-version stub-container-1))
     end
 
@@ -140,7 +139,7 @@ module LibertyBuildpack
       stub_jre2.stub(:detect).and_return('stub-jre-2')
       stub_buildpack_version.stub(:detect).and_return('stub-buildpack-version')
 
-      detected = with_buildpack { |buildpack| buildpack.detect }
+      detected = with_buildpack(&:detect)
       expect(detected).to match_array(%w(stub-jre-2 stub-buildpack-version stub-container-1))
     end
 
@@ -149,18 +148,18 @@ module LibertyBuildpack
       stub_jre1.stub(:detect).and_return('stub-jre-1')
       allow_any_instance_of(LibertyBuildpack::BuildpackVersion).to receive(:version_string).and_return(nil)
 
-      detected = with_buildpack { |buildpack| buildpack.detect }
+      detected = with_buildpack(&:detect)
       expect(detected).to match_array(%w(stub-jre-1 stub-container-1))
     end
 
-#    it 'should raise an error when none of the JREs return a non-null version for detect' do
-#      stub_container1.stub(:detect).and_return('stub-container-1')
-#      stub_jre1.stub(:detect).and_return(nil)
-#      stub_jre2.stub(:detect).and_return(nil)
+    #    it 'should raise an error when none of the JREs return a non-null version for detect' do
+    #      stub_container1.stub(:detect).and_return('stub-container-1')
+    #      stub_jre1.stub(:detect).and_return(nil)
+    #      stub_jre2.stub(:detect).and_return(nil)
 
-#      expect { with_buildpack { |buildpack| buildpack.detect}}.to raise_error SystemExit
-#      expect($stderr.string).to match(/JRE component did not return a valid version/)
-#    end
+    #      expect { with_buildpack { |buildpack| buildpack.detect}}.to raise_error SystemExit
+    #      expect($stderr.string).to match(/JRE component did not return a valid version/)
+    #    end
 
     it 'should call compile on matched components' do
       stub_container1.stub(:detect).and_return('stub-container-1')
@@ -175,57 +174,55 @@ module LibertyBuildpack
       stub_jre1.should_receive(:compile)
       stub_jre2.should_not_receive(:compile)
 
-      with_buildpack { |buildpack| buildpack.compile }
+      with_buildpack(&:compile)
     end
 
     describe 'Version Information' do
+      it 'should display version info from git when the version.yml does not exist' do
+        stub_container1.stub(:detect).and_return('stub-container-1')
+        stub_container1.stub(:apps).and_return(['root/app1'])
+        stub_jre1.stub(:detect).and_return('stub-jre-1')
+        stub_jre1.stub(:compile).and_return(' ')
 
-       it 'should display version info from git when the version.yml does not exist' do
-         stub_container1.stub(:detect).and_return('stub-container-1')
-         stub_container1.stub(:apps).and_return(['root/app1'])
-         stub_jre1.stub(:detect).and_return('stub-jre-1')
-         stub_jre1.stub(:compile).and_return(' ')
+        git_dir = Pathname.new('.git').expand_path
+        allow_any_instance_of(BuildpackVersion).to receive(:`)
+          .with("git --git-dir=#{git_dir} rev-parse --short HEAD")
+          .and_return('test-hash')
+        allow_any_instance_of(BuildpackVersion).to receive(:`)
+          .with("git --git-dir=#{git_dir} config --get remote.origin.url")
+          .and_return('test-remote')
 
-         git_dir = Pathname.new('.git').expand_path
-         allow_any_instance_of(BuildpackVersion).to receive(:`)
-                                                 .with("git --git-dir=#{git_dir} rev-parse --short HEAD")
-                                                 .and_return('test-hash')
-         allow_any_instance_of(BuildpackVersion).to receive(:`)
-                                                 .with("git --git-dir=#{git_dir} config --get remote.origin.url")
-                                                 .and_return('test-remote')
+        expect { with_buildpack(&:compile) }.to output(/^-----> Liberty Buildpack Version: test-hash \| test-remote\#test-hash\n/).to_stdout
+      end
 
-         expect { with_buildpack { |buildpack| buildpack.compile } }.to output(/^-----> Liberty Buildpack Version: test-hash \| test-remote\#test-hash\n/).to_stdout
-       end
+      it 'should hide remote info and display version info from the version config file when version.yml exists' do
+        Dir.mktmpdir do |_root|
+          File.stub(:exists?).with(anything).and_return(true)
+          allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).with('version', true).and_return('version' => '1234', 'remote' => '', 'hash' => '')
 
-       it 'should hide remote info and display version info from the version config file when version.yml exists' do
-          Dir.mktmpdir do |root|
-            File.stub(:exists?).with(anything).and_return(true)
-            allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).with('version', true).and_return({ 'version' => '1234', 'remote' => '', 'hash' => '' })
+          stub_container1.stub(:detect).and_return('stub-container-1')
+          stub_container1.stub(:apps).and_return(['root/app1'])
+          stub_jre1.stub(:detect).and_return('stub-jre-1')
+          YAML.stub(:load_file).with(File.expand_path('config/stubjre1.yml')).and_return(nil)
+          YAML.stub(:load_file).with(File.expand_path('config/stubjre2.yml')).and_return(nil)
+          YAML.stub(:load_file).with(File.expand_path('config/stubframework1.yml')).and_return(nil)
+          YAML.stub(:load_file).with(File.expand_path('config/stubframework2.yml')).and_return(nil)
+          YAML.stub(:load_file).with(File.expand_path('config/stubcontainer1.yml')).and_return(nil)
+          YAML.stub(:load_file).with(File.expand_path('config/stubcontainer2.yml')).and_return(nil)
+          stub_jre1.stub(:compile).and_return(' ')
 
-            stub_container1.stub(:detect).and_return('stub-container-1')
-            stub_container1.stub(:apps).and_return(['root/app1'])
-            stub_jre1.stub(:detect).and_return('stub-jre-1')
-            YAML.stub(:load_file).with(File.expand_path('config/stubjre1.yml')).and_return(nil)
-            YAML.stub(:load_file).with(File.expand_path('config/stubjre2.yml')).and_return(nil)
-            YAML.stub(:load_file).with(File.expand_path('config/stubframework1.yml')).and_return(nil)
-            YAML.stub(:load_file).with(File.expand_path('config/stubframework2.yml')).and_return(nil)
-            YAML.stub(:load_file).with(File.expand_path('config/stubcontainer1.yml')).and_return(nil)
-            YAML.stub(:load_file).with(File.expand_path('config/stubcontainer2.yml')).and_return(nil)
-            stub_jre1.stub(:compile).and_return(' ')
+          git_dir = Pathname.new('.git').expand_path
+          allow_any_instance_of(BuildpackVersion).to receive(:system).with('which git > /dev/null').and_return(true)
+          allow_any_instance_of(BuildpackVersion).to receive(:`)
+            .with("git --git-dir=#{git_dir} rev-parse --short HEAD")
+            .and_return('test-hash')
+          allow_any_instance_of(BuildpackVersion).to receive(:`)
+            .with("git --git-dir=#{git_dir} config --get remote.origin.url")
+            .and_return('test-remote')
 
-            git_dir = Pathname.new('.git').expand_path
-            allow_any_instance_of(BuildpackVersion).to receive(:system).with('which git > /dev/null').and_return(true)
-            allow_any_instance_of(BuildpackVersion).to receive(:`)
-                                                    .with("git --git-dir=#{git_dir} rev-parse --short HEAD")
-                                                    .and_return('test-hash')
-            allow_any_instance_of(BuildpackVersion).to receive(:`)
-                                                    .with("git --git-dir=#{git_dir} config --get remote.origin.url")
-                                                    .and_return('test-remote')
-
-            expect { with_buildpack { |buildpack| buildpack.compile } }.to output(/^-----> Liberty Buildpack Version: 1234\n/).to_stdout
-          end
-       end
-
+          expect { with_buildpack(&:compile) }.to output(/^-----> Liberty Buildpack Version: 1234\n/).to_stdout
+        end
+      end
     end # end of Version Info describe
 
     it 'should call release on matched components' do
@@ -243,7 +240,7 @@ module LibertyBuildpack
       stub_jre1.should_receive(:release)
       stub_jre2.should_not_receive(:release)
 
-      payload = with_buildpack { |buildpack| buildpack.release }
+      payload = with_buildpack(&:release)
 
       expect(payload).to eq({ 'addons' => [], 'config_vars' => {}, 'default_process_types' => { 'web' => 'test-command' } }.to_yaml)
     end
@@ -259,18 +256,18 @@ module LibertyBuildpack
       File.stub(:exists?).with(File.expand_path('config/licenses.yml')).and_return(true)
       YAML.stub(:load_file).with(File.expand_path('config/stubjre1.yml')).and_return('x' => 'y')
 
-      with_buildpack { |buildpack| buildpack.detect }
+      with_buildpack(&:detect)
     end
 
     it 'should raise error for bad configuration file that is missing container components' do
       stub_jre1.stub(:detect).and_return('stub-jre-1')
       allow(LibertyBuildpack::Util::ConfigurationUtils)
         .to receive(:load).with('components').and_return(
-           'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
-           'jres'       => ['Test::StubJre1', 'Test::StubJre2']
-      )
+          'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
+          'jres'       => ['Test::StubJre1', 'Test::StubJre2']
+        )
 
-      expect { with_buildpack { |buildpack| buildpack.detect } }.to raise_error SystemExit
+      expect { with_buildpack(&:detect) }.to raise_error SystemExit
       expect($stderr.string).to match(/No components of type containers defined in components configuration/)
     end
 
@@ -278,17 +275,17 @@ module LibertyBuildpack
       stub_jre1.stub(:detect).and_return('stub-jre-1')
       allow(LibertyBuildpack::Util::ConfigurationUtils)
         .to receive(:load).with('components').and_return(
-           'containers' => ['Test::StubContainer1', 'Test::StubContainer2'],
-           'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
-      )
+          'containers' => ['Test::StubContainer1', 'Test::StubContainer2'],
+          'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2']
+        )
 
-      expect { with_buildpack { |buildpack| buildpack.detect } }.to raise_error SystemExit
+      expect { with_buildpack(&:detect) }.to raise_error SystemExit
       expect($stderr.string).to match(/No components of type jres defined in components configuration/)
     end
 
     it 'logs information about the git repository of a buildpack',
        log_level: 'DEBUG' do
-      with_buildpack { |buildpack| buildpack.detect }
+      with_buildpack(&:detect)
       standard_error = $stderr.string
       expect(standard_error).to match(/git remotes/)
       expect(standard_error).to match(/git HEAD commit/)
@@ -298,27 +295,25 @@ module LibertyBuildpack
        log_level: 'DEBUG' do
       Dir.mktmpdir do |tmp_dir|
         Buildpack.stub(:git_dir).and_return(tmp_dir)
-        with_buildpack { |buildpack| buildpack.detect }
+        with_buildpack(&:detect)
         expect($stderr.string).to match(/Buildpack is not stored in a git repository/)
       end
     end
 
     it 'handles exceptions correctly' do
-      expect { with_buildpack { |buildpack| raise 'an exception' } }.to raise_error SystemExit
+      expect { with_buildpack { |_buildpack| raise 'an exception' } }.to raise_error SystemExit
       expect($stderr.string).to match(/an exception/)
     end
 
-    def with_buildpack(&block)
+    def with_buildpack
       LibertyBuildpack::Diagnostics::LoggerFactory.send :close # suppress warnings
       Dir.mktmpdir do |root|
         Buildpack.drive_buildpack_with_logger(File.join(root, APP_DIR), 'Error %s') do |buildpack|
-          block.call buildpack
+          yield buildpack
         end
       end
     end
-
   end
-
 end
 
 module Test

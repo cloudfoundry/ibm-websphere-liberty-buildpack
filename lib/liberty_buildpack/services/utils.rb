@@ -19,12 +19,10 @@ require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/repository/repository_utils'
 
 module LibertyBuildpack::Services
-
   #-----------------------------------
   # A class of static utility methods
   #-----------------------------------
   class Utils
-
     #---------------------------------------------------------------------
     # A utility method that can be used by most service classes to generate runtime-vars.xml entries. Services with json that does not follow normal conventions
     # might not be able to use this utility method and should provide the proper implementation in the service class. For services with json with non-String values
@@ -138,7 +136,7 @@ module LibertyBuildpack::Services
         bootstrap_contents.each do |line|
           return if (line =~ reg_ex).nil? == false
         end
-        File.open(bootstrap, 'a')  { |file| file.write(property) }
+        File.open(bootstrap, 'a') { |file| file.write(property) }
       end
     end
 
@@ -258,13 +256,12 @@ module LibertyBuildpack::Services
         return
       end
       classloaders.each do |classloader|
-        unless classloader.attribute('commonLibraryRef').nil?
-          # commonLibraryRef contain a comma-separated string of library ids.
-          cur_value = classloader.attribute('commonLibraryRef').value
-          return if cur_value.include?(lib_id)
-          classloader.add_attribute('commonLibraryRef', "#{cur_value},#{lib_id}")
-          return
-        end
+        next if classloader.attribute('commonLibraryRef').nil?
+        # commonLibraryRef contain a comma-separated string of library ids.
+        cur_value = classloader.attribute('commonLibraryRef').value
+        return if cur_value.include?(lib_id)
+        classloader.add_attribute('commonLibraryRef', "#{cur_value},#{lib_id}")
+        return
       end
       classloaders[0].add_attribute('commonLibraryRef', lib_id)
     end
@@ -345,11 +342,11 @@ module LibertyBuildpack::Services
       end
 
       managers = doc.elements.to_a('//featureManager')
-      if managers.empty?
-        manager = REXML::Element.new('featureManager', doc.root)
-      else
-        manager = managers.first
-      end
+      manager = if managers.empty?
+                  REXML::Element.new('featureManager', doc.root)
+                else
+                  managers.first
+                end
       additional_features.each do |feature|
         element = REXML::Element.new('feature', manager)
         element.add_text(feature)
@@ -357,12 +354,10 @@ module LibertyBuildpack::Services
     end
 
     def self.shared_elements?(array1, array2)
-      array2.each do | element |
+      array2.each do |element|
         return true if array1.include?(element)
       end
       false
     end
-
   end
-
 end

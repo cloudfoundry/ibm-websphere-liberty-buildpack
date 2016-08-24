@@ -18,13 +18,11 @@ require 'pathname'
 require 'liberty_buildpack/util/cache'
 
 module LibertyBuildpack::Util::Cache
-
   # A read-only collection of files packaged together with the buildpack.
   # The collection is referred to as 'admin cache' since it is used when
   # a buildpack is packaged to be installed as an admin buildpack and should
   # include binaries not available via network.
   class AdminCache
-
     # Location of the admin cache relative to the directory this file is in
     ADMIN_CACHE = Pathname.new(File.expand_path('../../../../admin_cache', File.dirname(__FILE__))).freeze
 
@@ -41,6 +39,5 @@ module LibertyBuildpack::Util::Cache
         false
       end
     end
-
   end
 end

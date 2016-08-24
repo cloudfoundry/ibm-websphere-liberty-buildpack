@@ -56,5 +56,4 @@ describe LibertyBuildpack::Jre::MemoryBucket do
   it 'should fail to construct if range is invalid' do
     expect { described_class.new(test_name, test_weighting, 'x') }.to raise_error(/Invalid\ 'range'\ parameter/)
   end
-
 end
