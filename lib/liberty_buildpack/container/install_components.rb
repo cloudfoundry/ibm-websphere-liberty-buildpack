@@ -60,5 +60,5 @@ module LibertyBuildpack::Container
       @esas.push [url, options_string]
       @pending[url] = 1
     end
-  end  # class
+  end # class
 end

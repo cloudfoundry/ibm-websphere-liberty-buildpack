@@ -20,10 +20,8 @@ require 'liberty_buildpack/jre/memory/memory_range'
 
 module LibertyBuildpack
   module Jre
-
     # A MemoryBucket is used to calculate default sizes for various type of memory
     class MemoryBucket
-
       # @!attribute [r] size
       # @return [Numeric, nil] the size of the memory bucket in KB or nil if this has not been specified by the user or
       #                        defaulted
@@ -57,13 +55,13 @@ module LibertyBuildpack
       private
 
       def validate_name(name)
-        fail "Invalid MemoryBucket name '#{name}'" if name.nil? || name.to_s.size == 0
+        raise "Invalid MemoryBucket name '#{name}'" if name.nil? || name.to_s.size == 0
         name
       end
 
       def validate_weighting(weighting)
-        fail diagnose_weighting(weighting, 'not numeric') unless numeric? weighting
-        fail diagnose_weighting(weighting, 'negative') if weighting < 0
+        raise diagnose_weighting(weighting, 'not numeric') unless numeric? weighting
+        raise diagnose_weighting(weighting, 'negative') if weighting < 0
         weighting
       end
 
@@ -72,7 +70,9 @@ module LibertyBuildpack
       end
 
       def numeric?(w)
-        Float(w) rescue false
+        Float(w)
+      rescue
+        false
       end
 
       def identify
@@ -80,11 +80,9 @@ module LibertyBuildpack
       end
 
       def validate_memory_range(range)
-        fail "Invalid 'range' parameter of class '#{range.class}' for #{identify} : not a MemoryRange" unless range.is_a? MemoryRange
+        raise "Invalid 'range' parameter of class '#{range.class}' for #{identify} : not a MemoryRange" unless range.is_a? MemoryRange
         range
       end
-
     end
-
   end
 end

@@ -18,7 +18,6 @@ require 'spec_helper'
 require 'liberty_buildpack/util/constantize'
 
 describe 'constantize' do
-
   it 'should constantize string' do
     expect('Test::StubClass'.constantize).to eq(Test::StubClass)
   end
@@ -26,7 +25,6 @@ describe 'constantize' do
   it 'should raise error if constant does not exist' do
     expect { 'Test::StubClass2'.constantize }.to raise_error(NameError)
   end
-
 end
 
 module Test

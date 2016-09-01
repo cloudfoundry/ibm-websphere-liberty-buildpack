@@ -20,12 +20,10 @@ require 'liberty_buildpack/jre/memory/memory_size'
 
 module LibertyBuildpack
   module Jre
-
     # This class represents a memory bucket for stack memory. This is treated differently to other memory buckets
     # which have absolute sizes since stack memory is specified in terms of the size of an individual stack with no
     # definition of how many stacks may exist.
     class StackMemoryBucket < MemoryBucket
-
       # Constructs a stack memory bucket.
       #
       # @param [Numeric] weighting a number between 0 and 1 corresponding to the proportion of total memory which this
@@ -46,8 +44,6 @@ module LibertyBuildpack
       private
 
       JVM_DEFAULT_STACK_SIZE = MemorySize.new('1M').freeze
-
     end
-
   end
 end

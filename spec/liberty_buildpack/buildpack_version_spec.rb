@@ -57,14 +57,14 @@ describe LibertyBuildpack::BuildpackVersion do
     git_dir = Pathname.new('.git').expand_path
 
     allow_any_instance_of(described_class).to receive(:system)
-                                              .with('which git > /dev/null')
-                                              .and_return(true)
+      .with('which git > /dev/null')
+      .and_return(true)
     allow_any_instance_of(described_class).to receive(:`)
-                                              .with("git --git-dir=#{git_dir} rev-parse --short HEAD")
-                                              .and_return('test-hash')
+      .with("git --git-dir=#{git_dir} rev-parse --short HEAD")
+      .and_return('test-hash')
     allow_any_instance_of(described_class).to receive(:`)
-                                              .with("git --git-dir=#{git_dir} config --get remote.origin.url")
-                                              .and_return('test-remote')
+      .with("git --git-dir=#{git_dir} config --get remote.origin.url")
+      .and_return('test-remote')
 
     expect(buildpack_version.to_s).to match(/test-remote#test-hash/)
     expect(buildpack_version.to_s(false)).to match(/test-remote#test-hash/)
@@ -106,20 +106,19 @@ describe LibertyBuildpack::BuildpackVersion do
 
     git_dir = Pathname.new('.git').expand_path
     allow_any_instance_of(described_class).to receive(:system)
-                                              .with('which git > /dev/null')
-                                              .and_return(true)
+      .with('which git > /dev/null')
+      .and_return(true)
     allow_any_instance_of(described_class).to receive(:`)
-                                              .with("git --git-dir=#{git_dir} rev-parse --short HEAD")
-                                              .and_return('test-hash')
+      .with("git --git-dir=#{git_dir} rev-parse --short HEAD")
+      .and_return('test-hash')
     allow_any_instance_of(described_class).to receive(:`)
-                                              .with("git --git-dir=#{git_dir} config --get remote.origin.url")
-                                              .and_return('test-remote')
+      .with("git --git-dir=#{git_dir} config --get remote.origin.url")
+      .and_return('test-remote')
 
     expect(buildpack_version.to_s).to eq('test-version | test-remote#test-hash')
   end
 
   context do
-
     let(:environment) { { 'OFFLINE' => 'true' } }
 
     it 'should pick up offline from the environment' do
@@ -127,11 +126,9 @@ describe LibertyBuildpack::BuildpackVersion do
 
       expect(buildpack_version.offline).to be
     end
-
   end
 
   context do
-
     let(:environment) { { 'VERSION' => 'test-version' } }
 
     it 'should pick up version from the environment' do
@@ -139,7 +136,5 @@ describe LibertyBuildpack::BuildpackVersion do
 
       expect(buildpack_version.version).to match(/test-version/)
     end
-
   end
-
 end

@@ -20,9 +20,8 @@ require 'liberty_buildpack/framework/jrebel_agent'
 require 'liberty_buildpack/container/common_paths'
 
 module LibertyBuildpack::Framework
-
   describe 'JRebelAgent' do
-    include_context 'component_helper'    # component context
+    include_context 'component_helper' # component context
 
     # test data
     let(:jrebel_home) { '.jrebel' }
@@ -30,7 +29,7 @@ module LibertyBuildpack::Framework
     let(:version) { '6.0.3' }
     let(:tokenized_version) { LibertyBuildpack::Util::TokenizedVersion.new(version) }
 
-    before do | example |
+    before do |example|
       if example.metadata[:index_version]
         # JRebel index.yml info provided by tests
         index_version = example.metadata[:index_version]
@@ -38,7 +37,7 @@ module LibertyBuildpack::Framework
       else
         # default values for the JRebel index.yml info for tests
         index_version = version
-        index_uri =  "https://downloadsite/jrebel/jrebel-#{version}-nosetup.zip"
+        index_uri = "https://downloadsite/jrebel/jrebel-#{version}-nosetup.zip"
       end
 
       # By default, always stub the return of a valid index.yml entry
@@ -66,8 +65,8 @@ module LibertyBuildpack::Framework
     describe 'detect' do
       it 'should not attach JRebel agent when no rebel-remote.xml in the application' do
         detected = JRebelAgent.new(
-            app_dir: 'spec/fixtures/jrebel_test_app_no_rebel_remote',
-            configuration: {}
+          app_dir: 'spec/fixtures/jrebel_test_app_no_rebel_remote',
+          configuration: {}
         ).detect
 
         expect(detected).to be_nil
@@ -75,8 +74,8 @@ module LibertyBuildpack::Framework
 
       it 'should attach JRebel agent when rebel-remote.xml is in a WAR application' do
         detected = JRebelAgent.new(
-            app_dir: 'spec/fixtures/jrebel_test_app_with_rebel_remote',
-            configuration: {}
+          app_dir: 'spec/fixtures/jrebel_test_app_with_rebel_remote',
+          configuration: {}
         ).detect
 
         expect(detected).to eq('jrebel-6.0.3')
@@ -84,8 +83,8 @@ module LibertyBuildpack::Framework
 
       it 'should attach JRebel agent when rebel-remote.xml is in an EAR application' do
         detected = JRebelAgent.new(
-            app_dir: 'spec/fixtures/jrebel_test_ear_with_rebel_remote',
-            configuration: {}
+          app_dir: 'spec/fixtures/jrebel_test_ear_with_rebel_remote',
+          configuration: {}
         ).detect
 
         expect(detected).to eq('jrebel-6.0.3')
@@ -93,8 +92,8 @@ module LibertyBuildpack::Framework
 
       it 'should attach JRebel agent when rebel-remote.xml is in a WAR application inside a packaged server' do
         detected = JRebelAgent.new(
-            app_dir: 'spec/fixtures/jrebel_test_packaged_server_with_war_with_rebel_remote',
-            configuration: {}
+          app_dir: 'spec/fixtures/jrebel_test_packaged_server_with_war_with_rebel_remote',
+          configuration: {}
         ).detect
 
         expect(detected).to eq('jrebel-6.0.3')
@@ -102,8 +101,8 @@ module LibertyBuildpack::Framework
 
       it 'should attach JRebel agent when rebel-remote.xml is in an EAR application inside a packaged server' do
         detected = JRebelAgent.new(
-            app_dir: 'spec/fixtures/jrebel_test_packaged_server_with_ear_with_rebel_remote',
-            configuration: {}
+          app_dir: 'spec/fixtures/jrebel_test_packaged_server_with_ear_with_rebel_remote',
+          configuration: {}
         ).detect
 
         expect(detected).to eq('jrebel-6.0.3')
@@ -111,8 +110,8 @@ module LibertyBuildpack::Framework
 
       it 'should attach JRebel agent when rebel-remote.xml is in a WAR application inside a server directory' do
         detected = JRebelAgent.new(
-            app_dir: 'spec/fixtures/jrebel_test_server_dir_with_war_with_rebel_remote',
-            configuration: {}
+          app_dir: 'spec/fixtures/jrebel_test_server_dir_with_war_with_rebel_remote',
+          configuration: {}
         ).detect
 
         expect(detected).to eq('jrebel-6.0.3')
@@ -120,8 +119,8 @@ module LibertyBuildpack::Framework
 
       it 'should attach JRebel agent when rebel-remote.xml is in an EAR application inside a server directory' do
         detected = JRebelAgent.new(
-            app_dir: 'spec/fixtures/jrebel_test_server_dir_with_ear_with_rebel_remote',
-            configuration: {}
+          app_dir: 'spec/fixtures/jrebel_test_server_dir_with_ear_with_rebel_remote',
+          configuration: {}
         ).detect
 
         expect(detected).to eq('jrebel-6.0.3')
@@ -129,17 +128,15 @@ module LibertyBuildpack::Framework
 
       it 'should not attach JRebel agent when disabled' do
         detected = JRebelAgent.new(
-            app_dir: 'spec/fixtures/jrebel_test_app_with_rebel_remote',
-            configuration: { 'enabled' => false }
+          app_dir: 'spec/fixtures/jrebel_test_app_with_rebel_remote',
+          configuration: { 'enabled' => false }
         ).detect
 
         expect(detected).to be_nil
       end
-
     end # end of detect tests
 
     describe 'compile', configuration: {} do
-
       before do
         FileUtils.mkdir_p("#{app_dir}/WEB-INF/classes/")
         FileUtils.touch("#{app_dir}/WEB-INF/classes/rebel-remote.xml")
@@ -171,7 +168,6 @@ module LibertyBuildpack::Framework
     end # end compile
 
     describe 'release', java_opts: [], configuration: {} do
-
       subject(:released) do
         jrebel = JRebelAgent.new(context)
         jrebel.detect

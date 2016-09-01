@@ -18,9 +18,7 @@ require 'spec_helper'
 require 'liberty_buildpack/framework/framework_utils'
 
 module LibertyBuildpack::Framework
-
   describe FrameworkUtils do
-
     it 'should find in lib dir' do
       app_dir = 'spec/fixtures/framework_auto_reconfiguration_servlet_4'
       pattern = "#{app_dir}/**/spring-core*.jar"
@@ -44,7 +42,5 @@ module LibertyBuildpack::Framework
       expect(result).to include("#{app_dir}/spring_app.war")
       expect(result).to include("#{app_dir}/spring_app.ear")
     end
-
   end
-
 end

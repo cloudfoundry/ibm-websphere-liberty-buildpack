@@ -17,7 +17,6 @@
 
 # A mixin that adds the ability to turn a +String+ into sanitized uri
 class String
-
   # Takes a uri and strips out any credentials it may contain.
   #
   # @return [String] the sanitized uri
@@ -27,5 +26,4 @@ class String
     rich_uri.password = nil
     rich_uri.to_s
   end
-
 end

@@ -41,5 +41,4 @@ shared_context 'component_helper' do
 
   let(:uri) { 'test-uri' }
   let(:version) { '0.0.0' }
-
 end

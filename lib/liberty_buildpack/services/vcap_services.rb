@@ -18,12 +18,10 @@ require 'liberty_buildpack/services'
 
 # A module encapsulating all of the services components for the Liberty buildpack
 module LibertyBuildpack::Services
-
   # An abstraction encapsulating the +VCAP_SERVICES+ of an application.
   #
   # A new instance of this type should be created once for the application.
   class VcapServices < Array
-
     def initialize(raw)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       concat raw.values.flatten
@@ -83,4 +81,3 @@ module LibertyBuildpack::Services
     end
   end
 end
-

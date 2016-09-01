@@ -81,7 +81,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
   end
 
   it 'downloads with credentials if cached file does not exist' do
-    stub_request(:get, uri_credentials)
+    stub_request(:get, uri)
       .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
 
     allow(Net::HTTP).to receive(:Proxy).and_call_original
@@ -173,7 +173,6 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
   end
 
   context do
-
     let(:environment) { { 'http_proxy' => 'http://proxy:9000', 'HTTP_PROXY' => nil } }
 
     it 'uses http_proxy if specified' do
@@ -186,11 +185,9 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
 
       download_cache.get(uri) {}
     end
-
   end
 
   context do
-
     let(:environment) { { 'HTTP_PROXY' => 'http://proxy:9000', 'http_proxy' => nil } }
 
     it 'uses HTTP_PROXY if specified' do
@@ -203,11 +200,9 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
 
       download_cache.get(uri) {}
     end
-
   end
 
   context do
-
     let(:environment) { { 'https_proxy' => 'http://proxy:9000', 'HTTPS_PROXY' => nil } }
 
     it 'uses https_proxy if specified and URL is secure' do
@@ -220,11 +215,9 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
 
       download_cache.get(uri_secure) {}
     end
-
   end
 
   context do
-
     let(:environment) { { 'HTTPS_PROXY' => 'http://proxy:9000', 'https_proxy' => nil } }
 
     it 'uses HTTPS_PROXY if specified and URL is secure' do
@@ -237,7 +230,6 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
 
       download_cache.get(uri_secure) {}
     end
-
   end
 
   it 'does not use ca_file if the URL is not secure and directory does not exist' do
@@ -328,7 +320,6 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
   end
 
   context 'User-Agent' do
-
     let(:default_user_agent) { Constants::DEFAULT_USER_AGENT }
     let(:default_user_agent_base) { Constants::DEFAULT_USER_AGENT_BASE }
     let(:trigger) { download_cache.get('http://foo-uri/') {} }
@@ -355,11 +346,9 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
         .with('headers' => { 'Accept' => '*/*', 'User-Agent' => default_user_agent_base + '-test' })
         .should have_been_made
     end
-
   end
 
   context 'Auth' do
-
     let(:trigger) { download_cache.get('http://foo-uri/') {} }
 
     it 'should raise an exception if incorrect authentication present' do
@@ -368,7 +357,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
         .to receive(:authorization_value).with('http://foo-uri/')
         .and_return('Basic dGVzdDp0ZXN0')
 
-      stub_request(:get, 'http://test:test@foo-uri/')
+      stub_request(:get, uri)
         .to_return(status: 200, body: 'foo-cached', headers: {})
 
       trigger
@@ -377,14 +366,12 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     it 'should use auth config if authorization required' do
       allow(LibertyBuildpack::Util::Cache::AuthenticationUtils)
         .to receive(:authorization_value).with('http://foo-uri/')
-        .and_return({ 'username' => 'foo', 'password' => 'bar' })
+        .and_return('username' => 'foo', 'password' => 'bar')
 
-      stub_request(:get, 'http://foo:bar@foo-uri/')
+      stub_request(:get, uri)
         .to_return(status: 200, body: 'foo-cached', headers: {})
 
       trigger
     end
-
   end
-
 end

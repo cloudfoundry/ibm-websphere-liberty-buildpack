@@ -19,7 +19,6 @@ require 'open3'
 require 'tmpdir'
 
 describe 'create vars script', :integration do
-
   it 'should fail to execute when no path for the file is passed' do
     error = Open3.capture3('resources/liberty/create_vars.rb')[1]
     expect(error).to match(/Please pass me a place to store the xml output/)
@@ -29,7 +28,7 @@ describe 'create vars script', :integration do
     Dir.mktmpdir do |root|
       filename = File.join(root, 'runtime-vars.xml')
       File.open(filename, 'w') { |file| file.write('<server></server>') }
-      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |stdin, stdout, stderr, wait_thr|
+      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |_stdin, _stdout, _stderr, wait_thr|
         expect(wait_thr.value).to be_success
       end
     end
@@ -40,7 +39,7 @@ describe 'create vars script', :integration do
     Dir.mktmpdir do |root|
       filename = File.join(root, 'runtime-vars.xml')
       File.open(filename, 'w') { |file| file.write('<server></server>') }
-      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |stdin, stdout, stderr, wait_thr|
+      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |_stdin, _stdout, _stderr, wait_thr|
         expect(wait_thr.value).to be_success
         filecontents = File.read(filename)
         expect(filecontents).to include("<variable name='port' value='3939'/>")
@@ -54,7 +53,7 @@ describe 'create vars script', :integration do
     Dir.mktmpdir do |root|
       filename = File.join(root, 'runtime-vars.xml')
       File.open(filename, 'w') { |file| file.write('<server></server>') }
-      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |stdin, stdout, stderr, wait_thr|
+      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |_stdin, _stdout, _stderr, wait_thr|
         expect(wait_thr.value).to be_success
 
         filecontents = File.read(filename)
@@ -66,11 +65,11 @@ describe 'create vars script', :integration do
   end
 
   it 'should correctly parse out elements from VCAP_APPLICATION and flatten them' do
-    ENV['VCAP_APPLICATION'] = "{\"application_name\": \"myapp\", \"application_version\": \"23rion23roin23dnj32d\"}"
+    ENV['VCAP_APPLICATION'] = '{"application_name": "myapp", "application_version": "23rion23roin23dnj32d"}'
     Dir.mktmpdir do |root|
       filename = File.join(root, 'runtime-vars.xml')
       File.open(filename, 'w') { |file| file.write('<server></server>') }
-      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |stdin, stdout, stderr, wait_thr|
+      Open3.popen3("resources/liberty/create_vars.rb #{filename}") do |_stdin, _stdout, _stderr, wait_thr|
         expect(wait_thr.value).to be_success
 
         filecontents = File.read(filename)
@@ -80,5 +79,4 @@ describe 'create vars script', :integration do
       end
     end
   end
-
 end # describe

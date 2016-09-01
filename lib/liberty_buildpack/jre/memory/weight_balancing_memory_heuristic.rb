@@ -25,10 +25,8 @@ require 'liberty_buildpack/jre/memory/stack_memory_bucket'
 
 module LibertyBuildpack
   module Jre
-
     # A utility for defaulting Java memory settings.
     class WeightBalancingMemoryHeuristic
-
       # Creates an instance based on a hash containing memory settings, and the application's memory size in
       # $MEMORY_LIMIT.
       #
@@ -63,11 +61,11 @@ module LibertyBuildpack
 
       private
 
-      NATIVE_MEMORY_WARNING_FACTOR = 3.freeze
+      NATIVE_MEMORY_WARNING_FACTOR = 3
 
-      TOTAL_MEMORY_WARNING_FACTOR = 0.8.freeze
+      TOTAL_MEMORY_WARNING_FACTOR = 0.8
 
-      CLOSE_TO_DEFAULT_FACTOR = 0.1.freeze
+      CLOSE_TO_DEFAULT_FACTOR = 0.1
 
       def allocate_lower_bounds(buckets)
         buckets.each_value do |bucket|
@@ -138,7 +136,7 @@ module LibertyBuildpack
           end
         end
         remaining_memory -= allocated_memory
-        fail "Total memory #{@memory_limit} exceeded by configured memory #{@sizes}" if remaining_memory < 0
+        raise "Total memory #{@memory_limit} exceeded by configured memory #{@sizes}" if remaining_memory < 0
         [remaining_memory, deleted]
       end
 
@@ -196,7 +194,7 @@ module LibertyBuildpack
 
       def validate(type, expected, actual)
         actual.each do |key|
-          fail "'#{key}' is not a valid memory #{type}" unless expected.include? key
+          raise "'#{key}' is not a valid memory #{type}" unless expected.include? key
         end
       end
 
@@ -223,10 +221,8 @@ module LibertyBuildpack
       end
 
       def switches(buckets)
-        buckets.map { |type, bucket| @java_opts[type][bucket.size] if bucket.size && bucket.size > 0 && @java_opts.key?(type) }.flatten(1).compact
+        buckets.flat_map { |type, bucket| @java_opts[type][bucket.size] if bucket.size && bucket.size > 0 && @java_opts.key?(type) }.compact
       end
-
     end
-
   end
 end

@@ -26,5 +26,4 @@ shared_context 'internet_availability_helper' do
     LibertyBuildpack::Util::Cache::InternetAvailability.instance.send :initialize
     LibertyBuildpack::Util::Cache::InternetAvailability.instance.available false if example.metadata[:disable_internet]
   end
-
 end

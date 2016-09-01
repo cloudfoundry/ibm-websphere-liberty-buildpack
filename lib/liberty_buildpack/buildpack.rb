@@ -28,10 +28,8 @@ require 'time'
 require 'yaml'
 
 module LibertyBuildpack
-
   # Encapsulates the detection, compile, and release functionality for Java application
   class Buildpack
-
     # +Buildpack+ driver method. Creates a logger and yields a new instance of +Buildpack+
     # to the given block catching any exceptions and logging diagnostics. As part of initialisation,
     # all of the files located in the following directories are +require+d:
@@ -83,7 +81,7 @@ module LibertyBuildpack
       FileUtils.mkdir_p @lib_directory
 
       @jre.compile
-      frameworks.each { |framework| framework.compile }
+      frameworks.each(&:compile)
       the_container.compile
       puts '-----> Liberty buildpack is done creating the droplet'
       @logger.debug { 'Liberty Buildpack compile complete' }
@@ -97,15 +95,15 @@ module LibertyBuildpack
       @logger.debug { 'Liberty Buildpack starting release' }
       the_container = container # diagnose detect failure early
       @jre.release
-      frameworks.each { |framework| framework.release }
+      frameworks.each(&:release)
       command = the_container.release
 
       payload = {
-          'addons' => [],
-          'config_vars' => {},
-          'default_process_types' => {
-              'web' => command
-          }
+        'addons' => [],
+        'config_vars' => {},
+        'default_process_types' => {
+          'web' => command
+        }
       }.to_yaml
 
       @logger.debug { "Liberty Buildpack release complete. Release Payload #{payload}" }
@@ -123,7 +121,7 @@ module LibertyBuildpack
     FRAMEWORK_TYPE = 'frameworks'.freeze
     CONTAINER_TYPE = 'containers'.freeze
 
-    LIB_DIRECTORY = '.lib'
+    LIB_DIRECTORY = '.lib'.freeze
 
     # Instances should only be constructed by this class.
     def initialize(app_dir)
@@ -142,22 +140,22 @@ module LibertyBuildpack
       jvm_type = environment['JVM']
 
       basic_context = {
-          app_dir: app_dir,
-          environment: environment,
-          java_home: '',
-          java_opts: [],
-          lib_directory: @lib_directory,
-          common_paths: @common_paths,
-          vcap_application: vcap_application ? YAML.load(vcap_application) : {},
-          vcap_services: vcap_services ? YAML.load(vcap_services) : {},
-          license_ids: license_ids ? license_ids : {},
-          jvm_type: jvm_type
+        app_dir: app_dir,
+        environment: environment,
+        java_home: '',
+        java_opts: [],
+        lib_directory: @lib_directory,
+        common_paths: @common_paths,
+        vcap_application: vcap_application ? YAML.load(vcap_application) : {},
+        vcap_services: vcap_services ? YAML.load(vcap_services) : {},
+        license_ids: license_ids ? license_ids : {},
+        jvm_type: jvm_type
       }
       initialize_components(components, basic_context)
     end
 
     def self.component_detections(components)
-      compacted_tags = components.map { |component| component.detect }.compact
+      compacted_tags = components.map(&:detect).compact
       compacted_tags.select { |tag| tag != '' }
     end
 
@@ -193,8 +191,8 @@ module LibertyBuildpack
     def self.log_debug_data(logger)
       logger.debug do
         safe_env = ENV.to_hash
-        if safe_env.has_key? 'VCAP_SERVICES'
-          safe_env.merge!({ 'VCAP_SERVICES' => LibertyBuildpack::Util.safe_vcap_services(safe_env['VCAP_SERVICES']) })
+        if safe_env.key? 'VCAP_SERVICES'
+          safe_env['VCAP_SERVICES'] = LibertyBuildpack::Util.safe_vcap_services(safe_env['VCAP_SERVICES'])
         end
         if LibertyBuildpack::Util::Heroku.heroku?
           LibertyBuildpack::Util.safe_heroku_env!(safe_env)
@@ -233,13 +231,13 @@ module LibertyBuildpack
     end
 
     def container
-      found_container = @containers.find { |container| container.detect }
+      found_container = @containers.find(&:detect)
       raise 'No supported application type was detected' unless found_container
       found_container
     end
 
     def frameworks
-      @frameworks.select { |framework| framework.detect }
+      @frameworks.select(&:detect)
     end
 
     def get_license_hash
@@ -247,11 +245,11 @@ module LibertyBuildpack
       liberty_license = 'IBM_LIBERTY_LICENSE'
 
       license_file = File.expand_path(LICENSE_CONFIG, File.dirname(__FILE__))
-      if File.exists? license_file
-        license_ids = YAML.load_file(license_file)
-      else
-        license_ids = { jvm_license => ENV[jvm_license], liberty_license => ENV[liberty_license] }
-      end
+      license_ids = if File.exists? license_file
+                      YAML.load_file(license_file)
+                    else
+                      { jvm_license => ENV[jvm_license], liberty_license => ENV[liberty_license] }
+                    end
       license_ids
     end
 
@@ -283,7 +281,5 @@ module LibertyBuildpack
         end
       end
     end
-
   end
-
 end

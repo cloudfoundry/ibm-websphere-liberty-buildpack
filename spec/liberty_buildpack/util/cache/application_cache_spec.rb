@@ -31,15 +31,15 @@ describe LibertyBuildpack::Util::Cache::ApplicationCache do
 
   previous_arg_value = ARGV[1]
 
-  before do |example|
+  before do |_example|
     ARGV[1] = nil
 
     stub_request(:get, 'http://foo-uri/').with(headers: { 'Accept' => '*/*', 'User-Agent' => default_user_agent })
-    .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
+                                         .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
 
     stub_request(:head, 'http://foo-uri/')
-    .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
-    .to_return(status: 304, body: '', headers: {})
+      .with(headers: { 'Accept' => '*/*', 'If-Modified-Since' => 'foo-last-modified', 'If-None-Match' => 'foo-etag', 'User-Agent' => default_user_agent })
+      .to_return(status: 304, body: '', headers: {})
   end
 
   after do
@@ -57,5 +57,4 @@ describe LibertyBuildpack::Util::Cache::ApplicationCache do
 
     expect(Pathname.glob(app_dir + '*.cached').size).to eq(1)
   end
-
 end

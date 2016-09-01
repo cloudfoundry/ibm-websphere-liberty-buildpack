@@ -18,17 +18,15 @@ require 'spec_helper'
 require 'open3'
 
 describe 'release script', :integration do
-
   it 'should work with the liberty WEB-INF case' do
     Dir.mktmpdir do |root|
       FileUtils.cp_r 'spec/fixtures/container_liberty/.', root
 
       with_memory_limit('1G') do
-        Open3.popen3("bin/release #{root}") do |stdin, stdout, stderr, wait_thr|
+        Open3.popen3("bin/release #{root}") do |_stdin, _stdout, _stderr, wait_thr|
           expect(wait_thr.value).to be_success
         end
       end
-
     end
   end
 
@@ -37,11 +35,10 @@ describe 'release script', :integration do
       FileUtils.cp_r 'spec/fixtures/container_liberty_server/.', root
 
       with_memory_limit('1G') do
-        Open3.popen3("bin/release #{root}") do |stdin, stdout, stderr, wait_thr|
+        Open3.popen3("bin/release #{root}") do |_stdin, _stdout, _stderr, wait_thr|
           expect(wait_thr.value).to be_success
         end
       end
-
     end
   end
 
@@ -61,5 +58,4 @@ describe 'release script', :integration do
       ENV['MEMORY_LIMIT'] = previous_value
     end
   end
-
 end

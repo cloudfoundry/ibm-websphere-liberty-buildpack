@@ -18,7 +18,6 @@ require 'spec_helper'
 require 'open3'
 
 describe 'detect script', :integration do
-
   LIBERTY_FOR_JAVA = 'Liberty for Java(TM) ('.freeze
 
   it 'should return zero if success on the liberty WEB-INF case' do
@@ -26,12 +25,11 @@ describe 'detect script', :integration do
       FileUtils.cp_r 'spec/fixtures/container_liberty/.', root
 
       with_memory_limit('1G') do
-        Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
+        Open3.popen3("bin/detect #{root}") do |_stdin, stdout, _stderr, wait_thr|
           expect(stdout.read).to include(LIBERTY_FOR_JAVA + 'WAR')
           expect(wait_thr.value).to be_success
         end
       end
-
     end
   end
 
@@ -40,12 +38,11 @@ describe 'detect script', :integration do
       FileUtils.cp_r 'spec/fixtures/container_liberty_server/.', root
 
       with_memory_limit('1G') do
-        Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
+        Open3.popen3("bin/detect #{root}") do |_stdin, stdout, _stderr, wait_thr|
           expect(stdout.read).to include(LIBERTY_FOR_JAVA + 'SVR-PKG')
           expect(wait_thr.value).to be_success
         end
       end
-
     end
   end
 
@@ -54,7 +51,7 @@ describe 'detect script', :integration do
       Dir.mktmpdir do |root|
         FileUtils.cp_r 'spec/fixtures/framework_auto_reconfiguration_servlet_2/.', root
         with_memory_limit('1G') do
-          Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
+          Open3.popen3("bin/detect #{root}") do |_stdin, stdout, stderr, wait_thr|
             expect(stdout.read).to include(LIBERTY_FOR_JAVA + 'WAR')
             expect(wait_thr.value).to be_success
             expect(stderr.read).not_to include('undefined method')
@@ -67,7 +64,7 @@ describe 'detect script', :integration do
   it 'should fail to detect when no containers detect' do
     Dir.mktmpdir do |root|
       with_memory_limit('1G') do
-        Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
+        Open3.popen3("bin/detect #{root}") do |_stdin, stdout, _stderr, wait_thr|
           expect(stdout.read).to_not include(LIBERTY_FOR_JAVA)
           expect(wait_thr.value).to_not be_success
         end
@@ -84,5 +81,4 @@ describe 'detect script', :integration do
       ENV['MEMORY_LIMIT'] = previous_value
     end
   end
-
 end

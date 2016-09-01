@@ -15,8 +15,6 @@
 # limitations under the License.
 
 module Constants
-
-  DEFAULT_USER_AGENT_BASE = 'UA-IBM-WebSphere-Liberty-Buildpack'
-  DEFAULT_USER_AGENT = "#{DEFAULT_USER_AGENT_BASE}-Default"
-
+  DEFAULT_USER_AGENT_BASE = 'UA-IBM-WebSphere-Liberty-Buildpack'.freeze
+  DEFAULT_USER_AGENT = "#{DEFAULT_USER_AGENT_BASE}-Default".freeze
 end

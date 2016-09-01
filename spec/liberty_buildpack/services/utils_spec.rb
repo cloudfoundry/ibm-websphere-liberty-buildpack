@@ -157,7 +157,6 @@ module LibertyBuildpack::Services
         features = Utils.get_features(doc.root)
         expect(features).to include('jdbc-4.0', 'jsp-2.2')
       end # it
-
     end # describe test add features
 
     describe 'test update_bootstrap_properties' do
@@ -553,7 +552,6 @@ module LibertyBuildpack::Services
     end # describe test add_library_to_app_classloader
 
     describe 'get_urls_for_client_jars' do
-
       it 'via client_jar_key' do
         config = {}
         config['client_jar_key'] = 'myKey'
@@ -597,23 +595,19 @@ module LibertyBuildpack::Services
         result = Utils.get_urls_for_client_jars(config, urls)
         expect(result).to include('http://myHost/myPath')
       end
-
     end # describe
 
     describe 'parse_compliant_vcap_service' do
-
       let(:vcap_services) do
         { 'myName' =>
           [{ 'name' => 'myName',
-              'plan' => 'beta',
-              'label' => 'myLabel',
-              'credentials' => {
-                'url' => 'http://foobar',
-                'password' => 'myPassword',
-                'scopes' => %w(singleton request)
-              }
-            }]
-        }
+             'plan' => 'beta',
+             'label' => 'myLabel',
+             'credentials' => {
+               'url' => 'http://foobar',
+               'password' => 'myPassword',
+               'scopes' => %w(singleton request)
+             } }] }
       end
 
       def test_result(generated_hash, generated_xml, name, value)
@@ -638,7 +632,7 @@ module LibertyBuildpack::Services
 
       it 'parse custom' do
         doc = REXML::Document.new('<server></server>')
-        hash = Utils.parse_compliant_vcap_service(doc.root, vcap_services['myName'][0]) do | name, value |
+        hash = Utils.parse_compliant_vcap_service(doc.root, vcap_services['myName'][0]) do |name, value|
           if name == 'credentials.scopes'
             value = value.join(' ')
           elsif name == 'plan'
@@ -655,8 +649,6 @@ module LibertyBuildpack::Services
         test_result(hash, doc.root, 'cloud.services.myName.connection.password', 'myPassword')
         test_result(hash, doc.root, 'cloud.services.myName.connection.scopes', 'singleton request')
       end
-
     end
-
   end # describe
 end

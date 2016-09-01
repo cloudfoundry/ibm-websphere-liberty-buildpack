@@ -26,12 +26,10 @@ require 'liberty_buildpack/util/tokenized_version'
 require 'pathname'
 
 module LibertyBuildpack::Jre
-
   # Encapsulates the detect, compile, and release functionality for selecting an OpenJDK JRE.
   class OpenJdk
-
     # Filename of killjava script used to kill the JVM on OOM.
-    KILLJAVA_FILE_NAME = 'killjava.sh'
+    KILLJAVA_FILE_NAME = 'killjava.sh'.freeze
 
     # Creates an instance, passing in an arbitrary collection of options.
     #
@@ -56,7 +54,7 @@ module LibertyBuildpack::Jre
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
       @version = OpenJdk.find_openjdk(@configuration)[0]
-      id @version if @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
+      id @version if !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
     end
 
     # Downloads and unpacks a OpenJdk
@@ -68,7 +66,7 @@ module LibertyBuildpack::Jre
 
       print "-----> Downloading OpenJdk #{@version} from #{@uri} "
 
-      LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
+      LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file| # TODO: Use global cache
         puts "(#{(Time.now - download_start_time).duration})"
         expand file
       end
@@ -138,15 +136,13 @@ module LibertyBuildpack::Jre
 
     def copy_killjava_script
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-      killjava_file_content = File.read(File.join resources, KILLJAVA_FILE_NAME)
+      killjava_file_content = File.read(File.join(resources, KILLJAVA_FILE_NAME))
       updated_content = killjava_file_content.gsub(/@@LOG_FILE_NAME@@/, LibertyBuildpack::Diagnostics::LOG_FILE_NAME)
       diagnostic_dir = LibertyBuildpack::Diagnostics.get_diagnostic_directory @app_dir
       FileUtils.mkdir_p diagnostic_dir
-      File.open(File.join(diagnostic_dir, KILLJAVA_FILE_NAME), 'w', 0755) do |file|
+      File.open(File.join(diagnostic_dir, KILLJAVA_FILE_NAME), 'w', 0o755) do |file|
         file.write updated_content
       end
     end
-
   end
-
 end

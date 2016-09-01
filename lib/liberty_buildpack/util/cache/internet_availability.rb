@@ -24,7 +24,6 @@ require 'singleton'
 module LibertyBuildpack
   module Util
     module Cache
-
       # Maintains the current state of internet availability.
       class InternetAvailability
         include ::Singleton
@@ -79,9 +78,7 @@ module LibertyBuildpack
             @available = previous
           end
         end
-
       end
-
     end
   end
 end

@@ -16,7 +16,6 @@
 
 # A mixin that adds the ability to format a +Numeric+ as a user-readable duration
 class Numeric
-
   # Formats a number as a user-readable duration
   #
   # @return [String] a user-readable duration. Follows the following algorithm
@@ -45,14 +44,13 @@ class Numeric
 
   private
 
-    MILLISECOND = 0.001.freeze
+  MILLISECOND = 0.001
 
-    TENTH = (100 * MILLISECOND).freeze
+  TENTH = (100 * MILLISECOND).freeze
 
-    SECOND = (10 * TENTH).freeze
+  SECOND = (10 * TENTH).freeze
 
-    MINUTE = (60 * SECOND).freeze
+  MINUTE = (60 * SECOND).freeze
 
-    HOUR = (60 * MINUTE).freeze
-
+  HOUR = (60 * MINUTE).freeze
 end

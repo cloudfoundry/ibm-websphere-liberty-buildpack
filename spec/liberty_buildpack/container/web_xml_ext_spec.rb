@@ -19,7 +19,6 @@ require 'logging_helper'
 require 'liberty_buildpack/container/web_xml_ext'
 
 module LibertyBuildpack::Container
-
   describe WebXmlExt do
     include_context 'logging_helper'
 
@@ -44,7 +43,5 @@ module LibertyBuildpack::Container
       expect(ibm_web_xml).not_to be_nil
       expect(ibm_web_xml.get_context_root).to eq('myContext')
     end
-
   end
-
 end

@@ -21,10 +21,8 @@ require 'liberty_buildpack/util/download'
 require 'liberty_buildpack/container/common_paths'
 
 module LibertyBuildpack::Framework
-
   # Provides the required detect/compile/release functionality in order to use JRebel with an application
   class JRebelAgent
-
     # Creates an instance, passing in a context of information available to the component
     #
     # @param [Hash] context the context that is provided to the instance
@@ -126,12 +124,11 @@ module LibertyBuildpack::Framework
     end
 
     def openjdk?
-      @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
+      !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
     end
 
     def enabled?
       @configuration['enabled'].nil? || @configuration['enabled']
     end
-
   end
 end

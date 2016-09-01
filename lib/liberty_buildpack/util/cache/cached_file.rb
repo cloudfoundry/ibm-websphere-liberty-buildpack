@@ -21,12 +21,10 @@ require 'liberty_buildpack/util/cache'
 module LibertyBuildpack
   module Util
     module Cache
-
       # Represents a file cached on a filesystem
       #
       # Note: this class is thread-safe, however access to the cached files is not
       class CachedFile
-
         # Creates an instance of the cached file.  Files created and expected by this class will all be rooted at
         # +cache_root+.
         #
@@ -50,8 +48,8 @@ module LibertyBuildpack
         # @param [Array] additional_args any additional arguments to be passed to the block
         # @yield [file, additional_args] the cached file and any additional arguments passed in
         # @return [Void]
-        def cached(mode_enc, *additional_args, &block)
-          @cached.open(mode_enc) { |f| block.call f, *additional_args }
+        def cached(mode_enc, *additional_args)
+          @cached.open(mode_enc) { |f| yield f, *additional_args }
         end
 
         # Returns whether or not data is cached.
@@ -73,8 +71,8 @@ module LibertyBuildpack
         # @param [Array] additional_args any additional arguments to be passed to the block
         # @yield [file] the etag file
         # @return [Void]
-        def etag(mode_enc, *additional_args, &block)
-          @etag.open(mode_enc) { |f| block.call f, *additional_args }
+        def etag(mode_enc, *additional_args)
+          @etag.open(mode_enc) { |f| yield f, *additional_args }
         end
 
         # Returns whether or not an etag is stored.
@@ -91,8 +89,8 @@ module LibertyBuildpack
         # @param [Array] additional_args any additional arguments to be passed to the block
         # @yield [file] the last modified file
         # @return [Void]
-        def last_modified(mode_enc, *additional_args, &block)
-          @last_modified.open(mode_enc) { |f| block.call f, *additional_args }
+        def last_modified(mode_enc, *additional_args)
+          @last_modified.open(mode_enc) { |f| yield f, *additional_args }
         end
 
         # Returns whether or not a last modified time stamp is stored.
@@ -101,9 +99,7 @@ module LibertyBuildpack
         def last_modified?
           @last_modified.exist?
         end
-
       end
-
     end
   end
 end

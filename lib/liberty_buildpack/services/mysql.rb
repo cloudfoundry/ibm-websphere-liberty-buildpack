@@ -19,12 +19,10 @@ require 'liberty_buildpack/services/client_jar_utils'
 require 'liberty_buildpack/services/relational_db'
 
 module LibertyBuildpack::Services
-
   #------------------------------------------------------------------------------------
   # The MySQL class is the class for MySQL relational database resources.
   #------------------------------------------------------------------------------------
   class MySQL < RelationalDatabasePlugin
-
     #------------------------------------------------------------------------------------
     # Initialize
     #
@@ -82,6 +80,5 @@ module LibertyBuildpack::Services
         ClientJarUtils.create_global_library(doc, lib_id, fileset_id, lib_dir, @client_jars_string)
       end
     end
-
   end
 end

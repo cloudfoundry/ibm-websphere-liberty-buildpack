@@ -18,7 +18,6 @@ require 'spec_helper'
 require 'liberty_buildpack/util/format_duration'
 
 describe 'format duration' do
-
   it 'should display seconds' do
     expect_time_string '0.0s', MILLISECOND
     expect_time_string '0.1s', TENTH
@@ -44,18 +43,17 @@ describe 'format duration' do
 
   private
 
-    MILLISECOND = 0.001
+  MILLISECOND = 0.001
 
-    TENTH = 100 * MILLISECOND
+  TENTH = 100 * MILLISECOND
 
-    SECOND = 10 * TENTH
+  SECOND = 10 * TENTH
 
-    MINUTE = 60 * SECOND
+  MINUTE = 60 * SECOND
 
-    HOUR = 60 * MINUTE
+  HOUR = 60 * MINUTE
 
-    def expect_time_string(expected, time)
-      expect(time.duration).to eq(expected)
-    end
-
+  def expect_time_string(expected, time)
+    expect(time.duration).to eq(expected)
+  end
 end

@@ -20,13 +20,12 @@ require 'fileutils'
 require 'liberty_buildpack/jre/ibmjdk'
 
 module LibertyBuildpack::Jre
-
   describe IBMJdk do
     include_context 'component_helper'
 
     let(:application_cache) { double('ApplicationCache') }
 
-    before do | example |
+    before do |example|
       # By default, always stub the return of a valid ibmjdk_config.yml against a given service_release as indicated by
       # the spec test's service_release metadata.  Tests that test for errors can disable a valid return of the
       # ibmjdk_config.yml by setting its find_item metadata to false along with the optional expected error
@@ -42,14 +41,11 @@ module LibertyBuildpack::Jre
 
       # return license file by default
       application_cache.stub(:get).and_yield(File.open('spec/fixtures/license.html'))
-
     end
 
     # tests for common behaviors across IBMJDK v7 releases
-    shared_examples_for 'IBMJDK v7' do | service_release |
-
-      it 'adds the JAVA_HOME to java_home', java_home: '', java_opts: [], license_ids: {} do | example |
-
+    shared_examples_for 'IBMJDK v7' do |service_release|
+      it 'adds the JAVA_HOME to java_home', java_home: '', java_opts: [], license_ids: {} do |example|
         java_home = example.metadata[:java_home]
 
         # context is provided by component_helper, its default values are provided by 'describe' metadata, and
@@ -60,7 +56,6 @@ module LibertyBuildpack::Jre
       end
 
       describe 'detect', java_home: '', license_ids: {}, service_release: service_release do
-
         # context is provided by component_helper, its default values are provided by 'describe' metadata, and
         # customized through test's metadata
         subject(:detected) { IBMJdk.new(context).detect }
@@ -81,7 +76,7 @@ module LibertyBuildpack::Jre
                license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' },
                service_release: service_release do
 
-        before do | example |
+        before do |example|
           # get the application cache fixture from the application_cache double provided in the overall setup
           LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
           cache_fixture = example.metadata[:cache_fixture]
@@ -92,7 +87,7 @@ module LibertyBuildpack::Jre
         # customized through test's metadata
         subject(:compiled) { IBMJdk.new(context).compile }
 
-        it 'should extract Java from a bin script', cache_fixture: 'stub-ibm-java.bin'  do
+        it 'should extract Java from a bin script', cache_fixture: 'stub-ibm-java.bin' do
           compiled
 
           java = File.join(app_dir, '.java', 'jre', 'bin', 'java')
@@ -141,7 +136,6 @@ module LibertyBuildpack::Jre
 
           expect(Pathname.new(File.join(LibertyBuildpack::Diagnostics.get_diagnostic_directory(app_dir), IBMJdk::KILLJAVA_FILE_NAME))).to exist
         end
-
       end # end of compile shared tests
 
       describe 'release',
@@ -185,7 +179,7 @@ module LibertyBuildpack::Jre
           expect(released).to include('-Xmx768M')
         end
 
-        it 'should add extra memory options when 1024m memory limit is set with 12.% ratio', configuration: { 'heap_size_ratio' => 0.125 }  do
+        it 'should add extra memory options when 1024m memory limit is set with 12.% ratio', configuration: { 'heap_size_ratio' => 0.125 } do
           ENV['MEMORY_LIMIT'] = '1024m'
 
           expect(released).to include('-Xtune:virtualized')
@@ -196,13 +190,10 @@ module LibertyBuildpack::Jre
           expect(released).to include("-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{IBMJdk::KILLJAVA_FILE_NAME}")
         end
       end # end of release shared tests
-
     end # end of shared tests for IBMJDK v7 release
 
     context 'IBMJDK Service Release 1.7.1' do
       it_behaves_like 'IBMJDK v7', '1.7.1'
     end
-
   end
-
 end

@@ -76,5 +76,4 @@ describe LibertyBuildpack::Jre::MemoryLimit do
 
     expect { described_class.memory_limit }.to raise_error(/Invalid/)
   end
-
 end

@@ -24,7 +24,6 @@ module LibertyBuildpack::Services
   # The Mongo class is the base class for NOSQL resources.
   #------------------------------------------------------------------------------------
   class Mongo
-
     #------------------------------------------------------------------------------------
     # Initialize a Mongo Resource Object
     #
@@ -64,7 +63,7 @@ module LibertyBuildpack::Services
       @hosts = get_cloud_property(properties, element, "#{conn_prefix}hosts", map['hosts'].join(' '))
       @ports = get_cloud_property(properties, element, "#{conn_prefix}ports", map['ports'].join(' '))
       @user = get_cloud_property(properties, element, "#{conn_prefix}user", map['user'])
-      @password =  get_cloud_property(properties, element, "#{conn_prefix}password", map['password'])
+      @password = get_cloud_property(properties, element, "#{conn_prefix}password", map['password'])
 
       # ensure all the cloud properties are always set
       get_cloud_property(properties, element, "#{conn_prefix}host", map['hosts'][0])
@@ -99,10 +98,10 @@ module LibertyBuildpack::Services
 
       if nodes.size == 1
         # single node
-        map['db'] =  first_node.path[1.. -1] unless first_node.path[1.. -1].nil?
+        map['db'] = first_node.path[1..-1] unless first_node.path[1..-1].nil?
       else
         # mutiple nodes
-        nodes[1..-1].each_with_index do | node, index |
+        nodes[1..-1].each_with_index do |node, index|
           if index + 2 == nodes.size
             # last node specifies db name
             slash = node.index('/')
@@ -166,7 +165,7 @@ module LibertyBuildpack::Services
     # @param uris - the hash containing the <key, uri> information from the repository
     # @param components - the non-null RequiredComponents to update.
     #---------------------------------------------
-    def get_required_esas(uris, components)
+    def get_required_esas(_uris, _components)
       false
     end
 
@@ -179,7 +178,7 @@ module LibertyBuildpack::Services
     # @param available_jars - an array containing the names of all installed client driver jars.
     # @raise if a problem was discovered (incoherent or inconsistent existing configuration, for example)
     #------------------------------------------------------------------------------------
-    def create(doc, server_dir, driver_dir, available_jars)
+    def create(doc, _server_dir, driver_dir, available_jars)
       # handle client driver jars
       @driver_dir = driver_dir
       @client_jars_string = ClientJarUtils.client_jars_string(ClientJarUtils.get_jar_names(available_jars, @reg_ex))
@@ -197,7 +196,7 @@ module LibertyBuildpack::Services
     # @param [Integer] number_instances - the number of mongo service instances.
     # @raise if a problem was discovered (incoherent or inconsistent existing configuration, for example)
     #------------------------------------------------------------------------------------
-    def update(doc, server_dir, driver_dir, available_jars, number_instances)
+    def update(doc, _server_dir, driver_dir, available_jars, number_instances)
       # handle client driver jars
       @driver_dir = driver_dir
       @client_jars_string = ClientJarUtils.client_jars_string(ClientJarUtils.get_jar_names(available_jars, @reg_ex))
@@ -222,7 +221,7 @@ module LibertyBuildpack::Services
 
     DEFAULT_MONGODB_PORT = '27017'.freeze
 
-    def get_cloud_property(properties, element, name, value)
+    def get_cloud_property(_properties, element, name, value)
       variable = element.root.elements.to_a("//variable[@name='#{name}']")
       if variable.empty?
         if value.nil?

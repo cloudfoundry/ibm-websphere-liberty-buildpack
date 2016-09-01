@@ -20,14 +20,11 @@ require 'liberty_buildpack/util/tokenized_version'
 
 module LibertyBuildpack
   module Jre
-
     # A MemoryBucket is used to calculate default sizes for various type of memory
     class OpenJDKMemoryHeuristicFactory
-
       private_class_method :new
 
       class << self
-
         # Returns a memory heuristics instance for the given version of OpenJDK.
         #
         # @param [Hash<String, String>] sizes any sizes specified by the user
@@ -53,10 +50,7 @@ module LibertyBuildpack
         def permgen_or_metaspace(version)
           version < LibertyBuildpack::Util::TokenizedVersion.new('1.8.0') ? 'permgen' : 'metaspace'
         end
-
       end
-
     end
-
   end
 end

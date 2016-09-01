@@ -26,10 +26,8 @@ require 'yaml'
 
 module LibertyBuildpack
   module Repository
-
     # A repository index represents the index of repository containing various versions of a file.
     class RepositoryIndex < RepositoryUtils
-
       # Creates a new repository index, populating it with values from an index file.
       #
       # @param [String] repository_root the root of the repository to create the index for
@@ -49,7 +47,7 @@ module LibertyBuildpack
       # @return [String] the URI of the file found
       def find_item(version)
         found_version = VersionResolver.resolve(version, @index.keys)
-        fail "No version resolvable for '#{version}' in #{@index.keys.join(', ')}" if found_version.nil?
+        raise "No version resolvable for '#{version}' in #{@index.keys.join(', ')}" if found_version.nil?
         uri = @index[found_version.to_s]
         [found_version, uri]
       end
@@ -64,8 +62,6 @@ module LibertyBuildpack
         LibertyBuildpack::Util::Cache::DownloadCache.new(Pathname.new(Dir.tmpdir),
                                                          LibertyBuildpack::Util::Cache::CACHED_RESOURCES_DIRECTORY)
       end
-
     end
-
   end
 end

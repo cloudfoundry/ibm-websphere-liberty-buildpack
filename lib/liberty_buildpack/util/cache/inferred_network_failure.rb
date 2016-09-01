@@ -18,11 +18,9 @@
 module LibertyBuildpack
   module Util
     module Cache
-
       # An error thrown when a we infer that an error has occurred (rather than receiving an explicit indication)
       class InferredNetworkFailure < StandardError
       end
-
     end
   end
 end

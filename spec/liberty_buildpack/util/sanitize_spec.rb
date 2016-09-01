@@ -19,7 +19,7 @@ require 'spec_helper'
 require 'application_helper'
 require 'liberty_buildpack/util/sanitizer'
 
-describe 'sanitize_uri' do # rubocop:disable RSpec/DescribeClass
+describe 'sanitize_uri' do
   include_context 'application_helper'
 
   it 'sanitizes uri with credentials in' do
@@ -29,5 +29,4 @@ describe 'sanitize_uri' do # rubocop:disable RSpec/DescribeClass
   it 'does not sanatize uri with no credentials in' do
     expect('https://myhost/path/to/file'.sanitize_uri).to eq('https://myhost/path/to/file')
   end
-
 end

@@ -18,9 +18,7 @@ require 'spec_helper'
 require 'liberty_buildpack/util/tokenized_version'
 
 module LibertyBuildpack::Util
-
   describe TokenizedVersion do
-
     it 'defaults to a wildcard if no version is supplied' do
       expect(TokenizedVersion.new(nil)).to eq(TokenizedVersion.new('+'))
     end
@@ -123,7 +121,5 @@ module LibertyBuildpack::Util
       expect { TokenizedVersion.new('1.7.') }.to raise_error(/Invalid/)
       expect { TokenizedVersion.new('1.7.0_') }.to raise_error(/Invalid/)
     end
-
   end
-
 end

@@ -61,7 +61,6 @@ describe LibertyBuildpack::Util::Cache::CachedFile do
   end
 
   context do
-
     before do
       touch('cached', 'foo-cached')
       touch('etag', 'foo-etag')
@@ -117,5 +116,4 @@ describe LibertyBuildpack::Util::Cache::CachedFile do
 
     file
   end
-
 end

@@ -19,14 +19,12 @@ require 'liberty_buildpack/util/configuration_utils'
 require 'liberty_buildpack/util/to_b'
 
 module LibertyBuildpack
-
   # A representation of the buildpack's version.  The buildpack's version is determined using the following algorithm:
   #
   # 1. using the +config/version.yml+ file if it exists
   # 2. using +git+ to determine the remote and hash if the buildpack is in a git repository
   # 3. unknown
   class BuildpackVersion
-
     # @!attribute [r] hash
     # @return [String, nil] the Git hash of this version, or +nil+ if it cannot be determined
     attr_reader :hash
@@ -136,7 +134,5 @@ module LibertyBuildpack
     def remote
       git 'config --get remote.origin.url'
     end
-
   end
-
 end

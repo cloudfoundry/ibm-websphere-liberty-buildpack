@@ -17,7 +17,6 @@
 require 'liberty_buildpack/util/configuration_utils'
 
 module LibertyBuildpack::Util::Cache
-
   # Utilites to handle sites requiring authentication
   # Authentication is specified in config/auth.xml file associating URL to
   # authorization data. Authorization could be the string usable in
@@ -32,11 +31,9 @@ module LibertyBuildpack::Util::Cache
   # http://generic.auth.com/files: Bearer AbCdEf123456
   #
   class AuthenticationUtils
-
     private_class_method :new
 
     class << self
-
       # Checks config/auth.yml for authorization data associated with
       # the URL and updates request accordingly.
       #
@@ -85,9 +82,6 @@ module LibertyBuildpack::Util::Cache
         key = @@sorted_keys.find { |k| url.start_with? k }
         key ? @@auth_config[key] : nil
       end
-
     end
-
   end
-
 end

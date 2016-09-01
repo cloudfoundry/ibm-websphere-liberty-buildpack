@@ -28,10 +28,8 @@ require 'fileutils'
 require 'rexml/document'
 
 module LibertyBuildpack::Framework
-
   # Encapsulates the detection, compile, and release functionality for DynamicPULSE Agent
   class DynamicPULSEAgent
-
     # An initializer for the instance.
     #
     # @param [Hash<Symbol, String>] context A shared context provided to all components
@@ -61,8 +59,6 @@ module LibertyBuildpack::Framework
         @logger.debug("system_id=#{@system_id}")
 
         return 'DynamicPULSE-3.+'
-      else
-        nil
       end
     end
 
@@ -98,6 +94,5 @@ module LibertyBuildpack::Framework
     rescue => e
       raise "[DynamicPULSE] Can't download #{filename} from #{download_url}. Please check dynamicpulse-remote.xml. #{e.message}"
     end
-
   end
 end

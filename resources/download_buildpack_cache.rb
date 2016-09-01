@@ -175,18 +175,17 @@ class BuildpackCache
       rescue => e
         abort "ERROR: Failed loading config #{file}: #{e}"
       end
-      unless config.nil?
-        config = config[DRIVER] || config
-        if repository_configuration?(config) && (File.exists?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(repository_root(config)).host))
-          configs.push(config)
-        end
+      next if config.nil?
+      config = config[DRIVER] || config
+      if repository_configuration?(config) && (File.exists?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(repository_root(config)).host))
+        configs.push(config)
       end
     end
     configs
   end
 
   def repository_configuration?(configuration)
-    configuration.has_key?(VERSION) && configuration.has_key?(REPOSITORY_ROOT) && !configuration[REPOSITORY_ROOT].empty?
+    configuration.key?(VERSION) && configuration.key?(REPOSITORY_ROOT) && !configuration[REPOSITORY_ROOT].empty?
   end
 
   def default_repository_root

@@ -18,11 +18,8 @@ require 'spec_helper'
 require 'liberty_buildpack/util'
 
 module LibertyBuildpack
-
   describe Util do
-
     describe 'safe_vcap_services' do
-
       it 'should not fail on nil' do
         expect(LibertyBuildpack::Util.safe_vcap_services(nil)).to eq(nil)
       end
@@ -42,16 +39,16 @@ module LibertyBuildpack
       end
 
       it 'should not fail on maps containing nil as value' do
-        expect(LibertyBuildpack::Util.safe_vcap_services({ 'one' => nil })).to eq({ 'one' => nil })
+        expect(LibertyBuildpack::Util.safe_vcap_services('one' => nil)).to eq('one' => nil)
         expect(LibertyBuildpack::Util.safe_vcap_services('{"one": null}')).to eq('{"one":null}')
       end
 
       it 'should mask "credential" entries' do
-        expect(LibertyBuildpack::Util.safe_vcap_services({ 'database' => [{ 'credentials' => { 'identity' => 'VERY SECRET PHRASE' } }] })).to eq({ 'database' => [{ 'credentials' => ['PRIVATE DATA HIDDEN'] }] })
+        expect(LibertyBuildpack::Util.safe_vcap_services('database' => [{ 'credentials' => { 'identity' => 'VERY SECRET PHRASE' } }])).to eq('database' => [{ 'credentials' => ['PRIVATE DATA HIDDEN'] }])
       end
 
       it 'should not mask than than "credential" entries' do
-        expect(LibertyBuildpack::Util.safe_vcap_services({ 'database' => [{ 'name' =>  'PLAIN NAME' }] })).to eq({ 'database' => [{ 'name' => 'PLAIN NAME' }] })
+        expect(LibertyBuildpack::Util.safe_vcap_services('database' => [{ 'name' => 'PLAIN NAME' }])).to eq('database' => [{ 'name' => 'PLAIN NAME' }])
       end
 
       it 'should not alter input variable' do
@@ -62,7 +59,6 @@ module LibertyBuildpack
     end
 
     describe 'safe_service_data' do
-
       it 'should not fail on nil' do
         expect(LibertyBuildpack::Util.safe_service_data(nil)).to eq(nil)
       end
@@ -91,7 +87,6 @@ module LibertyBuildpack
         output = LibertyBuildpack::Util.safe_service_data(input)
         expect(output).not_to eq(input)
       end
-
     end
 
     describe 'safe_credential_properties' do
@@ -116,7 +111,7 @@ module LibertyBuildpack
           "<variable name='cloud.services.data.name' value='PLAIN NAME'/>",
           "<variable name='cloud.services.data.connection.identity' value='VERY SECRET PHRASE'/>",
           "<variable name='cloud.services.data.version' value='PLAIN VERSION'/>"
-       ]
+        ]
 
         expected = [
           input[0],
@@ -132,25 +127,20 @@ module LibertyBuildpack
         output = LibertyBuildpack::Util.safe_credential_properties(input)
         expect(output).not_to eq(input)
       end
-
     end
 
     describe 'safe_heroku_env' do
-
       it 'should mask all variables ending in _URI and _URL' do
         safe_env = { 'SECRET_URL' => 'secret URL', 'SECRET_URI' => 'secret URI' }
         LibertyBuildpack::Util.safe_heroku_env!(safe_env)
-        expect(safe_env).to eq({ 'SECRET_URL' => '[PRIVATE DATA HIDDEN]', 'SECRET_URI' => '[PRIVATE DATA HIDDEN]' })
+        expect(safe_env).to eq('SECRET_URL' => '[PRIVATE DATA HIDDEN]', 'SECRET_URI' => '[PRIVATE DATA HIDDEN]')
       end
 
       it 'should not mask other variables than the one ending in _URI and _URL' do
         safe_env = { 'GOOD_VAR' => 'good data' }
         LibertyBuildpack::Util.safe_heroku_env!(safe_env)
-        expect(safe_env).to eq({ 'GOOD_VAR' => 'good data' })
+        expect(safe_env).to eq('GOOD_VAR' => 'good data')
       end
-
     end
-
   end
-
 end

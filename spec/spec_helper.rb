@@ -51,5 +51,4 @@ RSpec.configure do |config|
     diagnostics_directory = LibertyBuildpack::Diagnostics.get_diagnostic_directory(Dir.tmpdir)
     FileUtils.rm_rf diagnostics_directory
   end
-
 end

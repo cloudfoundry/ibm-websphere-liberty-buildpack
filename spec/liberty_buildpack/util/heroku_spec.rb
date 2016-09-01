@@ -19,9 +19,7 @@ require 'logging_helper'
 require 'liberty_buildpack/util/heroku'
 
 module LibertyBuildpack::Util
-
   describe 'Detect' do
-
     after (:each) do
       ENV.delete('DYNO')
     end
@@ -35,7 +33,6 @@ module LibertyBuildpack::Util
       ENV.delete('DYNO')
       expect(Heroku.heroku?).to eq(false)
     end
-
   end
 
   describe 'VCAP_SERVICES' do
@@ -190,7 +187,5 @@ module LibertyBuildpack::Util
       # verify we don't leak credentials
       check_debug_output(env)
     end
-
   end # describe
-
 end # module

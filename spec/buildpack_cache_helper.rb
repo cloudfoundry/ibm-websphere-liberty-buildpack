@@ -36,5 +36,4 @@ shared_context 'buildpack_cache_helper' do
   after do
     ENV['BUILDPACK_CACHE'] = previous_buildpack_cache
   end
-
 end

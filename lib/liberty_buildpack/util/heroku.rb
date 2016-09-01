@@ -18,10 +18,8 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/util'
 
 module LibertyBuildpack::Util
-
   # Heroku utilities.
   class Heroku
-
     # Detects Heroku environment.
     #
     # @return [Boolean] +true+ if running on Heroku. +False+ otherwise.
@@ -43,27 +41,26 @@ module LibertyBuildpack::Util
     def generate_vcap_services(env)
       vcap_services = {}
       service_name_map = parse_service_name_map(env)
-      env.each do | key, value |
-        if key.end_with?(URL_SUFFIX) || key.end_with?(URI_SUFFIX)
-          if key.start_with?(POSTGRESQL_PREFIX)
-            type, service = handle_postgresql(key, value, service_name_map)
-          elsif key.start_with?(CLEARDB_PREFIX)
-            type, service = handle_cleardb(key, value, service_name_map)
-          elsif key.start_with?(MONGOLAB_PREFIX)
-            type, service = handle_mongodb(key, value, service_name_map, 'mongolab')
-          elsif key.start_with?(MONGOHQ_PREFIX)
-            type, service = handle_mongodb(key, value, service_name_map, 'mongohq')
-          elsif key.start_with?(MONGOSOUP_PREFIX)
-            type, service = handle_mongodb(key, value, service_name_map, 'mongosoup')
-          else
-            type = key
-            service = {}
-            service['name'] = service_name_map[key] || generate_name(key)
-            service['credentials'] = create_default_credentials(key, value)
-          end
-
-          vcap_services[type] = [service]
+      env.each do |key, value|
+        next unless key.end_with?(URL_SUFFIX) || key.end_with?(URI_SUFFIX)
+        if key.start_with?(POSTGRESQL_PREFIX)
+          type, service = handle_postgresql(key, value, service_name_map)
+        elsif key.start_with?(CLEARDB_PREFIX)
+          type, service = handle_cleardb(key, value, service_name_map)
+        elsif key.start_with?(MONGOLAB_PREFIX)
+          type, service = handle_mongodb(key, value, service_name_map, 'mongolab')
+        elsif key.start_with?(MONGOHQ_PREFIX)
+          type, service = handle_mongodb(key, value, service_name_map, 'mongohq')
+        elsif key.start_with?(MONGOSOUP_PREFIX)
+          type, service = handle_mongodb(key, value, service_name_map, 'mongosoup')
+        else
+          type = key
+          service = {}
+          service['name'] = service_name_map[key] || generate_name(key)
+          service['credentials'] = create_default_credentials(key, value)
         end
+
+        vcap_services[type] = [service]
       end
       vcap_services
     end
@@ -136,7 +133,7 @@ module LibertyBuildpack::Util
       name_map = env['SERVICE_NAME_MAP']
       map = {}
       unless name_map.nil?
-        name_map.split(',').each do | value |
+        name_map.split(',').each do |value|
           key_value = value.split('=')
           map[key_value[0].strip] = key_value[1].strip if key_value.size == 2
         end
@@ -144,5 +141,4 @@ module LibertyBuildpack::Util
       map
     end
   end
-
 end

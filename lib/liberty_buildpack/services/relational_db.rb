@@ -20,12 +20,10 @@ require 'liberty_buildpack/services/client_jar_utils'
 require 'liberty_buildpack/services/utils'
 
 module LibertyBuildpack::Services
-
   #------------------------------------------------------------------------------------
   # Base class for relational database resources.
   #------------------------------------------------------------------------------------
   class RelationalDatabasePlugin
-
     #------------------------------------------------------------------------------------
     # Initialize
     #
@@ -65,7 +63,7 @@ module LibertyBuildpack::Services
       @host = get_cloud_property(properties, element, "#{conn_prefix}host", uri.host)
       @port = get_cloud_property(properties, element, "#{conn_prefix}port", uri.port)
       @user = get_cloud_property(properties, element, "#{conn_prefix}user", uri.user)
-      @password =  get_cloud_property(properties, element, "#{conn_prefix}password", uri.password)
+      @password = get_cloud_property(properties, element, "#{conn_prefix}password", uri.password)
 
       # ensure all the cloud properties are always set
       get_cloud_property(properties, element, "#{conn_prefix}hostname", uri.host)
@@ -121,7 +119,7 @@ module LibertyBuildpack::Services
     # @param uris - the hash containing the <key, uri> information from the repository
     # @param components - the non-null RequiredComponents to update.
     #---------------------------------------------
-    def get_required_esas(uris, components)
+    def get_required_esas(_uris, _components)
       false
     end
 
@@ -134,7 +132,7 @@ module LibertyBuildpack::Services
     # @param available_jars - an array containing the names of all installed client driver jars.
     # @raise if a problem was discovered (incoherent or inconsistent existing configuration, for example)
     #------------------------------------------------------------------------------------
-    def create(doc, server_dir, driver_dir, available_jars)
+    def create(doc, _server_dir, driver_dir, available_jars)
       # handle client driver jars
       @driver_dir = driver_dir
       @client_jars_string = ClientJarUtils.client_jars_string(ClientJarUtils.get_jar_names(available_jars, @reg_ex))
@@ -152,7 +150,7 @@ module LibertyBuildpack::Services
     # @param number_instances - the number of service instances that update the same service-specific server.xml stanzas
     # @raise if a problem was discovered (incoherent or inconsistent existing configuration, for example)
     #------------------------------------------------------------------------------------
-    def update(doc, server_dir, driver_dir, available_jars, number_instances)
+    def update(doc, _server_dir, driver_dir, available_jars, number_instances)
       # handle client driver jars
       @driver_dir = driver_dir
       @client_jars_string = ClientJarUtils.client_jars_string(ClientJarUtils.get_jar_names(available_jars, @reg_ex))
@@ -182,7 +180,7 @@ module LibertyBuildpack::Services
 
     private
 
-    def get_cloud_property(properties, element, name, value)
+    def get_cloud_property(_properties, element, name, value)
       variable = element.root.elements.to_a("//variable[@name='#{name}']")
       if variable.empty?
         if value.nil?
@@ -209,12 +207,11 @@ module LibertyBuildpack::Services
         datasource.elements.each do |element|
           # if name matches exactly, then we are done.
           return element if element.name == expected
-          if element.name.start_with? 'properties'
-            # found the properties element, but it's the wrong type. Update the name to expected type
-            @logger.debug("found properties, but wrong type. Found #{element.name} expected #{expected}")
-            element.name = expected
-            return element
-          end
+          next unless element.name.start_with? 'properties'
+          # found the properties element, but it's the wrong type. Update the name to expected type
+          @logger.debug("found properties, but wrong type. Found #{element.name} expected #{expected}")
+          element.name = expected
+          return element
         end
       end
       # if we got here, then we didn't find any properties. Create a properties instance of the expected type.

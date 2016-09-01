@@ -23,12 +23,10 @@ require 'liberty_buildpack/services/vcap_services'
 require 'liberty_buildpack/container/container_utils'
 
 module LibertyBuildpack::Framework
-
   #------------------------------------------------------------------------------------
   # The AppDynamicsAgent class that provides Appdynamics Agent resources as a framework to applications
   #------------------------------------------------------------------------------------
   class AppDynamicsAgent
-
     #-----------------------------------------------------------------------------------------
     # Creates an instance, passing in a context of information available to the component
     #
@@ -106,7 +104,7 @@ module LibertyBuildpack::Framework
     private
 
     # Name of the Appdynamics service
-    FILTER = /app[-]?dynamics/.freeze
+    FILTER = /app[-]?dynamics/
 
     # Appdynamics's directory of artifacts in the droplet
     APPDYNAMICS_HOME_DIR = '.appdynamics_agent'.freeze
@@ -141,7 +139,7 @@ module LibertyBuildpack::Framework
 
     def application_name(java_opts, credentials)
       name = credentials['application-name'] || @configuration['default_application_name'] ||
-        vcap_app_name
+             vcap_app_name
       java_opts << "-Dappdynamics.agent.applicationName=#{name}"
     end
 
@@ -157,13 +155,13 @@ module LibertyBuildpack::Framework
 
     def host_name(java_opts, credentials)
       host_name = credentials['host-name']
-      fail "'host-name' credential must be set" unless host_name
+      raise "'host-name' credential must be set" unless host_name
       java_opts << "-Dappdynamics.controller.hostName=#{host_name}"
     end
 
     def node_name(java_opts, credentials)
       name = credentials['node-name'] || @configuration['default_node_name'] ||
-        vcap_app_name
+             vcap_app_name
       java_opts << "-Dappdynamics.agent.nodeName=#{name}"
     end
 
@@ -179,7 +177,7 @@ module LibertyBuildpack::Framework
 
     def tier_name(java_opts, credentials)
       name = credentials['tier-name'] || @configuration['default_tier_name'] ||
-        vcap_app_name
+             vcap_app_name
       java_opts << "-Dappdynamics.agent.tierName=#{name}"
     end
 

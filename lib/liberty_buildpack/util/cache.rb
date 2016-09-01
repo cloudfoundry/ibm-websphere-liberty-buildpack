@@ -19,8 +19,6 @@ require 'liberty_buildpack/util'
 
 # A module encapsulating all of the utility components for caching
 module LibertyBuildpack::Util::Cache
-
   # The location to find cached resources in the buildpack
   CACHED_RESOURCES_DIRECTORY = Pathname.new(File.expand_path('../../../../resources/cache', __FILE__))
-
 end
