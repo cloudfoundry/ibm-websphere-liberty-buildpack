@@ -12,3 +12,5 @@ ParameterLists:
   Max: 10
 AvoidClassVars:
   Enabled: false
+FrozenStringLiteralComment:
+  Enabled: false
