@@ -74,4 +74,3 @@ add_runtime_variable(document.root, 'application.log.dir', log_directory)
 formatter = REXML::Formatters::Pretty.new(2)
 formatter.compact = true
 File.open(filename, 'w:utf-8') { |file| formatter.write(document, file) }
-

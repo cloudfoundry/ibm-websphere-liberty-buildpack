@@ -196,22 +196,19 @@ module LibertyBuildpack::Services
       filesets.each do |fileset|
         jar_string = fileset.attribute('includes').value unless fileset.attribute('includes').nil?
         # We need to find out if this fileset's include contains the same entries as the client_jar_string. client_jar_string is sorted, but the entry may not be.
-        unless jar_string.nil?
-          # the includes can either be comma-separated or whitespace-separated.
-          if jar_string.include?(',')
-            jars = jar_string.split(',')
-          else
-            jars = jar_string.split
-          end
-          unless jars.empty?
-            sorted_jar_string = ClientJarUtils.client_jars_string(jars)
-            if sorted_jar_string == client_jar_string
-              # update the dir attribute, overwrite if it already exists.
-              fileset.add_attribute('dir', lib_dir)
-              updated = true
-            end
-          end
+        next if jar_string.nil?
+        # the includes can either be comma-separated or whitespace-separated.
+        if jar_string.include?(',')
+          jars = jar_string.split(',')
+        else
+          jars = jar_string.split
         end
+        next if jars.empty?
+        sorted_jar_string = ClientJarUtils.client_jars_string(jars)
+        next unless sorted_jar_string == client_jar_string
+        # update the dir attribute, overwrite if it already exists.
+        fileset.add_attribute('dir', lib_dir)
+        updated = true
       end
       updated
     end

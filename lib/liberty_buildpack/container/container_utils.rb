@@ -50,9 +50,9 @@ module LibertyBuildpack::Container
       if lib_directory
         root_directory = Pathname.new(app_dir)
         libs = Pathname.new(lib_directory).children
-        .select { |file| file.extname == '.jar' }
-        .map { |file| file.relative_path_from(root_directory) }
-        .sort
+                       .select { |file| file.extname == '.jar' }
+                       .map { |file| file.relative_path_from(root_directory) }
+                       .sort
       end
       libs
     end
@@ -65,9 +65,9 @@ module LibertyBuildpack::Container
     # @return [void]
     def self.unzip(file, dir)
       file = File.expand_path(file)
-      FileUtils.mkdir_p (dir)
+      FileUtils.mkdir_p dir
       Dir.chdir (dir) do
-        if File.exists? '/usr/bin/unzip'
+        if File.exist? '/usr/bin/unzip'
           system "unzip -qqo '#{file}'"
         else
           system "jar xf \"#{file}\""
@@ -83,7 +83,7 @@ module LibertyBuildpack::Container
     def self.zip(dir, file)
       file = File.expand_path(file)
       Dir.chdir (dir) do
-        if File.exists? '/usr/bin/zip'
+        if File.exist? '/usr/bin/zip'
           system "zip -rq '#{file}' *"
         else
           system "jar cf \"#{file}\" *"
@@ -109,7 +109,7 @@ module LibertyBuildpack::Container
 
     RESOURCES_DIR = 'resources'.freeze
 
-    JAVA_OVERLAY_DIR  = '.java-overlay'.freeze
+    JAVA_OVERLAY_DIR = '.java-overlay'.freeze
 
     JAVA_DIR = '.java'.freeze
 

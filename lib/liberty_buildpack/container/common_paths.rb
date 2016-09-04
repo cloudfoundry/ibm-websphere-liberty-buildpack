@@ -43,23 +43,23 @@ module LibertyBuildpack::Container
     #
     # @param [String] app_dir  a relative path to the application's home directory
     def initialize(app_dir = nil)
-       # relative to the application's root dir
-       @relative_location = CURRENT_DIR
+      # relative to the application's root dir
+      @relative_location = CURRENT_DIR
 
-       # set the default app's root directory according to the environment unless an application root is provided
-       unless app_dir
-         if !Heroku.heroku?
-           app_dir = 'app'.freeze
-         else
-           app_dir = CURRENT_DIR
-         end
-       end
+      # set the default app's root directory according to the environment unless an application root is provided
+      unless app_dir
+        if !Heroku.heroku?
+          app_dir = 'app'.freeze
+        else
+          app_dir = CURRENT_DIR
+        end
+      end
 
-       # for recalculating the relative location of the execution dir to the base home directory
-       # which may not necessarily be the same as the app root dir
-       @relative_app_string = valid_relative_string(app_dir)
+      # for recalculating the relative location of the execution dir to the base home directory
+      # which may not necessarily be the same as the app root dir
+      @relative_app_string = valid_relative_string(app_dir)
 
-       update_relative_to_base
+      update_relative_to_base
     end
 
     # The relative location that should be updated when the execution path occurs in the non-default working directory
@@ -80,14 +80,14 @@ module LibertyBuildpack::Container
     #
     # @return [String] the path of the log directory that components should route log files to
     def log_directory
-       File.join(@relative_to_base, LOG_DIRECTORY_NAME)
+      File.join(@relative_to_base, LOG_DIRECTORY_NAME)
     end
 
     # The expected dump directory that components should store dumps to.
     #
     # @return [String] the path of the dump directory that components should route dump files to
     def dump_directory
-       File.join(@relative_to_base, DUMP_DIRECTORY_NAME)
+      File.join(@relative_to_base, DUMP_DIRECTORY_NAME)
     end
 
     # The buildpack's diagnostics directory which contains diagnostic scripts and logs that components may
@@ -97,7 +97,7 @@ module LibertyBuildpack::Container
     #
     # @return [String] path of the buildpack diagnostics directory
     def diagnostics_directory
-       File.join(@relative_location, DIAGNOSTICS_DIRECTORY_NAME)
+      File.join(@relative_location, DIAGNOSTICS_DIRECTORY_NAME)
     end
 
     private

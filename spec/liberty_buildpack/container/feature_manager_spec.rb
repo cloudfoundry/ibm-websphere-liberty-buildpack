@@ -70,7 +70,7 @@ module LibertyBuildpack::Container
 
         # check liberty's featureManager was not called.
         feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
-        expect(File.exists?(feature_manager_command_file)).to eq(false)
+        expect(File.exist?(feature_manager_command_file)).to eq(false)
       end
     end
 
@@ -80,7 +80,7 @@ module LibertyBuildpack::Container
 
         # check liberty's featureManager was not called.
         feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
-        expect(File.exists?(feature_manager_command_file)).to eq(false)
+        expect(File.exist?(feature_manager_command_file)).to eq(false)
       end
     end
 
@@ -90,7 +90,7 @@ module LibertyBuildpack::Container
 
         # check liberty's featureManager was not called.
         feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
-        expect(File.exists?(feature_manager_command_file)).to eq(false)
+        expect(File.exist?(feature_manager_command_file)).to eq(false)
       end
     end
 
@@ -100,7 +100,7 @@ module LibertyBuildpack::Container
 
         # check liberty's featureManager was called, with expected parameters.
         feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
-        expect(File.exists?(feature_manager_command_file)).to eq(true)
+        expect(File.exist?(feature_manager_command_file)).to eq(true)
         feature_manager_command = File.read feature_manager_command_file
         expect(feature_manager_command).to match(/jsp-2.2/)
         expect(feature_manager_command).to match(/featureOne/)
@@ -113,7 +113,7 @@ module LibertyBuildpack::Container
 
         # check that a repository properties file was not created.
         repository_description_properties_file = File.join(app_dir, '.repository.description.properties')
-        expect(File.exists?(repository_description_properties_file)).to eq(false)
+        expect(File.exist?(repository_description_properties_file)).to eq(false)
       end
     end
 
@@ -123,7 +123,7 @@ module LibertyBuildpack::Container
 
         # check liberty's featureManager was called, with expected parameters.
         feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
-        expect(File.exists?(feature_manager_command_file)).to eq(true)
+        expect(File.exist?(feature_manager_command_file)).to eq(true)
         feature_manager_command = File.read feature_manager_command_file
         expect(feature_manager_command).to match(/jsp-2.2/)
         expect(feature_manager_command).to match(/featureOne/)
@@ -137,7 +137,7 @@ module LibertyBuildpack::Container
 
         # check that a repository properties file was created, containing the expected properties.
         repository_description_properties_file = File.join(app_dir, '.repository.description.properties')
-        expect(File.exists?(repository_description_properties_file)).to eq(true)
+        expect(File.exist?(repository_description_properties_file)).to eq(true)
         repository_description_properties = File.read repository_description_properties_file
         expect(repository_description_properties).to match(/key1=value1/)
         expect(repository_description_properties).to match(/key2=value2/)
@@ -163,7 +163,7 @@ module LibertyBuildpack::Container
 
         # check liberty's featureManager was called, with expected parameters.
         feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
-        expect(File.exists?(feature_manager_command_file)).to eq(true)
+        expect(File.exist?(feature_manager_command_file)).to eq(true)
 
         feature_manager_command = File.read feature_manager_command_file
         expect(feature_manager_command).to match(/jsp-2.2/)
@@ -194,7 +194,7 @@ module LibertyBuildpack::Container
 
           # check liberty's featureManager was called, with expected parameters.
           feature_manager_command_file = File.join(liberty_dir, 'bin', 'installUtility.txt')
-          expect(File.exists?(feature_manager_command_file)).to eq(true)
+          expect(File.exist?(feature_manager_command_file)).to eq(true)
           feature_manager_command = File.read feature_manager_command_file
           expect(feature_manager_command).to match(/jvm args is \(\)/)
         end

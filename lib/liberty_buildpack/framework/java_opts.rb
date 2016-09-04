@@ -70,7 +70,7 @@ module LibertyBuildpack::Framework
 
     def memory_option?(option)
       option =~ /-Xms/ || option =~ /-Xmx/ || option =~ /-XX:MaxMetaspaceSize/ || option =~ /-XX:MaxPermSize/ ||
-        option =~ /-Xss/ || option =~ /-XX:MetaspaceSize/ || option =~ /-XX:PermSize/ if @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
+        option =~ /-Xss/ || option =~ /-XX:MetaspaceSize/ || option =~ /-XX:PermSize/ if !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
     end
 
     def parsed_java_opts

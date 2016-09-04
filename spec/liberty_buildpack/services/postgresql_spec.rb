@@ -30,9 +30,7 @@ module LibertyBuildpack::Services
     #----------------
     def validate_xml(server_xml, expected)
       # Collapse XML into one long String (no cr or lf).
-      server_xml_contents_array = File.readlines(server_xml).each do |line|
-        line.strip!
-      end
+      server_xml_contents_array = File.readlines(server_xml).each(&:strip!)
       server_xml_contents = server_xml_contents_array.join
       # For each String in the expected array, make sure there is a corresponding entry in server.xml
       # make sure we consume all entries in the expected array.
@@ -207,7 +205,7 @@ module LibertyBuildpack::Services
         elephantsql = {}
         elephantsql['name'] = 'myDatabase'
         elephantsql['label'] = 'elephantsql'
-        elephantsql['tags'] = %w('relational', 'postgresql')
+        elephantsql['tags'] = %w(relational postgresql)
         elephantsql_credentials = {}
         elephantsql_credentials['uri'] = 'postgres://myUser:myPassword@myHost.com:5432/myDb'
         elephantsql['credentials'] = elephantsql_credentials

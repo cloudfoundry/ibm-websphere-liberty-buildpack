@@ -75,7 +75,7 @@ module LibertyBuildpack
             downloaded  = false
           end
 
-          fail "Unable to find cached file for #{uri.sanitize_uri}" unless cached_file
+          raise "Unable to find cached file for #{uri.sanitize_uri}" unless cached_file
           cached_file.cached(File::RDONLY | File::BINARY, downloaded, &block)
         end
 
@@ -91,7 +91,7 @@ module LibertyBuildpack
 
         CA_FILE = (Pathname.new(__FILE__).dirname + '../../../../resources/ca_certs.pem').freeze
 
-        FAILURE_LIMIT = 5.freeze
+        FAILURE_LIMIT = 5
 
         HTTP_ERRORS = [
           EOFError,
@@ -140,7 +140,7 @@ module LibertyBuildpack
             elsif redirect?(response)
               downloaded = update URI(response['Location']), cached_file
             else
-              fail InferredNetworkFailure, "Bad response: #{response}"
+              raise InferredNetworkFailure, "Bad response: #{response}"
             end
           end
 
@@ -309,13 +309,13 @@ module LibertyBuildpack
         def validate_size(expected_size, cached_file)
           return unless expected_size
 
-          actual_size = cached_file.cached(File::RDONLY) { |f| f.size }
+          actual_size = cached_file.cached(File::RDONLY, &:size)
           @logger.debug { "Validated content size #{actual_size} is #{expected_size}" }
 
           return if expected_size.to_i == actual_size
 
           cached_file.destroy
-          fail InferredNetworkFailure, "Content has invalid size.  Was #{actual_size}, should be #{expected_size}."
+          raise InferredNetworkFailure, "Content has invalid size.  Was #{actual_size}, should be #{expected_size}."
         end
 
       end

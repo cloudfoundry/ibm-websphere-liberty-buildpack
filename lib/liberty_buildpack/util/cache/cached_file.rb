@@ -51,7 +51,7 @@ module LibertyBuildpack
         # @yield [file, additional_args] the cached file and any additional arguments passed in
         # @return [Void]
         def cached(mode_enc, *additional_args, &block)
-          @cached.open(mode_enc) { |f| block.call f, *additional_args }
+          @cached.open(mode_enc) { |f| yield f, *additional_args }
         end
 
         # Returns whether or not data is cached.
@@ -74,7 +74,7 @@ module LibertyBuildpack
         # @yield [file] the etag file
         # @return [Void]
         def etag(mode_enc, *additional_args, &block)
-          @etag.open(mode_enc) { |f| block.call f, *additional_args }
+          @etag.open(mode_enc) { |f| yield f, *additional_args }
         end
 
         # Returns whether or not an etag is stored.
@@ -92,7 +92,7 @@ module LibertyBuildpack
         # @yield [file] the last modified file
         # @return [Void]
         def last_modified(mode_enc, *additional_args, &block)
-          @last_modified.open(mode_enc) { |f| block.call f, *additional_args }
+          @last_modified.open(mode_enc) { |f| yield f, *additional_args }
         end
 
         # Returns whether or not a last modified time stamp is stored.

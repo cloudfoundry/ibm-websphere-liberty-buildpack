@@ -33,7 +33,7 @@ module LibertyBuildpack::Diagnostics
     def self.create_logger(app_dir)
       configuration = LibertyBuildpack::Util::ConfigurationUtils.load('logging', false)
 
-      if (defined? @@logger) && (@@logger != nil)
+      if (defined? @@logger) && !@@logger.nil?
         logger_recreated = true
         @@logger.warn("Logger is being re-created by #{caller[0]}")
       else
@@ -52,9 +52,7 @@ module LibertyBuildpack::Diagnostics
 
       set_log_level(configuration)
 
-      if logger_recreated
-        @@logger.warn("Logger was re-created by #{caller[0]}")
-      end
+      @@logger.warn("Logger was re-created by #{caller[0]}") if logger_recreated
       @@logger
     end
 
@@ -93,16 +91,15 @@ module LibertyBuildpack::Diagnostics
       switched_log_level = $VERBOSE || $DEBUG ? DEBUG_SEVERITY_STRING : nil
       log_level = (ENV[LOG_LEVEL_ENVIRONMENT_VARIABLE] || switched_log_level || logging_configuration[DEFAULT_LOG_LEVEL_CONFIGURATION_KEY]).upcase
 
-      @@logger.sev_threshold = case
-                               when log_level == DEBUG_SEVERITY_STRING then
+      @@logger.sev_threshold = if log_level == DEBUG_SEVERITY_STRING
                                  ::Logger::DEBUG
-                               when log_level == INFO_SEVERITY_STRING then
+                               elsif log_level == INFO_SEVERITY_STRING
                                  ::Logger::INFO
-                               when log_level == WARN_SEVERITY_STRING then
+                               elsif log_level == WARN_SEVERITY_STRING
                                  ::Logger::WARN
-                               when log_level == ERROR_SEVERITY_STRING then
+                               elsif log_level == ERROR_SEVERITY_STRING
                                  ::Logger::ERROR
-                               when log_level == FATAL_SEVERITY_STRING then
+                               elsif log_level == FATAL_SEVERITY_STRING
                                  ::Logger::FATAL
                                else
                                  ::Logger::DEBUG
@@ -142,9 +139,7 @@ module LibertyBuildpack::Diagnostics
 
       # Closes the underlying destinations.
       def close
-        @destinations.each do |destination|
-          destination.close
-        end
+        @destinations.each(&:close)
       end
 
     end
@@ -163,7 +158,6 @@ module LibertyBuildpack::Diagnostics
       # @param [Object, nil] message the message to be logged
       # @param [String, nil] progname the name of the program logging the message
       def add(severity, message = nil, progname = nil, &block)
-
         if message || block_given?
           message_text = message
           program_name = progname

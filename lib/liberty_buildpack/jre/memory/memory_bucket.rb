@@ -57,13 +57,13 @@ module LibertyBuildpack
       private
 
       def validate_name(name)
-        fail "Invalid MemoryBucket name '#{name}'" if name.nil? || name.to_s.size == 0
+        raise "Invalid MemoryBucket name '#{name}'" if name.nil? || name.to_s.size == 0
         name
       end
 
       def validate_weighting(weighting)
-        fail diagnose_weighting(weighting, 'not numeric') unless numeric? weighting
-        fail diagnose_weighting(weighting, 'negative') if weighting < 0
+        raise diagnose_weighting(weighting, 'not numeric') unless numeric? weighting
+        raise diagnose_weighting(weighting, 'negative') if weighting < 0
         weighting
       end
 
@@ -72,7 +72,9 @@ module LibertyBuildpack
       end
 
       def numeric?(w)
-        Float(w) rescue false
+        Float(w)
+      rescue
+        false
       end
 
       def identify
@@ -80,7 +82,7 @@ module LibertyBuildpack
       end
 
       def validate_memory_range(range)
-        fail "Invalid 'range' parameter of class '#{range.class}' for #{identify} : not a MemoryRange" unless range.is_a? MemoryRange
+        raise "Invalid 'range' parameter of class '#{range.class}' for #{identify} : not a MemoryRange" unless range.is_a? MemoryRange
         range
       end
 

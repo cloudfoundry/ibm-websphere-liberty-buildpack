@@ -34,7 +34,7 @@ module LibertyBuildpack
           memory_limit = ENV['MEMORY_LIMIT']
           return nil unless memory_limit
           memory_limit_size = MemorySize.new(memory_limit)
-          fail "Invalid negative $MEMORY_LIMIT #{memory_limit}" if memory_limit_size < 0
+          raise "Invalid negative $MEMORY_LIMIT #{memory_limit}" if memory_limit_size < 0
           memory_limit_size
         end
 

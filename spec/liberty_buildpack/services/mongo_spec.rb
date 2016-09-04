@@ -31,9 +31,7 @@ module LibertyBuildpack::Services
     #----------------
     def validate_xml(server_xml, expected)
       # Collapse XML into one long String (no cr or lf).
-      server_xml_contents_array = File.readlines(server_xml).each do |line|
-        line.strip!
-      end
+      server_xml_contents_array = File.readlines(server_xml).each(&:strip!)
       server_xml_contents = server_xml_contents_array.join
       # For each String in the expected array, make sure there is a corresponding entry in server.xml
       # make sure we consume all entries in the expected array.
@@ -254,7 +252,7 @@ module LibertyBuildpack::Services
         env['SERVICE_NAME_MAP'] = 'MONGOHQ_URL=myNoSql'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
-        run_test(vcap_services, %w{myHost.com myHost2.com myHost3.net}, %w{5432 27017 1234}, env['MONGOHQ_URL'])
+        run_test(vcap_services, %w(myHost.com myHost2.com myHost3.net), %w(5432 27017 1234), env['MONGOHQ_URL'])
       end
 
       it 'on Heroku (MongoLab)' do
@@ -305,11 +303,11 @@ module LibertyBuildpack::Services
           expect(map['password']).to match(expected_password)
         end
         expect(map['ports'].length).to eql(expected_ports.size)
-        expected_ports.each_with_index do | value, index |
+        expected_ports.each_with_index do |value, index|
           expect(map['ports'][index]).to match(value)
         end
         expect(map['hosts'].length).to eql(expected_hosts.size)
-        expected_hosts.each_with_index do | value, index |
+        expected_hosts.each_with_index do |value, index|
           expect(map['hosts'][index]).to match(value)
         end
       end
@@ -332,31 +330,31 @@ module LibertyBuildpack::Services
       it 'Two nodes' do
         # with ports
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myUser:myPassword@myHost.com:5432,myHost2.com:1234/myDb')
-        check_map(map, 'myDb', 'myUser', 'myPassword', %w{5432 1234}, %w{myHost myHost2})
+        check_map(map, 'myDb', 'myUser', 'myPassword', %w(5432 1234), %w(myHost myHost2))
         # without ports
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myUser:myPassword@myHost.com:5432,myHost2.com/myDb')
-        check_map(map, 'myDb', 'myUser', 'myPassword', %w{5432 27017}, %w{myHost myHost2})
+        check_map(map, 'myDb', 'myUser', 'myPassword', %w(5432 27017), %w(myHost myHost2))
         # without username/password
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myHost.com:5432,myHost2.com/myDb')
-        check_map(map, 'myDb', nil, nil, %w{5432 27017}, %w{myHost myHost2})
+        check_map(map, 'myDb', nil, nil, %w(5432 27017), %w(myHost myHost2))
         # no db
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myHost.com:5432,myHost2.com')
-        check_map(map, nil, nil, nil, %w{5432 27017}, %w{myHost myHost2})
+        check_map(map, nil, nil, nil, %w(5432 27017), %w(myHost myHost2))
       end
 
       it 'Multiple nodes' do
         # with ports
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myUser:myPassword@myHost.com:5432,myHost2.com:1234,myHost3.com:4567/myDb')
-        check_map(map, 'myDb', 'myUser', 'myPassword', %w{5432 1234 4567}, %w{myHost myHost2 myHost3})
+        check_map(map, 'myDb', 'myUser', 'myPassword', %w(5432 1234 4567), %w(myHost myHost2 myHost3))
         # without ports
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myUser:myPassword@myHost.com:5432,myHost2.com,myHost3.com:4567/myDb')
-        check_map(map, 'myDb', 'myUser', 'myPassword', %w{5432 27017 4567}, %w{myHost myHost2 myHost3})
+        check_map(map, 'myDb', 'myUser', 'myPassword', %w(5432 27017 4567), %w(myHost myHost2 myHost3))
         # without username/password
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myHost.com:5432,myHost2.com,myHost3.com:4567/myDb')
-        check_map(map, 'myDb', nil, nil, %w{5432 27017 4567}, %w{myHost myHost2 myHost3})
+        check_map(map, 'myDb', nil, nil, %w(5432 27017 4567), %w(myHost myHost2 myHost3))
         # no db
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myHost.com:5432,myHost2.com,myHost3.com:4567')
-        check_map(map, nil, nil, nil, %w{5432 27017 4567}, %w{myHost myHost2 myHost3})
+        check_map(map, nil, nil, nil, %w(5432 27017 4567), %w(myHost myHost2 myHost3))
       end
 
     end
@@ -365,15 +363,15 @@ module LibertyBuildpack::Services
 
       before do |example|
         # create hash containing vcap services data for a single instance.
-        @vcap = Hash.new
+        @vcap = {}
         @vcap['name'] = 'myMongo'
         @vcap['label'] = 'mongodb-2.2'
         @vcap['tags'] = %w(nosql document)
         @vcap['plan'] = 'free'
-        creds = Hash.new
+        creds = {}
         creds['hostname'] = '192.168.10.23'
         creds['host'] = '192.168.10.23'
-        creds['port'] = 10001
+        creds['port'] = 10_001
         creds['username'] = '485e460b-147f-4ae7-b5d3-bd15dd0f4046'
         creds['password'] = 'b15aac99-aef6-495f-96dd-53344c82fbf5'
         creds['name'] = '95381800-b0ca-4d95-9ac8-8cc536cdc803'
@@ -383,7 +381,7 @@ module LibertyBuildpack::Services
         # Read the contents of the .yml config file. Use the actual file for most realistic coverage.
         file = File.join(File.expand_path('../../../lib/liberty_buildpack/services/config', File.dirname(__FILE__)), 'mongo.yml')
         @config = YAML.load_file(file)
-        @driver_jars = ['db2.jar', "#{get_lib_jar}", 'mysql.jar']
+        @driver_jars = ['db2.jar', get_lib_jar.to_s, 'mysql.jar']
       end
 
       #----------------------------------------------------------
@@ -521,7 +519,7 @@ module LibertyBuildpack::Services
           Dir.mktmpdir do |root|
             obj = create_mongo
             expect(obj.requires_liberty_extensions?).to eq(true)
-            urls = Hash.new
+            urls = {}
             # test that we return the url for the mongo client jar
             clients = obj.get_urls_for_client_jars([], urls)
             expect(clients.size).to eq(1)

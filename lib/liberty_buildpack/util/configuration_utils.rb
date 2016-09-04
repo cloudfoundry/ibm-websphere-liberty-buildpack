@@ -55,7 +55,7 @@ module LibertyBuildpack::Util
 
       CONFIG_DIRECTORY = Pathname.new(File.expand_path('../../../config', File.dirname(__FILE__))).freeze
 
-      ENVIRONMENT_VARIABLE_PATTERN = 'JBP_CONFIG_'
+      ENVIRONMENT_VARIABLE_PATTERN = 'JBP_CONFIG_'.freeze
 
       def load_configuration(file, user_provided, should_log)
         configuration = YAML.load_file(file)
@@ -70,7 +70,7 @@ module LibertyBuildpack::Util
               configuration = do_merge(configuration, new_prop, should_log)
             end
           else
-            fail "User configuration value is not valid: #{user_provided_value}"
+            raise "User configuration value is not valid: #{user_provided_value}"
           end
           logger.debug { "Configuration from #{file} modified with: #{user_provided}" } if should_log
         end
@@ -91,7 +91,7 @@ module LibertyBuildpack::Util
 
       def do_resolve_value(key, v1, v2, should_log)
         return do_merge(v1, v2, should_log) if v1.is_a?(Hash) && v2.is_a?(Hash)
-        return v2 if (!v1.is_a?(Hash)) && (!v2.is_a?(Hash))
+        return v2 if !v1.is_a?(Hash) && !v2.is_a?(Hash)
         logger.warn { "User config value for '#{key}' is not valid, must be of a similar type" } if should_log
         v1
       end

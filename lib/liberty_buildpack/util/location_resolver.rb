@@ -45,12 +45,12 @@ module LibertyBuildpack::Util
     def absolute_path(config_file, server_xml_dir)
       result = config_file.clone
       @properties.each do |symbol, mapping|
-        variable = symbol.to_s.gsub "\_", '.'
+        variable = symbol.to_s.tr "\_", '.'
         result.gsub! "\$\{#{variable}\}", mapping
       end
       result = File.expand_path(result, server_xml_dir)
       unless result.start_with?(@app_dir)
-        fail "Absolute path must start with #{@app_dir} directory: #{result}"
+        raise "Absolute path must start with #{@app_dir} directory: #{result}"
       end
       result
     end

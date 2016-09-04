@@ -32,16 +32,14 @@ module LibertyBuildpack::Repository
     it 'should return a hash of component names to URIs listed in the component index if the argument is a valid component_index.yml' do
       LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
       application_cache.stub(:get).with('test-uri/component_index.yml')
-      .and_yield(File.open('spec/fixtures/test-component-index.yml'))
+                       .and_yield(File.open('spec/fixtures/test-component-index.yml'))
 
       component_index = ComponentIndex.new('test-uri/component_index.yml')
       expect(component_index.components).to eq(
-        { 'resolved-component1' => 'resolved-component1-uri',
-          'resolved-component2' => 'resolved-component2-uri' }
+        'resolved-component1' => 'resolved-component1-uri',
+        'resolved-component2' => 'resolved-component2-uri'
       )
     end
   end
 
 end
-
-

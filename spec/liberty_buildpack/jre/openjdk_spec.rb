@@ -30,13 +30,13 @@ module LibertyBuildpack::Jre
     let(:version_7) { VERSION_7 = LibertyBuildpack::Util::TokenizedVersion.new('1.7.0_+') }
 
     let(:configuration) do
-      { 'memory_sizes'      => { 'metaspace' => '64m..',
-                                 'permgen'   => '64m..' },
+      { 'memory_sizes' => { 'metaspace' => '64m..',
+                            'permgen'   => '64m..' },
         'memory_heuristics' => { 'heap'      => '75',
                                  'metaspace' => '10',
                                  'permgen'   => '10',
                                  'stack'     => '5',
-                                  'native'    => '10' } }
+                                 'native' => '10' } }
     end
 
     let(:application_cache) { double('ApplicationCache') }
@@ -49,21 +49,21 @@ module LibertyBuildpack::Jre
       allow(LibertyBuildpack::Repository::ConfiguredItem).to receive(:find_item).and_return([version_7, 'test-uri'])
       allow(LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new).with({ 'permgen' => '64m..' },
                                                                                          anything, anything, anything)
-                                                                        .and_return(memory_heuristic_7)
+        .and_return(memory_heuristic_7)
       allow(LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new).with({ 'metaspace' => '64m..' },
                                                                                          anything, anything, anything)
-                                                                        .and_return(memory_heuristic_8)
+        .and_return(memory_heuristic_8)
     end
 
     it 'should detect with id of openjdk-<version>' do
       Dir.mktmpdir do |root|
         detected = OpenJdk.new(
-            app_dir: '',
-            java_home: '',
-            java_opts: [],
-            configuration: configuration,
-            license_ids: {},
-            jvm_type: 'openjdk'
+          app_dir: '',
+          java_home: '',
+          java_opts: [],
+          configuration: configuration,
+          license_ids: {},
+          jvm_type: 'openjdk'
         ).detect
 
         expect(detected).to eq("openjdk-#{version_7}")
@@ -76,15 +76,15 @@ module LibertyBuildpack::Jre
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
 
         OpenJdk.new(
-            app_dir: root,
-            configuration: configuration,
-            java_home: '',
-            java_opts: [],
-            license_ids: {}
+          app_dir: root,
+          configuration: configuration,
+          java_home: '',
+          java_opts: [],
+          license_ids: {}
         ).compile
 
         java = File.join(root, '.java', 'jre', 'bin', 'java')
-        expect(File.exists?(java)).to eq(true)
+        expect(File.exist?(java)).to eq(true)
       end
     end
 
@@ -93,11 +93,11 @@ module LibertyBuildpack::Jre
         java_home = ''
 
         OpenJdk.new(
-            app_dir: '/application-directory',
-            java_home: java_home,
-            java_opts: [],
-            configuration: configuration,
-            license_ids: {}
+          app_dir: '/application-directory',
+          java_home: java_home,
+          java_opts: [],
+          configuration: configuration,
+          license_ids: {}
         )
 
         expect(java_home).to eq('.java')
@@ -109,11 +109,11 @@ module LibertyBuildpack::Jre
         java_opts = %w(test-opt-2 test-opt-1)
 
         OpenJdk.new(
-            app_dir: root,
-            java_home: '',
-            java_opts: java_opts,
-            configuration: configuration,
-            license_ids: {}
+          app_dir: root,
+          java_home: '',
+          java_opts: java_opts,
+          configuration: configuration,
+          license_ids: {}
         ).release
 
         expect(java_opts).to include('test-opt-2')
@@ -129,11 +129,11 @@ module LibertyBuildpack::Jre
         java_opts = %w(test-opt-2 test-opt-1)
 
         OpenJdk.new(
-            app_dir: root,
-            java_home: '',
-            java_opts: java_opts,
-            configuration: configuration,
-            license_ids: {}
+          app_dir: root,
+          java_home: '',
+          java_opts: java_opts,
+          configuration: configuration,
+          license_ids: {}
         ).release
 
         expect(java_opts).to include('test-opt-2')
@@ -148,11 +148,11 @@ module LibertyBuildpack::Jre
         LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise('test error')
         expect do
           OpenJdk.new(
-              app_dir: '',
-              java_home: '',
-              java_opts: [],
-              configuration: configuration,
-              license_ids: {}
+            app_dir: '',
+            java_home: '',
+            java_opts: [],
+            configuration: configuration,
+            license_ids: {}
           ).detect
         end.to raise_error(/OpenJdk\ error:\ test\ error/)
       end
@@ -163,12 +163,12 @@ module LibertyBuildpack::Jre
         java_opts = []
 
         OpenJdk.new(
-            app_dir: root,
-            java_home: '',
-            java_opts: java_opts,
-            common_paths: LibertyBuildpack::Container::CommonPaths.new,
-            configuration: configuration,
-            license_ids: {}
+          app_dir: root,
+          java_home: '',
+          java_opts: java_opts,
+          common_paths: LibertyBuildpack::Container::CommonPaths.new,
+          configuration: configuration,
+          license_ids: {}
         ).release
 
         expect(java_opts).to include("-XX:OnOutOfMemoryError=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{OpenJdk::KILLJAVA_FILE_NAME}")
@@ -181,11 +181,11 @@ module LibertyBuildpack::Jre
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
 
         OpenJdk.new(
-            app_dir: root,
-            configuration: configuration,
-            java_home: '',
-            java_opts: [],
-            license_ids: {}
+          app_dir: root,
+          configuration: configuration,
+          java_home: '',
+          java_opts: [],
+          license_ids: {}
         ).compile
 
         expect(Pathname.new(File.join(LibertyBuildpack::Diagnostics.get_diagnostic_directory(root), OpenJdk::KILLJAVA_FILE_NAME))).to exist

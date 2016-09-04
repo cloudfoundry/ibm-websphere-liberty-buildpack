@@ -22,7 +22,7 @@ require 'liberty_buildpack/container/common_paths'
 module LibertyBuildpack::Framework
 
   describe 'DynamicPULSEAgent' do
-    include_context 'component_helper'    # component context
+    include_context 'component_helper' # component context
 
     let(:remote_dir) { File.expand_path('../../fixtures/dynamicpulse-remote', File.dirname(__FILE__)) }
     let(:app_dir) { File.join(remote_dir, 'app') }
@@ -30,9 +30,9 @@ module LibertyBuildpack::Framework
     let(:application_cache) { double('ApplicationCache') }
     let(:lib_directory) { File.join(webinf_dir, 'lib') }
 
-    before do | example |
+    before do |example|
       # default values for the new relic index.yml info for tests
-      index_uri =  'http://downloadsite/dynamicpulse/SampleWebApp/dynamicpulse-agent.zip'
+      index_uri = 'http://downloadsite/dynamicpulse/SampleWebApp/dynamicpulse-agent.zip'
 
       # tests can set find_item=false and a raise_error_message to mock a failed return of processing the index.yml
       LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item).and_raise(example.metadata[:raise_error_message])
@@ -102,7 +102,7 @@ module LibertyBuildpack::Framework
         FileUtils.cp(File.join(remote_dir, 'dynamicpulse-remote.xml'), File.join(webinf_dir, 'dynamicpulse-remote.xml'))
         expect { compiled }.to output(%r{Downloading DynamicPULSE Agent 3.+ from http://downloadsite/dynamicpulse/SampleWebApp/dynamicpulse-agent.zip}).to_stdout
         # zip file should not be there - just contents of it
-        expect(File.exists?(File.join(app_dir, '.dynamic_pulse_agent', 'dynamicpulse-agent.zip'))).to eq(false)
+        expect(File.exist?(File.join(app_dir, '.dynamic_pulse_agent', 'dynamicpulse-agent.zip'))).to eq(false)
       end
 
       it 'should raise an error if the illegal centerUrl is in the dynamicpulse-remote.xml' do

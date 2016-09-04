@@ -23,7 +23,7 @@ module LibertyBuildpack::Diagnostics
 
     previous_environment = ENV.to_hash
 
-    LOG_MESSAGE = 'a log message'
+    LOG_MESSAGE = 'a log message'.freeze
 
     before do
       $stderr = StringIO.new
@@ -152,7 +152,8 @@ module LibertyBuildpack::Diagnostics
 
     it 'should take the default log level from a YAML file' do
       LibertyBuildpack::Util::ConfigurationUtils.stub(:load).with('logging', false).and_return(
-          'default_log_level' => 'DEBUG')
+        'default_log_level' => 'DEBUG'
+      )
       Dir.mktmpdir do |app_dir|
         logger = new_logger app_dir
         logger.debug(LOG_MESSAGE)
@@ -198,7 +199,7 @@ module LibertyBuildpack::Diagnostics
           logger = new_logger app_dir
           logger.debug(LOG_MESSAGE)
           expect($stderr.string).to match(/#{LOG_MESSAGE}/)
-          expect(File.exists?(log_file(app_dir))).to eq(false)
+          expect(File.exist?(log_file(app_dir))).to eq(false)
         ensure
           $VERBOSE = previous_value
         end
@@ -213,7 +214,7 @@ module LibertyBuildpack::Diagnostics
           logger = new_logger app_dir
           logger.debug(LOG_MESSAGE)
           expect($stderr.string).to match(/#{LOG_MESSAGE}/)
-          expect(File.exists?(log_file(app_dir))).to eq(false)
+          expect(File.exist?(log_file(app_dir))).to eq(false)
         ensure
           $DEBUG = previous_value
         end

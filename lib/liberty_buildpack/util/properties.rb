@@ -26,7 +26,7 @@ module LibertyBuildpack::Util
     # @param [String, nil] file_name the file to use for initialization. If no file is passed in, the instance is empty.
     def initialize(file_name)
       unless file_name.nil?
-        contents = File.open(file_name) { |file| file.read }
+        contents = File.open(file_name, &:read)
         contents.gsub! /[\r\n\f]+ /, ''
 
         contents.each_line do |line|
@@ -40,13 +40,13 @@ module LibertyBuildpack::Util
 
     private
 
-      def blank_line?(line)
-        line =~ /^[\s]*$/
-      end
+    def blank_line?(line)
+      line =~ /^[\s]*$/
+    end
 
-      def comment_line?(line)
-        line =~ /^[\s]*[#!].*$/
-      end
+    def comment_line?(line)
+      line =~ /^[\s]*[#!].*$/
+    end
 
   end
 

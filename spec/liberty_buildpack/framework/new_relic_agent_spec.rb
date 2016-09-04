@@ -22,26 +22,26 @@ require 'liberty_buildpack/container/common_paths'
 module LibertyBuildpack::Framework
 
   describe 'NewRelicAgent' do
-    include_context 'component_helper'    # component context
+    include_context 'component_helper' # component context
 
     # test data
-    let(:newrelic_home) { '.new_relic_agent' }   # the expected staged newrelic agent directory
+    let(:newrelic_home) { '.new_relic_agent' } # the expected staged newrelic agent directory
     let(:application_cache) { double('ApplicationCache') }
     let(:version) { '3.12.0' }
     let(:versionid) { "new-relic-#{version}" }
     let(:jar_name) { "new-relic-#{version}.jar" }
 
-    before do | example |
+    before do |example|
       # an index.yml entry returned from the index.yml of the new relic repository
       if example.metadata[:index_version]
-         # new relic index.yml info provided by tests
-         index_version = example.metadata[:index_version]
-         index_uri = example.metadata[:index_uri]
-         index_license = example.metadata[:index_license]
+        # new relic index.yml info provided by tests
+        index_version = example.metadata[:index_version]
+        index_uri = example.metadata[:index_uri]
+        index_license = example.metadata[:index_license]
       else
-         # default values for the new relic index.yml info for tests
-         index_version = version
-         index_uri =  "https://downloadsite/new-relic/#{versionid}.jar"
+        # default values for the new relic index.yml info for tests
+        index_version = version
+        index_uri = "https://downloadsite/new-relic/#{versionid}.jar"
       end
 
       # By default, always stub the return of a valid index.yml entry
@@ -72,7 +72,7 @@ module LibertyBuildpack::Framework
 
     describe 'detect',
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
-                                 'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] } do
+                                         'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] } do
 
       subject(:detected) { NewRelicAgent.new(context).detect }
 
@@ -92,8 +92,8 @@ module LibertyBuildpack::Framework
         it 'should raise a runtime error for multiple valid new relic user services',
            vcap_services_context: { def_type => [{ 'name' => 'newrelic', 'label' => def_label, 'tags' => def_tags,
                                                    'credentials' => def_credentials }],
-                                  'servicetype2' => [{ 'name' => 'newrelic', 'label' => def_label, 'tags' => def_tags,
-                                                   'credentials' => def_credentials }] } do
+                                    'servicetype2' => [{ 'name' => 'newrelic', 'label' => def_label, 'tags' => def_tags,
+                                                         'credentials' => def_credentials }] } do
 
           expect { detected }.to raise_error(RuntimeError)
         end
@@ -114,7 +114,7 @@ module LibertyBuildpack::Framework
       context 'application with no services' do
         it 'should not detect the new relic service',
            vcap_services_context: {} do
-           expect(detected).to eq(nil)
+          expect(detected).to eq(nil)
         end
       end
 
@@ -128,14 +128,14 @@ module LibertyBuildpack::Framework
 
         it 'should not be detected if new relic service does not exist',
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-mysql', 'label' => 'mysql',
-                                                  'credentials' => { 'licenseKey' => '9876543210fedcba' } }] }do
+                                                  'credentials' => { 'licenseKey' => '9876543210fedcba' } }] } do
 
           expect(detected).to eq(nil)
         end
 
         it 'should not be detected since name is not used as a match check unless it is a user service',
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-newrelic', 'label' => 'mysql',
-                                                  'credentials' => { 'licenseKey' => '9876543210fedcba' } }] }do
+                                                  'credentials' => { 'licenseKey' => '9876543210fedcba' } }] } do
 
           expect(detected).to eq(nil)
         end
@@ -146,16 +146,16 @@ module LibertyBuildpack::Framework
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-mysql', 'label' => 'mysql',
                                                   'credentials' => { 'licenseKey' => '9876543210fedcba' } }],
                                     'newrelic' => [{ 'name' => 'test-newrelic', 'label' => 'newrelic',
-                                                  'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
+                                                     'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
 
           expect(detected).to eq(versionid)
         end
 
         it 'should raise a runtime error if multiple newrelic services exist',
            vcap_services_context: { 'newrelickey1' => [{ 'name' => 'test-name', 'label' => 'newrelic',
-                                                  'credentials' => { 'licenseKey' => 'abcdef0123456789' } }],
+                                                         'credentials' => { 'licenseKey' => 'abcdef0123456789' } }],
                                     'newrelickey2' => [{ 'name' => 'test-name', 'label' => 'newrelic',
-                                                  'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
+                                                         'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
 
           expect { detected }.to raise_error(RuntimeError)
         end
@@ -172,7 +172,7 @@ module LibertyBuildpack::Framework
 
       context 'invalid index.yml entry with a valid newrelic service',
               vcap_services_context: { 'newrelic' => [{ 'name' => 'test-newrelic', 'label' => 'newrelic',
-                                       'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
+                                                        'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
 
         it 'should raise an error including the underlying failure if the index.yml could not be processed',
            return_find_item: false, raise_error_message: 'underlying index.yml error' do
@@ -185,9 +185,9 @@ module LibertyBuildpack::Framework
 
     describe 'compile',
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
-                                 'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
+                                         'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
              vcap_services_context: { 'newrelic' => [{ 'name' => 'test-newrelic', 'label' => 'newrelic',
-                                      'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
+                                                       'credentials' => { 'licenseKey' => 'abcdef0123456789' } }] } do
 
       subject(:compiled) do
         newrelic = NewRelicAgent.new(context)
@@ -202,13 +202,13 @@ module LibertyBuildpack::Framework
 
       it 'should create a new relic home directory in the application root' do
         compiled
-        expect(File.exists?(File.join(app_dir, newrelic_home))).to eq(true)
+        expect(File.exist?(File.join(app_dir, newrelic_home))).to eq(true)
       end
 
       describe 'download agent jar based on index.yml information' do
         it 'should download the agent with a matching key and jar version' do
           expect { compiled }.to output(%r{Downloading New Relic Agent #{version} from https://downloadsite/new-relic/new-relic-#{version}.jar}).to_stdout
-          expect(File.exists?(File.join(app_dir, newrelic_home, jar_name))).to eq(true)
+          expect(File.exist?(File.join(app_dir, newrelic_home, jar_name))).to eq(true)
         end
 
         it 'should raise an error with original exception if the jar could not be downloaded',
@@ -222,9 +222,9 @@ module LibertyBuildpack::Framework
     describe 'release',
              java_opts: [],
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
-                                 'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
+                                         'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
              vcap_services_context: { 'newrelic' => [{ 'name' => 'test-newrelic', 'label' => 'newrelic',
-                                      'credentials' => { 'licenseKey' => 'abcdefghijklmnop1234' } }] } do
+                                                       'credentials' => { 'licenseKey' => 'abcdefghijklmnop1234' } }] } do
 
       subject(:released) do
         newrelic = NewRelicAgent.new(context)
@@ -255,6 +255,3 @@ module LibertyBuildpack::Framework
 
   end
 end # module
-
-
-

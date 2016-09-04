@@ -54,7 +54,7 @@ module LibertyBuildpack::Framework
       # apply default variables
       copy_variables(variables, @configuration)
       # apply profiles
-      profiles.each do | profile |
+      profiles.each do |profile|
         profile = profile.strip
         profile_variables = @configuration[profile]
         if profile_variables.nil?
@@ -69,7 +69,7 @@ module LibertyBuildpack::Framework
 
       env_file_name = File.join(profiled_dir, 'env.sh')
       env_file = File.new(env_file_name, 'w')
-      variables.each do | key, value |
+      variables.each do |key, value|
         env_file.puts("export #{key}=\"#{value}\"")
       end
       env_file.close
@@ -88,7 +88,7 @@ module LibertyBuildpack::Framework
     end
 
     def copy_variables(variables, configuration)
-      configuration.each do | key, value |
+      configuration.each do |key, value|
         key = key.strip
         variables[key] = value unless value.is_a?(Hash) || value.is_a?(Array) || key.empty?
       end

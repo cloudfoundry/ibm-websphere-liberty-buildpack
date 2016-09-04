@@ -106,7 +106,7 @@ module LibertyBuildpack::Framework
     private
 
     # Name of the Appdynamics service
-    FILTER = /app[-]?dynamics/.freeze
+    FILTER = /app[-]?dynamics/
 
     # Appdynamics's directory of artifacts in the droplet
     APPDYNAMICS_HOME_DIR = '.appdynamics_agent'.freeze
@@ -157,7 +157,7 @@ module LibertyBuildpack::Framework
 
     def host_name(java_opts, credentials)
       host_name = credentials['host-name']
-      fail "'host-name' credential must be set" unless host_name
+      raise "'host-name' credential must be set" unless host_name
       java_opts << "-Dappdynamics.controller.hostName=#{host_name}"
     end
 

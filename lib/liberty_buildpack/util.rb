@@ -54,7 +54,7 @@ module LibertyBuildpack::Util
     safe_array = []
     vcap_service_data.each do |instance|
       safe_instance = instance.clone
-      if safe_instance.class == Hash && safe_instance.has_key?('credentials')
+      if safe_instance.class == Hash && safe_instance.key?('credentials')
         safe_instance['credentials'] = ['PRIVATE DATA HIDDEN']
       end
       safe_array << safe_instance

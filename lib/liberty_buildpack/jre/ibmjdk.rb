@@ -37,7 +37,7 @@ module LibertyBuildpack::Jre
     HEAP_SIZE_RATIO = 0.75
 
     # Filename of killjava script used to kill the JVM on OOM.
-    KILLJAVA_FILE_NAME = 'killjava.sh'
+    KILLJAVA_FILE_NAME = 'killjava.sh'.freeze
 
     # Creates an instance, passing in an arbitrary collection of options.
     #
@@ -66,7 +66,7 @@ module LibertyBuildpack::Jre
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
       @version = IBMJdk.find_ibmjdk(@configuration)[0]
-      id @version if @jvm_type == '' || @jvm_type == nil || 'ibmjre'.casecmp(@jvm_type) == 0
+      id @version if @jvm_type == '' || @jvm_type.nil? || 'ibmjre'.casecmp(@jvm_type) == 0
     end
 
     # Downloads and unpacks a JRE
@@ -89,7 +89,7 @@ module LibertyBuildpack::Jre
         filename = File.basename(@uri)
         print "-----> Retrieving IBM #{@version} JRE (#{filename}) ... "
       end
-      LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file|  # TODO: Use global cache
+      LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file| # TODO: Use global cache
         puts "(#{(Time.now - download_start_time).duration})"
         expand file
       end
@@ -130,14 +130,14 @@ module LibertyBuildpack::Jre
       FileUtils.mkdir_p(java_home)
 
       if File.basename(file.path).end_with?('.bin.cached', '.bin')
-          response_file = Tempfile.new('response.properties')
-          response_file.puts('INSTALLER_UI=silent')
-          response_file.puts('LICENSE_ACCEPTED=TRUE')
-          response_file.puts("USER_INSTALL_DIR=#{java_home}")
-          response_file.close
+        response_file = Tempfile.new('response.properties')
+        response_file.puts('INSTALLER_UI=silent')
+        response_file.puts('LICENSE_ACCEPTED=TRUE')
+        response_file.puts("USER_INSTALL_DIR=#{java_home}")
+        response_file.close
 
-          File.chmod(0755, file.path) unless File.executable?(file.path)
-          system "#{file.path} -i silent -f #{response_file.path} 2>&1"
+        File.chmod(0o755, file.path) unless File.executable?(file.path)
+        system "#{file.path} -i silent -f #{response_file.path} 2>&1"
       else
         system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
       end
@@ -198,11 +198,11 @@ module LibertyBuildpack::Jre
 
     def copy_killjava_script
       resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-      killjava_file_content = File.read(File.join resources, KILLJAVA_FILE_NAME)
+      killjava_file_content = File.read(File.join(resources, KILLJAVA_FILE_NAME))
       updated_content = killjava_file_content.gsub(/@@LOG_FILE_NAME@@/, LibertyBuildpack::Diagnostics::LOG_FILE_NAME)
       diagnostic_dir = LibertyBuildpack::Diagnostics.get_diagnostic_directory @app_dir
       FileUtils.mkdir_p diagnostic_dir
-      File.open(File.join(diagnostic_dir, KILLJAVA_FILE_NAME), 'w', 0755) do |file|
+      File.open(File.join(diagnostic_dir, KILLJAVA_FILE_NAME), 'w', 0o755) do |file|
         file.write updated_content
       end
     end

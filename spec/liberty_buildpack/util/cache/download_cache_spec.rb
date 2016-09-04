@@ -81,7 +81,8 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
   end
 
   it 'downloads with credentials if cached file does not exist' do
-    stub_request(:get, uri_credentials)
+    stub_request(:get, uri)
+      .with(headers: { Authorization: 'Basic dGVzdC11c2VybmFtZTp0ZXN0LXBhc3N3b3Jk' })
       .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag', 'Last-Modified' => 'foo-last-modified' })
 
     allow(Net::HTTP).to receive(:Proxy).and_call_original
@@ -368,7 +369,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
         .to receive(:authorization_value).with('http://foo-uri/')
         .and_return('Basic dGVzdDp0ZXN0')
 
-      stub_request(:get, 'http://test:test@foo-uri/')
+      stub_request(:get, 'http://foo-uri/')
         .to_return(status: 200, body: 'foo-cached', headers: {})
 
       trigger
@@ -377,9 +378,9 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     it 'should use auth config if authorization required' do
       allow(LibertyBuildpack::Util::Cache::AuthenticationUtils)
         .to receive(:authorization_value).with('http://foo-uri/')
-        .and_return({ 'username' => 'foo', 'password' => 'bar' })
+        .and_return('username' => 'foo', 'password' => 'bar')
 
-      stub_request(:get, 'http://foo:bar@foo-uri/')
+      stub_request(:get, 'http://foo-uri/')
         .to_return(status: 200, body: 'foo-cached', headers: {})
 
       trigger

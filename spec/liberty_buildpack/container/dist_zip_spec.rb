@@ -25,11 +25,11 @@ module LibertyBuildpack::Container
     describe 'detect', configuration: {} do
       it 'does not detect a non-distZip application' do
         detected = DistZip.new(
-        app_dir: 'spec/fixtures/container_main_with_web_inf',
-        configuration: {},
-        java_home: '',
-        java_opts: [],
-        license_ids: {}
+          app_dir: 'spec/fixtures/container_main_with_web_inf',
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: {}
         ).detect
 
         expect(detected).to be_nil
@@ -37,11 +37,11 @@ module LibertyBuildpack::Container
 
       it 'detects a distZip application' do
         detected = DistZip.new(
-        app_dir: 'spec/fixtures/container_dist_zip',
-        configuration: {},
-        java_home: '',
-        java_opts: [],
-        license_ids: {}
+          app_dir: 'spec/fixtures/container_dist_zip',
+          configuration: {},
+          java_home: '',
+          java_opts: [],
+          license_ids: {}
         ).detect
 
         expect(detected).to eq('dist-zip')
@@ -51,79 +51,79 @@ module LibertyBuildpack::Container
     describe 'compile',
              configuration: {} do
 
-     it 'Should make sure the classpath gets updated correctly' do
-       Dir.mktmpdir do |root|
-         FileUtils.mkdir_p File.join(root, 'bin')
-         FileUtils.mkdir_p File.join(root, 'lib')
-         File.open(File.join(root, 'lib', 'foobar.jar'), 'w')
-         File.open(File.join(root, 'bin', 'application'), 'w') do |file|
-           file.write('CLASSPATH=$APP_HOME/lib')
-         end
+      it 'Should make sure the classpath gets updated correctly' do
+        Dir.mktmpdir do |root|
+          FileUtils.mkdir_p File.join(root, 'bin')
+          FileUtils.mkdir_p File.join(root, 'lib')
+          File.open(File.join(root, 'lib', 'foobar.jar'), 'w')
+          File.open(File.join(root, 'bin', 'application'), 'w') do |file|
+            file.write('CLASSPATH=$APP_HOME/lib')
+          end
 
-         DistZip.new(
-         app_dir: root,
-         lib_directory: File.join(root, 'lib'),
-         configuration: {},
-         java_home: '.java',
-         java_opts: [],
-         license_ids: {}
-         ).compile
+          DistZip.new(
+            app_dir: root,
+            lib_directory: File.join(root, 'lib'),
+            configuration: {},
+            java_home: '.java',
+            java_opts: [],
+            license_ids: {}
+          ).compile
 
-         data = File.read(File.open(File.join(root, 'bin', 'application')))
-         expect(data).to include('$APP_HOME/lib/foobar.jar')
-       end
-     end
+          data = File.read(File.open(File.join(root, 'bin', 'application')))
+          expect(data).to include('$APP_HOME/lib/foobar.jar')
+        end
+      end
 
-     it 'Should make sure the App classpath gets updated correctly' do
-       Dir.mktmpdir do |root|
-         FileUtils.mkdir_p File.join(root, 'bin')
-         FileUtils.mkdir_p File.join(root, 'lib')
-         File.open(File.join(root, 'lib', 'appfoo.jar'), 'w')
-         File.open(File.join(root, 'bin', 'application'), 'w') do |file|
-           file.write('declare -r app_classpath="$app_home/lib"')
-         end
+      it 'Should make sure the App classpath gets updated correctly' do
+        Dir.mktmpdir do |root|
+          FileUtils.mkdir_p File.join(root, 'bin')
+          FileUtils.mkdir_p File.join(root, 'lib')
+          File.open(File.join(root, 'lib', 'appfoo.jar'), 'w')
+          File.open(File.join(root, 'bin', 'application'), 'w') do |file|
+            file.write('declare -r app_classpath="$app_home/lib"')
+          end
 
-         DistZip.new(
-         app_dir: root,
-         lib_directory: File.join(root, 'lib'),
-         configuration: {},
-         java_home: '.java',
-         java_opts: [],
-         license_ids: {}
-         ).compile
+          DistZip.new(
+            app_dir: root,
+            lib_directory: File.join(root, 'lib'),
+            configuration: {},
+            java_home: '.java',
+            java_opts: [],
+            license_ids: {}
+          ).compile
 
-         data = File.read(File.open(File.join(root, 'bin', 'application')))
-         expect(data).to include('$app_home/lib/appfoo.jar')
-       end
-     end
+          data = File.read(File.open(File.join(root, 'bin', 'application')))
+          expect(data).to include('$app_home/lib/appfoo.jar')
+        end
+      end
     end
 
     describe 'release',
              configuration: {} do
 
-     it 'should include command line argument java_opts' do
-       released = DistZip.new(
-       app_dir: 'spec/fixtures/container_dist_zip',
-       configuration: {},
-       java_home: '.java',
-       java_opts: %w{foo bar},
-       license_ids: {}
-       ).release
+      it 'should include command line argument java_opts' do
+        released = DistZip.new(
+          app_dir: 'spec/fixtures/container_dist_zip',
+          configuration: {},
+          java_home: '.java',
+          java_opts: %w(foo bar),
+          license_ids: {}
+        ).release
 
-       expect(released).to include('JAVA_OPTS="foo bar"')
-     end
+        expect(released).to include('JAVA_OPTS="foo bar"')
+      end
 
-     it 'should include the application path' do
-       released = DistZip.new(
-       app_dir: 'spec/fixtures/container_dist_zip',
-       configuration: {},
-       java_home: '.java',
-       java_opts: [],
-       license_ids: {}
-       ).release
+      it 'should include the application path' do
+        released = DistZip.new(
+          app_dir: 'spec/fixtures/container_dist_zip',
+          configuration: {},
+          java_home: '.java',
+          java_opts: [],
+          license_ids: {}
+        ).release
 
-       expect(released).to include('$PWD/bin/application')
-     end
+        expect(released).to include('$PWD/bin/application')
+      end
     end
   end
 end

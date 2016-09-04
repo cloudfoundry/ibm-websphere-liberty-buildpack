@@ -64,7 +64,7 @@ module LibertyBuildpack::Services
       @hosts = get_cloud_property(properties, element, "#{conn_prefix}hosts", map['hosts'].join(' '))
       @ports = get_cloud_property(properties, element, "#{conn_prefix}ports", map['ports'].join(' '))
       @user = get_cloud_property(properties, element, "#{conn_prefix}user", map['user'])
-      @password =  get_cloud_property(properties, element, "#{conn_prefix}password", map['password'])
+      @password = get_cloud_property(properties, element, "#{conn_prefix}password", map['password'])
 
       # ensure all the cloud properties are always set
       get_cloud_property(properties, element, "#{conn_prefix}host", map['hosts'][0])
@@ -99,10 +99,10 @@ module LibertyBuildpack::Services
 
       if nodes.size == 1
         # single node
-        map['db'] =  first_node.path[1.. -1] unless first_node.path[1.. -1].nil?
+        map['db'] = first_node.path[1..-1] unless first_node.path[1..-1].nil?
       else
         # mutiple nodes
-        nodes[1..-1].each_with_index do | node, index |
+        nodes[1..-1].each_with_index do |node, index|
           if index + 2 == nodes.size
             # last node specifies db name
             slash = node.index('/')
