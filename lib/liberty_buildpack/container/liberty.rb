@@ -298,7 +298,7 @@ module LibertyBuildpack::Container
     def check_default_features
       unless features_set?
         features = config_features(@configuration) || []
-        puts sprintf('-----> Warning: Liberty feature set is not specified. Using the default feature set: %s. For the best results, explicitly set the features via the JBP_CONFIG_LIBERTY environment variable or deploy the application as a server directory or packaged server with a custom server.xml file.', features)
+        puts format('-----> Warning: Liberty feature set is not specified. Using the default feature set: %s. For the best results, explicitly set the features via the JBP_CONFIG_LIBERTY environment variable or deploy the application as a server directory or packaged server with a custom server.xml file.', features)
       end
     end
 
@@ -728,7 +728,7 @@ module LibertyBuildpack::Container
     def self.find_liberty_files(app_dir, configuration)
       config_uri, license = Liberty.find_liberty_item(app_dir, configuration).drop(1)
       # Back to the future. Temporary hack to handle all-in-one liberty core for open source buildpack while the repository is being restructured.
-      if config_uri.end_with?('.jar') || config_uri.end_with?('.zip')
+      if config_uri.end_with?('.jar', '.zip')
         components_and_uris = { COMPONENT_LIBERTY_CORE => config_uri }
       else
         components_and_uris = LibertyBuildpack::Repository::ComponentIndex.new(config_uri).components
@@ -771,15 +771,15 @@ module LibertyBuildpack::Container
 
     def liberty_type
       if Liberty.web_inf(@app_dir)
-        type = 'WAR'
+        'WAR'
       elsif Liberty.meta_inf(@app_dir)
-        type = 'EAR'
+        'EAR'
       elsif Liberty.liberty_directory(@app_dir)
-        type = 'SVR-PKG'
+        'SVR-PKG'
       elsif Liberty.server_directory(@app_dir)
-        type = 'SVR-DIR'
+        'SVR-DIR'
       else
-        type = 'unknown'
+        'unknown'
       end
     end
 

@@ -66,7 +66,7 @@ module LibertyBuildpack::Container
     def self.unzip(file, dir)
       file = File.expand_path(file)
       FileUtils.mkdir_p dir
-      Dir.chdir (dir) do
+      Dir.chdir(dir) do
         if File.exist? '/usr/bin/unzip'
           system "unzip -qqo '#{file}'"
         else
@@ -82,7 +82,7 @@ module LibertyBuildpack::Container
     # @return [void]
     def self.zip(dir, file)
       file = File.expand_path(file)
-      Dir.chdir (dir) do
+      Dir.chdir(dir) do
         if File.exist? '/usr/bin/zip'
           system "zip -rq '#{file}' *"
         else
@@ -105,13 +105,13 @@ module LibertyBuildpack::Container
       end
     end
 
-    private
-
     RESOURCES_DIR = 'resources'.freeze
 
     JAVA_OVERLAY_DIR = '.java-overlay'.freeze
 
     JAVA_DIR = '.java'.freeze
+
+    private_constant :RESOURCES_DIR, :JAVA_OVERLAY_DIR, :JAVA_DIR
 
   end
 end

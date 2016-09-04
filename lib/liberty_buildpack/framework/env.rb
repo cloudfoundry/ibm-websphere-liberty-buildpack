@@ -40,7 +40,7 @@ module LibertyBuildpack::Framework
     #
     # @return [String] returns +env+ if custom environment variables are set.
     def detect
-      has_configuration? ? Env.to_s.dash_case : nil
+      configuration? ? Env.to_s.dash_case : nil
     end
 
     # Create .profile.d/env.sh with the custom environment variables.
@@ -83,7 +83,7 @@ module LibertyBuildpack::Framework
 
     private
 
-    def has_configuration?
+    def configuration?
       !@configuration.nil? && @configuration.size > 0 && !'---'.eql?(@configuration)
     end
 

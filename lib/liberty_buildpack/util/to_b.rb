@@ -21,7 +21,7 @@ class String
   #
   # @return [Boolean] +true+ if +<STRING>.downcase == 'true'+.  +false+ otherwise
   def to_b
-    downcase == 'true'
+    casecmp 'true'
   end
 
 end

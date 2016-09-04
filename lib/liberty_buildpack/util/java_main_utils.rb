@@ -47,11 +47,11 @@ module LibertyBuildpack::Util
         LibertyBuildpack::Util::Properties.new(manifest_file)
       end
 
-      private
-
       MAIN_CLASS_PROPERTY = 'java_main_class'.freeze
 
       MANIFEST_PROPERTY = 'Main-Class'.freeze
+
+      private_constant :MAIN_CLASS_PROPERTY, :MANIFEST_PROPERTY
 
     end
 

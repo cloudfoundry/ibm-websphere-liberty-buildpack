@@ -44,8 +44,8 @@ module LibertyBuildpack::Util
         if file.exist?
           user_provided = ENV[environment_variable_name(identifier)]
           configuration = load_configuration(file, user_provided, should_log)
-        else
-          logger.debug { "No configuration file #{file} found" } if should_log
+        elsif should_log
+          logger.debug { "No configuration file #{file} found" }
         end
 
         configuration || {}
@@ -82,8 +82,8 @@ module LibertyBuildpack::Util
         hash_v2.each do |key, value|
           if hash_v1.key? key
             hash_v1[key] = do_resolve_value(key, hash_v1[key], value, should_log)
-          else
-            logger.warn { "User config value for '#{key}' is not valid, existing property not present" } if should_log
+          elsif should_log
+            logger.warn { "User config value for '#{key}' is not valid, existing property not present" }
           end
         end
         hash_v1

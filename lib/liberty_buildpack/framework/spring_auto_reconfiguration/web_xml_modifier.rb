@@ -84,7 +84,7 @@ module LibertyBuildpack::Framework
       classes = classes_string.value.strip.split(/[,;\s]+/)
       classes = classes.concat CONTEXT_INITIALIZER_ADDITIONAL
 
-      classes_string.value = classes.join(',') # rubocop:disable UselessSetterCall
+      classes_string.value = classes.join(',')
     end
 
     def context_loader_listener?

@@ -27,7 +27,7 @@ module LibertyBuildpack::Util
     def initialize(file_name)
       unless file_name.nil?
         contents = File.open(file_name, &:read)
-        contents.gsub! /[\r\n\f]+ /, ''
+        contents.gsub!(/[\r\n\f]+ /, '')
 
         contents.each_line do |line|
           unless blank_line?(line) || comment_line?(line)

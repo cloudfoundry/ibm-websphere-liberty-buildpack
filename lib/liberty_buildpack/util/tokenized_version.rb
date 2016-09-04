@@ -59,7 +59,7 @@ module LibertyBuildpack::Util
     # Convert this to a string
     #
     # @return [String] a string representation of this tokenized version
-    def to_s # rubocop:disable TrivialAccessors
+    def to_s
       @version
     end
 

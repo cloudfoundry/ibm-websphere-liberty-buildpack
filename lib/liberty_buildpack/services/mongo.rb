@@ -296,7 +296,7 @@ module LibertyBuildpack::Services
     #------------------------------------------------------------------------------------
     def update_mongo_db(mongo_db)
       # ensure the mongoDB is logically a singleton. This means all mongoDB config stanzas have the same config id.
-      raise "The mongoDB configuration for service #{@service_name} is inconsistent" unless Utils.is_logical_singleton?(mongo_db)
+      raise "The mongoDB configuration for service #{@service_name} is inconsistent" unless Utils.logical_singleton?(mongo_db)
       # update the databaseName
       Utils.find_and_update_attribute(mongo_db, 'databaseName', @db_name)
     end
@@ -311,7 +311,7 @@ module LibertyBuildpack::Services
     # @raise if the mongoDB does not contain the expected library.
     #------------------------------------------------------------------------------------
     def update_mongo(doc, mongos)
-      raise "The mongo configuration for service #{@service_name} is inconsistent" unless Utils.is_logical_singleton?(mongos)
+      raise "The mongo configuration for service #{@service_name} is inconsistent" unless Utils.logical_singleton?(mongos)
       # Update the user and password attributes if they exist. Create them if they do not.
       Utils.find_and_update_attribute(mongos, 'user', @user)
       Utils.find_and_update_attribute(mongos, 'password', @password)

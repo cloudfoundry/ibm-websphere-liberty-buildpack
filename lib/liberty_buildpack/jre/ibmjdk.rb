@@ -171,13 +171,11 @@ module LibertyBuildpack::Jre
       mem = MemoryLimit.memory_limit
       if mem.nil?
         ## if no memory option has been set by cloudfoundry, we just assume defaults
-        java_memory_opts
       else
         new_heap_size = mem * heap_size_ratio
         java_memory_opts.push "-Xmx#{new_heap_size}"
-
-        java_memory_opts
       end
+      java_memory_opts
     end
 
     def heap_size_ratio

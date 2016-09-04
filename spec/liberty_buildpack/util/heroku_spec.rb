@@ -22,7 +22,7 @@ module LibertyBuildpack::Util
 
   describe 'Detect' do
 
-    after (:each) do
+    after(:each) do
       ENV.delete('DYNO')
     end
 
@@ -106,7 +106,7 @@ module LibertyBuildpack::Util
     def check_debug_output(env)
       log_content = File.read LibertyBuildpack::Diagnostics.get_buildpack_log app_dir
       env.each do |key, value|
-        if key.end_with?(Heroku::URL_SUFFIX) || key.end_with?(Heroku::URI_SUFFIX)
+        if key.end_with?(Heroku::URL_SUFFIX, Heroku::URI_SUFFIX)
           expect(log_content).not_to match(value)
         end
       end

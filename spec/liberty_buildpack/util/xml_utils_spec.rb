@@ -31,8 +31,8 @@ describe LibertyBuildpack::Util do
       server_xml_contents = File.readlines(server_xml)
       # For each String in the expected array, make sure there is a corresponding entry in server.xml
       # make sure we consume all entries in the expected array.
-      for index in 0...expected.size # rubocop:disable AvoidFor
-        expect(server_xml_contents[index].strip).to include(expected[index])
+      expected.each_with_index do |value, index|
+        expect(server_xml_contents[index].strip).to include(value)
       end
     end
 

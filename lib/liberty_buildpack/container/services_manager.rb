@@ -349,7 +349,6 @@ module LibertyBuildpack::Container
     # @param service_data - the array holding the instances data
     #-----------------------------------
     def get_service_type(name, service_data)
-      candidates = []
       # Use filters to find the plugin. Give precedence to a search against the label. If no matches using the label search against the tags.
       candidates = find_service_plugin_by_label(name)
       candidates = find_service_plugin_by_tags(service_data) if candidates.empty?
@@ -471,7 +470,7 @@ module LibertyBuildpack::Container
           Dir.glob("#{root}/**/*.jar").each do |file2|
             system "mv #{file2} #{lib_dir}"
           end
-        elsif file.path.end_with?('jar.cached') || file.path.end_with?('rar.cached')
+        elsif file.path.end_with?('jar.cached', 'rar.cached')
           # extracting the jar name is a real pain. things like File.basepath don't work
           n_one = File.basename(file.path, '.cached')
           name = n_one.split('%2F')[-1]
