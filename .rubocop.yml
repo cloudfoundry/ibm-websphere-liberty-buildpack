@@ -41,29 +41,18 @@ Style/NumericPredicate:
   Enabled: false
 Style/ZeroLengthPredicate:
   Enabled: false
+Style/OptionalArguments:
+  Exclude:
+    - 'lib/liberty_buildpack/repository/configured_item.rb'
 
 # bundle exec rubocop -a -D --except Performance/Casecmp
 # bundle exec rubocop --auto-gen-config
 
-Lint/AmbiguousRegexpLiteral:
-  Enabled: false
-Lint/DuplicatedKey:
-  Enabled: false
 Lint/IneffectiveAccessModifier:
   Enabled: false
 Lint/NonLocalExitFromIterator:
   Enabled: false
-Lint/ParenthesesAsGroupedExpression:
-  Enabled: false
-Lint/UnneededDisable:
-  Enabled: false
 Lint/UselessAccessModifier:
-  Enabled: false
-Lint/UselessAssignment:
-  Enabled: false
-Performance/Casecmp:
-  Enabled: false
-Performance/DoubleStartEndWith:
   Enabled: false
 Style/AccessorMethodName:
   Enabled: false
@@ -71,23 +60,9 @@ Style/ClassAndModuleChildren:
   Enabled: false
 Style/ClassVars:
   Enabled: false
-Style/For:
-  Enabled: false
-Style/FormatString:
-  Enabled: false
 Style/GuardClause:
   Enabled: false
-Style/IdenticalConditionalBranches:
-  Enabled: false
-Style/IfInsideElse:
-  Enabled: false
-Style/OptionalArguments:
-  Enabled: false
-Style/PredicateName:
-  Enabled: false
 Style/RegexpLiteral:
-  Enabled: false
-Style/VariableName:
   Enabled: false
 Style/ConditionalAssignment:
   Enabled: false

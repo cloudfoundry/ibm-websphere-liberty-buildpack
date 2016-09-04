@@ -76,7 +76,7 @@ module LibertyBuildpack::Util
   # @return [Hash] return env back with the data
   def self.safe_heroku_env!(env)
     env.each do |key, value|
-      if key.end_with?(Heroku::URL_SUFFIX) || key.end_with?(Heroku::URI_SUFFIX)
+      if key.end_with?(Heroku::URL_SUFFIX, Heroku::URI_SUFFIX)
         env[key] = '[PRIVATE DATA HIDDEN]'
       end
     end

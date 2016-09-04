@@ -149,7 +149,7 @@ module LibertyBuildpack::Services
     # @param [Array<REXML::Element>] elements_array - The non-null array containing the elements to check.
     # @ return true if the array describes a single logical element, false otherwise
     #-------------------------------------------------
-    def self.is_logical_singleton?(elements_array)
+    def self.logical_singleton?(elements_array)
       return true if elements_array.length == 1
       id = elements_array[0].attribute('id')
       elements_array[1..(elements_array.length - 1)].each do |element|

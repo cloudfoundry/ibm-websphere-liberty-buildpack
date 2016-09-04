@@ -38,18 +38,16 @@ module LibertyBuildpack::Framework
           if app_type == '.ear' || app_type == '.war'
             match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
             apps.concat(match)
-            break
           elsif app_type == "\/WEB-INF"
             match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
             match = match.length > 0 ? [match[0].gsub('/WEB-INF', '')] : [app_dir]
             apps.concat(match)
-            break
           else
             match = path.scan(%r{^(.*)\/.*\w+\/})
             # capturing group value is array itself
             apps.concat(match[0])
-            break
           end
+          break
         end
       end
       apps

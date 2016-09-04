@@ -44,7 +44,7 @@ module LibertyBuildpack::Util
       vcap_services = {}
       service_name_map = parse_service_name_map(env)
       env.each do |key, value|
-        next unless key.end_with?(URL_SUFFIX) || key.end_with?(URI_SUFFIX)
+        next unless key.end_with?(URL_SUFFIX, URI_SUFFIX)
         if key.start_with?(POSTGRESQL_PREFIX)
           type, service = handle_postgresql(key, value, service_name_map)
         elsif key.start_with?(CLEARDB_PREFIX)

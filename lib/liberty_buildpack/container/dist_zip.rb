@@ -202,8 +202,8 @@ module LibertyBuildpack::Container
       end
     end
 
-    def as_env_var(javaOpts)
-      "JAVA_OPTS=\"#{javaOpts.join(' ')}\"" unless javaOpts.nil?
+    def as_env_var(java_opts)
+      "JAVA_OPTS=\"#{java_opts.join(' ')}\"" unless java_opts.nil?
     end
   end
 end

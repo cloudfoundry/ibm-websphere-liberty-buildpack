@@ -225,12 +225,12 @@ module LibertyBuildpack::Services
     # A utility method that can be used to update an attribute for an element.
     #
     # @param element - the Element containing the attribute
-    # @param attrName - the String name of attribute to update
+    # @param attribute - the String name of attribute to update
     # @param value - the String value of the attribute
     #------------------------------------------------------------------------------------
-    def update_element_attribute(element, attrName, value)
+    def update_element_attribute(element, attribute, value)
       # Simply overwrite the attribute if it exists.
-      element.add_attribute(attrName, value)
+      element.add_attribute(attribute, value)
     end
 
     #------------------------------------------------------------------------------------
@@ -322,7 +322,7 @@ module LibertyBuildpack::Services
         datasources = doc.elements.to_a("//dataSource[@id='#{@datasource_id}']")
       end
       return datasources if datasources.empty?
-      raise "The datasource configuration for service #{@service_name} is inconsistent" unless Utils.is_logical_singleton?(datasources)
+      raise "The datasource configuration for service #{@service_name} is inconsistent" unless Utils.logical_singleton?(datasources)
       datasources
     end
 
@@ -353,7 +353,7 @@ module LibertyBuildpack::Services
       raise "Found JDBC driver by-reference and by-containment for #{@service_name}" unless by_reference.empty? || by_containment.empty?
       raise "There is no configured JDBC driver for #{@service_name}" if by_reference.empty? && by_containment.empty?
       jdbc_driver = by_reference.empty? ? by_containment : by_reference
-      raise "JDBC Driver configuration for #{@service_name} is inconsistent" unless Utils.is_logical_singleton?(jdbc_driver)
+      raise "JDBC Driver configuration for #{@service_name} is inconsistent" unless Utils.logical_singleton?(jdbc_driver)
       jdbc_driver
     end
 
