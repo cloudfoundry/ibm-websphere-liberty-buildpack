@@ -52,7 +52,7 @@ module LibertyBuildpack::Framework
     # @return [String, nil] returns DynamicPULSE-2.+ if DynamicPULSE Agent can attach otherwise returns +nil+
     def detect
       dynamicpulse_remote_xml = File.join(@app_dir, 'WEB-INF/dynamicpulse-remote.xml')
-      if File.exists?(dynamicpulse_remote_xml)
+      if File.exist?(dynamicpulse_remote_xml)
         doc = REXML::Document.new(open(dynamicpulse_remote_xml))
         @url = doc.elements['dynamicpulse-remote/centerUrl'].text
         @system_id = doc.elements['dynamicpulse-remote/systemId'].text
@@ -61,8 +61,6 @@ module LibertyBuildpack::Framework
         @logger.debug("system_id=#{@system_id}")
 
         return 'DynamicPULSE-3.+'
-      else
-        nil
       end
     end
 

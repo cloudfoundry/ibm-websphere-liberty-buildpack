@@ -68,63 +68,63 @@ module LibertyBuildpack::Framework
 
     private
 
-      SPRING_JAR_PATTERN = 'spring-core*.jar'
-      SPRING_APPS_PATTERN = "#{@app_dir}/**/#{SPRING_JAR_PATTERN}"
+    SPRING_JAR_PATTERN = 'spring-core*.jar'.freeze
+    SPRING_APPS_PATTERN = "#{@app_dir}/**/#{SPRING_JAR_PATTERN}".freeze
 
-      WEB_XML = File.join 'WEB-INF', 'web.xml'
+    WEB_XML = File.join 'WEB-INF', 'web.xml'
 
-      def self.find_auto_reconfiguration(app_dir, configuration)
-        if enabled?(configuration) && spring_application?(app_dir)
-          version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
-        else
-          version = nil
-          uri = nil
-        end
-        return version, uri # rubocop:disable RedundantReturn
+    def self.find_auto_reconfiguration(app_dir, configuration)
+      if enabled?(configuration) && spring_application?(app_dir)
+        version, uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
+      else
+        version = nil
+        uri = nil
       end
+      return version, uri # rubocop:disable RedundantReturn
+    end
 
-      def self.enabled?(configuration)
-        configuration['enabled'].nil? || configuration['enabled']
+    def self.enabled?(configuration)
+      configuration['enabled'].nil? || configuration['enabled']
+    end
+
+    def id(version)
+      "spring-auto-reconfiguration-#{version}"
+    end
+
+    def jar_name(version)
+      "#{id version}.jar"
+    end
+
+    def modify_web_xml(app_dir)
+      web_xml = File.join app_dir, WEB_XML
+
+      if File.exist? web_xml
+        puts '       Modifying /WEB-INF/web.xml for Auto Reconfiguration'
+        @logger.debug { "  Original web.xml: #{File.read web_xml}" }
+
+        modifier = File.open(web_xml) { |file| WebXmlModifier.new(file) }
+        modifier.augment_root_context
+        modifier.augment_servlet_contexts
+
+        File.open(web_xml, 'w') { |file| file.write(modifier.to_s) }
+        @logger.debug { "  Modified web.xml: #{File.read web_xml}" }
       end
+    end
 
-      def id(version)
-        "spring-auto-reconfiguration-#{version}"
+    def self.spring_application?(app_dir)
+      SpringAutoReconfiguration.spring_apps(app_dir) != []
+    end
+
+    def self.spring_apps(app_dir)
+      pattern = "#{app_dir}/**/#{SPRING_JAR_PATTERN}"
+      (shared_libs = FrameworkUtils.find_shared_libs(app_dir, pattern)) unless Dir.glob("#{app_dir}/**/wlp").each { |file| File.directory? file }.empty?
+      if !shared_libs.nil? && !shared_libs.empty?
+        s_apps = FrameworkUtils.find(app_dir)
+      else
+        s_apps = FrameworkUtils.find(app_dir, pattern)
       end
-
-      def jar_name(version)
-        "#{id version}.jar"
-      end
-
-      def modify_web_xml(app_dir)
-        web_xml = File.join app_dir, WEB_XML
-
-        if File.exists? web_xml
-          puts '       Modifying /WEB-INF/web.xml for Auto Reconfiguration'
-          @logger.debug { "  Original web.xml: #{File.read web_xml}" }
-
-          modifier = File.open(web_xml) { |file| WebXmlModifier.new(file) }
-          modifier.augment_root_context
-          modifier.augment_servlet_contexts
-
-          File.open(web_xml, 'w') { |file| file.write(modifier.to_s) }
-          @logger.debug { "  Modified web.xml: #{File.read web_xml}" }
-        end
-      end
-
-      def self.spring_application?(app_dir)
-        SpringAutoReconfiguration.spring_apps(app_dir) != []
-      end
-
-      def self.spring_apps(app_dir)
-        pattern = "#{app_dir}/**/#{SPRING_JAR_PATTERN}"
-        (shared_libs = FrameworkUtils.find_shared_libs(app_dir, pattern)) unless Dir.glob("#{app_dir}/**/wlp").each { |file| File.directory? file }.empty?
-        if !shared_libs.nil? && !shared_libs.empty?
-          s_apps = FrameworkUtils.find(app_dir)
-        else
-          s_apps = FrameworkUtils.find(app_dir, pattern)
-        end
-        s_apps
-      end
+      s_apps
+    end
   end
 
 end

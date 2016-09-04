@@ -28,7 +28,7 @@ module LibertyBuildpack
         @@platform ||= platform
         @@architecture ||= architecture
         @@default_repository_root ||= LibertyBuildpack::Util::ConfigurationUtils.load('repository')['default_repository_root']
-                                     .chomp('/')
+                                                                                .chomp('/')
       end
 
       # Resolves a repository url that may contain variables such as {default.repository.root}
@@ -38,10 +38,10 @@ module LibertyBuildpack
       # @return [String] resolved url
       def resolve_uri(raw)
         cooked = raw
-                   .gsub(/\{default.repository.root\}/, @@default_repository_root)
-                   .gsub(/\{platform\}/, @@platform)
-                   .gsub(/\{architecture\}/, @@architecture)
-                   .chomp('/')
+                 .gsub(/\{default.repository.root\}/, @@default_repository_root)
+                 .gsub(/\{platform\}/, @@platform)
+                 .gsub(/\{architecture\}/, @@architecture)
+                 .chomp('/')
         @logger.debug { "#{raw} expanded to #{cooked}" }
         cooked
       end
@@ -63,7 +63,7 @@ module LibertyBuildpack
         elsif !`which lsb_release 2> /dev/null`.empty?
           `lsb_release -cs`.strip
         else
-          fail 'Unable to determine platform'
+          raise 'Unable to determine platform'
         end
       end
 

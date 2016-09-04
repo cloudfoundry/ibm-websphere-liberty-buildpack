@@ -65,7 +65,7 @@ module LibertyBuildpack::Framework
         env_contents = File.readlines(env_file)
         expect(env_contents.size).to eq(4)
         expect(env_contents).to include(/export foo="bar"/)
-        expect(env_contents).to include(%r(export rmu=\"http://doesnotexist.com\"))
+        expect(env_contents).to include(%r{export rmu=\"http://doesnotexist.com\"})
         expect(env_contents).to include(/export bar="a b c"/)
         expect(env_contents).to include(/export b=" "/)
       end
@@ -73,7 +73,7 @@ module LibertyBuildpack::Framework
 
     it 'should create env.sh with env configuration from profile' do
       Dir.mktmpdir do |root|
-        yml = %Q(---
+        yml = %(---
         foo: bar
         rmu: http://doesnotexist.com
         profile_1:
@@ -92,14 +92,14 @@ module LibertyBuildpack::Framework
         env_contents = File.readlines(env_file)
         expect(env_contents.size).to eq(3)
         expect(env_contents).to include(/export foo="car"/)
-        expect(env_contents).to include(%r(export rmu=\"http://doesnotexist.com\"))
+        expect(env_contents).to include(%r{export rmu=\"http://doesnotexist.com\"})
         expect(env_contents).to include(/export bart="simpson"/)
       end
     end
 
     it 'should create env.sh with env configuration from list of profiles' do
       Dir.mktmpdir do |root|
-        yml = %Q(---
+        yml = %(---
         foo: bar
         rmu: http://doesnotexist.com
         my_profile:
@@ -123,7 +123,7 @@ module LibertyBuildpack::Framework
         env_contents = File.readlines(env_file)
         expect(env_contents.size).to eq(4)
         expect(env_contents).to include(/export foo="car"/)
-        expect(env_contents).to include(%r(export rmu=\"http://doesnotexist.com\"))
+        expect(env_contents).to include(%r{export rmu=\"http://doesnotexist.com\"})
         expect(env_contents).to include(/export bart="man"/)
         expect(env_contents).to include(/export disco="stu"/)
       end
@@ -131,7 +131,7 @@ module LibertyBuildpack::Framework
 
     it 'should create env.sh with env configuration from profile using BLUEMIX_REGION' do
       Dir.mktmpdir do |root|
-        yml = %Q(---
+        yml = %(---
         foo: bar
         rmu: http://doesnotexist.com
         "ibm:profile:1":
@@ -150,7 +150,7 @@ module LibertyBuildpack::Framework
         env_contents = File.readlines(env_file)
         expect(env_contents.size).to eq(3)
         expect(env_contents).to include(/export foo="car"/)
-        expect(env_contents).to include(%r(export rmu=\"http://doesnotexist.com\"))
+        expect(env_contents).to include(%r{export rmu=\"http://doesnotexist.com\"})
         expect(env_contents).to include(/export bart="simpson"/)
       end
     end

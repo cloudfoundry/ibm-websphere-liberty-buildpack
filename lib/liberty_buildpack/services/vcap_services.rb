@@ -83,4 +83,3 @@ module LibertyBuildpack::Services
     end
   end
 end
-

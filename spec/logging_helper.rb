@@ -30,7 +30,7 @@ shared_context 'logging_helper' do
   previous_debug_level = $DEBUG
   previous_verbose_level = $VERBOSE
 
-  let(:log_contents) { Pathname.new(LibertyBuildpack::Diagnostics.get_buildpack_log app_dir).read }
+  let(:log_contents) { Pathname.new(LibertyBuildpack::Diagnostics.get_buildpack_log(app_dir)).read }
 
   before do |example|
     log_level = example.metadata[:log_level]

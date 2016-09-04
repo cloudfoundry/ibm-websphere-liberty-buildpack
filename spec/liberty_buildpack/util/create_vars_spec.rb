@@ -66,7 +66,7 @@ describe 'create vars script', :integration do
   end
 
   it 'should correctly parse out elements from VCAP_APPLICATION and flatten them' do
-    ENV['VCAP_APPLICATION'] = "{\"application_name\": \"myapp\", \"application_version\": \"23rion23roin23dnj32d\"}"
+    ENV['VCAP_APPLICATION'] = '{"application_name": "myapp", "application_version": "23rion23roin23dnj32d"}'
     Dir.mktmpdir do |root|
       filename = File.join(root, 'runtime-vars.xml')
       File.open(filename, 'w') { |file| file.write('<server></server>') }

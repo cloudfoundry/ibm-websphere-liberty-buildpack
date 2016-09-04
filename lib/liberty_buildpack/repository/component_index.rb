@@ -22,7 +22,7 @@ module LibertyBuildpack::Repository
 
   # A component index represents the index of available components of a given release in the repository.
   class ComponentIndex
-    attr_reader :components       # list of URI to the components of Liberty
+    attr_reader :components # list of URI to the components of Liberty
 
     # Creates a new component index of component files for a given version.  The URI provided in the main repository
     # root's index will either be the URI to a tar of all the Liberty components or the URI to the component index file
@@ -32,14 +32,14 @@ module LibertyBuildpack::Repository
     #
     # @param [String] release_root_uri either the component index or a tar of all the components
     def initialize(release_root_uri)
-      if !release_root_uri.nil? && release_root_uri.end_with?("#{COMP_INDEX_PATH}")
-         @comp_index = {}
-         cache.get("#{release_root_uri}") do |file|
-            @comp_index.merge! YAML.load_file(file)
-         end
-         @components = @comp_index
+      if !release_root_uri.nil? && release_root_uri.end_with?(COMP_INDEX_PATH.to_s)
+        @comp_index = {}
+        cache.get(release_root_uri.to_s) do |file|
+          @comp_index.merge! YAML.load_file(file)
+        end
+        @components = @comp_index
       else
-         @components = nil
+        @components = nil
       end
     end
 

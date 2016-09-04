@@ -129,7 +129,7 @@ class BuildpackCache
   def download(uri, target)
     @logger.debug "Downloading file to #{target}"
     rich_uri = URI(uri)
-    if File.exists?(uri)
+    if File.exist?(uri)
       FileUtils.cp uri, target
     else
       proxy(rich_uri).start(rich_uri.host, rich_uri.port, use_ssl: secure?(rich_uri)) do |http|
@@ -175,18 +175,17 @@ class BuildpackCache
       rescue => e
         abort "ERROR: Failed loading config #{file}: #{e}"
       end
-      unless config.nil?
-        config = config[DRIVER] || config
-        if repository_configuration?(config) && (File.exists?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(repository_root(config)).host))
-          configs.push(config)
-        end
+      next if config.nil?
+      config = config[DRIVER] || config
+      if repository_configuration?(config) && (File.exist?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(repository_root(config)).host))
+        configs.push(config)
       end
     end
     configs
   end
 
   def repository_configuration?(configuration)
-    configuration.has_key?(VERSION) && configuration.has_key?(REPOSITORY_ROOT) && !configuration[REPOSITORY_ROOT].empty?
+    configuration.key?(VERSION) && configuration.key?(REPOSITORY_ROOT) && !configuration[REPOSITORY_ROOT].empty?
   end
 
   def default_repository_root
@@ -195,7 +194,7 @@ class BuildpackCache
 end
 
 if __FILE__ == $PROGRAM_NAME
-  if ARGV.length < 1
+  if ARGV.empty?
     puts "Usage: #{File.basename __FILE__} /path/to/cache"
     exit 1
   end

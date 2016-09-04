@@ -26,7 +26,7 @@ module LibertyBuildpack::Jre
 
     let(:application_cache) { double('ApplicationCache') }
 
-    before do | example |
+    before do |example|
       # By default, always stub the return of a valid ibmjdk_config.yml against a given service_release as indicated by
       # the spec test's service_release metadata.  Tests that test for errors can disable a valid return of the
       # ibmjdk_config.yml by setting its find_item metadata to false along with the optional expected error
@@ -46,9 +46,9 @@ module LibertyBuildpack::Jre
     end
 
     # tests for common behaviors across IBMJDK v7 releases
-    shared_examples_for 'IBMJDK v7' do | service_release |
+    shared_examples_for 'IBMJDK v7' do |service_release|
 
-      it 'adds the JAVA_HOME to java_home', java_home: '', java_opts: [], license_ids: {} do | example |
+      it 'adds the JAVA_HOME to java_home', java_home: '', java_opts: [], license_ids: {} do |example|
 
         java_home = example.metadata[:java_home]
 
@@ -81,7 +81,7 @@ module LibertyBuildpack::Jre
                license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' },
                service_release: service_release do
 
-        before do | example |
+        before do |example|
           # get the application cache fixture from the application_cache double provided in the overall setup
           LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
           cache_fixture = example.metadata[:cache_fixture]
@@ -92,18 +92,18 @@ module LibertyBuildpack::Jre
         # customized through test's metadata
         subject(:compiled) { IBMJdk.new(context).compile }
 
-        it 'should extract Java from a bin script', cache_fixture: 'stub-ibm-java.bin'  do
+        it 'should extract Java from a bin script', cache_fixture: 'stub-ibm-java.bin' do
           compiled
 
           java = File.join(app_dir, '.java', 'jre', 'bin', 'java')
-          expect(File.exists?(java)).to eq(true)
+          expect(File.exist?(java)).to eq(true)
         end
 
         it 'should extract Java from a tar gz', cache_fixture: 'stub-ibm-java.tar.gz' do
           compiled
 
           java = File.join(app_dir, '.java', 'jre', 'bin', 'java')
-          expect(File.exists?(java)).to eq(true)
+          expect(File.exist?(java)).to eq(true)
         end
 
         it 'should not display Avoid Trouble message when specifying 512MB or higher mem limit', cache_fixture: 'stub-ibm-java.tar.gz' do
@@ -133,7 +133,7 @@ module LibertyBuildpack::Jre
           compiled
 
           java = File.join(app_dir, '.java', 'jre', 'bin', 'java')
-          expect(File.exists?(java)).to eq(true)
+          expect(File.exist?(java)).to eq(true)
         end
 
         it 'places the killjava script (with appropriately substituted content) in the diagnostics directory', cache_fixture: 'stub-ibm-java.bin' do
@@ -185,7 +185,7 @@ module LibertyBuildpack::Jre
           expect(released).to include('-Xmx768M')
         end
 
-        it 'should add extra memory options when 1024m memory limit is set with 12.% ratio', configuration: { 'heap_size_ratio' => 0.125 }  do
+        it 'should add extra memory options when 1024m memory limit is set with 12.% ratio', configuration: { 'heap_size_ratio' => 0.125 } do
           ENV['MEMORY_LIMIT'] = '1024m'
 
           expect(released).to include('-Xtune:virtualized')

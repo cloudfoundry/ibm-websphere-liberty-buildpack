@@ -25,7 +25,7 @@ module LibertyBuildpack::Framework
 
     SPRING_AUTO_RECONFIGURATION_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('0.6.8')
 
-    SPRING_AUTO_RECONFIGURATION_DETAILS = [SPRING_AUTO_RECONFIGURATION_VERSION, 'test-uri']
+    SPRING_AUTO_RECONFIGURATION_DETAILS = [SPRING_AUTO_RECONFIGURATION_VERSION, 'test-uri'].freeze
 
     let(:application_cache) { double('ApplicationCache') }
     let(:web_xml_modifier) { double('WebXmlModifier') }
@@ -88,8 +88,8 @@ module LibertyBuildpack::Framework
           configuration: {}
         ).compile
 
-        expect(File.exists? File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar')).to eq(true)
-        expect(File.directory? File.join(root, 'no_spring_app.war', 'WEB-INF', 'lib')).to eq(false)
+        expect(File.exist?(File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar'))).to eq(true)
+        expect(File.directory?(File.join(root, 'no_spring_app.war', 'WEB-INF', 'lib'))).to eq(false)
         expect(File.symlink?(File.join(root, 'spring_app.ear', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to eq(true)
         expect(File.symlink?(File.join(root, 'spring_app.war', 'WEB-INF', 'lib', 'spring-auto-reconfiguration-0.6.8.jar'))).to eq(true)
       end
@@ -111,7 +111,7 @@ module LibertyBuildpack::Framework
           configuration: {}
         ).compile
 
-        expect(File.exists? File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar')).to eq(true)
+        expect(File.exist?(File.join(lib_directory, 'spring-auto-reconfiguration-0.6.8.jar'))).to eq(true)
       end
     end
 
@@ -163,32 +163,32 @@ module LibertyBuildpack::Framework
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
         LibertyBuildpack::Container::Liberty.new(
-        app_dir: root,
-        lib_directory: lib_directory,
-        configuration: {},
-        environment: {},
-        license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          app_dir: root,
+          lib_directory: lib_directory,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
         )
 
         SpringAutoReconfiguration.new(
-        app_dir: root,
-        lib_directory: lib_directory,
-        configuration: {}
+          app_dir: root,
+          lib_directory: lib_directory,
+          configuration: {}
         ).compile
 
         lib = File.join(war_file, 'WEB-INF', 'lib')
         test_jar_1 = File.join lib, 'test-jar-1.jar'
         test_jar_2 = File.join lib, 'test-jar-2.jar'
         test_text = File.join lib, 'test-text.txt'
-        expect(File.exists?(test_jar_1)).to eq(true)
+        expect(File.exist?(test_jar_1)).to eq(true)
         expect(File.symlink?(test_jar_1)).to eq(true)
         expect(File.readlink(test_jar_1)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-1.jar')).relative_path_from(Pathname.new(lib)).to_s)
 
-        expect(File.exists?(test_jar_2)).to eq(true)
+        expect(File.exist?(test_jar_2)).to eq(true)
         expect(File.symlink?(test_jar_2)).to eq(true)
         expect(File.readlink(test_jar_2)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-2.jar')).relative_path_from(Pathname.new(lib)).to_s)
 
-        expect(File.exists?(test_text)).to eq(false)
+        expect(File.exist?(test_text)).to eq(false)
       end
     end
 
@@ -209,17 +209,17 @@ module LibertyBuildpack::Framework
         application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/wlp-stub.jar'))
 
         LibertyBuildpack::Container::Liberty.new(
-        app_dir: root,
-        lib_directory: lib_directory,
-        configuration: {},
-        environment: {},
-        license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
+          app_dir: root,
+          lib_directory: lib_directory,
+          configuration: {},
+          environment: {},
+          license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
         )
 
         SpringAutoReconfiguration.new(
-        app_dir: root,
-        lib_directory: lib_directory,
-        configuration: {}
+          app_dir: root,
+          lib_directory: lib_directory,
+          configuration: {}
         ).compile
 
         lib = File.join(app_dir, 'WEB-INF', 'lib')
@@ -227,15 +227,15 @@ module LibertyBuildpack::Framework
         test_jar_2 = File.join lib, 'test-jar-2.jar'
         test_text = File.join lib, 'test-text.txt'
 
-        expect(File.exists?(test_jar_1)).to eq(true)
+        expect(File.exist?(test_jar_1)).to eq(true)
         expect(File.symlink?(test_jar_1)).to eq(true)
         expect(File.readlink(test_jar_1)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-1.jar')).relative_path_from(Pathname.new(lib)).to_s)
 
-        expect(File.exists?(test_jar_2)).to eq(true)
+        expect(File.exist?(test_jar_2)).to eq(true)
         expect(File.symlink?(test_jar_2)).to eq(true)
         expect(File.readlink(test_jar_2)).to eq(Pathname.new(File.join(lib_directory, 'test-jar-2.jar')).relative_path_from(Pathname.new(lib)).to_s)
 
-        expect(File.exists?(test_text)).to eq(false)
+        expect(File.exist?(test_text)).to eq(false)
       end
     end
 

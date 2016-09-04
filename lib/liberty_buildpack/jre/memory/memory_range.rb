@@ -37,7 +37,7 @@ module LibertyBuildpack
       # @param [MemorySize, nil] ceiling the upper bound of the range
       def initialize(value, ceiling = nil)
         if value.is_a? String
-          fail "Invalid combination of parameter types #{value.class} and #{ceiling.class}" if ceiling
+          raise "Invalid combination of parameter types #{value.class} and #{ceiling.class}" if ceiling
           lower_bound, upper_bound = get_bounds(value)
           @floor                   = create_memory_size lower_bound
           @ceiling                 = upper_bound ? create_memory_size(upper_bound) : nil
@@ -47,13 +47,13 @@ module LibertyBuildpack
           @floor   = value
           @ceiling = ceiling
         end
-        fail "Invalid range: floor #{@floor} is higher than ceiling #{@ceiling}" if @ceiling && @floor > @ceiling
+        raise "Invalid range: floor #{@floor} is higher than ceiling #{@ceiling}" if @ceiling && @floor > @ceiling
       end
 
       # Determines whether or not this range is bounded. Reads better than testing for a +nil+ ceiling.
       #
       # @return [Boolean] +true+ if and only if this range is bounded
-      alias_method :bounded?, :ceiling
+      alias bounded? ceiling
 
       # Determines whether a given memory size falls in this range.
       #
@@ -89,8 +89,8 @@ module LibertyBuildpack
       # @param [Numeric] other the factor to multiply by
       # @return [MemoryRange] the result
       def *(other)
-        fail "Cannot multiply a MemoryRange by an instance of #{other.class}" unless other.is_a? Numeric
-        fail 'Cannot multiply an unbounded MemoryRange by 0' if !bounded? && other == 0
+        raise "Cannot multiply a MemoryRange by an instance of #{other.class}" unless other.is_a? Numeric
+        raise 'Cannot multiply an unbounded MemoryRange by 0' if !bounded? && other == 0
         MemoryRange.new(@floor * other, bounded? ? @ceiling * other : nil)
       end
 
@@ -128,7 +128,7 @@ module LibertyBuildpack
       end
 
       def validate_memory_size(size)
-        fail "Invalid MemorySize parameter of type #{size.class}" unless size.is_a? MemorySize
+        raise "Invalid MemorySize parameter of type #{size.class}" unless size.is_a? MemorySize
       end
 
     end

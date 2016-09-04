@@ -138,7 +138,7 @@ module LibertyBuildpack::Services
         bootstrap_contents.each do |line|
           return if (line =~ reg_ex).nil? == false
         end
-        File.open(bootstrap, 'a')  { |file| file.write(property) }
+        File.open(bootstrap, 'a') { |file| file.write(property) }
       end
     end
 
@@ -258,13 +258,12 @@ module LibertyBuildpack::Services
         return
       end
       classloaders.each do |classloader|
-        unless classloader.attribute('commonLibraryRef').nil?
-          # commonLibraryRef contain a comma-separated string of library ids.
-          cur_value = classloader.attribute('commonLibraryRef').value
-          return if cur_value.include?(lib_id)
-          classloader.add_attribute('commonLibraryRef', "#{cur_value},#{lib_id}")
-          return
-        end
+        next if classloader.attribute('commonLibraryRef').nil?
+        # commonLibraryRef contain a comma-separated string of library ids.
+        cur_value = classloader.attribute('commonLibraryRef').value
+        return if cur_value.include?(lib_id)
+        classloader.add_attribute('commonLibraryRef', "#{cur_value},#{lib_id}")
+        return
       end
       classloaders[0].add_attribute('commonLibraryRef', lib_id)
     end
@@ -357,7 +356,7 @@ module LibertyBuildpack::Services
     end
 
     def self.shared_elements?(array1, array2)
-      array2.each do | element |
+      array2.each do |element|
         return true if array1.include?(element)
       end
       false

@@ -34,7 +34,7 @@ module LibertyBuildpack::Container
     describe 'zip' do
 
       it 'add zip' do
-        install_components =  InstallComponents.new
+        install_components = InstallComponents.new
 
         install_components.add_zip('http://foo/bar')
         install_components.add_zip('https://bar/foo')
@@ -47,7 +47,7 @@ module LibertyBuildpack::Container
       end
 
       it 'add zip with directory' do
-        install_components =  InstallComponents.new
+        install_components = InstallComponents.new
 
         install_components.add_zip('http://foo/bar', '.foo')
         install_components.add_zip('https://bar/foo', '.bar')
@@ -64,7 +64,7 @@ module LibertyBuildpack::Container
     describe 'esa' do
 
       it 'add esa' do
-        install_components =  InstallComponents.new
+        install_components = InstallComponents.new
 
         install_components.add_esa('http://foo/bar.esa', '--acceptLicense')
         install_components.add_esa('https://bar/foo.esa', '--to=usr')
@@ -81,7 +81,7 @@ module LibertyBuildpack::Container
     describe 'esa & zip' do
 
       it 'add both' do
-        install_components =  InstallComponents.new
+        install_components = InstallComponents.new
 
         install_components.add_zip('http://foo/bar')
         install_components.add_zip('https://bar/foo', '.bar')

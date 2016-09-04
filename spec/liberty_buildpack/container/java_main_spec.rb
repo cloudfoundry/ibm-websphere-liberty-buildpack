@@ -80,9 +80,9 @@ module LibertyBuildpack::Container
             configuration: { 'java_main_class' => 'com.ibm.rspec.test' }
           ).compile
 
-          expect(File.exists?(File.join root, '.java', 'overlay.txt')).to eq(true)
-          expect(File.exists?(File.join root, '.java', 'test.txt')).to eq(true)
-          expect(Dir.exists?(File.join root, 'resources', '.java-overlay')).to eq(false)
+          expect(File.exist?(File.join(root, '.java', 'overlay.txt'))).to eq(true)
+          expect(File.exist?(File.join(root, '.java', 'test.txt'))).to eq(true)
+          expect(Dir.exist?(File.join(root, 'resources', '.java-overlay'))).to eq(false)
         end
       end
     end
@@ -109,8 +109,9 @@ module LibertyBuildpack::Container
 
       it 'should return command line arguments when they are specified',
          configuration: {
-            'java_main_class' => 'com.ibm.rspec.test',
-            'arguments' => 'some arguments' } do
+           'java_main_class' => 'com.ibm.rspec.test',
+           'arguments' => 'some arguments'
+         } do
 
         expect(released).to include('com.ibm.rspec.test some arguments')
       end
@@ -160,8 +161,9 @@ module LibertyBuildpack::Container
       context 'default path which has jre in it' do
 
         before do
-          allow(File).to receive(:exists?).with(%r{.java/jre/bin/java}).and_return(true)
-          allow(File).to receive(:exists?).with(%r{.java/bin/java}).and_return(false)
+          allow(File).to receive(:exist?).and_call_original
+          allow(File).to receive(:exist?).with(%r{.java/jre/bin/java}).and_return(true)
+          allow(File).to receive(:exist?).with(%r{.java/bin/java}).and_return(false)
         end
 
         it 'should return the java command',
@@ -175,8 +177,9 @@ module LibertyBuildpack::Container
       context 'paths that do not have jre in it' do
 
         before do
-          allow(File).to receive(:exists?).with(%r{.java/jre/bin/java}).and_return(false)
-          allow(File).to receive(:exists?).with(%r{.java/bin/java}).and_return(true)
+          allow(File).to receive(:exist?).and_call_original
+          allow(File).to receive(:exist?).with(%r{.java/jre/bin/java}).and_return(false)
+          allow(File).to receive(:exist?).with(%r{.java/bin/java}).and_return(true)
         end
 
         it 'should return the java command adjusted for a nondefault java bin location',

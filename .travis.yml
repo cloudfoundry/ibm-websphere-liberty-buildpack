@@ -3,9 +3,9 @@ sudo: false
 language: ruby
 matrix:
   include:
-    - rvm: "1.9.3-p545"
+    - rvm: "2.2.5"
       env: COMMAND=rake
-    - rvm: "2.2.4"
-      env: COMMAND=rspec
+    - rvm: "2.3.1"
+      env: COMMAND=rake
 install: bundle install --deployment --without debug
 script: bundle exec $COMMAND

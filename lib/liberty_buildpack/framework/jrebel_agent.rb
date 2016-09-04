@@ -126,7 +126,7 @@ module LibertyBuildpack::Framework
     end
 
     def openjdk?
-      @jvm_type != nil && 'openjdk'.casecmp(@jvm_type) == 0
+      !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
     end
 
     def enabled?

@@ -65,7 +65,7 @@ module LibertyBuildpack::Services
       @host = get_cloud_property(properties, element, "#{conn_prefix}host", uri.host)
       @port = get_cloud_property(properties, element, "#{conn_prefix}port", uri.port)
       @user = get_cloud_property(properties, element, "#{conn_prefix}user", uri.user)
-      @password =  get_cloud_property(properties, element, "#{conn_prefix}password", uri.password)
+      @password = get_cloud_property(properties, element, "#{conn_prefix}password", uri.password)
 
       # ensure all the cloud properties are always set
       get_cloud_property(properties, element, "#{conn_prefix}hostname", uri.host)
@@ -209,12 +209,11 @@ module LibertyBuildpack::Services
         datasource.elements.each do |element|
           # if name matches exactly, then we are done.
           return element if element.name == expected
-          if element.name.start_with? 'properties'
-            # found the properties element, but it's the wrong type. Update the name to expected type
-            @logger.debug("found properties, but wrong type. Found #{element.name} expected #{expected}")
-            element.name = expected
-            return element
-          end
+          next unless element.name.start_with? 'properties'
+          # found the properties element, but it's the wrong type. Update the name to expected type
+          @logger.debug("found properties, but wrong type. Found #{element.name} expected #{expected}")
+          element.name = expected
+          return element
         end
       end
       # if we got here, then we didn't find any properties. Create a properties instance of the expected type.

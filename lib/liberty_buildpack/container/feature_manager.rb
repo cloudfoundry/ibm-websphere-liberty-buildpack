@@ -100,7 +100,7 @@ module LibertyBuildpack::Container
         # have multiple cardinality, the values will always be merged together.
         # Reading or processing order does not matter.
         server_dir = File.dirname(server_xml)
-        %w{defaults overrides}.each do | type |
+        %w(defaults overrides).each do |type|
           Dir.glob("#{server_dir}/configDropins/#{type}/*.xml").each do |file|
             features.merge(read_features(file))
           end
@@ -188,7 +188,7 @@ module LibertyBuildpack::Container
         @logger.debug('entry (#{server_xml})')
         server_xml_doc = LibertyBuildpack::Util::XmlUtils.read_xml_file(server_xml)
         features = REXML::XPath.match(server_xml_doc, '/server/featureManager/feature/text()[not(contains(., ":"))]')
-        features = features.map { | feature | feature.to_s }
+        features = features.map(&:to_s)
         @logger.debug("exit (#{features})")
         features
       end

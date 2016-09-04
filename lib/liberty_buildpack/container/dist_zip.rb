@@ -59,7 +59,7 @@ module LibertyBuildpack::Container
     #
     # @return [Void]
     def compile
-      File.chmod(0755, start_script(root))
+      File.chmod(0o755, start_script(root))
       augment_classpath_content
     end
 
@@ -78,7 +78,7 @@ module LibertyBuildpack::Container
         "JAVA_HOME=#{check_jre_path}",
         'SERVER_PORT=$PORT',
         as_env_var(java_opts),
-        qualify_path(start_script(root), @app_dir),
+        qualify_path(start_script(root), @app_dir)
       ].flatten.compact.join(' ')
     end
 
@@ -135,7 +135,7 @@ module LibertyBuildpack::Container
 
     PATTERN_APP_CLASSPATH = /^declare -r app_classpath=\"(.*)\"$/
 
-    PATTERN_CLASSPATH = /^CLASSPATH=(.*)$/.freeze
+    PATTERN_CLASSPATH = /^CLASSPATH=(.*)$/
 
     # private_constant :PATTERN_APP_CLASSPATH, :PATTERN_CLASSPATH
 

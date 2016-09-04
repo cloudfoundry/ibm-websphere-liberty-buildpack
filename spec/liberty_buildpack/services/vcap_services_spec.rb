@@ -24,11 +24,11 @@ describe LibertyBuildpack::Services::VcapServices do
   shared_context 'service context' do
     let(:service) do
       { 'name' => 'test-name', 'label' => label, 'tags' => ['test-tag'], 'plan' => 'test-plan',
-      'credentials' => { 'uri' => 'test-uri', 'h1' => 'foo', 'h2' => 'foo' } }
+        'credentials' => { 'uri' => 'test-uri', 'h1' => 'foo', 'h2' => 'foo' } }
     end
     let(:same_service) do
       { 'name' => 'diff-name', 'label' => label, 'tags' => ['test-tag'], 'plan' => 'test-plan',
-      'credentials' => { 'uri' => 'test-uri', 'h1' => 'foo', 'h2' => 'foo' } }
+        'credentials' => { 'uri' => 'test-uri', 'h1' => 'foo', 'h2' => 'foo' } }
     end
 
     let(:services) { described_class.new('test' => [service]) }
@@ -36,7 +36,7 @@ describe LibertyBuildpack::Services::VcapServices do
     let(:multiple_match_error) { 'Multiple inexact matches exist' }
   end
 
-  shared_examples_for 'a default service with a label value:' do | label_value |
+  shared_examples_for 'a default service with a label value:' do |label_value|
     include_context 'service context' do
       let(:label) { label_value }
     end
@@ -47,47 +47,47 @@ describe LibertyBuildpack::Services::VcapServices do
     end
 
     it 'raise error from one_service? if there is no service that matches' do
-      expect(services.one_service? 'bad-test').not_to be
+      expect(services.one_service?('bad-test')).not_to be
       expect(services.one_service?(/bad-test/)).not_to be
     end
 
     it 'returns true from one_service? if there is a matching tag' do
-      expect(services.one_service? 'test-tag').to be
+      expect(services.one_service?('test-tag')).to be
       expect(services.one_service?(/test-tag/)).to be
     end
 
     it 'returns false from one_service? if there is a matching service without required credentials' do
-      expect(services.one_service? 'test-tag', 'bad-credential').not_to be
+      expect(services.one_service?('test-tag', 'bad-credential')).not_to be
       expect(services.one_service?(/test-tag/, 'bad-credential')).not_to be
     end
 
     it 'returns true from one_service? if there is a matching service with required credentials' do
-      expect(services.one_service? 'test-tag', 'uri').to be
+      expect(services.one_service?('test-tag', 'uri')).to be
       expect(services.one_service?(/test-tag/, 'uri')).to be
     end
 
     it 'returns true from one_service? if there is a matching service with one required group credentials' do
-      expect(services.one_service? 'test-tag', %w(uri other)).to be
+      expect(services.one_service?('test-tag', %w(uri other))).to be
       expect(services.one_service?(/test-tag/, %w(uri other))).to be
     end
 
     it 'returns true from one_service? if there is a matching service with two required group credentials' do
-      expect(services.one_service? 'test-tag', %w(h1 h2)).to be
+      expect(services.one_service?('test-tag', %w(h1 h2))).to be
       expect(services.one_service?(/test-tag/, %w(h1 h2))).to be
     end
 
     it 'returns false from one_service? if there is a matching service with no required group credentials' do
-      expect(services.one_service? 'test-tag', %w(foo bar)).not_to be
+      expect(services.one_service?('test-tag', %w(foo bar))).not_to be
       expect(services.one_service?(/test-tag/, %w(foo bar))).not_to be
     end
 
     it 'returns nil from find_service? if there is no service that matches' do
-      expect(services.find_service 'bad-test').to be_nil
+      expect(services.find_service('bad-test')).to be_nil
       expect(services.find_service(/bad-test/)).to be_nil
     end
 
     it 'returns service from find_service? if there is a matching tag' do
-      expect(services.find_service 'test-tag').to be(service)
+      expect(services.find_service('test-tag')).to be(service)
       expect(services.find_service(/test-tag/)).to be(service)
     end
   end # end of shared example
@@ -101,22 +101,22 @@ describe LibertyBuildpack::Services::VcapServices do
       end
 
       it 'returns service from find_service? if there is a matching label' do
-        expect(services.find_service 'test-label').to be(service)
+        expect(services.find_service('test-label')).to be(service)
         expect(services.find_service(/test-label/)).to be(service)
       end
 
       it 'returns service from find_service? if there is a matching name' do
-        expect(services.find_service 'test-name').to be_nil
+        expect(services.find_service('test-name')).to be_nil
         expect(services.find_service(/test-name/)).to be_nil
       end
 
       it 'returns true from one_service? if there is a matching label' do
-        expect(services.one_service? 'test-label').to be
+        expect(services.one_service?('test-label')).to be
         expect(services.one_service?(/test-label/)).to be
       end
 
       it 'returns true from one_service? if there is a matching name' do
-        expect(services.one_service? 'test-name').not_to be
+        expect(services.one_service?('test-name')).not_to be
         expect(services.one_service?(/test-name/)).not_to be
       end
     end
@@ -131,12 +131,12 @@ describe LibertyBuildpack::Services::VcapServices do
       end
 
       it 'returns true from one_service? if there is a matching name' do
-        expect(services.one_service? 'test-name').to be
+        expect(services.one_service?('test-name')).to be
         expect(services.one_service?(/test-name/)).to be
       end
 
       it 'returns service from find_service? if there is a matching name' do
-        expect(services.find_service 'test-name').to be(service)
+        expect(services.find_service('test-name')).to be(service)
         expect(services.find_service(/test-name/)).to be(service)
       end
     end

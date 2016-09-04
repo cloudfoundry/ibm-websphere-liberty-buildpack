@@ -23,7 +23,7 @@ require 'liberty_buildpack/buildpack'
 
 build_dir = ARGV[0]
 
-components = LibertyBuildpack::Buildpack.drive_buildpack_with_logger(build_dir, 'Detect failed with exception %s') { |buildpack| buildpack.detect }.compact
+components = LibertyBuildpack::Buildpack.drive_buildpack_with_logger(build_dir, 'Detect failed with exception %s', &:detect).compact
 
 if components.empty?
   abort

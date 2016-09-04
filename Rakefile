@@ -22,19 +22,19 @@ YARD::Rake::YardocTask.new do |t|
 end
 
 require 'rubocop/rake_task'
-Rubocop::RakeTask.new do |t|
-  Sickill::Rainbow.enabled = true if ENV.has_key? 'RAKE_FORCE_COLOR'
+RuboCop::RakeTask.new do |_t|
+  Sickill::Rainbow.enabled = true if ENV.key? 'RAKE_FORCE_COLOR'
 end
 
 require 'open3'
 task :check_api_doc do
   puts "\nChecking API documentation..."
-  output = Open3.capture3("yard stats --list-undoc")[0]
+  output = Open3.capture3('yard stats --list-undoc')[0]
   if output !~ /100.00% documented/
-  	puts "\nFailed due to undocumented public API:\n\n#{output}"
-  	exit 1
+    puts "\nFailed due to undocumented public API:\n\n#{output}"
+    exit 1
   else
-  	puts "\n#{output}\n"
+    puts "\n#{output}\n"
   end
 end
 
@@ -42,10 +42,10 @@ require 'rake/clean'
 CLEAN.include %w(.yardoc coverage)
 CLOBBER.include %w(doc pkg)
 
-task :default => [ :rubocop, :check_api_doc, :yard, :spec ]
+task default: [:rubocop, :check_api_doc, :yard, :spec]
 
-desc "Package buildpack together with admin cache"
-task :package, [:zipfile, :hosts, :version] do |t, args|
+desc 'Package buildpack together with admin cache'
+task :package, [:zipfile, :hosts, :version] do |_t, args|
   source = File.dirname(__FILE__)
   basename = File.basename(source)
   if args.zipfile.nil?
@@ -53,25 +53,25 @@ task :package, [:zipfile, :hosts, :version] do |t, args|
     zipfile = File.expand_path(File.join('..', "#{basename}-#{hash}.zip"), source)
   else
     zipfile = File.expand_path(args.zipfile)
-    zipfile << ".zip" unless zipfile.end_with? (".zip")
+    zipfile << '.zip' unless zipfile.end_with? '.zip'
   end
   puts "Using #{zipfile} as a buildpack zip output file"
-  if File.exists? (zipfile)
-    puts "The output file already exists. Change the output location."
+  if File.exist? zipfile
+    puts 'The output file already exists. Change the output location.'
     exit 1
   end
   if args.hosts == '*'
     cache_hosts = nil
-    puts "Caching all resources"
+    puts 'Caching all resources'
   elsif args.hosts == '-'
     cache_hosts = []
-    puts "Caching disabled"
+    puts 'Caching disabled'
   else
-    if args.hosts.nil?
-      cache_hosts = ['public.dhe.ibm.com']
-    else
-      cache_hosts = args.hosts.split
-    end
+    cache_hosts = if args.hosts.nil?
+                    ['public.dhe.ibm.com']
+                  else
+                    args.hosts.split
+                  end
     puts "Caching files hosted on #{cache_hosts.join(', ')}"
   end
   require 'tmpdir'
@@ -93,7 +93,7 @@ task :package, [:zipfile, :hosts, :version] do |t, args|
 
     bc = BuildpackCache.new(File.join(dest, 'admin_cache'))
     # Collect all remote content using all config files
-    configs = bc.collect_configs nil, cache_hosts 
+    configs = bc.collect_configs nil, cache_hosts
     bc.download_cache(configs)
     # Fix file permissions
     system("find #{dest} -type f -exec chmod a+r {} \\;")
@@ -103,4 +103,3 @@ task :package, [:zipfile, :hosts, :version] do |t, args|
     system("cd #{dest} && zip -r #{zipfile} -x@.package-exclude .")
   end
 end
-
