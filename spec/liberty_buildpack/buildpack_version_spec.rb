@@ -28,7 +28,8 @@ describe LibertyBuildpack::BuildpackVersion do
 
   before do |example|
     configuration = example.metadata[:configuration] || {}
-    allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).with('version', true).and_return(configuration)
+    allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).with('version', true, true)
+      .and_return(configuration)
   end
 
   it 'should create offline version string from config/version.yml',

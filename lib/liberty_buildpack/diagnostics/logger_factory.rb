@@ -31,7 +31,7 @@ module LibertyBuildpack::Diagnostics
     # @param [String] app_dir the root directory for diagnostics
     # @return [Logger] the created Logger instance
     def self.create_logger(app_dir)
-      configuration = LibertyBuildpack::Util::ConfigurationUtils.load('logging', false)
+      configuration = LibertyBuildpack::Util::ConfigurationUtils.load('logging', true, false)
 
       if (defined? @@logger) && !@@logger.nil?
         logger_recreated = true

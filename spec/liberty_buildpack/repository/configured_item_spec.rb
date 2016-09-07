@@ -32,7 +32,7 @@ describe LibertyBuildpack::Repository::ConfiguredItem do
   end
 
   it 'raises an error if no repository root is specified' do
-    expect { described_class.find_item('Test', {}) }.to raise_error
+    expect { described_class.find_item('Test', {}) }.to raise_error(/A repository root must be specified/)
   end
 
   it 'resolves a system.properties version if specified' do

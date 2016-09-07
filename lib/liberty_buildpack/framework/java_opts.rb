@@ -62,7 +62,7 @@ module LibertyBuildpack::Framework
 
     private
 
-    JAVA_OPTS_PROPERTY = 'java_opts'.freeze
+    CONFIGURATION_PROPERTY = 'java_opts'.freeze
 
     ENVIRONMENT_PROPERTY = 'from_environment'.freeze
 
@@ -76,14 +76,14 @@ module LibertyBuildpack::Framework
     def parsed_java_opts
       parsed_java_opts = []
 
-      parsed_java_opts.concat @configuration[JAVA_OPTS_PROPERTY].shellsplit if supports_configuration?
+      parsed_java_opts.concat @configuration[CONFIGURATION_PROPERTY].shellsplit if supports_configuration?
       parsed_java_opts.concat @environment[ENVIRONMENT_VARIABLE].shellsplit if supports_environment?
 
       parsed_java_opts.map { |java_opt| java_opt.gsub(/([\s])/, '\\\\\1') }
     end
 
     def supports_configuration?
-      @configuration.key? JAVA_OPTS_PROPERTY
+      @configuration.key?(CONFIGURATION_PROPERTY) && !@configuration[CONFIGURATION_PROPERTY].nil?
     end
 
     def supports_environment?

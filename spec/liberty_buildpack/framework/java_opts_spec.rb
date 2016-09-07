@@ -44,6 +44,16 @@ module LibertyBuildpack::Framework
       expect(detected).to eq('java-opts')
     end
 
+    it 'should not detect with nil java_opts configuration' do
+      detected = JavaOpts.new(
+        java_opts: java_opts,
+        app_dir: 'root',
+        configuration: { 'java_opts' => nil }
+      ).detect
+
+      expect(detected).to be_nil
+    end
+
     it 'should not detect without java_opts configuration' do
       detected = JavaOpts.new(
         java_opts: java_opts,
