@@ -151,7 +151,7 @@ module LibertyBuildpack::Diagnostics
     end
 
     it 'should take the default log level from a YAML file' do
-      LibertyBuildpack::Util::ConfigurationUtils.stub(:load).with('logging', false).and_return(
+      LibertyBuildpack::Util::ConfigurationUtils.stub(:load).with('logging', true, false).and_return(
         'default_log_level' => 'DEBUG'
       )
       Dir.mktmpdir do |app_dir|

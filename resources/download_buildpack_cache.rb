@@ -189,7 +189,7 @@ class BuildpackCache
   end
 
   def default_repository_root
-    LibertyBuildpack::Util::ConfigurationUtils.load('repository', false)['default_repository_root'].chomp('/')
+    LibertyBuildpack::Util::ConfigurationUtils.load('repository', true, false)['default_repository_root'].chomp('/')
   end
 end
 

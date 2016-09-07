@@ -32,13 +32,13 @@ describe LibertyBuildpack::Util::Cache::AuthenticationUtils do
 
   it 'should handle empty configuration file' do
     allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load)
-      .with('auth', false).and_return({})
+      .with('auth', true, false).and_return({})
     expect(described_class.send(:authorization_value, 'http://auth.com')).to be_nil
   end
 
   it 'should return the best match' do
     allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load)
-      .with('auth', false).and_return('http://auth.com' => 'Basic One', 'http://auth.com/file/' => 'Basic Two')
+      .with('auth', true, false).and_return('http://auth.com' => 'Basic One', 'http://auth.com/file/' => 'Basic Two')
     expect(described_class.send(:authorization_value, 'http://auth.com/file/file.zip')).to eq 'Basic Two'
     expect(described_class.send(:authorization_value, 'http://auth.com/dir/file.zip')).to eq 'Basic One'
     expect(described_class.send(:authorization_value, 'http://auth2.com/dir/file.zip')).to be_nil
@@ -46,7 +46,7 @@ describe LibertyBuildpack::Util::Cache::AuthenticationUtils do
 
   it 'should handle authorization specified as a string' do
     allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load)
-      .with('auth', false).and_return('http://auth.com' => 'Bearer Secret')
+      .with('auth', true, false).and_return('http://auth.com' => 'Bearer Secret')
 
     request = Net::HTTP::Get.new('/')
     expect(described_class.authorization(request, 'http://auth.com')).to eq true
@@ -55,7 +55,7 @@ describe LibertyBuildpack::Util::Cache::AuthenticationUtils do
 
   it 'should handle authorization specified as a map' do
     allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load)
-      .with('auth', false).and_return('http://auth.com' => { 'username' => 'test', 'password' => 'test' })
+      .with('auth', true, false).and_return('http://auth.com' => { 'username' => 'test', 'password' => 'test' })
 
     request = Net::HTTP::Get.new('/')
     expect(described_class.authorization(request, 'http://auth.com')).to eq true
@@ -65,7 +65,7 @@ describe LibertyBuildpack::Util::Cache::AuthenticationUtils do
 
   it 'should not match if "username" key is missing' do
     allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load)
-      .with('auth', false).and_return('http://auth.com' => { 'password' => 'test' })
+      .with('auth', true, false).and_return('http://auth.com' => { 'password' => 'test' })
 
     request = Net::HTTP::Get.new('/')
     expect(described_class.authorization(request, 'http://auth.com')).to eq false
@@ -73,7 +73,7 @@ describe LibertyBuildpack::Util::Cache::AuthenticationUtils do
 
   it 'should not match if "password" key is missing' do
     allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load)
-      .with('auth', false).and_return('http://auth.com' => { 'username' => 'test' })
+      .with('auth', true, false).and_return('http://auth.com' => { 'username' => 'test' })
 
     request = Net::HTTP::Get.new('/')
     expect(described_class.authorization(request, 'http://auth.com')).to eq false
@@ -81,7 +81,7 @@ describe LibertyBuildpack::Util::Cache::AuthenticationUtils do
 
   it 'should not update Authorization header if it is present' do
     allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load)
-      .with('auth', false).and_return('http://auth.com' => 'Basic One')
+      .with('auth', true, false).and_return('http://auth.com' => 'Basic One')
 
     request = Net::HTTP::Get.new('/')
     request['Authorization'] = 'Basic Two'

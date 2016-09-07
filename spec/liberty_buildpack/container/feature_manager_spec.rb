@@ -153,7 +153,7 @@ module LibertyBuildpack::Container
 
         # call feature manager using desired configuration and server.xml files.
         app_dir, liberty_dir = set_up_feature_manager_script(root_dir, feature_manager_script_file)
-        expect { call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file) }.to raise_exception
+        expect { call_feature_manager(app_dir, liberty_dir, configuration_file, server_xml_file) }.to raise_exception(/could not install required features/)
       end
     end
 

@@ -200,7 +200,8 @@ module LibertyBuildpack
       it 'should hide remote info and display version info from the version config file when version.yml exists' do
         Dir.mktmpdir do |root|
           File.stub(:exists?).with(anything).and_return(true)
-          allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).with('version', true).and_return('version' => '1234', 'remote' => '', 'hash' => '')
+          allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).with('version', true, true)
+            .and_return('version' => '1234', 'remote' => '', 'hash' => '')
 
           stub_container1.stub(:detect).and_return('stub-container-1')
           stub_container1.stub(:apps).and_return(['root/app1'])

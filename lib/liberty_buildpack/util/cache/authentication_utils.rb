@@ -76,7 +76,7 @@ module LibertyBuildpack::Util::Cache
       def authorization_value(url)
         unless @@auth_config
           # Load auth.yml and make sure the information is not logged
-          @@auth_config = LibertyBuildpack::Util::ConfigurationUtils.load('auth', false)
+          @@auth_config = LibertyBuildpack::Util::ConfigurationUtils.load('auth', true, false)
           # Sort keys by size with longest first.
           @@sorted_keys = @@auth_config.keys.sort { |a, b| b.size <=> a.size }
         end
