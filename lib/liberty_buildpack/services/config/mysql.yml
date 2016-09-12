@@ -31,5 +31,5 @@ client_jars : 'mariadb-java-client*.jar|mysql-connector-java*.jar'
 service_filter : 'mysql|cleardb'
 
 driver:
-  version: 1.+
+  version: 1.4.+
   repository_root: "https://download.run.pivotal.io/mariadb-jdbc"
