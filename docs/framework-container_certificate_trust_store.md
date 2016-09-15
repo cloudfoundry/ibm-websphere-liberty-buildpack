@@ -16,12 +16,12 @@ Tags are printed to standard output by the buildpack detect script
 ## Configuration
 For general information on configuring the buildpack, including how to specify configuration values through environment variables, refer to [Configuration and Extension][].
 
-The framework can be configured by creating or modifying the [`config/container_certificate_trust_store.yml`][] file in the buildpack fork.
+The framework can be configured by creating or modifying the [`config/containercertificatetruststore.yml`][] file in the buildpack fork.
 
 | Name | Description
 | ---- | -----------
 | `enabled` | Whether to enable the trust store
 | `jvm_trust_store` | Whether to use the JVM trust store or not
 
-[`config/container_certificate_trust_store.yml`]: ../config/container_certificate_trust_store.yml
+[`config/containercertificatetruststore.yml`]: ../config/containercertificatetruststore.yml
 [Configuration and Extension]: ../README.md#configuration-and-extension
