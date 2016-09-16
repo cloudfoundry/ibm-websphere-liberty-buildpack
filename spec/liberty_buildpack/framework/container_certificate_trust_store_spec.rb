@@ -74,9 +74,9 @@ describe LibertyBuildpack::Framework::ContainerCertificateTrustStore do
     allow(component).to receive(:write_certificate).and_return(Pathname.new('/certificate-0'),
                                                                Pathname.new('/certificate-1'),
                                                                Pathname.new('/certificate-2'))
-    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass java-buildpack-trust-store-password -file /certificate-0 -alias certificate-0")
-    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass java-buildpack-trust-store-password -file /certificate-1 -alias certificate-1")
-    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass java-buildpack-trust-store-password -file /certificate-2 -alias certificate-2")
+    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore #{app_dir}/my/java_home/jre/lib/security/cacerts -storepass changeit -file /certificate-0 -alias certificate-0")
+    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore #{app_dir}/my/java_home/jre/lib/security/cacerts -storepass changeit -file /certificate-1 -alias certificate-1")
+    allow(component).to receive(:shell).with("#{app_dir}/my/java_home/jre/bin/keytool -importcert -noprompt -keystore #{app_dir}/my/java_home/jre/lib/security/cacerts -storepass changeit -file /certificate-2 -alias certificate-2")
 
     component.compile
   end
