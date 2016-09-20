@@ -89,8 +89,6 @@ module LibertyBuildpack::Framework
 
     CA_CERTIFICATES = Pathname.new('/etc/ssl/certs/ca-certificates.crt').freeze
 
-    JVM_KEY_STORE = Pathname.new('$JAVA_HOME/jre/lib/security/cacerts').freeze
-
     LOCAL_CERTS_ENABLED = 'enabled'.freeze
 
     USE_JVM_TRUST_STORE = 'jvm_trust_store'.freeze
@@ -153,7 +151,11 @@ module LibertyBuildpack::Framework
     end
 
     def password
-      'java-buildpack-trust-store-password'
+      if use_jvm_trust_store?
+        'changeit'
+      else
+        'java-buildpack-trust-store-password'
+      end
     end
 
     def supports_configuration?
@@ -174,7 +176,7 @@ module LibertyBuildpack::Framework
 
     def trust_store
       if use_jvm_trust_store?
-        JVM_KEY_STORE
+        File.join(@app_dir, @java_home, '/jre/lib/security/cacerts')
       else
         File.join(@app_dir, NEW_TRUST_STORE_DIRECTORY, NEW_TRUST_STORE_FILE)
       end
