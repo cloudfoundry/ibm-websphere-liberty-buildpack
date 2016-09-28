@@ -738,54 +738,6 @@ module LibertyBuildpack::Container
         end
       end
 
-      it 'should produce droplet.yaml for WEB-INF case' do
-        Dir.mktmpdir do |root|
-          droplet_yaml_file = File.join root, 'droplet.yaml'
-          root = File.join(root, 'app')
-          FileUtils.mkdir_p File.join(root, 'WEB-INF')
-          library_directory = File.join(root, '.lib')
-          FileUtils.mkdir_p(library_directory)
-
-          set_liberty_fixture('spec/fixtures/wlp-stub.tar.gz')
-
-          Liberty.new(
-            app_dir: root,
-            lib_directory: library_directory,
-            configuration: {},
-            environment: {},
-            license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
-          ).compile
-
-          expect(File.exist?(droplet_yaml_file)).to eq(true)
-
-          droplet_yaml_content = YAML.load(File.read(droplet_yaml_file))
-          expect(droplet_yaml_content).to have_key('state_file')
-          expect(droplet_yaml_content['state_file']).to eq('.liberty.state')
-        end
-      end
-
-      it 'should NOT produce droplet.yaml for WEB-INF case when there is no icap extensions' do
-        Dir.mktmpdir do |root|
-          droplet_yaml_file = File.join root, 'droplet.yaml'
-          root = File.join(root, 'app')
-          FileUtils.mkdir_p File.join(root, 'WEB-INF')
-          library_directory = File.join(root, '.lib')
-          FileUtils.mkdir_p(library_directory)
-
-          set_liberty_fixture('spec/fixtures/wlp-stub-no-icap.tar.gz')
-
-          Liberty.new(
-            app_dir: root,
-            lib_directory: library_directory,
-            configuration: {},
-            environment: {},
-            license_ids: { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
-          ).compile
-
-          expect(File.exist?(droplet_yaml_file)).to eq(false)
-        end
-      end
-
       it 'should produce the correct server.xml for the META-INF case when the app is of type ear' do
         Dir.mktmpdir do |root|
           root = File.join(root, 'app')
@@ -1039,7 +991,6 @@ module LibertyBuildpack::Container
 
       it 'should modify server xml to work with cloud foundry' do
         Dir.mktmpdir do |root|
-          droplet_yaml_file = File.join root, 'droplet.yaml'
           root = File.join(root, 'app')
           FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
           File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
@@ -1060,11 +1011,10 @@ module LibertyBuildpack::Container
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read server_xml_file
-          expect(server_xml_contents.include?('host="*"')).to eq(true)
+          expect(server_xml_contents.include?('host="127.0.0.1"')).to eq(true)
           expect(server_xml_contents.include?('httpPort="${port}"')).to eq(true)
           expect(server_xml_contents.include?('httpsPort=')).to eq(false)
           expect(server_xml_contents).to match(/<webContainer trustHostHeaderPort='true' extractHostHeaderPort='true'\/>/)
-          expect(File.exist?(droplet_yaml_file)).to eq(false)
         end
       end
 
@@ -1308,7 +1258,7 @@ module LibertyBuildpack::Container
       end
     end
 
-    context 'droplet.yaml' do
+    context 'appstate2' do
 
       def generate(root, xml, configuration)
         FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
@@ -1328,7 +1278,6 @@ module LibertyBuildpack::Container
 
       def check_appstate(app_xml, app_name, configuration = default_configuration)
         Dir.mktmpdir do |root|
-          droplet_yaml_file = File.join root, 'droplet.yaml'
           root = File.join(root, 'app')
 
           generate(root, app_xml, configuration)
@@ -1341,15 +1290,12 @@ module LibertyBuildpack::Container
           expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false'/>")
           expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
-          expect(server_xml_contents).to include("<appstate appName='#{app_name}' markerPath='${home}/../.liberty.state'/>")
-
-          expect(File.exist?(droplet_yaml_file)).to eq(true)
+          expect(server_xml_contents).to include("<appstate2 appName='#{app_name}'/>")
         end
       end
 
       def check_no_appstate(app_xml, configuration = default_configuration)
         Dir.mktmpdir do |root|
-          droplet_yaml_file = File.join root, 'droplet.yaml'
           root = File.join(root, 'app')
 
           generate(root, app_xml, configuration)
@@ -1362,45 +1308,44 @@ module LibertyBuildpack::Container
           expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false'/>")
           expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
-          expect(server_xml_contents).not_to match(/<appstate.*\/>/)
+          expect(server_xml_contents).not_to match(/<appstate2.*\/>/)
 
-          expect(File.exist?(droplet_yaml_file)).to eq(false)
         end
       end
 
-      it 'should add droplet.yaml when server xml contains myapp application' do
+      it 'should add appstate2 when server xml contains myapp application' do
         check_appstate('<application name="myapp" />', 'myapp')
       end
 
-      it 'should add droplet.yaml when server xml contains foo application' do
+      it 'should add appstate2 when server xml contains foo application' do
         check_appstate('<application name="foo" />', 'foo')
       end
 
-      it 'should add droplet.yaml when server xml contains foo webApplication' do
+      it 'should add appstate2 when server xml contains foo webApplication' do
         check_appstate('<webApplication name="fooWar" />', 'fooWar')
       end
 
-      it 'should add droplet.yaml when server xml contains foo enterpriseApplication' do
+      it 'should add appstate2 when server xml contains foo enterpriseApplication' do
         check_appstate('<enterpriseApplication name="fooEar" />', 'fooEar')
       end
 
-      it 'should NOT add droplet.yaml when server xml contains two applications' do
-        check_no_appstate('<application name="foo" /><application name="foo2" />')
+      it 'should add appstate2 when server xml contains two applications' do
+        check_appstate('<application name="foo" /><application name="foo2" />', 'foo, foo2')
       end
 
-      it 'should NOT add droplet.yaml when server xml contains two webApplications' do
-        check_no_appstate('<webApplication name="fooWar" /><webApplication name="fooWar2" />')
+      it 'should add appstate2 when server xml contains two webApplications' do
+        check_appstate('<webApplication name="fooWar" /><webApplication name="fooWar2" />', 'fooWar, fooWar2')
       end
 
-      it 'should NOT add droplet.yaml when server xml contains two enterpriseApplications' do
-        check_no_appstate('<enterpriseApplication name="fooEar" /><enterpriseApplication name="fooEar2" />')
+      it 'should add appstate2 when server xml contains two enterpriseApplications' do
+        check_appstate('<enterpriseApplication name="fooEar" /><enterpriseApplication name="fooEar2" />', 'fooEar, fooEar2')
       end
 
-      it 'should NOT add droplet.yaml when server xml contains two different application types' do
-        check_no_appstate('<application name="foo" /><webApplication name="fooWar" />')
+      it 'should add appstate2 when server xml contains two different application types' do
+        check_appstate('<application name="foo" /><webApplication name="fooWar" />', 'foo, fooWar')
       end
 
-      it 'should NOT add droplet.yaml when server xml contains one application and appstate is disabled' do
+      it 'should NOT add appstate2 when server xml contains one application and appstate is disabled' do
         configuration = default_configuration
         configuration['app_state'] = false
         check_no_appstate('<application name="myapp" />', configuration)

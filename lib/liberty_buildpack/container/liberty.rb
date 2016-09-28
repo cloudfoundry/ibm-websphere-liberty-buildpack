@@ -391,7 +391,7 @@ module LibertyBuildpack::Container
       disable_config_monitoring(server_xml_doc)
 
       # Check if appstate ICAP feature can be used
-      add_droplet_yaml if appstate_enabled? && check_appstate_feature(server_xml_doc)
+      check_appstate_feature(server_xml_doc) if appstate_enabled?
 
       # update config for services
       @services_manager.update_configuration(server_xml_doc, create, current_server_dir)
@@ -412,7 +412,7 @@ module LibertyBuildpack::Container
         endpoint = endpoints[0]
         endpoints.drop(1).each { |element| element.parent.delete_element(element) }
       end
-      endpoint.add_attribute('host', '*')
+      endpoint.add_attribute('host', '127.0.0.1')
       endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
       endpoint.delete_attribute('httpsPort')
     end
@@ -483,8 +483,8 @@ module LibertyBuildpack::Container
     def check_appstate_feature(server_xml_doc)
       # Currently appstate can work only with one application
       apps = REXML::XPath.match(server_xml_doc, '/server/application | /server/webApplication | /server/enterpriseApplication')
-      if apps.size == 1 && !apps[0].attributes['name'].nil?
-        # Add appstate-1.0 feature
+      if apps.size >= 1 && !apps[0].attributes['name'].nil?
+        # Add appstate-2.0 feature
         feature_managers = REXML::XPath.match(server_xml_doc, '/server/featureManager')
         if feature_managers.empty?
           feature_manager = REXML::Element.new('featureManager', server_xml_doc.root)
@@ -492,22 +492,22 @@ module LibertyBuildpack::Container
           feature_manager = feature_managers[0]
         end
         appstate_feature = REXML::Element.new('feature', feature_manager)
-        appstate_feature.text = 'appstate-1.0'
+        appstate_feature.text = 'appstate-2.0'
 
-        # Turn on marker file using appstate element
-        appstate = REXML::Element.new('appstate', server_xml_doc.root)
-        appstate.add_attribute('appName', apps[0].attributes['name'])
-        appstate.add_attribute('markerPath', '${home}/../.liberty.state')
+        # Set the apps to be monitored.
+        appstate = REXML::Element.new('appstate2', server_xml_doc.root)
+
+        app_names = []
+
+        apps.each do |app|
+          app_names << app.attributes['name'] unless app.attributes['name'].nil?
+        end
+
+        appstate.add_attribute('appName', app_names.join(', '))
         true
       else
         false
       end
-    end
-
-    def add_droplet_yaml
-      resources = File.expand_path(RESOURCES, File.dirname(__FILE__))
-      container_root = File.expand_path('..', @app_dir)
-      FileUtils.cp(File.join(resources, 'droplet.yaml'), container_root)
     end
 
     def make_server_script_runnable
