@@ -1258,7 +1258,7 @@ module LibertyBuildpack::Container
       end
     end
 
-    context 'droplet.yaml' do
+    context 'appstate2' do
 
       def generate(root, xml, configuration)
         FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
