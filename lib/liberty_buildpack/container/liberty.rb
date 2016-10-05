@@ -412,7 +412,11 @@ module LibertyBuildpack::Container
         endpoint = endpoints[0]
         endpoints.drop(1).each { |element| element.parent.delete_element(element) }
       end
-      endpoint.add_attribute('host', '127.0.0.1')
+      if appstate_enabled?
+        endpoint.add_attribute('host', '127.0.0.1')
+      else
+        endpoint.add_attribute('host', '*')
+      end
       endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
       endpoint.delete_attribute('httpsPort')
     end
