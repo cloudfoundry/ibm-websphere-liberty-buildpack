@@ -40,8 +40,8 @@ All Documentation is available in the Docs folder of the buildpack.
     * [DistZip](docs/container-distZip.md)
 * Frameworks
     * [AppDynamics Agent](docs/framework-app_dynamics_agent.md)
-    * [DynaTrace Application Monitoring Agent](docs/framework-dynatrace-agent.md)
-    * [Dynatrace Ruxit Cloud Native Agent](docs/framework-ruxit_agent.md)
+    * [Dynatrace Appmon Agent](docs/framework-dynatrace_appmon_agent.md)
+    * [Dynatrace SaaS/Managed OneAgent](docs/framework-dynatrace_one_agent.md)
     * [DynamicPULSE Agent](docs/framework-dynamic_pulse_agent.md)
     * [Java Options](docs/framework-java_opts.md)
     * [JRebel Agent](docs/framework-jrebel-agent.md)

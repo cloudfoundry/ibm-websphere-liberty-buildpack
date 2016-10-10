@@ -24,9 +24,9 @@ require 'liberty_buildpack/services/vcap_services'
 module LibertyBuildpack::Framework
 
   #------------------------------------------------------------------------------------
-  # The DynaTraceAgent class that provides Dyna Trace Agent resources as a framework to applications
+  # The DynatraceAppmonAgent class that provides Dyna Trace Agent resources as a framework to applications
   #------------------------------------------------------------------------------------
-  class DynaTraceAgent
+  class DynatraceAppmonAgent
 
     #-----------------------------------------------------------------------------------------
     # Creates an instance, passing in a context of information available to the component
@@ -110,7 +110,7 @@ module LibertyBuildpack::Framework
     SERVER_KEY = 'server'.freeze
 
     # dynatrace's directory of artifacts in the droplet
-    DT_HOME_DIR = '.dynatrace_agent'.freeze
+    DT_HOME_DIR = '.dynatrace_appmon_agent'.freeze
 
     #------------------------------------------------------------------------------------------
     # Determines the system architecture.
@@ -134,9 +134,9 @@ module LibertyBuildpack::Framework
     # Download the agent library from the repository as specified in the dynatrace configuration.
     #------------------------------------------------------------------------------------------
     def download_and_install_agent(dt_home)
-      LibertyBuildpack::Util.download_zip(@version, @uri, 'Dynatrace Agent', dt_home)
+      LibertyBuildpack::Util.download_zip(@version, @uri, 'Dynatrace Appmon Agent', dt_home)
     rescue => e
-      raise "Unable to download the Dynatrace Agent jar. Ensure that the agent jar at #{@uri} is available and accessible. #{e.message}"
+      raise "Unable to download the Dynatrace Appmon Agent jar. Ensure that the agent jar at #{@uri} is available and accessible. #{e.message}"
     end
 
     #------------------------------------------------------------------------------------------
@@ -146,7 +146,9 @@ module LibertyBuildpack::Framework
     # @return [Boolean] true if the app is bound to a dynatrace service
     #------------------------------------------------------------------------------------------
     def dt_service_exist?
-      @services.one_service?(DT_SERVICE_NAME, SERVER_KEY)
+      @services.one_service?(DT_SERVICE_NAME, SERVER_KEY) &&
+      !@services.one_service?(DT_SERVICE_NAME, 'tenant') &&
+      !@services.one_service?(DT_SERVICE_NAME, 'tenanttoken')
     end
 
     #------------------------------------------------------------------------------------------
@@ -159,7 +161,7 @@ module LibertyBuildpack::Framework
         @dt_service = @services.find_service(DT_SERVICE_NAME)
         dt_profile_name = vcap_dt_profile ? vcap_dt_profile : DT_DEFAULT_PROFILE_NAME
         if vcap_dt_server.nil?
-          raise 'DynaTrace server is not set, server must be set in service credentials.'
+          raise 'Dynatrace Appmon server is not set, server must be set in service credentials.'
         end
         @dt_options = "name=#{dt_profile_name},server=#{vcap_dt_server}"
 
@@ -169,7 +171,7 @@ module LibertyBuildpack::Framework
           end
         end
       rescue => e
-        @logger.error("Unable to process the service options for the DynaTrace Agent framework. #{e.message}")
+        @logger.error("Unable to process the service options for the Dynatrace Appmon Agent framework. #{e.message}")
       end
 
       @dt_options.nil? ? nil : @dt_options
@@ -196,10 +198,10 @@ module LibertyBuildpack::Framework
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
       rescue => e
-        @logger.error("Unable to process the configuration for the DynaTrace Agent framework. #{e.message}")
+        @logger.error("Unable to process the configuration for the Dynatrace Appmon Agent framework. #{e.message}")
       end
 
-      @version.nil? ? nil : "dynatrace-agent-#{@version}"
+      @version.nil? ? nil : "dynatrace-appmon-agent-#{@version}"
     end
 
     #-----------------------------------------------------------------------------------------

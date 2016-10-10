@@ -16,20 +16,21 @@
 
 require 'spec_helper'
 require 'component_helper'
-require 'liberty_buildpack/framework/dynatrace_agent'
+require 'liberty_buildpack/framework/dynatrace_one_agent'
 require 'liberty_buildpack/container/common_paths'
 
 module LibertyBuildpack::Framework
 
-  describe 'DynaTraceAgent' do
+  describe 'DynatraceOneAgent' do
     include_context 'component_helper' # component context
 
     # test data
-    let(:dynatrace_home) { '.dynatrace_agent' } # the expected staged dynatrace agent directory
+    let(:dynatrace_home) { '.dynatrace_one_agent' } # the expected staged dynatrace one agent directory
     let(:application_cache) { double('ApplicationCache') }
-    let(:version) { '6.2.0_1238' }
-    let(:jar_name) { 'dynatrace-agent-unix.jar' }
-    let(:detect_string) { "dynatrace-agent-#{version}" }
+    let(:version) { '1.95.0' }
+    let(:jar_name) { 'dynatrace-one-agent.zip' }
+    let(:detect_string) { "dynatrace-one-agent-#{version}" }
+    let(:detect_string_apitoken) { 'dynatrace-one-agent-latest' }
 
     before do |example|
       # an index.yml entry returned from the index.yml of the dynatrace repository
@@ -40,7 +41,7 @@ module LibertyBuildpack::Framework
       else
         # default values for the dynatrace index.yml info for tests
         index_version = version
-        index_uri = 'https://downloadsite/dynatrace/dynatrace-agent-unix.jar'
+        index_uri = 'https://downloadsite/dynatrace/dynatrace-one-agent.zip'
       end
 
       # By default, always stub the return of a valid index.yml entry
@@ -55,14 +56,14 @@ module LibertyBuildpack::Framework
 
       # For a download request of a dynatrace agent jar, return the fixture jar
       LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
-      application_cache.stub(:get).with(index_uri).and_yield(File.open('spec/fixtures/stub-dynatrace-agent.jar'))
+      application_cache.stub(:get).with(index_uri).and_yield(File.open('spec/fixtures/stub-dynatrace-one-agent.zip'))
     end
 
     describe 'configuration' do
-      it 'must have v6.2.0_1238 as the configured version' do
-        configuration = YAML.load_file(File.expand_path('../../../config/dynatraceagent.yml', File.dirname(__FILE__)))
+      it 'must have v1.95.0 as the configured version' do
+        configuration = YAML.load_file(File.expand_path('../../../config/dynatraceoneagent.yml', File.dirname(__FILE__)))
 
-        expected_version = LibertyBuildpack::Util::TokenizedVersion.new('6.2.0_1238')
+        expected_version = LibertyBuildpack::Util::TokenizedVersion.new('1.95.0')
         actual_version = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)[0]
 
         expect(actual_version).to eq(expected_version)
@@ -73,39 +74,52 @@ module LibertyBuildpack::Framework
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
                                          'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] } do
 
-      subject(:detected) { DynaTraceAgent.new(context).detect }
+      subject(:detected) { DynatraceOneAgent.new(context).detect }
 
       context 'user provided service' do
         def_type = 'servicetype'
         def_name = 'servicename'
         def_label = 'user-provided'
         def_tags = ['atag']
-        def_credentials = { 'profile' => 'Monitoring', 'server' => '127.0.0.1' }
+        def_credentials = { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token', 'server' => '127.0.0.1' }
+        def_credentials_apitoken = { 'environmentid' => 'test-environmentid', 'apitoken' => 'test-apitoken', 'endpoint' => '127.0.0.1' }
 
-        it 'should be detected when the service name includes dynatrace substring',
+        it 'should be detected when the service name includes dynatrace substring and tenanttoken in credentials',
            vcap_services_context: { def_type => [{ 'name' => 'dynatrace', 'label' => def_label, 'tags' => def_tags,
                                                    'credentials' => def_credentials }] } do
           expect(detected).to eq(detect_string)
         end
 
+        it 'should be detected when the service name includes ruxit substring and tenanttoken in credentials',
+           vcap_services_context: { def_type => [{ 'name' => 'ruxit', 'label' => def_label, 'tags' => def_tags,
+                                                   'credentials' => def_credentials }] } do
+          expect(detected).to eq(detect_string)
+        end
+
+        it 'should be detected when the service name includes dynatrace substring and apitoken in credentials',
+           vcap_services_context: { def_type => [{ 'name' => 'dynatrace', 'label' => def_label, 'tags' => def_tags,
+                                                   'credentials' => def_credentials_apitoken }] } do
+          expect(detected).to eq(detect_string_apitoken)
+        end
+
         it 'should raise a runtime error for multiple valid dynatrace user services',
            vcap_services_context: { def_type => [{ 'name' => 'dynatrace', 'label' => def_label, 'tags' => def_tags,
-                                                   'credentials' => def_credentials }],
+                                                   'credentials' => def_credentials_apitoken }],
                                     'servicetype2' => [{ 'name' => 'dynatrace', 'label' => def_label, 'tags' => def_tags,
-                                                         'credentials' => def_credentials }] } do
+                                                         'credentials' => def_credentials_apitoken }] } do
 
           expect { detected }.to raise_error(RuntimeError)
         end
 
         it 'should be detected when the tag includes dynatrace substring',
            vcap_services_context: { def_type => [{ 'name' => def_name, 'label' => def_label, 'tags' => ['dynatracetag'],
-                                                   'credentials' => def_credentials }] } do
-          expect(detected).to eq(detect_string)
+                                                   'credentials' => def_credentials_apitoken }] } do
+          expect(detected).to eq(detect_string_apitoken)
         end
 
         it 'should not be detected unless the name or tag includes dynatrace substring',
            vcap_services_context: { def_type => [{ 'name' => def_name, 'label' => def_label, 'tags' => def_tags,
-                                                   'credentials' => def_credentials }] } do
+                                                   'credentials' => def_credentials_apitoken }] } do
           expect(detected).to eq(nil)
         end
       end
@@ -118,56 +132,64 @@ module LibertyBuildpack::Framework
       end
 
       context 'application with one service' do
-        def_credentials = { 'profile' => 'Monitoring', 'server' => '127.0.0.1' }
+        def_credentials = { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token' }
+        def_credentials_apitoken = { 'environmentid' => 'test-environmentid', 'apitoken' => 'test-apitoken' }
 
-        it 'should be detected when an application has a valid service attribute that includes dynatrace',
+        it 'should be detected when an application has a valid service attribute that includes dynatrace with tenanttoken',
            vcap_services_context: { 'dynatrace' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace',
                                                       'credentials' => def_credentials }] } do
 
           expect(detected).to eq(detect_string)
         end
 
+        it 'should be detected when an application has a valid service attribute that includes dynatrace with apitoken',
+           vcap_services_context: { 'dynatrace' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace',
+                                                      'credentials' => def_credentials_apitoken }] } do
+
+          expect(detected).to eq(detect_string_apitoken)
+        end
+
         it 'should not be detected if dynatrace service does not exist',
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-mysql', 'label' => 'mysql',
-                                                  'credentials' => def_credentials }] } do
+                                                  'credentials' => def_credentials_apitoken }] } do
 
           expect(detected).to eq(nil)
         end
 
         it 'should not be detected since name is not used as a match check unless it is a user service',
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-dynatrace', 'label' => 'mysql',
-                                                  'credentials' => def_credentials }] } do
+                                                  'credentials' => def_credentials_apitoken }] } do
 
           expect(detected).to eq(nil)
         end
       end
 
       context 'application with multiple services' do
-        def_credentials = { 'profile' => 'Monitoring', 'server' => '127.0.0.1' }
+        def_credentials_apitoken = { 'environmentid' => 'test-environmentid', 'apitoken' => 'test-apitoken' }
 
         it 'should be detected if one of the services is dynatrace',
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-mysql', 'label' => 'mysql',
-                                                  'credentials' => def_credentials }],
+                                                  'credentials' => def_credentials_apitoken }],
                                     'dynatrace' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace',
-                                                      'credentials' => def_credentials }] } do
+                                                      'credentials' => def_credentials_apitoken }] } do
 
-          expect(detected).to eq(detect_string)
+          expect(detected).to eq(detect_string_apitoken)
         end
 
         it 'should raise a runtime error if multiple dynatrace services exist',
            vcap_services_context: { 'dynatracekey1' => [{ 'name' => 'test-name', 'label' => 'dynatrace',
-                                                          'credentials' => def_credentials }],
+                                                          'credentials' => def_credentials_apitoken }],
                                     'dynatracekey2' => [{ 'name' => 'test-name', 'label' => 'dynatrace',
-                                                          'credentials' => def_credentials }] } do
+                                                          'credentials' => def_credentials_apitoken }] } do
 
           expect { detected }.to raise_error(RuntimeError)
         end
 
         it 'should not be detected if none of the services is dynatrace',
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-mysql', 'label' => 'mysql',
-                                                  'credentials' => def_credentials }],
+                                                  'credentials' => def_credentials_apitoken }],
                                     'sqldb' => [{ 'name' => 'test-sqldb', 'label' => 'sqldb',
-                                                  'credentials' => def_credentials }] } do
+                                                  'credentials' => def_credentials_apitoken }] } do
 
           expect(detected).to eq(nil)
         end
@@ -175,7 +197,7 @@ module LibertyBuildpack::Framework
 
       context 'invalid index.yml entry with a valid dynatrace service',
               vcap_services_context: { 'dynatrace' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace',
-                                                         'credentials' => { 'profile' => 'Monitoring', 'server' => '127.0.0.1' } }] } do
+                                                         'credentials' => { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token' } }] } do
 
         it 'should raise an error including the underlying failure if the index.yml could not be processed',
            return_find_item: false, raise_error_message: 'underlying index.yml error' do
@@ -190,10 +212,10 @@ module LibertyBuildpack::Framework
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
                                          'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
              vcap_services_context: { 'dynatrace' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace',
-                                                        'credentials' => { 'profile' => 'Monitoring', 'server' => '127.0.0.1' } }] } do
+                                                        'credentials' => { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token' } }] } do
 
       subject(:compiled) do
-        dynatrace = DynaTraceAgent.new(context)
+        dynatrace = DynatraceOneAgent.new(context)
         dynatrace.detect
         dynatrace.compile
       end
@@ -203,18 +225,19 @@ module LibertyBuildpack::Framework
         expect(File.exist?(File.join(app_dir, dynatrace_home))).to eq(true)
       end
 
-      describe 'download agent jar based on index.yml information' do
-        it 'should download the agent with a matching key and jar version' do
-          expect { compiled }.to output(%r{Downloading Dynatrace Agent #{version} from https://downloadsite/dynatrace/dynatrace-agent-unix.jar}).to_stdout
-          # jar file should not be there - just contents of it
+      describe 'download agent zip based on index.yml information' do
+        it 'should download the agent with a matching key and zip version' do
+          expect { compiled }.to output(%r{Downloading Dynatrace OneAgent #{version} from https://downloadsite/dynatrace/dynatrace-one-agent.zip}).to_stdout
+          # zip file should not be there - just contents of it
           expect(File.exist?(File.join(app_dir, dynatrace_home, jar_name))).to eq(false)
-          expect(File.exist?(File.join(app_dir, dynatrace_home, 'agent', 'linux-x86-64', 'agent', 'lib64', 'libdtagent.so'))).to eq(true)
+          expect(File.exist?(File.join(app_dir, dynatrace_home, 'agent', 'lib64', 'liboneagentloader.so'))).to eq(true)
+          expect(File.exist?(File.join(app_dir, dynatrace_home, 'manifest.json'))).to eq(true)
         end
 
-        it 'should raise an error with original exception if the jar could not be downloaded',
-           index_version: '6.2.0_1238', index_uri: 'https://downloadsite/dynatrace/dynatrace-agent-unix.jar' do
+        it 'should raise an error with original exception if the zip could not be downloaded',
+           index_version: '1.95.0', index_uri: 'https://downloadsite/dynatrace/dynatrace-one-agent.zip' do
           allow(LibertyBuildpack::Util).to receive(:download_zip).and_raise('underlying download error')
-          expect { compiled }.to raise_error(/Unable to download the Dynatrace Agent jar..+underlying download error/)
+          expect { compiled }.to raise_error(/Unable to download the Dynatrace OneAgent..+underlying download error/)
         end
       end
     end # end compile
@@ -224,29 +247,20 @@ module LibertyBuildpack::Framework
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
                                          'application_name' => 'TestApp', 'application_uris' => ['TestApp.the.domain'] },
              vcap_services_context: { 'dynatrace' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace',
-                                                        'credentials' => { 'profile' => 'Monitoring', 'server' => '127.0.0.1' },
-                                                        'options' => { 'exclude' => 'starts:somepackage.someclass' } }] } do
+                                                        'credentials' => { 'tenant' => 'test-tenant', 'tenanttoken' => 'test-token' } }] } do
 
       subject(:released) do
-        dynatrace = DynaTraceAgent.new(context)
+        dynatrace = DynatraceOneAgent.new(context)
         dynatrace.detect
         dynatrace.release
       end
 
       it 'should return command line options for a valid service in a default container' do
         pwd = ENV['PWD']
-        pattern = "^(-agentpath:#{pwd}/app/#{dynatrace_home}/agent/.*/agent/.*/libdtagent.so=name=Monitoring,server=127.0.0.1.*)$"
+        pattern = "^(-agentpath:#{pwd}/app/#{dynatrace_home}/agent/.*/libruxitagentloader.so=server=https://test-tenant.live.dynatrace.com,tenant=test-tenant,tenanttoken=test-token.*)$"
 
         expect(released[0]).to match(/#{pattern}/)
       end
-
-      it 'should return command line options for a valid service with optional parameters' do
-        pwd = ENV['PWD']
-        pattern = "^(-agentpath:#{pwd}/app/#{dynatrace_home}/agent/.*/agent/.*/libdtagent.so=name=Monitoring,server=127.0.0.1,exclude=starts:somepackage.someclass)$"
-
-        expect(released[0]).to match(/#{pattern}/)
-      end
-
     end # end of release
 
   end

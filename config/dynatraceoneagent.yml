@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Service configuration for the Ruxit framework
+# Service configuration for the Dynatrace OneAgent framework
 ---
 version: 1.+
 repository_root: https://download.ruxit.com/agent/paas/cloudfoundry/java
