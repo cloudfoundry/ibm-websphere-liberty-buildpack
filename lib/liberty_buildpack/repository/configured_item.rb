@@ -47,7 +47,11 @@ module LibertyBuildpack
           index = index(repository_root)
           index.find_item version
         rescue => e
-          raise RuntimeError, "#{component_name} error: #{e.message}", e.backtrace unless component_name.nil?
+          if component_name.nil?
+            raise e
+          else
+            raise RuntimeError, "#{component_name} error: #{e.message}", e.backtrace
+          end
         end
 
         private

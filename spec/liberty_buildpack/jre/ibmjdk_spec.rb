@@ -153,7 +153,11 @@ module LibertyBuildpack::Jre
 
         # context is provided by component_helper, its default values are provided by 'describe' metadata, and
         # customized through test's metadata
-        subject(:released) { IBMJdk.new(context).release }
+        subject(:released) do
+          component = IBMJdk.new(context)
+          component.detect
+          component.release
+        end
 
         it 'should add default dump options that output data to the common dumps directory, if enabled' do
           expect(released).to include('-Xdump:none',
@@ -203,6 +207,30 @@ module LibertyBuildpack::Jre
       it_behaves_like 'IBMJDK v7', '1.7.1'
     end
 
+    describe 'TLS options',
+             java_home: '',
+             java_opts: [],
+             license_ids: { 'IBM_JVM_LICENSE' => '1234-ABCD' } do
+
+      # context is provided by component_helper, its default values are provided by 'describe' metadata, and
+      # customized through test's metadata
+      subject(:released) do
+        component = IBMJdk.new(context)
+        component.detect
+        component.release
+      end
+
+      it 'should add appropriate TLS options for Java 1.8', java_opts: [], service_release: '1.8.0' do
+        expect(released).to include('-Dcom.ibm.jsse2.overrideDefaultTLS=true')
+        expect(released).not_to include('-Dcom.ibm.jsse2.overrideDefaultProtocol=SSL_TLSv2')
+      end
+
+      it 'should add appropriate TLS options for Java 1.7', java_opts: [], service_release: '1.7.1' do
+        expect(released).to include('-Dcom.ibm.jsse2.overrideDefaultTLS=true')
+        expect(released).to include('-Dcom.ibm.jsse2.overrideDefaultProtocol=SSL_TLSv2')
+      end
+
+    end
   end
 
 end

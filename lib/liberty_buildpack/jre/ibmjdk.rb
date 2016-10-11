@@ -100,7 +100,8 @@ module LibertyBuildpack::Jre
     #
     # @return [void]
     def release
-      @java_opts.concat memory(@configuration)
+      @java_opts.concat memory_opts
+      @java_opts.concat tls_opts
       @java_opts.concat default_dump_opts
       @java_opts << '-Xshareclasses:none'
       @java_opts << "-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
@@ -121,6 +122,8 @@ module LibertyBuildpack::Jre
     RESOURCES = '../../../resources/ibmjdk/diagnostics'.freeze
 
     JAVA_HOME = '.java'.freeze
+
+    VERSION_8 = LibertyBuildpack::Util::TokenizedVersion.new('1.8.0').freeze
 
     def expand(file)
       expand_start_time = Time.now
@@ -164,7 +167,7 @@ module LibertyBuildpack::Jre
       File.join @app_dir, JAVA_HOME
     end
 
-    def memory(configuration)
+    def memory_opts
       java_memory_opts = []
       java_memory_opts.push '-Xtune:virtualized'
 
@@ -176,6 +179,17 @@ module LibertyBuildpack::Jre
         java_memory_opts.push "-Xmx#{new_heap_size}"
       end
       java_memory_opts
+    end
+
+    def tls_opts
+      opts = []
+      # enable all TLS protocols when SSLContext.getInstance("TLS") is called
+      opts << '-Dcom.ibm.jsse2.overrideDefaultTLS=true'
+      if @version < VERSION_8
+        # enable all TLS protocols when SSLContext.getDefault() is called
+        opts << '-Dcom.ibm.jsse2.overrideDefaultProtocol=SSL_TLSv2'
+      end
+      opts
     end
 
     def heap_size_ratio
