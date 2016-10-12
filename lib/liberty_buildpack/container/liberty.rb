@@ -191,9 +191,9 @@ module LibertyBuildpack::Container
       # options, without duplicating options.
       jvm_options_src = File.join(current_server_dir, JVM_OPTIONS)
       if File.exist?(jvm_options_src)
-
-        File.open(jvm_options_src, 'rb') do |file|
+        File.open(jvm_options_src, 'r') do |file|
           file.each_line do |line|
+            line.chomp!
             @java_opts << line unless @java_opts.include?(line)
           end
         end
