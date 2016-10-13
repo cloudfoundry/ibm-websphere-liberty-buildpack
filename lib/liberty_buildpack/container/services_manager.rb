@@ -22,6 +22,7 @@ require 'liberty_buildpack/container'
 require 'liberty_buildpack/container/install_components'
 require 'liberty_buildpack/util'
 require 'liberty_buildpack/util/constantize'
+require 'liberty_buildpack/util/service_configuration_utils'
 require 'liberty_buildpack/util/cache/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/xml_utils'
@@ -240,8 +241,7 @@ module LibertyBuildpack::Container
       services_config_path = File.expand_path(SERVICES_CONFIG_DIR, File.dirname(__FILE__))
       Dir.glob("#{services_config_path}/*.yml").each do |file|
         key = File.basename(file, '.yml')
-        @logger.debug("loading service config for #{key} from #{file}")
-        config[key] = File.open(file, 'r:utf-8') { |yf| YAML.load(yf) }
+        config[key] = LibertyBuildpack::Util::ServiceConfigurationUtils.load_user_conf(key, config, file, true, true)
       end
       @logger.debug("config is #{config}")
       config
