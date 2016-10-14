@@ -19,16 +19,15 @@
 class_name : LibertyBuildpack::Services::PostgreSQL
 class_file : postgresql.rb
 server_xml_stanza : dataSource
+service_filter : 'postgresql|elephantsql'
 
 # plugin specific attributes
 features: 
- if: ['jdbc-4.1']
+ if: ['jdbc-4.0']
  then: []
- else: ['jdbc-4.0']
+ else: ['jdbc-4.1']
 
 client_jars : 'postgresql-.*.jar'
-
-service_filter : 'postgresql|elephantsql'
 
 driver:
   version: 9.4.+

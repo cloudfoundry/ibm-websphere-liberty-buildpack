@@ -14,12 +14,10 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-require 'application_helper'
 require 'spec_helper'
 require 'liberty_buildpack/container/services_manager'
 require 'liberty_buildpack/services/mongo'
 require 'liberty_buildpack/util/heroku'
-require 'liberty_buildpack/util/service_configuration_utils'
 
 module LibertyBuildpack::Services
 
@@ -362,7 +360,6 @@ module LibertyBuildpack::Services
     end
 
     describe 'MongoDB_2' do
-      include_context 'application_helper'
 
       before do |example|
         # create hash containing vcap services data for a single instance.
@@ -383,8 +380,7 @@ module LibertyBuildpack::Services
         @vcap['credentials'] = creds
         # Read the contents of the .yml config file. Use the actual file for most realistic coverage.
         file = File.join(File.expand_path('../../../lib/liberty_buildpack/services/config', File.dirname(__FILE__)), 'mongo.yml')
-        conf = {}
-        @config = LibertyBuildpack::Util::ServiceConfigurationUtils.load_user_conf('mongo', conf, file, true, true)
+        @config = YAML.load_file(file)
         @driver_jars = ['db2.jar', get_lib_jar.to_s, 'mysql.jar']
       end
 
@@ -541,26 +537,6 @@ module LibertyBuildpack::Services
             features = Set.new
             obj.get_required_features(features)
             expect(features.to_a).to match_array(['mongodb-2.0'])
-          end
-        end # it
-
-        it 'should use user defined client_jar_url' do
-          Dir.mktmpdir do |root|
-            # Set User defined client_jar_url
-            ENV['LBP_SERVICE_CONFIG_MONGO'] = 'client_jar_url: "https://randomthing.ibm.com/bluemixparty/my-mongo-driver-300.3.6.jar"'
-            # Read the contents of the .yml config file. Use the actual file for most realistic coverage.
-            file = File.join(File.expand_path('../../../lib/liberty_buildpack/services/config', File.dirname(__FILE__)), 'mongo.yml')
-            conf = {}
-            @config = LibertyBuildpack::Util::ServiceConfigurationUtils.load_user_conf('mongo', conf, file, true, true)
-            @driver_jars = ['db2.jar', get_lib_jar.to_s, 'mysql.jar']
-            obj = create_mongo
-            expect(obj.requires_liberty_extensions?).to eq(true)
-            urls = {}
-            # test that we return the url for the mongo client jar
-            clients = obj.get_urls_for_client_jars([], urls)
-            expect(clients.size).to eq(1)
-            expect(clients[0]).not_to eq('https://repo1.maven.org/maven2/org/mongodb/mongo-java-driver/2.13.3/mongo-java-driver-2.13.3.jar')
-            expect(clients[0]).to eq('https://randomthing.ibm.com/bluemixparty/my-mongo-driver-300.3.6.jar')
           end
         end # it
       end # describe component_dependencies
