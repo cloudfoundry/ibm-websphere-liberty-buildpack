@@ -14,6 +14,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+require 'logging_helper'
 require 'spec_helper'
 require 'liberty_buildpack/container/services_manager'
 require 'liberty_buildpack/util/heroku'
@@ -21,6 +22,8 @@ require 'liberty_buildpack/util/heroku'
 module LibertyBuildpack::Services
 
   describe 'MySQL' do
+
+    include_context 'logging_helper'
 
     #----------------
     # Helper method to check an xml file agains expected results.
@@ -112,7 +115,7 @@ module LibertyBuildpack::Services
         File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
 
         expected_config = []
-        expected_config << '<feature>jdbc-4.0</feature>'
+        expected_config << '<feature>jdbc-4.1</feature>'
         t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='#{get_driver_id}' jndiName='#{get_jndi}' transactional='true' type='javax.sql.ConnectionPoolDataSource'>"
         t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' user='#{get_user}'/>"
         t3 = '</dataSource>'
@@ -146,7 +149,7 @@ module LibertyBuildpack::Services
         # check if dataSource properties and library were updated. Other elements should not be updated.
         expected_config = []
         expected_config << '<feature>jsp-2.2</feature>'
-        expected_config << '<feature>jdbc-4.0</feature>'
+        expected_config << '<feature>jdbc-4.1</feature>'
         t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='myDriver' jndiName='myJndi' transactional='true'>"
         t2 = "<properties databaseName='#{get_name}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' user='#{get_user}'/>"
         t3 = '</dataSource>'
@@ -266,7 +269,7 @@ module LibertyBuildpack::Services
           File.open(server_xml, 'w') { |file| server_xml_doc.write(file) }
 
           expected_config = []
-          expected_config << '<feature>jdbc-4.0</feature>'
+          expected_config << '<feature>jdbc-4.1</feature>'
           t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='#{get_driver_id}' jndiName='#{get_jndi}' transactional='true' type='javax.sql.ConnectionPoolDataSource'>"
           t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' password='#{get_password}' serverName='#{get_host}' user='#{get_user}'/>"
           t3 = '</dataSource>'
@@ -279,6 +282,53 @@ module LibertyBuildpack::Services
       end
 
     end
+
+    describe 'Override configuration' do
+
+      let(:application_cache) { double('ApplicationCache') }
+
+      it 'should use user defined repository and version' do
+        Dir.mktmpdir do |root|
+          vcap_services = {}
+          cleardb = {}
+          cleardb['name'] = 'myDatabase'
+          cleardb['label'] = 'cleardb'
+          cleardb_credentials = {}
+          cleardb_credentials['name'] = 'myDb'
+          cleardb_credentials['host'] = 'myHost.com'
+          cleardb_credentials['hostname'] = 'myHost.com'
+          cleardb_credentials['port'] = '5432'
+          cleardb_credentials['user'] = 'myUser'
+          cleardb_credentials['username'] = 'myUser'
+          cleardb_credentials['password'] = 'myPassword'
+          cleardb_credentials['uri'] = 'mysql://myUser:myPassword@myHost.com:5432/myDb'
+          cleardb['credentials'] = cleardb_credentials
+          vcap_services['cleardb'] = [cleardb]
+
+          FileUtils.mkdir(File.join(root, 'cache'))
+          index_file = "#{root}/cache/index.yml"
+          cached_file = "#{root}/cache/foo.jar.cached"
+          File.open(index_file, 'w') do |file|
+            file.puts('---')
+            file.puts("11.0.0: #{cached_file}")
+          end
+          FileUtils.cp('spec/fixtures/wlp-stub.jar', cached_file)
+
+          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
+          application_cache.stub(:get).with(index_file).and_yield(File.open(index_file))
+          application_cache.stub(:get).with(cached_file).and_yield(File.open(cached_file))
+
+          ENV['LBP_SERVICE_CONFIG_MYSQL'] = "{driver: { repository_root: #{root}/cache, version: 11.+ }}"
+
+          sm = LibertyBuildpack::Container::ServicesManager.new(vcap_services, root, nil)
+          file = File.join(root, 'lib', 'foo.jar')
+          expect(File).not_to exist(file)
+          sm.install_client_jars([], root)
+          expect(File).to exist(file)
+        end
+      end
+    end
+
   end
 
 end
