@@ -119,7 +119,7 @@ form similar to `2013-08-22 10:10:18 -0400`.
 
 ## Accessing the Information of Bound Services
 
-The service variables that are accessible from a server.xml file follow [the specification that is defined by Cloud Foundry](http://docs.cloudfoundry.com/docs/using/services/spring-service-bindings.html#properties).
+The service variables that are accessible from a server.xml file follow [the specification that is defined by Cloud Foundry](https://docs.cloudfoundry.org/buildpacks/java/spring-service-bindings.html#properties).
 For more information about the Cloud Foundry specification, see Property placeholders in the Cloud Foundry documentation.
 
 When you want to bind a Cloud Foundry service to your application, information
