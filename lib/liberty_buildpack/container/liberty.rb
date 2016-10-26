@@ -412,7 +412,7 @@ module LibertyBuildpack::Container
         endpoint = endpoints[0]
         endpoints.drop(1).each { |element| element.parent.delete_element(element) }
       end
-      if appstate_enabled?
+      if appstate_enabled? && appstate_apps(server_xml_doc).size > 0
         endpoint.add_attribute('host', '127.0.0.1')
       else
         endpoint.add_attribute('host', '*')
@@ -484,10 +484,13 @@ module LibertyBuildpack::Container
       config_enabled && feature_present
     end
 
+    def appstate_apps(server_xml_doc)
+      REXML::XPath.match(server_xml_doc, '/server/application | /server/webApplication | /server/enterpriseApplication')
+    end
+
     def check_appstate_feature(server_xml_doc)
-      # Currently appstate can work only with one application
-      apps = REXML::XPath.match(server_xml_doc, '/server/application | /server/webApplication | /server/enterpriseApplication')
-      if apps.size >= 1 && !apps[0].attributes['name'].nil?
+      apps = appstate_apps(server_xml_doc)
+      if apps.size > 0
         # Add appstate-2.0 feature
         feature_managers = REXML::XPath.match(server_xml_doc, '/server/featureManager')
         if feature_managers.empty?
@@ -508,9 +511,6 @@ module LibertyBuildpack::Container
         end
 
         appstate.add_attribute('appName', app_names.join(', '))
-        true
-      else
-        false
       end
     end
 
