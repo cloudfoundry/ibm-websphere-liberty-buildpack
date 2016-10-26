@@ -1011,7 +1011,7 @@ module LibertyBuildpack::Container
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read server_xml_file
-          expect(server_xml_contents.include?('host="127.0.0.1"')).to eq(true)
+          expect(server_xml_contents.include?('host="*"')).to eq(true)
           expect(server_xml_contents.include?('httpPort="${port}"')).to eq(true)
           expect(server_xml_contents.include?('httpsPort=')).to eq(false)
           expect(server_xml_contents).to match(/<webContainer trustHostHeaderPort='true' extractHostHeaderPort='true'\/>/)
@@ -1291,6 +1291,7 @@ module LibertyBuildpack::Container
           expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<appstate2 appName='#{app_name}'/>")
+          expect(server_xml_contents).to match(/httpEndpoint id="defaultHttpEndpoint" host="127.0.0.1"/)
         end
       end
 
@@ -1309,7 +1310,7 @@ module LibertyBuildpack::Container
           expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
           expect(server_xml_contents).not_to match(/<appstate2.*\/>/)
-
+          expect(server_xml_contents).to match(/httpEndpoint id="defaultHttpEndpoint" host="\*"/)
         end
       end
 
@@ -1349,6 +1350,11 @@ module LibertyBuildpack::Container
         configuration = default_configuration
         configuration['app_state'] = false
         check_no_appstate('<application name="myapp" />', configuration)
+      end
+
+      it 'should NOT add appstate2 when server xml does not contain application and appstate is enabled' do
+        configuration = default_configuration
+        check_no_appstate('', configuration)
       end
 
     end
