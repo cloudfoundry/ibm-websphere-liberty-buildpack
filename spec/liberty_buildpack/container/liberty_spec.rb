@@ -1314,6 +1314,34 @@ module LibertyBuildpack::Container
         end
       end
 
+      def check_appstate_with_dropin(app_xml, app_name, configuration = default_configuration)
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', 'myServer')
+          File.open(File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml'), 'w') do |file|
+            file.write('<server></server>')
+          end
+          dropins = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'dropins')
+          FileUtils.mkdir_p dropins
+          File.open(File.join(dropins, 'foo.jar'), 'w') do |file|
+            file.write("i'm a jar")
+          end
+
+          generate(root, app_xml, configuration)
+
+          liberty_directory = File.join root, '.liberty'
+          expect(Dir.exist?(liberty_directory)).to eq(true)
+
+          server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false'/>")
+          expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
+          expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='true' updateTrigger='mbean'/>")
+          expect(server_xml_contents).to include("<appstate2 appName='#{app_name}'/>")
+          expect(server_xml_contents).to match(/httpEndpoint id="defaultHttpEndpoint" host="\*"/)
+        end
+      end
+
       it 'should add appstate2 when server xml contains myapp application' do
         check_appstate('<application name="myapp" />', 'myapp')
       end
@@ -1355,6 +1383,10 @@ module LibertyBuildpack::Container
       it 'should NOT add appstate2 when server xml does not contain application and appstate is enabled' do
         configuration = default_configuration
         check_no_appstate('', configuration)
+      end
+
+      it 'should NOT change host to 127.0.0.1 when appstate2 is enabled but there is an application in the dropins folder' do
+        check_appstate_with_dropin('<application name="foo" /><webApplication name="fooWar" />', 'foo, fooWar')
       end
 
     end
