@@ -1352,9 +1352,12 @@ module LibertyBuildpack::Container
         check_no_appstate('<application name="myapp" />', configuration)
       end
 
-      it 'should NOT add appstate2 when server xml does not contain application and appstate is enabled' do
-        configuration = default_configuration
-        check_no_appstate('', configuration)
+      it 'should NOT add appstate2 when server xml does not contain application' do
+        check_no_appstate('')
+      end
+
+      it 'should NOT add appstate2 when server xml contains application without name' do
+        check_no_appstate('<application location="myapp" />')
       end
 
     end

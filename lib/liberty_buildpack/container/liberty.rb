@@ -485,7 +485,12 @@ module LibertyBuildpack::Container
     end
 
     def appstate_apps(server_xml_doc)
-      REXML::XPath.match(server_xml_doc, '/server/application | /server/webApplication | /server/enterpriseApplication')
+      apps = REXML::XPath.match(server_xml_doc, '/server/application | /server/webApplication | /server/enterpriseApplication')
+      app_names = []
+      apps.each do |app|
+        app_names << app.attributes['name'] unless app.attributes['name'].nil?
+      end
+      app_names
     end
 
     def check_appstate_feature(server_xml_doc)
@@ -503,14 +508,7 @@ module LibertyBuildpack::Container
 
         # Set the apps to be monitored.
         appstate = REXML::Element.new('appstate2', server_xml_doc.root)
-
-        app_names = []
-
-        apps.each do |app|
-          app_names << app.attributes['name'] unless app.attributes['name'].nil?
-        end
-
-        appstate.add_attribute('appName', app_names.join(', '))
+        appstate.add_attribute('appName', apps.join(', '))
       end
     end
 
