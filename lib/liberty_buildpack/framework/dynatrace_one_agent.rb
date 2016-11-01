@@ -24,9 +24,9 @@ require 'liberty_buildpack/services/vcap_services'
 module LibertyBuildpack::Framework
 
   #------------------------------------------------------------------------------------
-  # The RuxitAgent class that provides Dynatrace Ruxit Agent resources as a framework to applications
+  # The DynatraceOneAgent class that provides Dynatrace OneAgent resources as a framework to applications
   #------------------------------------------------------------------------------------
-  class RuxitAgent
+  class DynatraceOneAgent
 
     #-----------------------------------------------------------------------------------------
     # Creates an instance, passing in a context of information available to the component
@@ -51,19 +51,19 @@ module LibertyBuildpack::Framework
     end
 
     #-----------------------------------------------------------------------------------------
-    # Determines if the application's VCAP environment and the configured Ruxit configuration
-    # is available for the Ruxit framework to provide a configured Ruxit agent. Valid
+    # Determines if the application's VCAP environment and the configured Dynatrace configuration
+    # is available for the Dynatrace framework to provide a configured Dynatrace agent. Valid
     # detect is based on VCAP_SERVICES, VCAP_APPLICATION, and the repository root index.yml
-    # defined by the Ruxit configuration.
+    # defined by the Dynatrace configuration.
     #
     # @return [String] the detected versioned ID if the environment and config are valid, otherwise nil
     #------------------------------------------------------------------------------------------
     def detect
-      ruxit_service_exist? ? process_config : nil
+      dynatrace_service_exist? ? process_config : nil
     end
 
     #-----------------------------------------------------------------------------------------
-    # Create the ruxit_agent directory and its contents for the app droplet.
+    # Create the dynatrace_one_agent directory and its contents for the app droplet.
     #------------------------------------------------------------------------------------------
     def compile
       if @app_dir.nil?
@@ -72,50 +72,54 @@ module LibertyBuildpack::Framework
         raise "Version #{@version} or uri #{@uri} is not available, detect needs to be invoked"
       end
 
-      # create a ruxit home dir in the droplet
-      ruxit_home = File.join(@app_dir, RUXIT_HOME_DIR)
-      FileUtils.mkdir_p(ruxit_home)
-      @logger.debug("Ruxit home directory: #{ruxit_home}")
+      # create a dynatrace home dir in the droplet
+      dynatrace_home = File.join(@app_dir, DYNATRACE_HOME_DIR)
+      FileUtils.mkdir_p(dynatrace_home)
+      @logger.debug("Dynatrace OneAgent home directory: #{dynatrace_home}")
 
-      # export ruxit specific environment variables
-      export_ruxit_environment_variables
+      # export dynatrace specific environment variables
+      export_dynatrace_environment_variables
 
-      download_and_install_agent(ruxit_home)
+      download_and_install_agent(dynatrace_home)
     end
 
     #-----------------------------------------------------------------------------------------
-    # Create the Ruxit agent options appended as java_opts.
+    # Create the Dynatrace agent options appended as java_opts.
     #------------------------------------------------------------------------------------------
     def release
-      credentials = @services.find_service(RUXIT_SERVICE_NAME)['credentials']
+      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)['credentials']
 
-      # ruxit paths within the droplet
+      # dynatrace paths within the droplet
       pwd = ENV['PWD']
-      ruxit_home_dir = "#{pwd}/app/#{RUXIT_HOME_DIR}"
-      ruxit_agent = File.join(ruxit_home_dir, 'agent', lib_name, 'libruxitagentloader.so')
-      @logger.debug("ruxit_agent: #{ruxit_agent}")
+      dynatrace_home_dir = "#{pwd}/app/#{DYNATRACE_HOME_DIR}"
+      dynatrace_one_agent = File.join(dynatrace_home_dir, 'agent', lib_name, 'liboneagentloader.so')
+      dynatrace_one_agent = File.join(dynatrace_home_dir, 'agent', lib_name, 'libruxitagentloader.so') unless File.file?(File.join(@app_dir, DYNATRACE_HOME_DIR, 'agent', lib_name, 'liboneagentloader.so'))
 
-      # create the ruxit agent command as java_opts
-      @java_opts << "-agentpath:#{ruxit_agent}=#{get_service_options(credentials)}"
+      @logger.debug("dynatrace_one_agent: #{dynatrace_one_agent}")
+
+      # create the dynatrace agent command as java_opts
+      @java_opts << "-agentpath:#{dynatrace_one_agent}=#{get_service_options(credentials)}"
     end
 
     private
 
     # Name of the dynatrace service
-    RUXIT_SERVICE_NAME = /ruxit/
+    DYNATRACE_SERVICE_NAME = /ruxit|dynatrace/
 
     # VCAP_SERVICES keys
     CREDENTIALS_KEY = 'credentials'.freeze
     SERVER = 'server'.freeze
     TENANT = 'tenant'.freeze
     TENANTTOKEN = 'tenanttoken'.freeze
+    APITOKEN = 'apitoken'.freeze
+    ENVIRONMENTID = 'environmentid'.freeze
+    ENDPOINT = 'endpoint'.freeze
 
-    # ruxit's directory of artifacts in the droplet
-    RUXIT_HOME_DIR = '.ruxit_agent'.freeze
+    # dynatrace's directory of artifacts in the droplet
+    DYNATRACE_HOME_DIR = '.dynatrace_one_agent'.freeze
 
-    # ruxit ENV variables
+    # dynatrace ENV variables
     RUXIT_APPLICATION_ID = 'RUXIT_APPLICATIONID'.freeze
-    RUXIT_CLUSTER_ID = 'RUXIT_CLUSTER_ID'.freeze
     RUXIT_HOST_ID = 'RUXIT_HOST_ID'.freeze
 
     #------------------------------------------------------------------------------------------
@@ -128,38 +132,42 @@ module LibertyBuildpack::Framework
     end
 
     #------------------------------------------------------------------------------------------
-    # Download the agent library from the repository as specified in the ruxit configuration.
+    # Download the agent library from the repository as specified in the dynatrace configuration.
     #------------------------------------------------------------------------------------------
-    def download_and_install_agent(ruxit_home)
-      LibertyBuildpack::Util.download_zip(@version, @uri, 'Ruxit Agent', ruxit_home)
+    def download_and_install_agent(dynatrace_home)
+      LibertyBuildpack::Util.download_zip(@version, @uri, 'Dynatrace OneAgent', dynatrace_home)
     rescue => e
-      raise "Unable to download the Ruxit Agent. Ensure that the agent at #{@uri} is available and accessible. #{e.message}"
+      raise "Unable to download the Dynatrace OneAgent. Ensure that the agent at #{@uri} is available and accessible. #{e.message}"
     end
 
     #------------------------------------------------------------------------------------------
-    # Determines if the ruxit service is included in VCAP_SERVICES based on whether the
+    # Determines if the dynatrace service is included in VCAP_SERVICES based on whether the
     # service entry has valid entries.
     #
-    # @return [Boolean] true if the app is bound to a ruxit service
+    # @return [Boolean] true if the app is bound to a dynatrace service
     #------------------------------------------------------------------------------------------
-    def ruxit_service_exist?
-      @services.one_service?(RUXIT_SERVICE_NAME, TENANT, TENANTTOKEN)
+    def dynatrace_service_exist?
+      @services.one_service? DYNATRACE_SERVICE_NAME, [ENVIRONMENTID, TENANT], [APITOKEN, TENANTTOKEN]
+    end
+
+    def supports_apitoken?
+      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)['credentials']
+      credentials[APITOKEN] ? true : false
     end
 
     #------------------------------------------------------------------------------------------
-    # Retrieves Ruxit options from the ruxit service in VCAP_SERVICES.
+    # Retrieves Dynatrace options from the dynatrace service in VCAP_SERVICES.
     #
     # @return [String] options string to be appended to java agent options
     #------------------------------------------------------------------------------------------
     def get_service_options(credentials)
       begin
-        @ruxit_service = @services.find_service(RUXIT_SERVICE_NAME)
-        @ruxit_options = "#{SERVER}=#{server(credentials)},#{TENANT}=#{tenant(credentials)},#{TENANTTOKEN}=#{tenanttoken(credentials)}"
+        @dynatrace_options = "#{SERVER}=#{server(credentials)},#{TENANT}=#{tenant(credentials)},#{TENANTTOKEN}=#{tenanttoken(credentials)}"
       rescue => e
-        @logger.error("Unable to process the service options for the Ruxit Agent framework. #{e.message}")
+        @logger.error("Unable to process the service options for the Dynatrace OneAgent framework. #{e.message}")
       end
 
-      @ruxit_options.nil? ? nil : @ruxit_options
+      @dynatrace_options.nil? ? nil : @dynatrace_options
     end
 
     #------------------------------------------------------------------------------------------
@@ -173,37 +181,37 @@ module LibertyBuildpack::Framework
 
     #-----------------------------------------------------------------------------------------
     # Processes the dynatrace configuration to obtain the corresponding version and uri of the
-    # dynatrace agent jar in the repository root. If the configuration can be processed and the
-    # uri contains a valid dynatrace agent jar name, the versioned ID is returned and configuration
+    # dynatrace oneagent zzip in the repository root or bypasses the repository to directly download_uri
+    # the agent from the cluster. If the configuration can be processed and the
+    # uri contains a valid dynatrace oneagent zip name, the versioned ID is returned and configuration
     # data is initialized.
     #
     # @return [String] the dynatrace version ID
     #------------------------------------------------------------------------------------------
     def process_config
       begin
-        @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
+        @version, @uri = supports_apitoken? ? agent_download_url : LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
       rescue => e
-        @logger.error("Unable to process the configuration for the Ruxit Agent framework. #{e.message}")
+        @logger.error("Unable to process the configuration for the Dynatrace OneAgent framework. #{e.message}")
       end
 
-      @version.nil? ? nil : "ruxit-agent-#{@version}"
+      @version.nil? ? nil : "dynatrace-one-agent-#{@version}"
     end
 
-    # Create .profile.d/0ruxit-env.sh with the ruxit environment variables
+    # Create .profile.d/0dynatrace-env.sh with the dynatrace environment variables
     #
     # @return [void]
-    def export_ruxit_environment_variables
+    def export_dynatrace_environment_variables
       profiled_dir = File.join(@app_dir, '.profile.d')
       FileUtils.mkdir_p(profiled_dir)
 
       variables = {}
       variables[RUXIT_APPLICATION_ID] = application_id
-      variables[RUXIT_CLUSTER_ID] = cluster_id
       variables[RUXIT_HOST_ID] = host_id
 
-      @logger.debug { "Ruxit environment variables: #{variables}" }
+      @logger.debug { "Dynatrace SaaS/Managed environment variables: #{variables}" }
 
-      env_file_name = File.join(profiled_dir, '0ruxit-env.sh')
+      env_file_name = File.join(profiled_dir, '0dynatrace-env.sh')
       env_file = File.new(env_file_name, 'w')
       variables.each do |key, value|
         env_file.puts("export #{key}=\"${#{key}:-#{value}}\"") # "${VAR1:-default value}"
@@ -211,11 +219,15 @@ module LibertyBuildpack::Framework
       env_file.close
     end
 
-    def application_id
-      @vcap_application['application_name']
+    def agent_download_url
+      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)['credentials']
+      download_uri = server(credentials).gsub('/communication', '').gsub(':8443', '').gsub(':443', '')
+      download_uri += '/api/v1/deployment/installer/agent/unix/paas/latest?include=java&bitness=64&'
+      download_uri += "Api-Token=#{credentials[APITOKEN]}"
+      ['latest', download_uri]
     end
 
-    def cluster_id
+    def application_id
       @vcap_application['application_name']
     end
 
@@ -224,15 +236,21 @@ module LibertyBuildpack::Framework
     end
 
     def server(credentials)
-      credentials[SERVER] || "https://#{tenant(credentials)}.live.ruxit.com:443/communication"
+      credentials[ENDPOINT] || credentials[SERVER] || "https://#{tenant(credentials)}.live.dynatrace.com"
     end
 
     def tenant(credentials)
-      credentials[TENANT]
+      credentials[ENVIRONMENTID] || credentials[TENANT]
     end
 
     def tenanttoken(credentials)
-      credentials[TENANTTOKEN]
+      supports_apitoken? ? tenanttoken_from_api : credentials[TENANTTOKEN]
+    end
+
+    def tenanttoken_from_api
+      dynatrace_one_agent_manifest = File.join(@app_dir, DYNATRACE_HOME_DIR, 'manifest.json')
+      @logger.debug { "File exists?: #{dynatrace_one_agent_manifest} #{File.file?(dynatrace_one_agent_manifest)}" }
+      JSON.parse(File.read(dynatrace_one_agent_manifest))['tenantToken']
     end
 
   end
