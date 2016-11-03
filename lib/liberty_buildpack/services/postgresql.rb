@@ -69,5 +69,32 @@ module LibertyBuildpack::Services
       end
     end
 
+    #------------------------------------------------------------------------------------
+    # Method to create/update a datasource stanza (and all related sub-artifacts such as the JDBCDriver) in server.xml.
+    #
+    # @param doc - the root element of the REXML::Document for server.xml
+    # @param server_dir - the server directory which is the location for bootstrap.properties and jvm.options
+    # @param driver_dir - the symbolic name of the directory where client jars are installed
+    # @param available_jars - an array containing the names of all installed client driver jars.
+    # @param number_instances - the number of service instances that update the same service-specific server.xml stanzas
+    # @raise if a problem was discovered (incoherent or inconsistent existing configuration, for example)
+    #------------------------------------------------------------------------------------
+    def update(doc, server_dir, driver_dir, available_jars, number_instances)
+      super
+      # Find the datasource config for this service instance.
+      datasource = find_datasource(doc, number_instances)
+      unless datasource.empty?
+        # Make sure the correct type is added if the datasource already exists.
+        Utils.find_and_update_attribute(datasource, 'type', 'javax.sql.ConnectionPoolDataSource')
+
+        # Update the javax.sql.ConnectionPoolDataSource to use the postgresql implementation.
+        jdbc_attribute = Utils.find_attribute(datasource, 'jdbcDriverRef')
+        unless jdbc_attribute.nil?
+          driver = doc.elements.to_a("//jdbcDriver[@id='#{jdbc_attribute}']")
+          Utils.find_and_update_attribute(driver, 'javax.sql.ConnectionPoolDataSource', 'org.postgresql.ds.PGConnectionPoolDataSource')
+        end
+      end
+    end
+
   end
 end

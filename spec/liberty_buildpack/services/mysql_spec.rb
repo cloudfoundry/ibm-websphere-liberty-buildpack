@@ -136,7 +136,7 @@ module LibertyBuildpack::Services
         t2 = "<properties databaseName='noName' password='noPassword' portNumber='1111' serverName='noHost' user='noUser'/>"
         t3 = '</dataSource>'
         contents << t1 + t2 + t3
-        contents << "<jdbcDriver id='myDriver' #{driver_info} libraryRef='myLibrary'/>"
+        contents << "<jdbcDriver id='myDriver' libraryRef='myLibrary'/>"
         contents << "<library id='myLibrary'><fileset dir='lib' id='lib-id'/></library>"
         contents << '</server>'
 
@@ -150,7 +150,7 @@ module LibertyBuildpack::Services
         expected_config = []
         expected_config << '<feature>jsp-2.2</feature>'
         expected_config << '<feature>jdbc-4.1</feature>'
-        t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='myDriver' jndiName='myJndi' transactional='true'>"
+        t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='myDriver' jndiName='myJndi' transactional='true' type='javax.sql.ConnectionPoolDataSource'>"
         t2 = "<properties databaseName='#{get_name}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' user='#{get_user}'/>"
         t3 = '</dataSource>'
         expected_config << t1 + t2 + t3
