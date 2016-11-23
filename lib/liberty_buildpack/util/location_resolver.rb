@@ -30,23 +30,28 @@ module LibertyBuildpack::Util
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @app_dir = app_dir
       @properties = {
-        wlp_install_dir: wlp_install_dir,
-        wlp_user_dir: wlp_install_dir + '/usr',
-        usr_extension_dir: wlp_install_dir + '/usr/extension',
-        shared_app_dir: wlp_install_dir + '/usr/shared/apps',
-        shared_config_dir: wlp_install_dir + '/usr/shared/config',
-        shared_resource_dir: wlp_install_dir + '/usr/shared/resources',
-        server_config_dir: wlp_install_dir + '/usr/servers/' + server_name,
-        server_output_dir: wlp_install_dir + '/usr/servers/' + server_name
+        'wlp.install.dir' => wlp_install_dir,
+        'wlp.user.dir' => wlp_install_dir + '/usr',
+        'usr.extension.dir' => wlp_install_dir + '/usr/extension',
+        'shared.app.dir' => wlp_install_dir + '/usr/shared/apps',
+        'shared.config.dir' => wlp_install_dir + '/usr/shared/config',
+        'shared.resource.dir' => wlp_install_dir + '/usr/shared/resources',
+        'server.config.dir' => wlp_install_dir + '/usr/servers/' + server_name,
+        'server.output.dir' => wlp_install_dir + '/usr/servers/' + server_name
       }
     end
 
     # Return the absolute path to the server configuration file.
     def absolute_path(config_file, server_xml_dir)
-      result = config_file.clone
-      @properties.each do |symbol, mapping|
-        variable = symbol.to_s.tr "\_", '.'
-        result.gsub! "\$\{#{variable}\}", mapping
+      result = config_file.gsub(/(\$\{.+?\})/) do |match|
+        if match =~ /\$\{env\./i
+          var_name = match[6..-2]
+          match = ENV[var_name] unless ENV[var_name].nil?
+        else
+          var_name = match[2..-2]
+          match = @properties[var_name] unless @properties[var_name].nil?
+        end
+        match
       end
       result = File.expand_path(result, server_xml_dir)
       unless result.start_with?(@app_dir)
