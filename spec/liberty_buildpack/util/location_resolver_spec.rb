@@ -35,7 +35,7 @@ describe LibertyBuildpack::Util::LocationResolver do
     end
   end
 
-  it 'resolve environment in variables' do
+  it 'resolve environment variables' do
     Dir.mktmpdir do |root|
       ENV['test.space'] = 'dev'
       ENV['test.profile'] = 'bluemix'
@@ -51,6 +51,38 @@ describe LibertyBuildpack::Util::LocationResolver do
       expect(location_resolver.absolute_path('${env.test.space}/foo/${ENV.test.profile}', liberty_home)).to eql("#{liberty_home}/dev/foo/bluemix")
       # variable does not exist
       expect(location_resolver.absolute_path('${env.test.doesnotexist}/foo', liberty_home)).to eql("#{liberty_home}/${env.test.doesnotexist}/foo")
+    end
+  end
+
+  it 'resolve variables from server.env' do
+    Dir.mktmpdir do |root|
+      ENV['test.space'] = 'dev'
+      ENV['test.profile'] = 'bluemix'
+
+      liberty_home = File.join(root, '.liberty')
+      FileUtils.mkdir_p liberty_home
+      server_name = 'myServer'
+      FileUtils.mkdir_p File.join(root, 'wlp', 'usr', 'servers', server_name)
+      File.open(File.join(root, 'wlp', 'usr', 'servers', server_name, 'server.env'), 'w') do |file|
+        file.puts('# ignore me')
+        file.puts('')
+        file.puts('test.space=prod')
+        file.puts('testbadsyntax')
+        file.puts('test.org=myorg')
+      end
+
+      FileUtils.ln_sf(Pathname.new(File.join(root, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home)
+
+      location_resolver = LibertyBuildpack::Util::LocationResolver.new(root, liberty_home, server_name)
+
+      # single variable
+      expect(location_resolver.absolute_path('${env.test.space}/foo', liberty_home)).to eql("#{liberty_home}/prod/foo")
+      # multiple variables with mixed case
+      expect(location_resolver.absolute_path('${env.test.space}/foo/${ENV.test.profile}', liberty_home)).to eql("#{liberty_home}/prod/foo/bluemix")
+      # variable does not exist
+      expect(location_resolver.absolute_path('${env.test.doesnotexist}/foo', liberty_home)).to eql("#{liberty_home}/${env.test.doesnotexist}/foo")
+      # variable only in server.env file
+      expect(location_resolver.absolute_path('${env.test.org}/bar', liberty_home)).to eql("#{liberty_home}/myorg/bar")
     end
   end
 
