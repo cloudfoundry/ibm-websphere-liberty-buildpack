@@ -39,6 +39,9 @@ module LibertyBuildpack::Util
         'server.config.dir' => wlp_install_dir + '/usr/servers/' + server_name,
         'server.output.dir' => wlp_install_dir + '/usr/servers/' + server_name
       }
+      @env = ENV.to_hash
+      server_env = File.join(wlp_install_dir, 'usr', 'servers', server_name, 'server.env')
+      load_server_env(server_env) if File.exist?(server_env)
     end
 
     # Return the absolute path to the server configuration file.
@@ -46,7 +49,7 @@ module LibertyBuildpack::Util
       result = config_file.gsub(/(\$\{.+?\})/) do |match|
         if match =~ /\$\{env\./i
           var_name = match[6..-2]
-          match = ENV[var_name] unless ENV[var_name].nil?
+          match = @env[var_name] unless @env[var_name].nil?
         else
           var_name = match[2..-2]
           match = @properties[var_name] unless @properties[var_name].nil?
@@ -59,5 +62,22 @@ module LibertyBuildpack::Util
       end
       result
     end
+
+    private
+
+    def load_server_env(server_env_file)
+      File.open(server_env_file, 'r') do |file|
+        file.each_line do |line|
+          line.chomp!
+          next if line.empty? || line.start_with?('#')
+          index = line.index('=')
+          next if index.nil?
+          key = line[0..index - 1]
+          value = line[index + 1..-1]
+          @env[key] = value
+        end
+      end
+    end
+
   end
 end
