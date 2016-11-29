@@ -112,6 +112,7 @@ module LibertyBuildpack::Framework
     TENANT = 'tenant'.freeze
     TENANTTOKEN = 'tenanttoken'.freeze
     APITOKEN = 'apitoken'.freeze
+    APIURL = 'apiurl'.freeze
     ENVIRONMENTID = 'environmentid'.freeze
     ENDPOINT = 'endpoint'.freeze
 
@@ -221,10 +222,17 @@ module LibertyBuildpack::Framework
 
     def agent_download_url
       credentials = @services.find_service(DYNATRACE_SERVICE_NAME)['credentials']
-      download_uri = server(credentials).gsub('/communication', '').gsub(':8443', '').gsub(':443', '')
-      download_uri += '/api/v1/deployment/installer/agent/unix/paas/latest?include=java&bitness=64&'
+      download_uri = "#{api_base_url}/v1/deployment/installer/agent/unix/paas/latest?include=java&bitness=64&"
       download_uri += "Api-Token=#{credentials[APITOKEN]}"
       ['latest', download_uri]
+    end
+
+    def api_base_url
+      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)['credentials']
+      return credentials[APIURL] unless credentials[APIURL].nil?
+      base_url = credentials[ENDPOINT] || credentials[SERVER] || "https://#{tenant(credentials)}.live.dynatrace.com"
+      base_url = base_url.gsub('/communication', '').concat('/api').gsub(':8443', '').gsub(':443', '')
+      base_url
     end
 
     def application_id
@@ -236,7 +244,15 @@ module LibertyBuildpack::Framework
     end
 
     def server(credentials)
-      credentials[ENDPOINT] || credentials[SERVER] || "https://#{tenant(credentials)}.live.dynatrace.com"
+      given_endp = credentials[ENDPOINT] || credentials[SERVER] || "https://#{tenant(credentials)}.live.dynatrace.com"
+      supports_apitoken? ? server_from_api : given_endp
+    end
+
+    def server_from_api
+      dynatrace_one_agent_manifest = File.join(@app_dir, DYNATRACE_HOME_DIR, 'manifest.json')
+      @logger.debug { "File exists?: #{dynatrace_one_agent_manifest} #{File.file?(dynatrace_one_agent_manifest)}" }
+      endpoints = JSON.parse(File.read(dynatrace_one_agent_manifest))['communicationEndpoints']
+      endpoints.join('\;')
     end
 
     def tenant(credentials)
