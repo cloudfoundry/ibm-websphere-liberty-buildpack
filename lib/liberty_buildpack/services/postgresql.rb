@@ -37,63 +37,25 @@ module LibertyBuildpack::Services
       @properties_type = 'properties'
     end
 
+    protected
+
     #------------------------------------------------------------------------------------
-    # Method to create a jdbc driver.
-    # This method will also create the library associated with the jdbc driver.
+    # Method to customize jdbcDriver - called on create or update.
     #
-    # @param doc - the root element of the REXML::Document for server.xml
-    # @param lib_dir - the directory where client driver jars are located
-    # @raise if an internal inconsistency was found.
+    # @param jdbc_driver - an array containing all jdbcDriver elements with a given id.
     #------------------------------------------------------------------------------------
-    def create_jdbcdriver(doc, jdbc_driver_id, lib_id, fileset_id, lib_dir)
-      # We assume a consistent server.xml. If the datasource did not exist, then this must be a pure "push app" use case. If it is a "push server.xml"
-      # case, then failure to find the datasource indicates server.xml is not consistent.
-      # TODO: surprisingly, the following will find the driver even if it is imbedded in another datasource.
-      # We could probably use XPATH /server/jdbcDriver to limit the search to global.
-      drivers = doc.elements.to_a("//jdbcDriver[@id='#{jdbc_driver_id}']")
-      # if we find an existing jdbc driver, then one of two things has occurred
-      # 1) case of pushing server.xml, but datasource not found (user error)
-      # 2) case of pushing a web app and multiple instances of a given resource type (db2) were bound. The JDBC driver was already created when
-      #    we created the datasource for a previously processed instance. All instances of a resource type share the same JDBCDriver and library.
-      if drivers.empty?
-        # Not found, create it. The JDBC Driver is created as a global element and not nested underneath the datasource.
-        # puts "jdbcDriver #{jdbc_driver_id} not found, creating it"
-        # create the jdbcDriver
-        driver = REXML::Element.new('jdbcDriver', doc.root)
-        driver.add_attribute('id', jdbc_driver_id)
-        driver.add_attribute('javax.sql.XADataSource', 'org.postgresql.xa.PGXADataSource')
-        driver.add_attribute('javax.sql.ConnectionPoolDataSource', 'org.postgresql.ds.PGConnectionPoolDataSource')
-        driver.add_attribute('libraryRef', lib_id)
-        # create the shared library. It should not exist.
-        ClientJarUtils.create_global_library(doc, lib_id, fileset_id, lib_dir, @client_jars_string)
-      end
+    def modify_jdbc_driver(jdbcdrivers)
+      Utils.find_and_update_attribute(jdbcdrivers, 'javax.sql.XADataSource', 'org.postgresql.xa.PGXADataSource')
+      Utils.find_and_update_attribute(jdbcdrivers, 'javax.sql.ConnectionPoolDataSource', 'org.postgresql.ds.PGConnectionPoolDataSource')
     end
 
     #------------------------------------------------------------------------------------
-    # Method to create/update a datasource stanza (and all related sub-artifacts such as the JDBCDriver) in server.xml.
+    # Method to customize dataSource - called on create or update.
     #
-    # @param doc - the root element of the REXML::Document for server.xml
-    # @param server_dir - the server directory which is the location for bootstrap.properties and jvm.options
-    # @param driver_dir - the symbolic name of the directory where client jars are installed
-    # @param available_jars - an array containing the names of all installed client driver jars.
-    # @param number_instances - the number of service instances that update the same service-specific server.xml stanzas
-    # @raise if a problem was discovered (incoherent or inconsistent existing configuration, for example)
+    # @param datasources - an array containing all dataSource stanzas with a given id.
     #------------------------------------------------------------------------------------
-    def update(doc, server_dir, driver_dir, available_jars, number_instances)
-      super
-      # Find the datasource config for this service instance.
-      datasource = find_datasource(doc, number_instances)
-      unless datasource.empty?
-        # Make sure the correct type is added if the datasource already exists.
-        Utils.find_and_update_attribute(datasource, 'type', 'javax.sql.ConnectionPoolDataSource')
-
-        # Update the javax.sql.ConnectionPoolDataSource to use the postgresql implementation.
-        jdbc_attribute = Utils.find_attribute(datasource, 'jdbcDriverRef')
-        unless jdbc_attribute.nil?
-          driver = doc.elements.to_a("//jdbcDriver[@id='#{jdbc_attribute}']")
-          Utils.find_and_update_attribute(driver, 'javax.sql.ConnectionPoolDataSource', 'org.postgresql.ds.PGConnectionPoolDataSource')
-        end
-      end
+    def modify_datasource(datasources)
+      Utils.find_and_update_attribute(datasources, 'type', 'javax.sql.ConnectionPoolDataSource')
     end
 
   end

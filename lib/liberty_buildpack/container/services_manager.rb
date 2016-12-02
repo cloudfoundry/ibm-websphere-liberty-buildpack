@@ -32,10 +32,11 @@ module LibertyBuildpack::Container
   # The class that encapsulate access to services and services information.
   class ServicesManager
 
-    def initialize(vcap_services, server_dir, opt_out_string)
+    def initialize(vcap_services, server_dir, opt_out_string, context = nil)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @logger.debug("init: server dir is #{server_dir}, vcap_services is #{LibertyBuildpack::Util.safe_vcap_services(vcap_services)} and opt_out is #{opt_out_string}")
       @opt_out = parse_opt_out(opt_out_string)
+      @context = context
       FileUtils.mkdir_p(server_dir)
       # The collection of service instances that require full autoconfig
       @services_full_autoconfig = []
@@ -411,7 +412,11 @@ module LibertyBuildpack::Container
       # require the file
       filename = File.join(File.expand_path('..', File.dirname(__FILE__)), 'services', file)
       require filename
-      instance = class_name.constantize.new(type, config)
+      if class_name.constantize.instance_method(:initialize).parameters.map(&:last).map(&:to_s).include? 'context'
+        instance = class_name.constantize.new(type, config, @context)
+      else
+        instance = class_name.constantize.new(type, config)
+      end
       instance.parse_vcap_services(element, instance_data)
       instance
     end
