@@ -127,7 +127,7 @@ module LibertyBuildpack::Services
       end
 
       def check_server_xml_update(root, sm)
-        driver_info = "javax.sql.ConnectionPoolDataSource='org.mariadb.jdbc.MySQLDataSource'"
+        driver_info = "javax.sql.ConnectionPoolDataSource='org.mariadb.jdbc.MySQLDataSource' javax.sql.XADataSource='org.mariadb.jdbc.MySQLDataSource'"
 
         contents = []
         contents << '<server>'

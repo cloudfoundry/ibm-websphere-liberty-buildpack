@@ -163,21 +163,50 @@ module LibertyBuildpack::Services
         @logger.debug("datasource #{@datasource_id} not found, creating it")
         create_datasource(doc, @driver_dir)
       else
+        modify_datasource(datasources)
         # Find the jdbc driver. Use the jdbc driver to find the shared library.
         jdbc_driver = find_jdbc_driver(doc, datasources)
+        modify_jdbc_driver(jdbc_driver)
         library = find_shared_library(doc, jdbc_driver)
         ClientJarUtils.update_library(doc, @service_name, library, @fileset_id, @driver_dir, @client_jars_string)
 
         # Do not update datasource attributes. Specifically, do not update the jndi name. We do need to update the properties attributes though.
         # find the instance that contains the properties. Liberty only allows one instance of properties.
         properties_element = find_datasource_properties(datasources)
-        update_element_attribute(properties_element, 'databaseName', @db_name)
-        update_element_attribute(properties_element, 'user', @user)
-        update_element_attribute(properties_element, 'password', @password)
-        update_element_attribute(properties_element, 'serverName', @host)
-        update_element_attribute(properties_element, 'portNumber', @port)
+        properties_element.add_attribute('databaseName', @db_name)
+        properties_element.add_attribute('user', @user)
+        properties_element.add_attribute('password', @password)
+        properties_element.add_attribute('serverName', @host)
+        properties_element.add_attribute('portNumber', @port)
+        modify_properties(properties_element)
         Utils.add_features(doc, @features)
       end
+    end
+
+    protected
+
+    #------------------------------------------------------------------------------------
+    # Method to customize dataSource - called on create or update.
+    #
+    # @param datasources - an array containing all dataSource stanzas with a given id.
+    #------------------------------------------------------------------------------------
+    def modify_datasource(datasources)
+    end
+
+    #------------------------------------------------------------------------------------
+    # Method to customize properties - called on create or update.
+    #
+    # @param properties_element - the properties element
+    #------------------------------------------------------------------------------------
+    def modify_properties(properties_element)
+    end
+
+    #------------------------------------------------------------------------------------
+    # Method to customize jdbcDriver - called on create or update.
+    #
+    # @param jdbc_driver - an array containing all jdbcDriver elements with a given id.
+    #------------------------------------------------------------------------------------
+    def modify_jdbc_driver(jdbcdrivers)
     end
 
     private
@@ -222,18 +251,6 @@ module LibertyBuildpack::Services
     end
 
     #------------------------------------------------------------------------------------
-    # A utility method that can be used to update an attribute for an element.
-    #
-    # @param element - the Element containing the attribute
-    # @param attribute - the String name of attribute to update
-    # @param value - the String value of the attribute
-    #------------------------------------------------------------------------------------
-    def update_element_attribute(element, attribute, value)
-      # Simply overwrite the attribute if it exists.
-      element.add_attribute(attribute, value)
-    end
-
-    #------------------------------------------------------------------------------------
     # A private worker method for the create_or_update_datasource method.
     # This method will only be called when a datasource does not exist.
     #
@@ -251,6 +268,8 @@ module LibertyBuildpack::Services
       # We don't presently support XA in the cloud. Although Liberty defaults to connection pooled, we need to explicitly specify ConnectionPooledDataSource as some
       # vendors use a single class to implement all datasource types, in which case Liberty will use an XA connection. Avoid this.
       ds.add_attribute('type', 'javax.sql.ConnectionPoolDataSource')
+      modify_datasource([ds])
+
       # add properties element and standard set of attributes.
       props = REXML::Element.new(@properties_type, ds)
       props.add_attribute('id', @properties_id)
@@ -259,6 +278,8 @@ module LibertyBuildpack::Services
       props.add_attribute('password', @password)
       props.add_attribute('portNumber', @port)
       props.add_attribute('serverName', @host)
+      modify_properties(props)
+
       # allow types that need it to add a ConnectionManager
       create_connection_manager(ds)
       # create the JDBC driver. The JDBC driver will create the shared library.
@@ -299,6 +320,7 @@ module LibertyBuildpack::Services
         driver = REXML::Element.new('jdbcDriver', doc.root)
         driver.add_attribute('id', jdbc_driver_id)
         driver.add_attribute('libraryRef', lib_id)
+        modify_jdbc_driver([driver])
         # create the shared library. It should not exist.
         ClientJarUtils.create_global_library(doc, lib_id, fileset_id, lib_dir, @client_jars_string)
       end

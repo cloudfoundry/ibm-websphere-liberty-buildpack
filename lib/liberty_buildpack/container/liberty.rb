@@ -550,7 +550,8 @@ module LibertyBuildpack::Container
 
         # read opt-out of service bindings information from env (manifest.yml), and initialise
         # services manager, which will be used to list dependencies for any bound services.
-        @services_manager = ServicesManager.new(@vcap_services, runtime_vars_dir(root), @environment['services_autoconfig_excludes'])
+        context = { app_dir: @app_dir, java_home: @java_home }
+        @services_manager = ServicesManager.new(@vcap_services, runtime_vars_dir(root), @environment['services_autoconfig_excludes'], context)
 
         # if the liberty feature manager and repository are not being used to install server
         # features, download the required files from the various configured locations. If the

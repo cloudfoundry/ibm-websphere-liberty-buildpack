@@ -48,23 +48,23 @@ module LibertyBuildpack::Services
       # Helper methods to return constants used in checking server.xml contents
       #----------------------------------------------------------
       def get_ds_id
-        'postgresql-myDatabase'
+        'compose-postgresql-myDatabase'
       end
 
       def get_props_id
-        'postgresql-myDatabase-props'
+        'compose-postgresql-myDatabase-props'
       end
 
       def get_driver_id
-        'postgresql-driver'
+        'compose-postgresql-driver'
       end
 
       def get_lib_id
-        'postgresql-library'
+        'compose-postgresql-library'
       end
 
       def get_fileset_id
-        'postgresql-fileset'
+        'compose-postgresql-fileset'
       end
 
       def get_lib_dir
@@ -92,12 +92,13 @@ module LibertyBuildpack::Services
       end
 
       def get_name
-        '${cloud.services.myDatabase.connection.name}'
+        '${cloud.services.myDatabase.connection.db}'
       end
 
       def check_variables(root, vcap_services)
         expected_vars = []
-        expected_vars << '<variable name=\'cloud.services.myDatabase.connection.name\' value=\'myDb\'/>'
+        expected_vars << '<variable name=\'cloud.services.myDatabase.connection.name\' value=\'foobar\'/>'
+        expected_vars << '<variable name=\'cloud.services.myDatabase.connection.db\' value=\'myDb\'/>'
         expected_vars << '<variable name=\'cloud.services.myDatabase.connection.host\' value=\'myHost.com\'/>'
         expected_vars << '<variable name=\'cloud.services.myDatabase.connection.port\' value=\'5432\'/>'
         expected_vars << '<variable name=\'cloud.services.myDatabase.connection.user\' value=\'myUser\'/>'
@@ -119,7 +120,8 @@ module LibertyBuildpack::Services
         expected_config = []
         expected_config << '<feature>jdbc-4.1</feature>'
         t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='#{get_driver_id}' jndiName='#{get_jndi}' transactional='true' type='javax.sql.ConnectionPoolDataSource'>"
-        t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' user='#{get_user}'/>"
+        ssl_opts = "ssl='true' sslMode='verify-ca' sslRootCert='/home/vcap/app/.compose_postgresql/cacert.pem'"
+        t2 = "<properties databaseName='#{get_name}' id='#{get_props_id}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' #{ssl_opts} user='#{get_user}'/>"
         t3 = '</dataSource>'
         expected_config << t1 + t2 + t3
         driver_info = "javax.sql.ConnectionPoolDataSource='org.postgresql.ds.PGConnectionPoolDataSource' javax.sql.XADataSource='org.postgresql.xa.PGXADataSource'"
@@ -128,7 +130,7 @@ module LibertyBuildpack::Services
         validate_xml(server_xml, expected_config)
       end
 
-      def check_server_xml_update(root, sm)
+      def check_server_xml_update(root, sm) # rubocop:disable MethodLength
         driver_info = "javax.sql.ConnectionPoolDataSource='org.postgresql.ds.PGConnectionPoolDataSource' javax.sql.XADataSource='org.postgresql.xa.PGXADataSource'"
 
         contents = []
@@ -153,7 +155,8 @@ module LibertyBuildpack::Services
         expected_config << '<feature>jsp-2.2</feature>'
         expected_config << '<feature>jdbc-4.1</feature>'
         t1 = "<dataSource id='#{get_ds_id}' jdbcDriverRef='myDriver' jndiName='myJndi' transactional='true' type='javax.sql.ConnectionPoolDataSource'>"
-        t2 = "<properties databaseName='#{get_name}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' user='#{get_user}'/>"
+        ssl_opts = "ssl='true' sslMode='verify-ca' sslRootCert='/home/vcap/app/.compose_postgresql/cacert.pem'"
+        t2 = "<properties databaseName='#{get_name}' password='#{get_password}' portNumber='#{get_port}' serverName='#{get_host}' #{ssl_opts} user='#{get_user}'/>"
         t3 = '</dataSource>'
         expected_config << t1 + t2 + t3
         expected_config << "<jdbcDriver id='myDriver' #{driver_info} libraryRef='myLibrary'/>"
@@ -163,109 +166,31 @@ module LibertyBuildpack::Services
 
       def run_test(vcap_services)
         Dir.mktmpdir do |root|
-          sm = LibertyBuildpack::Container::ServicesManager.new(vcap_services, root, nil)
-          check_variables(root, vcap_services)
+          context = { app_dir: root }
+          sm = LibertyBuildpack::Container::ServicesManager.new(vcap_services, root, nil, context)
+          check_variables(root, sm)
           check_server_xml_create(root, sm)
           check_server_xml_update(root, sm)
         end
       end
 
-      it 'on Bluemix (postgresql)' do
+      it 'on Bluemix (compose for postgresql)' do
         vcap_services = {}
         postgresql = {}
         postgresql['name'] = 'myDatabase'
-        postgresql['label'] = 'postgresql-9.1'
+        postgresql['label'] = 'compose-for-postgresql'
         postgresql_credentials = {}
-        postgresql_credentials['name'] = 'myDb'
-        postgresql_credentials['host'] = 'myHost.com'
-        postgresql_credentials['hostname'] = 'myHost.com'
-        postgresql_credentials['port'] = '5432'
-        postgresql_credentials['user'] = 'myUser'
-        postgresql_credentials['username'] = 'myUser'
-        postgresql_credentials['password'] = 'myPassword'
+        postgresql_credentials['name'] = 'foobar'
         postgresql_credentials['uri'] = 'postgres://myUser:myPassword@myHost.com:5432/myDb'
+        postgresql_credentials['ca_certificate_base64'] = 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNDVENDQVkrZ0F3SUJBZ0lRYUVwWWNJQnI4SThDK3ZiZTZMQ1FrREFLQmdncWhrak9QUVFEQXpCR01Rc3dDUVlEVlFRR0V3SkQKVGpFYU1CZ0dBMVVFQ2hNUlYyOVRhV2R1SUVOQklFeHBiV2wwWldReEd6QVpCZ05WQkFNVEVrTkJJRmR2VTJsbmJpQkZRME1nVW05dgpkREFlRncweE5ERXhNRGd3TURVNE5UaGFGdzAwTkRFeE1EZ3dNRFU0TlRoYU1FWXhDekFKQmdOVkJBWVRBa05PTVJvd0dBWURWUVFLCkV4RlhiMU5wWjI0Z1EwRWdUR2x0YVhSbFpERWJNQmtHQTFVRUF4TVNRMEVnVjI5VGFXZHVJRVZEUXlCU2IyOTBNSFl3RUFZSEtvWkkKemowQ0FRWUZLNEVFQUNJRFlnQUU0ZjJPdUVNa3E1WjdoY0s2QzYyTjREcmpKTG5Tc2I2SU9zcS9Tcmo1N3l3dnIxRlFQRWQxYlBpVQp0NXY4S0I3RlZNeGpuUlpMVThIbklLdk5yQ1hTZjQvQ3dWcUNYakNMZWxUT0E3V1JmNnFVME5HS1NNeUNCU2FoMVZFUzFuczJvMEl3ClFEQU9CZ05WSFE4QkFmOEVCQU1DQVFZd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVXF2M1ZXcVAyaDRzeWhmM1IKTWx1QVJaUHpBN2d3Q2dZSUtvWkl6ajBFQXdNRGFBQXdaUUl4QU9Ta2hMQ0IxVDJ3ZEt5VXBPZ09QUUIwVEtHWGEva05VVHloMlR2MApEYXVwbjc1T2NzcUYxTm5zdFRKRkdHK3JyUUl3ZmNmM2FXTXZvZUdZN3hNUTBYay8wZjdxTzMvZVZ2U1FzUlVSMkxJaUZkQXZ3eVl1CmEvR1JzcEJsOUpybWtPNUsKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo='
         postgresql['credentials'] = postgresql_credentials
-        vcap_services['postgresql-9.1'] = [postgresql]
-
-        run_test(vcap_services)
-      end
-
-      it 'on Bluemix (elephantsql)' do
-        vcap_services = {}
-        elephantsql = {}
-        elephantsql['name'] = 'myDatabase'
-        elephantsql['label'] = 'elephantsql'
-        elephantsql_credentials = {}
-        elephantsql_credentials['uri'] = 'postgres://myUser:myPassword@myHost.com:5432/myDb'
-        elephantsql['credentials'] = elephantsql_credentials
-        vcap_services['elephantsql'] = [elephantsql]
-
-        run_test(vcap_services)
-      end
-
-      it 'on Pivotal' do
-        vcap_services = {}
-        elephantsql = {}
-        elephantsql['name'] = 'myDatabase'
-        elephantsql['label'] = 'elephantsql'
-        elephantsql['tags'] = %w(relational postgresql)
-        elephantsql_credentials = {}
-        elephantsql_credentials['uri'] = 'postgres://myUser:myPassword@myHost.com:5432/myDb'
-        elephantsql['credentials'] = elephantsql_credentials
-        vcap_services['elephantsql'] = [elephantsql]
-
-        run_test(vcap_services)
-      end
-
-      it 'on Heroku' do
-        env = {}
-        env['HEROKU_POSTGRESQL_RED_URL'] = 'postgres://myUser:myPassword@myHost.com:5432/myDb'
-        env['SERVICE_NAME_MAP'] = 'HEROKU_POSTGRESQL_RED_URL=myDatabase'
-        vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
+        vcap_services['compose-for-postgresql'] = [postgresql]
 
         run_test(vcap_services)
       end
 
     end
 
-    describe 'Override configuration' do
-
-      let(:application_cache) { double('ApplicationCache') }
-
-      it 'should use user defined repository and version' do
-        Dir.mktmpdir do |root|
-          vcap_services = {}
-          elephantsql = {}
-          elephantsql['name'] = 'myDatabase'
-          elephantsql['label'] = 'elephantsql'
-          elephantsql_credentials = {}
-          elephantsql_credentials['uri'] = 'postgres://myUser:myPassword@myHost.com:5432/myDb'
-          elephantsql['credentials'] = elephantsql_credentials
-          vcap_services['elephantsql'] = [elephantsql]
-
-          FileUtils.mkdir(File.join(root, 'cache'))
-          index_file = "#{root}/cache/index.yml"
-          cached_file = "#{root}/cache/foo.jar.cached"
-          File.open(index_file, 'w') do |file|
-            file.puts('---')
-            file.puts("11.0.0: #{cached_file}")
-          end
-          FileUtils.cp('spec/fixtures/wlp-stub.jar', cached_file)
-
-          LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
-          application_cache.stub(:get).with(index_file).and_yield(File.open(index_file))
-          application_cache.stub(:get).with(cached_file).and_yield(File.open(cached_file))
-
-          ENV['LBP_SERVICE_CONFIG_POSTGRESQL'] = "{driver: { repository_root: #{root}/cache, version: 11.+ }}"
-
-          sm = LibertyBuildpack::Container::ServicesManager.new(vcap_services, root, nil)
-          file = File.join(root, 'lib', 'foo.jar')
-          expect(File).not_to exist(file)
-          sm.install_client_jars([], root)
-          expect(File).to exist(file)
-        end
-      end
-    end
   end
 
 end
