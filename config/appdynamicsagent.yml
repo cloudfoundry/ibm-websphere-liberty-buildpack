@@ -15,7 +15,7 @@
 
 # Service configuration
 ---
-version: 4.1.+
+version: 4.+
 repository_root: "{default.repository.root}/app-dynamics"
 default_application_name:
 default_node_name:
