@@ -16,10 +16,10 @@
 # Service configuration
 ---
 # attributes required by all service plugins
-class_name : LibertyBuildpack::Services::MySQL
-class_file : mysql.rb
+class_name : LibertyBuildpack::Services::ComposeMySQL
+class_file : compose_mysql.rb
 server_xml_stanza : dataSource
-service_filter : '(?<!compose-for-)mysql|cleardb'
+service_filter : 'compose-for-mysql'
 
 # plugin specific attributes
 features:
