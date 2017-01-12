@@ -34,6 +34,7 @@ module LibertyBuildpack::Services
     def initialize(type, config)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @type = type
+      @config_type = @type
       @config = config
       @reg_ex = Regexp.new(@config['client_jars'])
       @features = @config['features']
@@ -63,6 +64,10 @@ module LibertyBuildpack::Services
       @db_name = get_cloud_property(properties, element, "#{conn_prefix}db", map['db'])
       @hosts = get_cloud_property(properties, element, "#{conn_prefix}hosts", map['hosts'].join(' '))
       @ports = get_cloud_property(properties, element, "#{conn_prefix}ports", map['ports'].join(' '))
+
+      # work around issue where some values pased from variables can't be resolved correctly.
+      set_connection_variables(map)
+
       @user = get_cloud_property(properties, element, "#{conn_prefix}user", map['user'])
       @password = get_cloud_property(properties, element, "#{conn_prefix}password", map['password'])
 
@@ -77,16 +82,16 @@ module LibertyBuildpack::Services
       # default JNDI name for NoSQL is mongo/service_name
       @jndi_name = "mongo/#{@service_name}"
       # Generate ids. For Mongo, we need both mongo and mongoDB stanzas.
-      @mongo_id = "#{@type}-#{@service_name}"
+      @mongo_id = "#{@config_type}-#{@service_name}"
       @mongodb_id = "#{@mongo_id}-db"
-      @lib_id = "#{@type}-library"
-      @fileset_id = "#{@type}-fileset"
+      @lib_id = "#{@config_type}-library"
+      @fileset_id = "#{@config_type}-fileset"
     end
 
     # Parse mongodb URL.
     # URL syntax: mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
     #
-    def self.parse_url(mongo_url) # rubocop:disable MethodLength
+    def self.parse_url(mongo_url) # rubocop:disable MethodLength, PerceivedComplexity
       map = {}
       nodes = mongo_url.split(',')
 
@@ -111,7 +116,13 @@ module LibertyBuildpack::Services
               host_port = node
             else
               host_port = node[0..slash - 1]
-              map['db'] = node[slash + 1..-1]
+              question_mark = node.index('?')
+              if question_mark.nil? # rubocop:disable Metrics/BlockNesting
+                # no query in the uri
+                map['db'] = node[slash + 1..-1]
+              else
+                map['db'] = node[slash + 1..question_mark - 1]
+              end
             end
           else
             host_port = node
@@ -222,6 +233,11 @@ module LibertyBuildpack::Services
 
     DEFAULT_MONGODB_PORT = '27017'.freeze
 
+    def set_connection_variables(map)
+      @hosts = map['hosts'].join(',')
+      @ports = map['ports'].join(',')
+    end
+
     def get_cloud_property(properties, element, name, value)
       variable = element.root.elements.to_a("//variable[@name='#{name}']")
       if variable.empty?
@@ -250,11 +266,9 @@ module LibertyBuildpack::Services
       mongo.add_attribute('libraryRef', @lib_id)
       mongo.add_attribute('user', @user)
       mongo.add_attribute('password', @password)
-      # add hostNames and ports elements.
-      hosts = REXML::Element.new('hostNames', mongo)
-      hosts.add_text(@hosts)
-      ports = REXML::Element.new('ports', mongo)
-      ports.add_text(@ports)
+      mongo.add_attribute('hostNames', @hosts)
+      mongo.add_attribute('ports', @ports)
+      add_properties(mongo)
       # create the mongoDB
       mongodb = REXML::Element.new('mongoDB', doc.root)
       mongodb.add_attribute('id', @mongodb_id)
@@ -315,12 +329,13 @@ module LibertyBuildpack::Services
       # Update the user and password attributes if they exist. Create them if they do not.
       Utils.find_and_update_attribute(mongos, 'user', @user)
       Utils.find_and_update_attribute(mongos, 'password', @password)
-      find_and_update_endpoint_element(mongos, 'hostNames', @hosts)
-      find_and_update_endpoint_element(mongos, 'ports', @ports)
+      Utils.find_and_update_attribute(mongos, 'hostNames', @hosts)
+      Utils.find_and_update_attribute(mongos, 'ports', @ports)
+      update_properties(mongos)
       # delete all hostNames and ports attributes to prevent a conflict with hostNames and ports elements we just added.
       mongos.each do |mongo|
-        mongo.delete_attribute('hostNames')
-        mongo.delete_attribute('ports')
+        mongo.delete_element('hostNames')
+        mongo.delete_element('ports')
       end
       # The mongo stanza may contain the library by reference or by containment. It must be one or the other. We rely on Liberty configuration to coherency check.
       lib_id = nil
@@ -364,5 +379,24 @@ module LibertyBuildpack::Services
         element.add_text(text)
       end
     end
+
+    protected
+
+    #------------------------------------------------------------------------------------
+    # Method to customize properties - called on create
+    #
+    # @param properties_element - the properties element
+    #------------------------------------------------------------------------------------
+    def add_properties(properties_element)
+    end
+
+    #------------------------------------------------------------------------------------
+    # Method to update properties - called on update.
+    #
+    # @param properties_element - the properties element
+    #------------------------------------------------------------------------------------
+    def update_properties(properties_element)
+    end
+
   end
 end

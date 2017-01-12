@@ -78,11 +78,13 @@ module LibertyBuildpack::Services
       end
 
       def get_hosts
-        '${cloud.services.myNoSql.connection.hosts}'
+        # '${cloud.services.myNoSql.connection.hosts}'
+        'myHost.com'
       end
 
       def get_ports
-        '${cloud.services.myNoSql.connection.ports}'
+        # '${cloud.services.myNoSql.connection.ports}'
+        '5432'
       end
 
       def get_user
@@ -122,9 +124,7 @@ module LibertyBuildpack::Services
 
         expected_config = []
         expected_config << '<feature>mongodb-2.0</feature>'
-        t1 = "<mongo id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' user='#{get_user}'>"
-        t2 = "<hostNames>#{get_hosts}</hostNames><ports>#{get_ports}</ports></mongo>"
-        expected_config << t1 + t2
+        expected_config << "<mongo hostNames='#{@test_hosts}' id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' ports='#{@test_ports}' user='#{get_user}'/>"
         expected_config << "<mongoDB databaseName='#{get_db}' id='#{get_mongodb_id}' jndiName='#{get_jndi}' mongoRef='#{get_mongo_id}'/>"
         expected_config << "<library id='#{get_lib_id}'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}'/></library>"
         validate_xml(server_xml, expected_config)
@@ -134,7 +134,7 @@ module LibertyBuildpack::Services
         contents = []
         contents << '<server>'
         contents << '<featureManager><feature>jsp-2.2</feature></featureManager>'
-        t1 = "<mongo id='#{get_mongo_id}' libraryRef='myLibrary' password='noPassword' user='noUser' hostNames='noHost' ports='1111'/>"
+        t1 = "<mongo hostNames='noHost' id='#{get_mongo_id}' libraryRef='myLibrary' password='noPassword' ports='1111' user='noUser'/>"
         contents << t1
         contents << "<mongoDB databaseName='noDB' id='#{get_mongodb_id}' jndiName='myJndi' mongoRef='#{get_mongo_id}'/>"
         contents << "<library id='myLibrary'><fileset dir='lib' id='lib-id'/></library>"
@@ -166,9 +166,8 @@ module LibertyBuildpack::Services
         expected_config = []
         expected_config << '<feature>jsp-2.2</feature>'
         expected_config << '<feature>mongodb-2.0</feature>'
-        t1 = "<mongo id='#{get_mongo_id}' libraryRef='myLibrary' password='#{get_password}' user='#{get_user}'>"
-        t2 = "<hostNames>#{get_hosts}</hostNames><ports>#{get_ports}</ports></mongo>"
-        expected_config << t1 + t2
+        t1 = "<mongo hostNames='#{@test_hosts}' id='#{get_mongo_id}' libraryRef='myLibrary' password='#{get_password}' ports='#{@test_ports}' user='#{get_user}'/>"
+        expected_config << t1
         expected_config << "<mongoDB databaseName='#{get_db}' id='#{get_mongodb_id}' jndiName='myJndi' mongoRef='#{get_mongo_id}'/>"
         expected_config << "<library id='myLibrary'><fileset dir='lib' id='lib-id'/><fileset dir='#{get_lib_dir}'/></library>"
         validate_xml(server_xml, expected_config)
@@ -201,6 +200,8 @@ module LibertyBuildpack::Services
         mongodb['credentials'] = mongodb_credentials
         vcap_services['mongodb-2.2'] = [mongodb]
 
+        @test_hosts = get_hosts
+        @test_ports = get_ports
         run_test(vcap_services, ['myHost.com'], ['5432'], mongodb_credentials['url'])
       end
 
@@ -220,6 +221,8 @@ module LibertyBuildpack::Services
         mongolab['credentials'] = mongolab_credentials
         vcap_services['MongoLab-1.0'] = [mongolab]
 
+        @test_hosts = get_hosts
+        @test_ports = get_ports
         run_test(vcap_services, ['myHost.com'], ['5432'], mongolab_credentials['url'])
       end
 
@@ -234,6 +237,8 @@ module LibertyBuildpack::Services
         mongolab['credentials'] = mongolab_credentials
         vcap_services['mongolab'] = [mongolab]
 
+        @test_hosts = get_hosts
+        @test_ports = get_ports
         run_test(vcap_services, ['myHost.com'], ['5432'], mongolab_credentials['uri'])
       end
 
@@ -243,6 +248,8 @@ module LibertyBuildpack::Services
         env['SERVICE_NAME_MAP'] = 'MONGOHQ_URL=myNoSql'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
+        @test_hosts = get_hosts
+        @test_ports = get_ports
         run_test(vcap_services, ['myHost.com'], ['5432'], env['MONGOHQ_URL'])
       end
 
@@ -252,6 +259,8 @@ module LibertyBuildpack::Services
         env['SERVICE_NAME_MAP'] = 'MONGOHQ_URL=myNoSql'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
+        @test_hosts = 'myHost.com,myHost2.com,myHost3.net'
+        @test_ports = '5432,27017,1234'
         run_test(vcap_services, %w(myHost.com myHost2.com myHost3.net), %w(5432 27017 1234), env['MONGOHQ_URL'])
       end
 
@@ -261,6 +270,8 @@ module LibertyBuildpack::Services
         env['SERVICE_NAME_MAP'] = 'MONGOLAB_URI=myNoSql'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
+        @test_hosts = get_hosts
+        @test_ports = get_ports
         run_test(vcap_services, ['myHost.com'], ['5432'], env['MONGOLAB_URI'])
       end
 
@@ -270,6 +281,8 @@ module LibertyBuildpack::Services
         env['SERVICE_NAME_MAP'] = 'MONGOSOUP_URL=myNoSql'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
+        @test_hosts = get_hosts
+        @test_ports = get_ports
         run_test(vcap_services, ['myHost.com'], ['5432'], env['MONGOSOUP_URL'])
       end
 
@@ -279,6 +292,8 @@ module LibertyBuildpack::Services
         env['SERVICE_NAME_MAP'] = 'MONGOSOUP_URL=myNoSql'
         vcap_services = LibertyBuildpack::Util::Heroku.new.generate_vcap_services(env)
 
+        @test_hosts = 'myHost.com'
+        @test_ports = '27017'
         run_test(vcap_services, ['myHost.com'], ['27017'], env['MONGOSOUP_URL'])
       end
 
@@ -416,11 +431,13 @@ module LibertyBuildpack::Services
       end
 
       def get_host
-        '${cloud.services.myMongo.connection.hosts}'
+        # '${cloud.services.myMongo.connection.hosts}'
+        '192.168.10.23'
       end
 
       def get_port
-        '${cloud.services.myMongo.connection.ports}'
+        # '${cloud.services.myMongo.connection.ports}'
+        '10001'
       end
 
       def get_user
@@ -557,9 +574,8 @@ module LibertyBuildpack::Services
             s2 = '<featureManager><feature>servlet-3.0</feature><feature>mongodb-2.0</feature></featureManager>'
             s3 = "<application name='myapp'><classloader commonLibraryRef='#{get_lib_id}'/></application>"
             # The mongo stanza is logically split across two strings for readability, but needs to be checked as a single string.
-            t1 = "<mongo id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' user='#{get_user}'>"
-            t2 = "<hostNames>#{get_host}</hostNames><ports>#{get_port}</ports></mongo>"
-            s4 = t1 + t2
+            t1 = "<mongo hostNames='#{get_host}' id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' ports='#{get_port}' user='#{get_user}'/>"
+            s4 = t1
             s5 = "<mongoDB databaseName='#{get_db}' id='#{get_mongodb_id}' jndiName='#{get_jndi}' mongoRef='#{get_mongo_id}'/>"
             s6 = "<library id='#{get_lib_id}'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}' includes='#{get_lib_jar}'/></library>"
             s7 = '</server>'
@@ -592,9 +608,8 @@ module LibertyBuildpack::Services
             s5 = "<mongoDB databaseName='somedb' id='mongo-someMongo-db' jndiName='somejndi' mongoRef='mongo-someMongo'/>"
             s6 = "<library id='#{get_lib_id}'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}' includes='#{get_lib_jar}'/></library>"
             # The mongo stanza is logically split across two strings for readability, but needs to be checked as a single string.
-            t1 = "<mongo id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' user='#{get_user}'>"
-            t2 = "<hostNames>#{get_host}</hostNames><ports>#{get_port}</ports></mongo>"
-            s7 = t1 + t2
+            t1 = "<mongo hostNames='#{get_host}' id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' ports='#{get_port}' user='#{get_user}'/>"
+            s7 = t1
             s8 = "<mongoDB databaseName='#{get_db}' id='#{get_mongodb_id}' jndiName='#{get_jndi}' mongoRef='#{get_mongo_id}'/>"
             s9 = '</server>'
             expected = [s1, s2, s3, s4, s5, s6, s7, s8, s9]
@@ -623,9 +638,8 @@ module LibertyBuildpack::Services
             s2 = '<featureManager><feature>servlet-3.0</feature><feature>mongodb-2.0</feature></featureManager>'
             s3 = "<application name='myapp'><classloader commonLibraryRef='#{get_lib_id}'/></application>"
             # The mongo stanza is logically split across two strings for readability, but needs to be checked as a single string.
-            t1 = "<mongo id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' user='#{get_user}'>"
-            t2 = "<hostNames>#{get_host}</hostNames><ports>#{get_port}</ports></mongo>"
-            s4 = t1 + t2
+            t1 = "<mongo hostNames='#{get_host}' id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' ports='#{get_port}' user='#{get_user}'/>"
+            s4 = t1
             s5 = "<mongoDB databaseName='#{get_db}' id='#{get_mongodb_id}' jndiName='somejndi' mongoRef='#{get_mongo_id}'/>"
             s6 = "<library id='#{get_lib_id}'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}' includes='#{get_lib_jar}'/></library>"
             s7 = '</server>'
@@ -653,9 +667,8 @@ module LibertyBuildpack::Services
             s2 = '<featureManager><feature>servlet-3.0</feature><feature>mongodb-2.0</feature></featureManager>'
             s3 = "<webApplication name='myapp'><classloader commonLibraryRef='#{get_lib_id}'/></webApplication>"
             # The mongo stanza is logically split across two strings for readability, but needs to be checked as a single string.
-            t1 = "<mongo id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' user='#{get_user}'>"
-            t2 = "<hostNames>#{get_host}</hostNames><ports>#{get_port}</ports></mongo>"
-            s4 = t1 + t2
+            t1 = "<mongo hostNames='#{get_host}' id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' ports='#{get_port}' user='#{get_user}'/>"
+            s4 = t1
             s5 = "<mongoDB databaseName='#{get_db}' id='#{get_mongodb_id}' jndiName='somejndi' mongoRef='#{get_mongo_id}'/>"
             s6 = "<library id='#{get_lib_id}'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}' includes='#{get_lib_jar}'/></library>"
             s7 = '</server>'
@@ -683,9 +696,8 @@ module LibertyBuildpack::Services
             s2 = '<featureManager><feature>servlet-3.0</feature><feature>mongodb-2.0</feature></featureManager>'
             s3 = "<webApplication name='myapp'><classloader commonLibraryRef='fake_lib'/></webApplication>"
             # The mongo stanza is logically split across two strings for readability, but needs to be checked as a single string.
-            t1 = "<mongo id='fake_mongo' libraryRef='fake_lib' password='#{get_password}' user='#{get_user}'>"
-            t2 = "<hostNames>#{get_host}</hostNames><ports>#{get_port}</ports></mongo>"
-            s4 = t1 + t2
+            t1 = "<mongo hostNames='#{get_host}' id='fake_mongo' libraryRef='fake_lib' password='#{get_password}' ports='#{get_port}' user='#{get_user}'/>"
+            s4 = t1
             s5 = "<mongoDB databaseName='#{get_db}' id='fake_mongo_db' jndiName='somejndi' mongoRef='fake_mongo'/>"
             s6 = "<library id='fake_lib'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}' includes='#{get_lib_jar}'/></library>"
             s7 = '</server>'
@@ -710,9 +722,8 @@ module LibertyBuildpack::Services
             s2 = '<featureManager><feature>servlet-3.0</feature><feature>mongodb-2.0</feature></featureManager>'
             s3 = "<webApplication name='myapp'><classloader commonLibraryRef='#{get_lib_id}'/></webApplication>"
             # The mongo stanza is logically split across two strings for readability, but needs to be checked as a single string.
-            t1 = "<mongo id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' user='#{get_user}'>"
-            t2 = "<hostNames>#{get_host}</hostNames><ports>#{get_port}</ports></mongo>"
-            s4 = t1 + t2
+            t1 = "<mongo hostNames='#{get_host}' id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' ports='#{get_port}' user='#{get_user}'/>"
+            s4 = t1
             s5 = "<mongoDB databaseName='#{get_db}' id='#{get_mongodb_id}' jndiName='#{get_jndi}' mongoRef='#{get_mongo_id}'/>"
             s6 = "<library id='#{get_lib_id}'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}' includes='#{get_lib_jar}'/></library>"
             s7 = '</server>'
@@ -737,9 +748,8 @@ module LibertyBuildpack::Services
             s2 = '<featureManager><feature>servlet-3.0</feature><feature>mongodb-2.0</feature></featureManager>'
             s3 = "<webApplication name='myapp'><classloader apiTypeVisibility='spec,ibm-api,api,third-party' commonLibraryRef='#{get_lib_id}'/></webApplication>"
             # The mongo stanza is logically split across two strings for readability, but needs to be checked as a single string.
-            t1 = "<mongo id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' user='#{get_user}'>"
-            t2 = "<hostNames>#{get_host}</hostNames><ports>#{get_port}</ports></mongo>"
-            s4 = t1 + t2
+            t1 = "<mongo hostNames='#{get_host}' id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' ports='#{get_port}' user='#{get_user}'/>"
+            s4 = t1
             s5 = "<mongoDB databaseName='#{get_db}' id='#{get_mongodb_id}' jndiName='#{get_jndi}' mongoRef='#{get_mongo_id}'/>"
             s6 = "<library apiTypeVisibility='spec,ibm-api,api,third-party' id='#{get_lib_id}'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}' includes='#{get_lib_jar}'/></library>"
             s7 = '</server>'
@@ -788,9 +798,8 @@ module LibertyBuildpack::Services
             s5 = "<mongoDB databaseName='somedb' id='mongo-someMongo-db' jndiName='somejndi' mongoRef='mongo-someMongo'/>"
             s6 = "<library id='#{get_lib_id}'><fileset dir='#{get_lib_dir}' id='#{get_fileset_id}' includes='#{get_lib_jar}'/></library>"
             # The mongo stanza is logically split across two strings for readability, but needs to be checked as a single string.
-            t1 = "<mongo id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' user='#{get_user}'>"
-            t2 = "<hostNames>#{get_host}</hostNames><ports>#{get_port}</ports></mongo>"
-            s7 = t1 + t2
+            t1 = "<mongo hostNames='#{get_host}' id='#{get_mongo_id}' libraryRef='#{get_lib_id}' password='#{get_password}' ports='#{get_port}' user='#{get_user}'/>"
+            s7 = t1
             s8 = "<mongoDB databaseName='#{get_db}' id='#{get_mongodb_id}' jndiName='otherjndi' mongoRef='#{get_mongo_id}'/>"
             s9 = '</server>'
             expected = [s1, s2, s3, s4, s5, s6, s7, s8, s9]
