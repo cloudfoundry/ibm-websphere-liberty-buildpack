@@ -22,4 +22,4 @@ cf push <APP-NAME> -p <ARTIFACT> -b https://github.com/cloudfoundry/ibm-webspher
 ```
 
 [JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-AWON-8GALN9&title=IBM%C2%AE+SDK%2C+Java-+Technology+Edition%2C+Version+7.0&l=en
-[manifest documentation]: http://docs.cloudfoundry.com/docs/using/deploying-apps/manifest.html
+[manifest documentation]: https://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html
