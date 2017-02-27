@@ -163,7 +163,7 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def get_service_options(credentials)
       begin
-        @dynatrace_options = "#{SERVER}=#{server(credentials)},#{TENANT}=#{tenant(credentials)},#{TENANTTOKEN}=#{tenanttoken(credentials)}"
+        @dynatrace_options = "#{TENANT}=#{tenant(credentials)},#{TENANTTOKEN}=#{tenanttoken(credentials)},#{SERVER}=#{server(credentials)}"
       rescue => e
         @logger.error("Unable to process the service options for the Dynatrace OneAgent framework. #{e.message}")
       end
@@ -252,7 +252,7 @@ module LibertyBuildpack::Framework
       dynatrace_one_agent_manifest = File.join(@app_dir, DYNATRACE_HOME_DIR, 'manifest.json')
       @logger.debug { "File exists?: #{dynatrace_one_agent_manifest} #{File.file?(dynatrace_one_agent_manifest)}" }
       endpoints = JSON.parse(File.read(dynatrace_one_agent_manifest))['communicationEndpoints']
-      endpoints.join('\;')
+      endpoints.join(';')
     end
 
     def tenant(credentials)

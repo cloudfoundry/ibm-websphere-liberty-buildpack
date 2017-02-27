@@ -257,7 +257,7 @@ module LibertyBuildpack::Framework
 
       it 'should return command line options for a valid service in a default container' do
         pwd = ENV['PWD']
-        pattern = "^(-agentpath:#{pwd}/app/#{dynatrace_home}/agent/.*/libruxitagentloader.so=server=https://test-tenant.live.dynatrace.com,tenant=test-tenant,tenanttoken=test-token.*)$"
+        pattern = "^(-agentpath:#{pwd}/app/#{dynatrace_home}/agent/.*/libruxitagentloader.so=tenant=test-tenant,tenanttoken=test-token,server=https://test-tenant.live.dynatrace.com.*)$"
 
         expect(released[0]).to match(/#{pattern}/)
       end
