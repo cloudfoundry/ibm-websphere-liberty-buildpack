@@ -77,18 +77,17 @@ module LibertyBuildpack::Framework
       FileUtils.mkdir_p(dynatrace_home)
       @logger.debug("Dynatrace OneAgent home directory: #{dynatrace_home}")
 
-      # export dynatrace specific environment variables
-      export_dynatrace_environment_variables
-
       download_and_install_agent(dynatrace_home)
+
+      # export dynatrace specific environment variables
+      export_dynatrace_app_environment_variables
+      export_dynatrace_connection_environment_variables
     end
 
     #-----------------------------------------------------------------------------------------
     # Create the Dynatrace agent options appended as java_opts.
     #------------------------------------------------------------------------------------------
     def release
-      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)['credentials']
-
       # dynatrace paths within the droplet
       pwd = ENV['PWD']
       dynatrace_home_dir = "#{pwd}/app/#{DYNATRACE_HOME_DIR}"
@@ -98,7 +97,7 @@ module LibertyBuildpack::Framework
       @logger.debug("dynatrace_one_agent: #{dynatrace_one_agent}")
 
       # create the dynatrace agent command as java_opts
-      @java_opts << "-agentpath:#{dynatrace_one_agent}=#{get_service_options(credentials)}"
+      @java_opts << "-agentpath:#{dynatrace_one_agent}"
     end
 
     private
@@ -122,6 +121,9 @@ module LibertyBuildpack::Framework
     # dynatrace ENV variables
     RUXIT_APPLICATION_ID = 'RUXIT_APPLICATIONID'.freeze
     RUXIT_HOST_ID = 'RUXIT_HOST_ID'.freeze
+    DT_TENANT = 'DT_TENANT'.freeze
+    DT_TENANTTOKEN = 'DT_TENANTTOKEN'.freeze
+    DT_CONNECTION_POINT = 'DT_CONNECTION_POINT'.freeze
 
     #------------------------------------------------------------------------------------------
     # Determines the system architecture.
@@ -152,23 +154,8 @@ module LibertyBuildpack::Framework
     end
 
     def supports_apitoken?
-      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)['credentials']
+      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)[CREDENTIALS_KEY]
       credentials[APITOKEN] ? true : false
-    end
-
-    #------------------------------------------------------------------------------------------
-    # Retrieves Dynatrace options from the dynatrace service in VCAP_SERVICES.
-    #
-    # @return [String] options string to be appended to java agent options
-    #------------------------------------------------------------------------------------------
-    def get_service_options(credentials)
-      begin
-        @dynatrace_options = "#{TENANT}=#{tenant(credentials)},#{TENANTTOKEN}=#{tenanttoken(credentials)},#{SERVER}=#{server(credentials)}"
-      rescue => e
-        @logger.error("Unable to process the service options for the Dynatrace OneAgent framework. #{e.message}")
-      end
-
-      @dynatrace_options.nil? ? nil : @dynatrace_options
     end
 
     #------------------------------------------------------------------------------------------
@@ -199,10 +186,10 @@ module LibertyBuildpack::Framework
       @version.nil? ? nil : "dynatrace-one-agent-#{@version}"
     end
 
-    # Create .profile.d/0dynatrace-env.sh with the dynatrace environment variables
+    # Create .profile.d/0dynatrace-app-env.sh with the dynatrace app environment variables
     #
     # @return [void]
-    def export_dynatrace_environment_variables
+    def export_dynatrace_app_environment_variables
       profiled_dir = File.join(@app_dir, '.profile.d')
       FileUtils.mkdir_p(profiled_dir)
 
@@ -210,9 +197,7 @@ module LibertyBuildpack::Framework
       variables[RUXIT_APPLICATION_ID] = application_id
       variables[RUXIT_HOST_ID] = host_id
 
-      @logger.debug { "Dynatrace SaaS/Managed environment variables: #{variables}" }
-
-      env_file_name = File.join(profiled_dir, '0dynatrace-env.sh')
+      env_file_name = File.join(profiled_dir, '0dynatrace-app-env.sh')
       env_file = File.new(env_file_name, 'w')
       variables.each do |key, value|
         env_file.puts("export #{key}=\"${#{key}:-#{value}}\"") # "${VAR1:-default value}"
@@ -220,15 +205,42 @@ module LibertyBuildpack::Framework
       env_file.close
     end
 
+    # Create .profile.d/dynatrace-env.sh with the dynatrace agent connection environment variables
+    #
+    # @return [void]
+    def export_dynatrace_connection_environment_variables
+      profiled_dir = File.join(@app_dir, '.profile.d')
+      FileUtils.mkdir_p(profiled_dir)
+
+      if supports_apitoken? && File.file?(File.join(@app_dir, DYNATRACE_HOME_DIR, 'dynatrace-env.sh'))
+        # copy dynatrace-env.sh from agent zip to .profile.d for setting DT_CONNECTION_POINT etc
+        dynatrace_env_sh = File.join(@app_dir, DYNATRACE_HOME_DIR, 'dynatrace-env.sh')
+        FileUtils.cp(dynatrace_env_sh, profiled_dir)
+      else
+        credentials = @services.find_service(DYNATRACE_SERVICE_NAME)[CREDENTIALS_KEY]
+        variables = {}
+        variables[DT_TENANT] = tenant(credentials)
+        variables[DT_TENANTTOKEN] = tenanttoken(credentials)
+        variables[DT_CONNECTION_POINT] = server(credentials)
+
+        env_file_name = File.join(profiled_dir, 'dynatrace-env.sh')
+        env_file = File.new(env_file_name, 'w')
+        variables.each do |key, value|
+          env_file.puts("export #{key}=\"${#{key}:-#{value}}\"") # "${VAR1:-default value}"
+        end
+        env_file.close
+      end
+    end
+
     def agent_download_url
-      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)['credentials']
+      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)[CREDENTIALS_KEY]
       download_uri = "#{api_base_url}/v1/deployment/installer/agent/unix/paas/latest?include=java&bitness=64&"
       download_uri += "Api-Token=#{credentials[APITOKEN]}"
       ['latest', download_uri]
     end
 
     def api_base_url
-      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)['credentials']
+      credentials = @services.find_service(DYNATRACE_SERVICE_NAME)[CREDENTIALS_KEY]
       return credentials[APIURL] unless credentials[APIURL].nil?
       base_url = credentials[ENDPOINT] || credentials[SERVER] || "https://#{tenant(credentials)}.live.dynatrace.com"
       base_url = base_url.gsub('/communication', '').concat('/api').gsub(':8443', '').gsub(':443', '')
