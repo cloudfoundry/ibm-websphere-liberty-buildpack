@@ -96,6 +96,12 @@ module LibertyBuildpack::Jre
 
     VERSION_8 = LibertyBuildpack::Util::TokenizedVersion.new('1.8.0').freeze
 
+    MEMORY_CONFIG_FOLDER = '.memory_config/'.freeze
+
+    MEMORY_HEURISTICS_FILE = 'heuristics'.freeze
+
+    MEMORY_SIZES_FILE = 'sizes'.freeze
+
     def expand(file)
       expand_start_time = Time.now
       print "       Expanding OpenJdk to #{JAVA_HOME} "
@@ -133,7 +139,25 @@ module LibertyBuildpack::Jre
         sizes.delete 'permgen'
       end
 
+      write_memory_config(heuristics, sizes)
+
       OpenJDKMemoryHeuristicFactory.create_memory_heuristic(sizes, heuristics, @version).resolve
+    end
+
+    def memory_heuristics_file
+      File.join(@app_dir, MEMORY_CONFIG_FOLDER, MEMORY_HEURISTICS_FILE)
+    end
+
+    def memory_sizes_file
+      File.join(@app_dir, MEMORY_CONFIG_FOLDER, MEMORY_SIZES_FILE)
+    end
+
+    def write_memory_config(heuristics, sizes)
+      FileUtils.mkdir_p File.join(@app_dir, MEMORY_CONFIG_FOLDER)
+
+      File.open(memory_heuristics_file, 'w') { |file| file.write(heuristics) }
+
+      File.open(memory_sizes_file, 'w') { |file| file.write(sizes) }
     end
 
     def copy_killjava_script
