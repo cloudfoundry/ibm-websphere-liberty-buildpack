@@ -17,17 +17,17 @@
 
 require 'spec_helper'
 require 'logging_helper'
-require 'liberty_buildpack/jre/memory/stack_memory_bucket'
-require 'liberty_buildpack/jre/memory/memory_bucket'
-require 'liberty_buildpack/jre/memory/memory_range'
-require 'liberty_buildpack/jre/memory/memory_size'
+require_relative  '../../../resources/memory/stack_memory_bucket'
+require_relative  '../../../resources/memory/memory_bucket'
+require_relative  '../../../resources/memory/memory_range'
+require_relative  '../../../resources/memory/memory_size'
 
-describe LibertyBuildpack::Jre::StackMemoryBucket do
+describe StackMemoryBucket do
   include_context 'logging_helper'
 
   let(:test_stack_bucket_weighting) { 0.05 }
-  let(:test_stack_size) { LibertyBuildpack::Jre::MemorySize.new('2M') }
-  let(:test_stack_size_range) { LibertyBuildpack::Jre::MemoryRange.new(test_stack_size, test_stack_size) }
+  let(:test_stack_size) { MemorySize.new('2M') }
+  let(:test_stack_size_range) { MemoryRange.new(test_stack_size, test_stack_size) }
 
   it 'should call the superclass constructor correctly' do
     # since we can't easily stub the superclass, test the superclass behaves as expected

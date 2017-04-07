@@ -41,18 +41,8 @@ module LibertyBuildpack::Jre
 
     let(:application_cache) { double('ApplicationCache') }
 
-    let(:memory_heuristic_7) { double('MemoryHeuristic', resolve: %w(opt-7-1 opt-7-2)) }
-
-    let(:memory_heuristic_8) { double('MemoryHeuristic', resolve: %w(opt-8-1 opt-8-2)) }
-
     before do
       allow(LibertyBuildpack::Repository::ConfiguredItem).to receive(:find_item).and_return([version_7, 'test-uri'])
-      allow(LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new).with({ 'permgen' => '64m..' },
-                                                                                         anything, anything, anything)
-        .and_return(memory_heuristic_7)
-      allow(LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new).with({ 'metaspace' => '64m..' },
-                                                                                         anything, anything, anything)
-        .and_return(memory_heuristic_8)
     end
 
     it 'should detect with id of openjdk-<version>' do
@@ -104,42 +94,43 @@ module LibertyBuildpack::Jre
       end
     end
 
-    it 'adds memory options to java_opts' do
+    it 'should add the heuristics file with default configuration' do
       Dir.mktmpdir do |root|
-        java_opts = %w(test-opt-2 test-opt-1)
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
 
-        OpenJdk.new(
+        component = OpenJdk.new(
           app_dir: root,
-          java_home: '',
-          java_opts: java_opts,
           configuration: configuration,
+          java_home: '',
+          java_opts: [],
           license_ids: {}
-        ).release
+        )
+        component.release
 
-        expect(java_opts).to include('test-opt-2')
-        expect(java_opts).to include('test-opt-1')
-        expect(java_opts).to include('opt-7-1')
-        expect(java_opts).to include('opt-7-2')
+        my_app_dir = component.instance_variable_get('@app_dir')
+        memory_config = File.read("#{my_app_dir}/.memory_config/heuristics")
+        expect(memory_config).to include('heap')
       end
     end
 
-    it 'adds memory options to java_opts (Java 8)' do
-      allow(LibertyBuildpack::Repository::ConfiguredItem).to receive(:find_item).and_return([version_8, 'test-uri'])
+    it 'should add the sizes file with default configuration' do
       Dir.mktmpdir do |root|
-        java_opts = %w(test-opt-2 test-opt-1)
+        LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-uri').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
 
-        OpenJdk.new(
+        component = OpenJdk.new(
           app_dir: root,
-          java_home: '',
-          java_opts: java_opts,
           configuration: configuration,
+          java_home: '',
+          java_opts: [],
           license_ids: {}
-        ).release
+        )
+        component.release
 
-        expect(java_opts).to include('test-opt-2')
-        expect(java_opts).to include('test-opt-1')
-        expect(java_opts).to include('opt-8-1')
-        expect(java_opts).to include('opt-8-2')
+        my_app_dir = component.instance_variable_get('@app_dir')
+        memory_config = File.read("#{my_app_dir}/.memory_config/sizes")
+        expect(memory_config).to include('permgen')
       end
     end
 

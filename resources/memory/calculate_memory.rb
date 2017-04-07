@@ -15,18 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require_relative 'memory_limit'
 require_relative 'memory_size'
-
-def memory_limit
-  memory_limit = ENV['MEMORY_LIMIT']
-  memory_limit_size = MemorySize.new(memory_limit)
-  raise "Invalid negative $MEMORY_LIMIT #{memory_limit}" if memory_limit_size < 0
-  memory_limit_size
-end
+require_relative 'openjdk_memory_heuristic_factory'
+require 'json'
 
 def heap_size
   heap_size_ratio = File.read('.memory_config/heap_size_ratio_config')
-  new_heap_size = memory_limit * heap_size_ratio.to_f
+  new_heap_size = MemoryLimit.memory_limit * heap_size_ratio.to_f
   new_heap_size
 end
 
@@ -35,7 +31,7 @@ def java_opts_file
   "/home/vcap/app/wlp/usr/servers/#{server_name}/jvm.options"
 end
 
-def set_memory_config
+def set_ibmjdk_config
   if File.readlines(java_opts_file).grep(/-Xmx/).size > 0
     puts 'User already set max heap size (-Xmx)'
   else
@@ -46,4 +42,41 @@ def set_memory_config
   end
 end
 
-set_memory_config
+def set_openjdk_config
+  if File.readlines(java_opts_file).grep(/-Xmx/).size > 0
+    puts 'User already set max heap size (-Xmx)'
+  else
+    puts 'Setting openJDK memory configuration'
+    File.open(java_opts_file, 'a') do |file|
+      file.puts OpenJDKMemoryHeuristicFactory.create_memory_heuristic(sizes, heuristics, openjdk_version).resolve
+    end
+  end
+end
+
+def sizes
+  memory_sizes = File.read('.memory_config/sizes')
+  JSON.parse memory_sizes.gsub('=>', ':')
+end
+
+def heuristics
+  memory_heuristics = File.read('.memory_config/heuristics')
+  JSON.parse memory_heuristics.gsub('=>', ':')
+end
+
+def openjdk_version
+  if File.readlines('.memory_config/heuristics').grep(/metaspace/).size > 0
+    '1.8.0'
+  else
+    '1.7.1'
+  end
+end
+
+def ibm_jdk?
+  File.file?('.memory_config/heap_size_ratio_config')
+end
+
+if ibm_jdk?
+  set_ibmjdk_config
+else
+  set_openjdk_config
+end

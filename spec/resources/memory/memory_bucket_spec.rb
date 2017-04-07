@@ -17,16 +17,16 @@
 
 require 'spec_helper'
 require 'logging_helper'
-require 'liberty_buildpack/jre/memory/memory_bucket'
-require 'liberty_buildpack/jre/memory/memory_range'
-require 'liberty_buildpack/jre/memory/memory_size'
+require_relative  '../../../resources/memory/memory_bucket'
+require_relative  '../../../resources/memory/memory_range'
+require_relative  '../../../resources/memory/memory_size'
 
-describe LibertyBuildpack::Jre::MemoryBucket do
+describe MemoryBucket do
   include_context 'logging_helper'
 
   let(:test_name) { 'bucket-name' }
   let(:test_weighting) { 0.5 }
-  let(:test_range) { LibertyBuildpack::Jre::MemoryRange.new('10M..10M') }
+  let(:test_range) { MemoryRange.new('10M..10M') }
 
   it 'should fail to construct if name is nil' do
     expect { described_class.new(nil, test_weighting, test_range) }.to raise_error(/Invalid MemoryBucket name/)

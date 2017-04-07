@@ -17,8 +17,6 @@
 require 'fileutils'
 require 'liberty_buildpack/diagnostics/common'
 require 'liberty_buildpack/container/common_paths'
-require 'liberty_buildpack/jre'
-require 'liberty_buildpack/jre/memory/openjdk_memory_heuristic_factory'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/cache/application_cache'
 require 'liberty_buildpack/util/format_duration'
@@ -81,7 +79,7 @@ module LibertyBuildpack::Jre
     def release
       @version = OpenJdk.find_openjdk(@configuration)[0]
       @java_opts << "-XX:OnOutOfMemoryError=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
-      @java_opts.concat memory
+      memory
     end
 
     private
@@ -140,8 +138,6 @@ module LibertyBuildpack::Jre
       end
 
       write_memory_config(heuristics, sizes)
-
-      OpenJDKMemoryHeuristicFactory.create_memory_heuristic(sizes, heuristics, @version).resolve
     end
 
     def memory_heuristics_file

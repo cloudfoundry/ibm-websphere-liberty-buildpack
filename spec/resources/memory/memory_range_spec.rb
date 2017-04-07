@@ -16,18 +16,18 @@
 # limitations under the License.
 
 require 'spec_helper'
-require 'liberty_buildpack/jre/memory/memory_range'
-require 'liberty_buildpack/jre/memory/memory_size'
+require_relative  '../../../resources/memory/memory_range'
+require_relative  '../../../resources/memory/memory_size'
 
-describe LibertyBuildpack::Jre::MemoryRange do
+describe MemoryRange do
 
-  let(:low) { LibertyBuildpack::Jre::MemorySize.new('1m') }
+  let(:low) { MemorySize.new('1m') }
 
-  let(:mid) { LibertyBuildpack::Jre::MemorySize.new('4m') }
+  let(:mid) { MemorySize.new('4m') }
 
-  let(:test_lower_bound) { LibertyBuildpack::Jre::MemorySize.new('3m') }
+  let(:test_lower_bound) { MemorySize.new('3m') }
 
-  let(:test_upper_bound) { LibertyBuildpack::Jre::MemorySize.new('5m') }
+  let(:test_upper_bound) { MemorySize.new('5m') }
 
   it 'should accept an absolute memory size and produce the corresponding tight range' do
     range = described_class.new('3m')

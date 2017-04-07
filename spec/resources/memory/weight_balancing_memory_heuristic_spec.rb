@@ -18,9 +18,9 @@
 require 'spec_helper'
 require 'logging_helper'
 require 'memory_limit_helper'
-require 'liberty_buildpack/jre/memory/weight_balancing_memory_heuristic'
+require_relative '../../../resources/memory/weight_balancing_memory_heuristic'
 
-describe LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic do
+describe WeightBalancingMemoryHeuristic do
   include_context 'logging_helper'
   include_context 'memory_limit_helper'
 
@@ -31,7 +31,7 @@ describe LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic do
     java_opts   = { 'heap'  => ->(v) { "-Xmx#{v}" }, 'permgen' => ->(v) { "-XX:MaxPermSize=#{v}" },
                     'stack' => ->(v) { "-Xss#{v}" } }
 
-    LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic.new(sizes, weightings, valid_types, java_opts)
+    WeightBalancingMemoryHeuristic.new(sizes, weightings, valid_types, java_opts)
   end
 
   it 'should fail if a memory limit is negative',
@@ -193,31 +193,6 @@ describe LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic do
     expect(output).to eq([])
   end
 
-  it 'should issue a warning when the specified maximum memory sizes imply the total memory size may be too large',
-     memory_limit: '4096m',
-     sizes:        { 'heap' => '800m', 'permgen' => '800m' },
-     enable_log_file: true do
-
-    output = heuristic.resolve
-
-    expect(output).to include('-Xmx800M')
-    expect(output).to include('-XX:MaxPermSize=800M')
-    expect(log_contents).to match(/There is more than .* times more spare native memory than the default/)
-  end
-
-  it 'should issue a warning when the specified maximum memory sizes, including native, imply the total memory size may be too large',
-     memory_limit: '4096m',
-     sizes:        { 'heap' => '1m', 'permgen' => '1m', 'stack' => '2m', 'native' => '2000m' },
-     enable_log_file: true do
-
-    output = heuristic.resolve
-
-    expect(output).to include('-Xmx1M')
-    expect(output).to include('-XX:MaxPermSize=1M')
-    expect(output).to include('-Xss2M')
-    expect(log_contents).to match(/allocated Java memory sizes total .* which is less than/)
-  end
-
   it 'should allow native memory to be fixed',
      memory_limit: '4096m',
      sizes:        { 'permgen' => '1m', 'stack' => '2m', 'native' => '10m' } do
@@ -238,36 +213,6 @@ describe LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic do
     expect(output).to include('-Xmx3753369K')
     expect(output).to include('-XX:MaxPermSize=1M')
     expect(output).to include('-Xss2M')
-  end
-
-  it 'should issue a warning when the specified maximum heap size is close to the default',
-     memory_limit: '4096m',
-     sizes:        { 'heap' => '2049m' },
-     enable_log_file: true do
-
-    heuristic.resolve
-
-    expect(log_contents).to match(/WARN.*is close to the default/)
-  end
-
-  it 'should issue a warning when the specified maximum permgen size is close to the default',
-     memory_limit: '4096m',
-     sizes:        { 'permgen' => '1339m' },
-     enable_log_file: true do
-
-    heuristic.resolve
-
-    expect(log_contents).to match(/WARN.*is close to the default/)
-  end
-
-  it 'should not issue a warning when the specified maximum permgen size is not close to the default',
-     memory_limit: '1G',
-     sizes:        { 'permgen' => '128M' },
-     enable_log_file: true do
-
-    heuristic.resolve
-
-    expect(log_contents).not_to match(/WARN.*is close to the default/)
   end
 
   it 'should fail when the specified maximum memory is larger than the total memory size',

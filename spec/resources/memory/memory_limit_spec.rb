@@ -17,34 +17,34 @@
 
 require 'spec_helper'
 require 'memory_limit_helper'
-require 'liberty_buildpack/jre/memory/memory_limit'
-require 'liberty_buildpack/jre/memory/memory_size'
+require_relative  '../../../resources/memory/memory_limit'
+require_relative  '../../../resources/memory/memory_size'
 
-describe LibertyBuildpack::Jre::MemoryLimit do
+describe MemoryLimit do
   include_context 'memory_limit_helper'
 
   it 'should accept memory with an uppercase G',
      memory_limit: '1G' do
 
-    expect(described_class.memory_limit).to eq(LibertyBuildpack::Jre::MemorySize.new('1048576K'))
+    expect(described_class.memory_limit).to eq(MemorySize.new('1048576K'))
   end
 
   it 'should accept memory with an lowercase G',
      memory_limit: '1g' do
 
-    expect(described_class.memory_limit).to eq(LibertyBuildpack::Jre::MemorySize.new('1048576K'))
+    expect(described_class.memory_limit).to eq(MemorySize.new('1048576K'))
   end
 
   it 'should accept memory with an uppercase M',
      memory_limit: '1M' do
 
-    expect(described_class.memory_limit).to eq(LibertyBuildpack::Jre::MemorySize.new('1024K'))
+    expect(described_class.memory_limit).to eq(MemorySize.new('1024K'))
   end
 
   it 'should accept memory with an lowercase M',
      memory_limit: '1m' do
 
-    expect(described_class.memory_limit).to eq(LibertyBuildpack::Jre::MemorySize.new('1024K'))
+    expect(described_class.memory_limit).to eq(MemorySize.new('1024K'))
   end
 
   it 'should return nil if a memory limit is not specified',

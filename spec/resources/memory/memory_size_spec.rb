@@ -16,9 +16,9 @@
 # limitations under the License.
 
 require 'spec_helper'
-require 'liberty_buildpack/jre/memory/memory_size'
+require_relative '../../../resources/memory/memory_size'
 
-describe LibertyBuildpack::Jre::MemorySize do
+describe MemorySize do
 
   let(:half_meg) { described_class.new('512K') }
 
