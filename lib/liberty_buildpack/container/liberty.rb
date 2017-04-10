@@ -103,6 +103,7 @@ module LibertyBuildpack::Container
       minify_liberty if minify?
       overlay_java
       set_liberty_system_properties
+      set_jdk_memory_configuration
     end
 
     # Creates the command to run the Liberty application.
@@ -112,14 +113,16 @@ module LibertyBuildpack::Container
       jvm_options
 
       server_dir = ' wlp/usr/servers/' << server_name << '/'
+      write_server_name
       runtime_vars_file =  server_dir + 'runtime-vars.xml'
       create_vars_string = File.join(LIBERTY_HOME, 'create_vars.rb') << runtime_vars_file << ' &&'
+      create_jdk_memory_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'calculate_memory.rb') << ' &&')
       skip_maxpermsize_string = ContainerUtils.space('WLP_SKIP_MAXPERMSIZE=true')
       java_home_string = ContainerUtils.space("JAVA_HOME=\"$PWD/#{@java_home}\"")
       wlp_user_dir_string = ContainerUtils.space('WLP_USER_DIR="$PWD/wlp/usr"')
       server_script_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'bin', 'server'))
 
-      start_command = "#{create_vars_string}#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
+      start_command = "#{create_vars_string}#{create_jdk_memory_string}#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
       move_app
 
       start_command
@@ -257,6 +260,18 @@ module LibertyBuildpack::Container
       File.chmod(0o755, create_vars_destination)
     end
 
+    def set_jdk_memory_configuration
+      resources_dir = File.expand_path(RESOURCES, File.dirname(__FILE__))
+      jdk_memory_config_destination = File.join(liberty_home, 'calculate_memory.rb')
+      jdk_memory_size_destination = File.join(liberty_home, 'memory_size.rb')
+
+      FileUtils.cp(File.join(resources_dir, 'memory_size.rb'), jdk_memory_size_destination)
+      FileUtils.cp(File.join(resources_dir, 'calculate_memory.rb'), jdk_memory_config_destination)
+
+      File.chmod(0o755, jdk_memory_size_destination)
+      File.chmod(0o755, jdk_memory_config_destination)
+    end
+
     KEY_HTTP_PORT = 'port'.freeze
 
     RESOURCES = File.join('..', '..', '..', 'resources', 'liberty').freeze
@@ -282,6 +297,10 @@ module LibertyBuildpack::Container
     WEB_INF = 'WEB-INF'.freeze
 
     META_INF = 'META-INF'.freeze
+
+    MEMORY_CONFIG_FOLDER = '.memory_config/'.freeze
+
+    SERVER_NAME_FILE = 'server_name_information'.freeze
 
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
@@ -529,6 +548,15 @@ module LibertyBuildpack::Container
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
       end
+    end
+
+    def server_name_file
+      File.join(@app_dir, MEMORY_CONFIG_FOLDER, SERVER_NAME_FILE)
+    end
+
+    def write_server_name
+      FileUtils.mkdir_p File.join(@app_dir, MEMORY_CONFIG_FOLDER)
+      File.open(server_name_file, 'w') { |file| file.write(server_name) }
     end
 
     # Liberty download component names, as used in the component_index.yml file

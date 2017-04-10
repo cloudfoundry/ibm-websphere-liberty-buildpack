@@ -106,18 +106,6 @@ module LibertyBuildpack::Jre
           expect(File.exist?(java)).to eq(true)
         end
 
-        it 'should not display Avoid Trouble message when specifying 512MB or higher mem limit', cache_fixture: 'stub-ibm-java.tar.gz' do
-          ENV['MEMORY_LIMIT'] = '512m'
-
-          expect { compiled }.not_to output(/Avoid Trouble/).to_stdout
-        end
-
-        it 'should display Avoid Trouble message when specifying <512MB mem limit', cache_fixture: 'stub-ibm-java.tar.gz' do
-          ENV['MEMORY_LIMIT'] = '256m'
-
-          expect { compiled }.to output(/Avoid Trouble/).to_stdout
-        end
-
         it 'should fail when the license id is not provided', app_dir: '', license_ids: {} do
           expect { compiled }.to raise_error
         end
@@ -140,6 +128,22 @@ module LibertyBuildpack::Jre
           compiled
 
           expect(Pathname.new(File.join(LibertyBuildpack::Diagnostics.get_diagnostic_directory(app_dir), IBMJdk::KILLJAVA_FILE_NAME))).to exist
+        end
+
+        it 'should add 0.50 ratio when heap_size_ratio is set to 50%', configuration: { 'heap_size_ratio' => 0.50 } do
+          compiled
+
+          my_app_dir = component.instance_variable_get('@app_dir')
+          memory_config = File.read("#{my_app_dir}/.memory_config/heap_size_ratio_config")
+          expect(memory_config).to include('0.5')
+        end
+
+        it 'should add 0.75 ratio when heap_size_ratio is not set' do
+          compiled
+
+          my_app_dir = component.instance_variable_get('@app_dir')
+          memory_config = File.read("#{my_app_dir}/.memory_config/heap_size_ratio_config")
+          expect(memory_config).to include('0.75')
         end
 
       end # end of compile shared tests
@@ -166,34 +170,6 @@ module LibertyBuildpack::Jre
                                       '-Xdump:java:defaults:file=./../dumps/javacore.%Y%m%d.%H%M%S.%pid.%seq.txt',
                                       '-Xdump:snap:defaults:file=./../dumps/Snap.%Y%m%d.%H%M%S.%pid.%seq.trc',
                                       '-Xdump:heap+java+snap:events=user')
-        end
-
-        it 'should add extra memory options when 512m memory limit is set' do
-          ENV['MEMORY_LIMIT'] = '512m'
-
-          expect(released).to include('-Xtune:virtualized')
-          expect(released).to include('-Xmx384M')
-        end
-
-        it 'should add extra memory options when 512m memory limit is set with 50% ratio', configuration: { 'heap_size_ratio' => 0.50 } do
-          ENV['MEMORY_LIMIT'] = '512m'
-
-          expect(released).to include('-Xtune:virtualized')
-          expect(released).to include('-Xmx256M')
-        end
-
-        it 'should add extra memory options when 1024m memory limit is set' do
-          ENV['MEMORY_LIMIT'] = '1024m'
-
-          expect(released).to include('-Xtune:virtualized')
-          expect(released).to include('-Xmx768M')
-        end
-
-        it 'should add extra memory options when 1024m memory limit is set with 12.% ratio', configuration: { 'heap_size_ratio' => 0.125 } do
-          ENV['MEMORY_LIMIT'] = '1024m'
-
-          expect(released).to include('-Xtune:virtualized')
-          expect(released).to include('-Xmx128M')
         end
 
         it 'should provide troubleshooting info for JVM shutdowns' do

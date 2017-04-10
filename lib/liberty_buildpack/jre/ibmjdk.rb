@@ -23,8 +23,6 @@ require 'liberty_buildpack/util/cache/application_cache'
 require 'liberty_buildpack/util/format_duration'
 require 'liberty_buildpack/util/tokenized_version'
 require 'liberty_buildpack/util/license_management'
-require 'liberty_buildpack/jre/memory/memory_limit'
-require 'liberty_buildpack/jre/memory/memory_size'
 require 'pathname'
 require 'tempfile'
 
@@ -79,9 +77,6 @@ module LibertyBuildpack::Jre
         raise
       end
 
-      # Checks that user has defined a sufficient memory limit
-      check_memory
-
       download_start_time = Time.now
       if @uri.include? '://'
         print "-----> Downloading IBM #{@version} JRE from #{@uri} ... "
@@ -94,6 +89,7 @@ module LibertyBuildpack::Jre
         expand file
       end
       copy_killjava_script
+      write_heap_size_ratio_file
     end
 
     # Build Java memory options and places then in +context[:java_opts]+
@@ -107,16 +103,6 @@ module LibertyBuildpack::Jre
       @java_opts << "-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
     end
 
-    # Prints a warning message if a memory limit of less than 512M has been chosen when using the IBM JDK.
-    def check_memory
-      mem_limit = MemoryLimit.memory_limit
-      unless mem_limit.nil?
-        if mem_limit < MemorySize.new('512M')
-          puts '-----> Avoid Trouble: Specify a minimum of 512M as the Memory Limit for your apps when using IBM JDK.'
-        end
-      end
-    end
-
     private
 
     RESOURCES = '../../../resources/ibmjdk/diagnostics'.freeze
@@ -124,6 +110,10 @@ module LibertyBuildpack::Jre
     JAVA_HOME = '.java'.freeze
 
     VERSION_8 = LibertyBuildpack::Util::TokenizedVersion.new('1.8.0').freeze
+
+    MEMORY_CONFIG_FOLDER = '.memory_config/'.freeze
+
+    HEAP_RATIO_FILE = 'heap_size_ratio_config'.freeze
 
     def expand(file)
       expand_start_time = Time.now
@@ -171,14 +161,16 @@ module LibertyBuildpack::Jre
       java_memory_opts = []
       java_memory_opts.push '-Xtune:virtualized'
 
-      mem = MemoryLimit.memory_limit
-      if mem.nil?
-        ## if no memory option has been set by cloudfoundry, we just assume defaults
-      else
-        new_heap_size = mem * heap_size_ratio
-        java_memory_opts.push "-Xmx#{new_heap_size}"
-      end
       java_memory_opts
+    end
+
+    def heap_size_ratio_file
+      File.join(@app_dir, MEMORY_CONFIG_FOLDER, HEAP_RATIO_FILE)
+    end
+
+    def write_heap_size_ratio_file
+      FileUtils.mkdir_p File.join(@app_dir, MEMORY_CONFIG_FOLDER)
+      File.open(heap_size_ratio_file, 'w') { |file| file.write(heap_size_ratio) }
     end
 
     def tls_opts
