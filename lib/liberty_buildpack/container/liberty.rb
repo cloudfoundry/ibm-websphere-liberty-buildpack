@@ -261,20 +261,25 @@ module LibertyBuildpack::Container
     end
 
     def set_jdk_memory_configuration
-      resources_dir = File.expand_path(RESOURCES, File.dirname(__FILE__))
-      jdk_memory_config_destination = File.join(liberty_home, 'calculate_memory.rb')
-      jdk_memory_size_destination = File.join(liberty_home, 'memory_size.rb')
+      memory_resources_dir = File.expand_path(MEMORY_RESOURCES, File.dirname(__FILE__))
 
-      FileUtils.cp(File.join(resources_dir, 'memory_size.rb'), jdk_memory_size_destination)
-      FileUtils.cp(File.join(resources_dir, 'calculate_memory.rb'), jdk_memory_config_destination)
+      Dir.glob(File.join(memory_resources_dir, '/*')).select { |f| !File.directory?(f) }.each { |f| FileUtils.cp(f, File.join(liberty_home, File.basename(f))) }
 
-      File.chmod(0o755, jdk_memory_size_destination)
-      File.chmod(0o755, jdk_memory_config_destination)
+      File.chmod(0o755, File.join(liberty_home, 'calculate_memory.rb'))
+      File.chmod(0o755, File.join(liberty_home, 'memory_size.rb'))
+      File.chmod(0o755, File.join(liberty_home, 'memory_bucket.rb'))
+      File.chmod(0o755, File.join(liberty_home, 'memory_limit.rb'))
+      File.chmod(0o755, File.join(liberty_home, 'memory_range.rb'))
+      File.chmod(0o755, File.join(liberty_home, 'openjdk_memory_heuristic_factory.rb'))
+      File.chmod(0o755, File.join(liberty_home, 'stack_memory_bucket.rb'))
+      File.chmod(0o755, File.join(liberty_home, 'weight_balancing_memory_heuristic.rb'))
     end
 
     KEY_HTTP_PORT = 'port'.freeze
 
     RESOURCES = File.join('..', '..', '..', 'resources', 'liberty').freeze
+
+    MEMORY_RESOURCES = File.join('..', '..', '..', 'resources', 'memory').freeze
 
     KEY_SUPPORT = 'support'.freeze
 

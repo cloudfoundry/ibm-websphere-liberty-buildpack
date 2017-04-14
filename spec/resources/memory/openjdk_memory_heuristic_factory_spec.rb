@@ -16,9 +16,8 @@
 # limitations under the License.
 
 require 'spec_helper'
-require 'liberty_buildpack/jre/memory/openjdk_memory_heuristic_factory'
-require 'liberty_buildpack/jre/memory/weight_balancing_memory_heuristic'
-require 'liberty_buildpack/util/tokenized_version'
+require_relative  '../../../resources/memory/openjdk_memory_heuristic_factory'
+require_relative  '../../../resources/memory/weight_balancing_memory_heuristic'
 require 'rspec/expectations'
 
 RSpec::Matchers.define :be_a_hash_like do |expected|
@@ -30,13 +29,13 @@ RSpec::Matchers.define :be_a_hash_like do |expected|
   end
 end
 
-describe LibertyBuildpack::Jre::OpenJDKMemoryHeuristicFactory do
+describe OpenJDKMemoryHeuristicFactory do
 
   let(:heuristics) { { 'c' => 'd' } }
 
-  let(:post_8) { LibertyBuildpack::Util::TokenizedVersion.new('1.8.0') }
+  let(:post_8) { '1.8.0' }
 
-  let(:pre_8) { LibertyBuildpack::Util::TokenizedVersion.new('1.7.0') }
+  let(:pre_8) { '1.7.0' }
 
   let(:sizes) { { 'a' => 'b' } }
 
@@ -50,7 +49,7 @@ describe LibertyBuildpack::Jre::OpenJDKMemoryHeuristicFactory do
   end
 
   it 'should pass the appropriate constructor parameters for versions prior to 1.8' do
-    allow(LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new)
+    allow(WeightBalancingMemoryHeuristic).to receive(:new)
       .with(sizes, heuristics, %w(heap stack native permgen),
             be_a_hash_like(expected_java_memory_options))
 
@@ -58,7 +57,7 @@ describe LibertyBuildpack::Jre::OpenJDKMemoryHeuristicFactory do
   end
 
   it 'should pass the appropriate constructor parameters for versions 1.8 and higher' do
-    allow(LibertyBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new)
+    allow(WeightBalancingMemoryHeuristic).to receive(:new)
       .with(sizes, heuristics, %w(heap stack native metaspace),
             be_a_hash_like(expected_java_memory_options))
 
