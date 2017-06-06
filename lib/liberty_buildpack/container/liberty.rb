@@ -443,7 +443,7 @@ module LibertyBuildpack::Container
         endpoint = endpoints[0]
         endpoints.drop(1).each { |element| element.parent.delete_element(element) }
       end
-      if appstate_enabled? && appstate_apps(server_xml_doc).size > 0
+      if appstate_enabled? && appstate_apps(server_xml_doc).size > 0 && !dropins_dir_populated?
         endpoint.add_attribute('host', '127.0.0.1')
       else
         endpoint.add_attribute('host', '*')
@@ -491,11 +491,14 @@ module LibertyBuildpack::Container
       application_monitors = REXML::XPath.match(server_xml_doc, '/server/applicationMonitor')
       if application_monitors.empty?
         application_monitor = REXML::Element.new('applicationMonitor', server_xml_doc.root)
-        dropins_dir = File.join(current_server_dir, 'dropins')
-        dropins_dir_populated = Dir.exist?(dropins_dir) && Dir.entries(dropins_dir).size > 2
-        application_monitor.add_attribute('dropinsEnabled', dropins_dir_populated ? 'true' : 'false')
+        application_monitor.add_attribute('dropinsEnabled', dropins_dir_populated? ? 'true' : 'false')
         application_monitor.add_attribute('updateTrigger', 'mbean')
       end
+    end
+
+    def dropins_dir_populated?
+      dropins_dir = File.join(current_server_dir, 'dropins')
+      Dir.exist?(dropins_dir) && Dir.entries(dropins_dir).size > 2
     end
 
     def disable_welcome_page(server_xml_doc)
