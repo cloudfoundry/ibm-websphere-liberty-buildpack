@@ -66,3 +66,5 @@ Style/RegexpLiteral:
   Enabled: false
 Style/ConditionalAssignment:
   Enabled: false
+FrozenStringLiteralComment:
+  Enabled: false
