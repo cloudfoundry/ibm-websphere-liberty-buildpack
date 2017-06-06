@@ -21,9 +21,27 @@ require_relative 'openjdk_memory_heuristic_factory'
 require 'json'
 
 def heap_size
+  mem_limit = MemoryLimit.memory_limit
   heap_size_ratio = File.read('.memory_config/heap_size_ratio_config')
-  new_heap_size = MemoryLimit.memory_limit * heap_size_ratio.to_f
+  if valid_float?(heap_size_ratio)
+    heap_size_ratio = heap_size_ratio.to_f
+  else
+    puts "'#{heap_size_ratio}' is not a valid heap size ratio setting, using default value."
+    heap_size_ratio = Float(0.75)
+  end
+
+  if mem_limit < MemorySize.new('512M')
+    low_mem_heap_size_ratio = Float(0.5)
+    unless heap_size_ratio != Float(0.75)
+      heap_size_ratio = low_mem_heap_size_ratio
+    end
+  end
+  new_heap_size = mem_limit * heap_size_ratio
   new_heap_size
+end
+
+def valid_float?(str)
+  true if Float(str) rescue false # rubocop:disable Style/RescueModifier
 end
 
 def java_opts_file
@@ -35,9 +53,10 @@ def set_ibmjdk_config
   if File.readlines(java_opts_file).grep(/-Xmx/).size > 0
     puts 'User already set max heap size (-Xmx)'
   else
-    puts "Setting JDK heap to: -Xmx#{heap_size}"
+    calculated_heap_size = heap_size
+    puts "Setting JDK heap to: -Xmx#{calculated_heap_size}"
     File.open(java_opts_file, 'a') do |file|
-      file.puts "-Xmx#{heap_size}"
+      file.puts "-Xmx#{calculated_heap_size}"
     end
   end
 end
