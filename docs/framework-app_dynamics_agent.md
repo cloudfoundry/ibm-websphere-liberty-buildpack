@@ -13,18 +13,18 @@ The AppDynamics Agent Framework causes an application to be automatically config
 Tags are printed to standard output by the buildpack detect script
 
 ## User-Provided Service
-When binding AppDynamics using a user-provided service, it must have name or tag with `app-dynamics` or `appdynamics` in it. The credential payload can contain the following entries:
+When binding AppDynamics using a user-provided service, it must have name or tag with `appdynamics` in it. The credential payload can contain the following entries:
 
 | Name | Description
 | ---- | -----------
-| `account-access-key` | (Optional) The account access key to use when authenticating with the controller
-| `account-name` | (Optional) The account name to use when authenticating with the controller
-| `application-name` | (Optional) the applicationa's name
+| `account-access-key` |  The account access key to use when authenticating with the controller
+| `account-name` |  The account name to use when authenticating with the controller
+| `application-name` |  the applicationa's name
 | `host-name` | The controller host name
-| `node-name` | (Optional) the application's node name
-| `port` | (Optional) The controller port
-| `ssl-enabled` | (Optional) Whether or not to use an SSL connection to the controller
-| `tier-name` | (Optional) the application's tier name
+| `node-name` | the application's node name
+| `port` | The controller port
+| `ssl-enabled` | Whether or not to use an SSL connection to the controller
+| `tier-name` | the application's tier name
 
 To provide more complex values such as the `tier-name`, using the interactive mode when creating a user-provided service will manage the character escaping automatically. For example, the default `tier-name` could be set with a value of `Tier-$(expr "$VCAP_APPLICATION" : '.*instance_index[": ]*\([[:digit:]]*\).*')` to calculate a value from the Cloud Foundry instance index.
 
