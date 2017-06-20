@@ -62,23 +62,6 @@ describe 'compile script', :integration do
     end # dir
   end # it
 
-  it 'should generate a staging_task.log file with the liberty WEB-INF case' do
-    Dir.mktmpdir do |root|
-      FileUtils.cp_r'spec/fixtures/container_liberty_no_log/.', root
-      with_memory_limit('1G') do
-        Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
-          result = wait_thr.value
-          if result != 0
-            puts "stdout: #{stdout.read}"
-            puts "stderr: #{stderr.read}"
-          end
-          expect(result).to be_success
-          expect(File.exist?(File.join(root, 'logs', 'staging_task.log'))).to be_truthy
-        end # popen3
-      end # with
-    end # dir
-  end # it
-
   it 'should also work with the zipped up server case' do
     Dir.mktmpdir do |root|
       FileUtils.cp_r 'spec/fixtures/container_liberty_server/.', root
@@ -91,24 +74,6 @@ describe 'compile script', :integration do
             puts "stderr: #{stderr.read}"
           end
           expect(result).to be_success
-        end # popen3
-      end # with
-    end # dir
-  end # it
-
-  it 'should generate a staging_task.log file with the zipped up server case' do
-    Dir.mktmpdir do |root|
-      FileUtils.cp_r 'spec/fixtures/container_liberty_server/.', root
-
-      with_memory_limit('1G') do
-        Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
-          result = wait_thr.value
-          if result != 0
-            puts "stdout: #{stdout.read}"
-            puts "stderr: #{stderr.read}"
-          end
-          expect(result).to be_success
-          expect(File.exist?(File.join(root, 'logs', 'staging_task.log'))).to be_truthy
         end # popen3
       end # with
     end # dir

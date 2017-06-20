@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013-2017 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -1379,11 +1379,6 @@ module LibertyBuildpack::Container
           end
         end
 
-        def create_staging_log(path)
-          FileUtils.mkdir_p(File.join(path, 'logs'))
-          File.open(File.join(path, 'logs', 'staging_task.log'), 'w') { |file| file.write('') }
-        end
-
         def jvm_opts(jvm_options_file)
           expect(File.exist?(jvm_options_file)).to eq(true)
           File.read(jvm_options_file)
@@ -1450,7 +1445,6 @@ module LibertyBuildpack::Container
           server_jvm_opts = jvm_opt_test(File.join('wlp', 'usr', 'servers', 'defaultServer', 'jvm.options')) do |root, context|
             FileUtils.mkdir_p File.join(root, '.liberty', 'usr', 'servers', 'defaultServer')
             create_server_xml(root)
-            create_staging_log(root)
             context[:java_opts] = %w(test-opt-2 test-opt-1)
           end
 
@@ -1468,7 +1462,6 @@ module LibertyBuildpack::Container
 
             create_server_xml(File.join(root, 'wlp', 'usr', 'servers', 'defaultServer'))
             create_jvm_options(File.join(root, 'wlp', 'usr', 'servers', 'defaultServer'), 'provided-opt-1')
-            create_staging_log(root)
 
             context[:java_opts] = %w(test-opt-2 test-opt-1) # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
           end
@@ -1490,7 +1483,6 @@ module LibertyBuildpack::Container
             FileUtils.mkdir_p File.join(liberty_home, 'usr', 'servers', 'defaultServer')
             create_server_xml(root)
             create_jvm_options(root, 'provided-opt-1')
-            create_staging_log(root)
 
             context[:java_opts] = %w(test-opt-2 test-opt-1) # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
           end
@@ -1512,7 +1504,6 @@ module LibertyBuildpack::Container
             FileUtils.mkdir_p File.join(liberty_home, 'usr', 'servers', 'defaultServer')
             create_server_xml(root)
             create_jvm_options(root, 'provided-opt-1')
-            create_staging_log(root)
 
             context[:java_opts] = %w(provided-opt-1) # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
           end
