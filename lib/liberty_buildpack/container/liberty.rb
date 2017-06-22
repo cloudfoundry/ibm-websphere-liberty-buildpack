@@ -152,6 +152,7 @@ module LibertyBuildpack::Container
       elsif Liberty.server_directory(@app_dir)
         dest = File.join(@app_dir, '.wlp', USR_PATH, SERVERS_PATH, DEFAULT_SERVER)
         move_and_relink @app_dir, dest
+        move_staging_logs dest, @app_dir
         FileUtils.mv File.join(@app_dir, '.wlp'), File.join(@app_dir, WLP_PATH)
         move_user_features
       else
@@ -161,6 +162,7 @@ module LibertyBuildpack::Container
         dest = File.join(dest, DEFAULT_SERVER, 'apps', myapp_name)
         FileUtils.rm_rf(dest)
         move_and_relink @app_dir, dest
+        move_staging_logs dest, @app_dir
         FileUtils.mv File.join(@app_dir, '.wlp'), File.join(@app_dir, WLP_PATH)
         move_user_features
       end
@@ -177,6 +179,11 @@ module LibertyBuildpack::Container
         file = File.join(dest, link)
         FileUtils.ln_sf(Pathname(target).relative_path_from(Pathname(File.dirname(file))), file)
       end
+    end
+
+    def move_staging_logs(src, dest)
+      FileUtils.mkdir_p(File.join(dest, 'logs'))
+      FileUtils.mv File.join(src, 'logs', 'staging_task.log'), File.join(dest, 'logs')
     end
 
     def move_user_features
