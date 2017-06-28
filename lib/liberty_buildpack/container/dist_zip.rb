@@ -176,7 +176,7 @@ module LibertyBuildpack::Container
     #
     # @return [Pathname, nil] the single directory in the root of the droplet, otherwise +nil+
     def find_single_directory
-      roots = Dir.glob(File.join(@app_dir, '*')).select { |f| File.directory? f }
+      roots = Dir.glob(File.join(@app_dir, '*')).select { |f| f != File.join(@app_dir, 'logs') && File.directory?(f) }
       roots.size == 1 ? roots.first : nil
     end
 
