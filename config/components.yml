@@ -33,3 +33,4 @@ frameworks:
   - "LibertyBuildpack::Framework::DynatraceOneAgent"
   - "LibertyBuildpack::Framework::DynamicPULSEAgent"
   - "LibertyBuildpack::Framework::ContainerCertificateTrustStore"
+  - "LibertyBuildpack::Framework::ContrastSecurityAgent"
