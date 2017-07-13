@@ -112,6 +112,13 @@ module LibertyBuildpack::Framework
                                                    'credentials' => def_credentials }] } do
           expect(detected).to eq(nil)
         end
+
+        it 'should detect a referral tile created user provided service',
+           vcap_services_context: { def_type => [{ 'name' => def_name, 'label' => def_label, 'tags' => def_tags,
+                                                   'credentials' => { 'contrast_referral_tile' => 'true' } }] } do
+
+          expect(detected).to eq(versionid)
+        end
       end
 
       context 'application with no services' do

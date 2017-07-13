@@ -8,6 +8,7 @@ The Contrast Security Agent Framework causes an application to be automatically 
         <li>name that has the substring <code>contrast-security</code>. <strong>Note: </strong> This is only applicable to user-provided services</li>
         <li>label that has the substring <code>contrast-security</code>.</li>
         <li>tags that have the substring <code>contrast-security</code>.</li>
+        <li>credential payload containing the key <code>contrast_referral_tile<code></li>
       </ul>
     </td>
   </tr>

@@ -77,7 +77,7 @@ module LibertyBuildpack::Framework
       contrast_home = File.join(@app_dir, CONTRAST_DIR)
       FileUtils.mkdir_p(contrast_home)
 
-      write_configuration(@services.find_service(CONTRAST_FILTER)['credentials'])
+      write_configuration(find_service['credentials'])
       download_agent(@version, @uri, jar_name, contrast_home)
     end
 
@@ -122,6 +122,7 @@ module LibertyBuildpack::Framework
     CONTRAST_DIR = '.contrast'.freeze
     CONTRAST_FILTER = 'contrast-security'.freeze
     PLUGIN_PACKAGE = 'com.aspectsecurity.contrast.runtime.agent.plugins.'.freeze
+    REFERRAL_TILE = 'contrast_referral_tile'.freeze
     SERVICE_KEY = 'service_key'.freeze
     TEAMSERVER_URL = 'teamserver_url'.freeze
     USERNAME = 'username'.freeze
@@ -140,7 +141,7 @@ module LibertyBuildpack::Framework
     # @return [Boolean]  true if the app is bound to a contrast-security service
     #------------------------------------------------------------------------------------------
     def contrast_service_exist?
-      @services.one_service?(CONTRAST_FILTER, TEAMSERVER_URL, USERNAME, API_KEY, SERVICE_KEY)
+      @services.one_service?(CONTRAST_FILTER, TEAMSERVER_URL, USERNAME, API_KEY, SERVICE_KEY) || !referral_tile.nil?
     end
 
     def add_contrast(doc, credentials)
@@ -199,6 +200,20 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def vcap_app_name
       @vcap_application['application_name']
+    end
+
+    def referral_tile
+      @services.find do |service|
+        service['credentials'].key?(REFERRAL_TILE)
+      end
+    end
+
+    def find_service
+      if @services.one_service?(CONTRAST_FILTER, TEAMSERVER_URL, USERNAME, API_KEY, SERVICE_KEY)
+        @services.find_service(CONTRAST_FILTER)
+      else
+        referral_tile
+      end
     end
 
   end
