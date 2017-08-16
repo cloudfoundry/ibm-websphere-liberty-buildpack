@@ -121,7 +121,8 @@ module LibertyBuildpack::Framework
     CONTRAST_CONFIG_NAME = 'contrast.config'.freeze
     CONTRAST_DIR = '.contrast'.freeze
     CONTRAST_FILTER = 'contrast-security'.freeze
-    PLUGIN_PACKAGE = 'com.aspectsecurity.contrast.runtime.agent.plugins.'.freeze
+    JAVA_AGENT_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('3.4.3').freeze
+    PLUGIN_PACKAGE = 'com.aspectsecurity.contrast.runtime.agent.plugins'.freeze
     REFERRAL_TILE = 'contrast_referral_tile'.freeze
     SERVICE_KEY = 'service_key'.freeze
     TEAMSERVER_URL = 'teamserver_url'.freeze
@@ -132,7 +133,11 @@ module LibertyBuildpack::Framework
     end
 
     def version_identifier
-      "contrast-engine-#{@version.to_s.split('_')[0]}"
+      if @version < JAVA_AGENT_VERSION
+        "contrast-engine-#{@version.to_s.split('_')[0]}"
+      else
+        "java-agent-#{@version.to_s.split('_')[0]}"
+      end
     end
 
     #-----------------------------------------------------------------------------------------
