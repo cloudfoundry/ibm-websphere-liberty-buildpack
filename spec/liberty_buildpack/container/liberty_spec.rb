@@ -1557,7 +1557,7 @@ module LibertyBuildpack::Container
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/defaultServer/runtime-vars.xml && .liberty/calculate_memory.rb && WLP_SKIP_MAXPERMSIZE=true JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/defaultServer/runtime-vars.xml && .liberty/calculate_memory.rb && WLP_SKIP_MAXPERMSIZE=true JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" exec .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1575,7 +1575,7 @@ module LibertyBuildpack::Container
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/defaultServer/runtime-vars.xml && .liberty/calculate_memory.rb && WLP_SKIP_MAXPERMSIZE=true JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/defaultServer/runtime-vars.xml && .liberty/calculate_memory.rb && WLP_SKIP_MAXPERMSIZE=true JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" exec .liberty/bin/server run defaultServer")
         end
       end
 
@@ -1593,7 +1593,7 @@ module LibertyBuildpack::Container
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/myServer/runtime-vars.xml && .liberty/calculate_memory.rb && WLP_SKIP_MAXPERMSIZE=true JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" .liberty/bin/server run myServer")
+          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/myServer/runtime-vars.xml && .liberty/calculate_memory.rb && WLP_SKIP_MAXPERMSIZE=true JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" exec .liberty/bin/server run myServer")
         end
       end
 
@@ -1611,7 +1611,7 @@ module LibertyBuildpack::Container
             license_ids: {}
           ).release
 
-          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/defaultServer/runtime-vars.xml && .liberty/calculate_memory.rb && WLP_SKIP_MAXPERMSIZE=true JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" .liberty/bin/server run defaultServer")
+          expect(command).to eq(".liberty/create_vars.rb wlp/usr/servers/defaultServer/runtime-vars.xml && .liberty/calculate_memory.rb && WLP_SKIP_MAXPERMSIZE=true JAVA_HOME=\"$PWD/#{test_java_home}\" WLP_USER_DIR=\"$PWD/wlp/usr\" exec .liberty/bin/server run defaultServer")
         end
       end
 
