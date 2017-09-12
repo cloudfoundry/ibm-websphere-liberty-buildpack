@@ -211,6 +211,7 @@ module LibertyBuildpack::Framework
       @services.find do |service|
       	if service['credentials'] != nil
           service['credentials'].key?(REFERRAL_TILE)
+        end  
       end
     end
 
