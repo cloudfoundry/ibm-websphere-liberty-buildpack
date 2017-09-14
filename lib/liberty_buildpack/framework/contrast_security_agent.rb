@@ -209,7 +209,9 @@ module LibertyBuildpack::Framework
 
     def referral_tile
       @services.find do |service|
-        service['credentials'].key?(REFERRAL_TILE)
+        unless service['credentials'].nil?
+          service['credentials'].key?(REFERRAL_TILE)
+        end
       end
     end
 
