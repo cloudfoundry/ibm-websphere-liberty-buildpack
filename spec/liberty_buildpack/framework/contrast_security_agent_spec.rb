@@ -158,8 +158,8 @@ module LibertyBuildpack::Framework
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-mysql', 'label' => 'mysql',
                                                   'credentials' => { 'licenseKey' => '9876543210fedcba' } }],
                                     'contrast-security' => [{ 'name' => 'contrast-security', 'label' => 'contrast-security',
-                                                              'credentials' => def_credentials }] } do
-
+                                    'credentials' => def_credentials }]} do
+            
           expect(detected).to eq(versionid)
         end
 
@@ -176,7 +176,8 @@ module LibertyBuildpack::Framework
            vcap_services_context: { 'mysql' => [{ 'name' => 'test-mysql', 'label' => 'mysql',
                                                   'credentials' => { 'licenseKey' => '9876543210fedcba' } }],
                                     'sqldb' => [{ 'name' => 'test-sqldb', 'label' => 'sqldb',
-                                                  'credentials' => {} }] } do
+                                                  'credentials' => {} }],
+             'APIConnect' => [{'name' => 'API Connect-1', 'label' => 'APIConnect', 'plan' => 'Lite'}]} do
 
           expect(detected).to eq(nil)
         end
