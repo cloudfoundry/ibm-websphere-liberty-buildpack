@@ -41,7 +41,11 @@ module LibertyBuildpack
           tokenized_candidate_version = safe_candidate_version candidate_version
           tokenized_versions          = versions.map { |version| create_token(version) }.compact
 
-          puts "HERE: #{tokenized_versions.last}" 
+          if(tokenized_versions.last == "1.8.0_sr5")
+              print "Before: #{tokenized_versions}"
+              puts "HERE: #{tokenized_versions.pop}"
+              print "After: #{tokenized_versions}"
+          end 
 
           version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
