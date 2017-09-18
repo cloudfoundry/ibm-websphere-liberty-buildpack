@@ -41,11 +41,11 @@ module LibertyBuildpack
           tokenized_candidate_version = safe_candidate_version candidate_version
           tokenized_versions          = versions.map { |version| create_token(version) }.compact
 
+          puts "HERE: #{tokenized_versions}"
+
           version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
                     .max { |a, b| a <=> b }
-
-          puts "HERE: #{version}"
 
           version
         end
