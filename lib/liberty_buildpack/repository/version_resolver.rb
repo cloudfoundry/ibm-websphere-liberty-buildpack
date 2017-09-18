@@ -29,7 +29,7 @@ module LibertyBuildpack
       class << self
 
         # Resolves a version from a collection of versions.  The +candidate_version+ must be structured like:
-        #   * up to three numeric components, followed by an optional string component
+        #   * up to three numeric covmponents, followed by an optional string component
         #   * the final component may be a +
         # The resolution returns the maximum of the versions that match the candidate version
         #
@@ -43,7 +43,7 @@ module LibertyBuildpack
 
           version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
-                    .max { |a, b| a.to_i <=> b.to_i }
+                    .max { |a.to_i, b.to_i| a.to_i <=> b.to_i }
 
           version
         end
