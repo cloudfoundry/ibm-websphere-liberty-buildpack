@@ -84,6 +84,8 @@ module LibertyBuildpack
                         end
                       end }
 
+          puts "This is the result: #{version}"
+
           version
         end
 
