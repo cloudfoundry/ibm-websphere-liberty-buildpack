@@ -75,11 +75,12 @@ module LibertyBuildpack
                           numArr.zip(numArr2).each do |first, second|
                               next unless (first.to_f <=> second.to_f) != 0
                               puts "End result: #{first.to_f <=> second.to_f}"
-                              break
+                              return first.to_f <=> second.to_f
                           end
                         else
                             next unless (a.to_i <=> b.to_i) != 0
                             puts "End result: #{a.to_i <=> b.to_i}"
+                            return first.to_i <=> second.to_i
                         end
                       end }
 
