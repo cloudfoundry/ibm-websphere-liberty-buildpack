@@ -51,8 +51,7 @@ module LibertyBuildpack
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
                     .max { |a, b|
                       a.zip(b).each do |c, d|
-                        puts "Lo que ej: #{c}"
-                        if !/\A\d+\z/.match(a)
+                        if !/\A\d+\z/.match(c)
                           #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
                           newNum = c.dup
                           if newNum.include? "ifx"
