@@ -85,7 +85,13 @@ module LibertyBuildpack
                               return first.to_f <=> second.to_f
                           end
                         else
-                            next unless (c.to_i <=> d.to_i) != 0
+                            if c[0] == "0"
+                              c = "0."+c
+                            end
+                            if d[0] == "0"
+                              d = "0."+d
+                            end
+                            next unless (c.to_f <=> d.to_f) != 0
                             puts "End result: #{a.to_f <=> b.to_f}"
                             return c.to_f <=> d.to_f
                         end
