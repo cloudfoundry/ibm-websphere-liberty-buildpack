@@ -43,17 +43,17 @@ module LibertyBuildpack
 
           if(tokenized_versions.last.to_s == "1.8.0_sr5")
               #print "Before: #{tokenized_versions}"
-              puts "HERE: #{tokenized_versions.pop.last}"
+              puts "HERE: #{tokenized_versions.pop}"
               #print "After: #{tokenized_versions}"
           end
 
           version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
                     .max { |a, b|
-                      a.zip(b).each do |a, b|
+                      a.zip(b).each do |c, d|
                         if !/\A\d+\z/.match(a)
                           #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
-                          newNum = a.dup
+                          newNum = c.dup
                           if newNum.include? "ifx"
                               newNum = newNum.gsub!("ifx", ".5")
                           end
@@ -62,7 +62,7 @@ module LibertyBuildpack
                           numArr = newNum.split(" ")
                           puts "IMPRIME: #{numArr} como estaba antes: #{a}"
                           #Eliminating the letters (except ifx) for the string in b in order to facilitate comparison
-                          newNum2 = b.dup
+                          newNum2 = d.dup
                           if newNum2.include? "ifx"
                               newNum2 = newNum2.gsub!("ifx", ".5")
                           end
