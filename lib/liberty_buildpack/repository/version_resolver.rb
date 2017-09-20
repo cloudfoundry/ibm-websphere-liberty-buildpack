@@ -86,14 +86,14 @@ module LibertyBuildpack
                           end
                         else
                             puts "HEREEEE"
-                            if c[0] == "0"
+                            if c[0] == "0" and c.length > 1
                               c = "0."+c
                             end
-                            if d[0] == "0"
+                            if d[0] == "0" and d.length > 1
                               d = "0."+d
                             end
                             next unless (c.to_f <=> d.to_f) != 0
-                            puts "End result: #{a.to_f <=> b.to_f}"
+                            puts "End result: #{c.to_f <=> d.to_f}"
                             return c.to_f <=> d.to_f
                         end
                       end }
