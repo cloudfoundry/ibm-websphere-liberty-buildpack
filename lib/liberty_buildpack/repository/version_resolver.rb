@@ -54,11 +54,12 @@ module LibertyBuildpack
                         if !/\A\d+\z/.match(c)
                           #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
                           newNum = c.dup
-                          puts "TESTING: #{newNum}"
                           if newNum.include? "ifx"
                               newNum = newNum.gsub!("ifx", ".5")
                           end
                           newNum = newNum.gsub!(/[a-zA-Z]/, " ")
+                          puts "TESTING: #{newNum}"
+                          
                           if newNum.include? "_"
                             newNum = newNum.gsub!("_", " ")
                           end
@@ -67,11 +68,11 @@ module LibertyBuildpack
                           puts "IMPRIME: #{numArr} como estaba antes: #{c}"
                           #Eliminating the letters (except ifx) for the string in b in order to facilitate comparison
                           newNum2 = d.dup
-                          puts "TESTING: #{newNum2}"
                           if newNum2.include? "ifx"
                               newNum2 = newNum2.gsub!("ifx", ".5")
                           end
                           newNum2 = newNum2.gsub!(/[a-zA-Z]/, " ")
+                          puts "TESTING: #{newNum2}"
                           if newNum2.include? "_"
                             newNum2 = newNum2.gsub!("_", " ")
                           end
@@ -86,7 +87,6 @@ module LibertyBuildpack
                               return first.to_f <=> second.to_f
                           end
                         else
-                            puts "HEREEEE"
                             if c[0] == "0" and c.length > 1
                               c = "0."+c
                             end
