@@ -60,7 +60,7 @@ module LibertyBuildpack
                           newNum = newNum.gsub!(/[a-zA-Z]/, " ")
                           newNum = newNum.gsub!("_", " ")
                           numArr = newNum.split(" ")
-                          puts "IMPRIME: #{numArr} como estaba antes: #{a}"
+                          puts "IMPRIME: #{numArr} como estaba antes: #{c}"
                           #Eliminating the letters (except ifx) for the string in b in order to facilitate comparison
                           newNum2 = d.dup
                           if newNum2.include? "ifx"
@@ -69,7 +69,7 @@ module LibertyBuildpack
                           newNum2 = newNum2.gsub!(/[a-zA-Z]/, " ")
                           newNum2 = newNum2.gsub!("_", " ")
                           numArr2 = newNum2.split(" ")
-                          puts "Going to compare #{numArr2} that was #{b} originally vs #{numArr} that was #{a} originally"
+                          puts "Going to compare #{numArr2} that was #{d} originally vs #{numArr} that was #{c} originally"
                           #Compare each number now from left to right
 
                           numArr.zip(numArr2).each do |first, second|
@@ -78,9 +78,9 @@ module LibertyBuildpack
                               return first.to_f <=> second.to_f
                           end
                         else
-                            next unless (a.to_i <=> b.to_i) != 0
+                            next unless (c.to_i <=> d.to_i) != 0
                             puts "End result: #{a.to_i <=> b.to_i}"
-                            return first.to_i <=> second.to_i
+                            return c.to_i <=> d.to_i
                         end
                       end }
 
