@@ -49,10 +49,39 @@ module LibertyBuildpack
 
           version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
-                    .max { |a, b| a <=> b }
+                    .max { |a, b|
+                      ver1.zip(ver2).each do |a, b|
+                        if !/\A\d+\z/.match(a)
+                          #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
+                          newNum = a.dup
+                          if newNum.include? "ifx"
+                              newNum = newNum.gsub!("ifx", ".5")
+                          end
+                          newNum = newNum.gsub!(/[a-zA-Z]/, " ")
+                          newNum = newNum.gsub!("_", " ")
+                          numArr = newNum.split(" ")
+                          puts "IMPRIME: #{numArr} como estaba antes: #{a}"
+                          #Eliminating the letters (except ifx) for the string in b in order to facilitate comparison
+                          newNum2 = b.dup
+                          if newNum2.include? "ifx"
+                              newNum2 = newNum2.gsub!("ifx", ".5")
+                          end
+                          newNum2 = newNum2.gsub!(/[a-zA-Z]/, " ")
+                          newNum2 = newNum2.gsub!("_", " ")
+                          numArr2 = newNum2.split(" ")
+                          puts "Going to compare #{numArr2} that was #{b} originally vs #{numArr} that was #{a} originally"
+                          #Compare each number now from left to right
 
-          puts "LET'S SEE #{tokenized_versions
-                    .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }}"
+                          numArr.zip(numArr2).each do |first, second|
+                              next unless (first.to_f <=> second.to_f) != 0
+                              puts "End result: #{first.to_f <=> second.to_f}"
+                              break
+                          end
+                        else
+                            next unless (a.to_i <=> b.to_i) != 0
+                            puts "End result: #{a.to_i <=> b.to_i}"
+                        end
+                      end }
 
           version
         end
