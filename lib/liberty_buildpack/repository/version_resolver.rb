@@ -50,7 +50,7 @@ module LibertyBuildpack
           version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
                     .max { |a, b|
-                      ver1.zip(ver2).each do |a, b|
+                      a.zip(b).each do |a, b|
                         if !/\A\d+\z/.match(a)
                           #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
                           newNum = a.dup
