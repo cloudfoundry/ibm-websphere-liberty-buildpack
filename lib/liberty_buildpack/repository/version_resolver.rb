@@ -59,7 +59,7 @@ module LibertyBuildpack
                           end
                           newNum = newNum.gsub!(/[a-zA-Z]/, " ")
                           puts "TESTING: #{newNum}"
-                          
+
                           if newNum.include? "_"
                             newNum = newNum.gsub!("_", " ")
                           end
@@ -85,6 +85,7 @@ module LibertyBuildpack
                               next unless (first.to_f <=> second.to_f) != 0
                               puts "End result: #{first.to_f <=> second.to_f}"
                               return first.to_f <=> second.to_f
+                              break
                           end
                         else
                             if c[0] == "0" and c.length > 1
@@ -96,6 +97,7 @@ module LibertyBuildpack
                             next unless (c.to_f <=> d.to_f) != 0
                             puts "End result: #{c.to_f <=> d.to_f}"
                             return c.to_f <=> d.to_f
+                            break
                         end
                       end }
 
