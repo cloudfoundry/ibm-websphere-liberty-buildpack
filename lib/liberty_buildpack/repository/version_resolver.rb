@@ -49,57 +49,7 @@ module LibertyBuildpack
 
           version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
-                    .max { |a, b|
-                      a.zip(b).each do |c, d|
-                        if !/\A\d+\z/.match(c)
-                          #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
-                          newNum = c.dup
-                          if newNum.include? "ifx"
-                              newNum = newNum.gsub!("ifx", ".5")
-                          end
-                          newNum = newNum.gsub!(/[a-zA-Z]/, " ")
-                          puts "TESTING: #{newNum}"
-
-                          if newNum.include? "_"
-                            newNum = newNum.gsub!("_", " ")
-                          end
-
-                          numArr = newNum.split(" ")
-                          puts "IMPRIME: #{numArr} como estaba antes: #{c}"
-                          #Eliminating the letters (except ifx) for the string in b in order to facilitate comparison
-                          newNum2 = d.dup
-                          if newNum2.include? "ifx"
-                              newNum2 = newNum2.gsub!("ifx", ".5")
-                          end
-                          newNum2 = newNum2.gsub!(/[a-zA-Z]/, " ")
-                          puts "TESTING: #{newNum2}"
-                          if newNum2.include? "_"
-                            newNum2 = newNum2.gsub!("_", " ")
-                          end
-
-                          numArr2 = newNum2.split(" ")
-                          puts "Going to compare #{numArr2} that was #{d} originally vs #{numArr} that was #{c} originally"
-                          #Compare each number now from left to right
-
-                          numArr.zip(numArr2).each do |first, second|
-                              next unless (first.to_f <=> second.to_f) != 0
-                              puts "End result: #{first.to_f <=> second.to_f}"
-                              return first.to_f <=> second.to_f
-                              break
-                          end
-                        else
-                            if c[0] == "0" and c.length > 1
-                              c = "0."+c
-                            end
-                            if d[0] == "0" and d.length > 1
-                              d = "0."+d
-                            end
-                            next unless (c.to_f <=> d.to_f) != 0
-                            puts "End result: #{c.to_f <=> d.to_f}"
-                            return c.to_f <=> d.to_f
-                            break
-                        end
-                      end }
+                    .max { |a, b| custom_compare(a,b)}
 
           puts "This is the result: #{version}"
 
@@ -137,6 +87,57 @@ module LibertyBuildpack
             tokenized_candidate_version[i].nil? ||
               tokenized_candidate_version[i] == LibertyBuildpack::Util::TokenizedVersion::WILDCARD ||
               tokenized_candidate_version[i] == tokenized_version[i]
+          end
+        end
+
+        def custom_compare(a,b)
+          a.zip(b).each do |c, d|
+            if !/\A\d+\z/.match(c)
+              #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
+              newNum = c.dup
+              if newNum.include? "ifx"
+                  newNum = newNum.gsub!("ifx", ".5")
+              end
+              newNum = newNum.gsub!(/[a-zA-Z]/, " ")
+              puts "TESTING: #{newNum}"
+
+              if newNum.include? "_"
+                newNum = newNum.gsub!("_", " ")
+              end
+
+              numArr = newNum.split(" ")
+              #puts "IMPRIME: #{numArr} como estaba antes: #{c}"
+              #Eliminating the letters (except ifx) for the string in b in order to facilitate comparison
+              newNum2 = d.dup
+              if newNum2.include? "ifx"
+                  newNum2 = newNum2.gsub!("ifx", ".5")
+              end
+              newNum2 = newNum2.gsub!(/[a-zA-Z]/, " ")
+              puts "TESTING: #{newNum2}"
+              if newNum2.include? "_"
+                newNum2 = newNum2.gsub!("_", " ")
+              end
+
+              numArr2 = newNum2.split(" ")
+              puts "Going to compare #{numArr2} that was #{d} originally vs #{numArr} that was #{c} originally"
+              #Compare each number now from left to right
+
+              numArr.zip(numArr2).each do |first, second|
+                  next unless (first.to_f <=> second.to_f) != 0
+                  puts "End result: #{first.to_f <=> second.to_f}"
+                  return first.to_f <=> second.to_f
+              end
+            else
+                if c[0] == "0" and c.length > 1
+                  c = "0."+c
+                end
+                if d[0] == "0" and d.length > 1
+                  d = "0."+d
+                end
+                next unless (c.to_f <=> d.to_f) != 0
+                puts "End result: #{c.to_f <=> d.to_f}"
+                return c.to_f <=> d.to_f
+            end
           end
         end
 
