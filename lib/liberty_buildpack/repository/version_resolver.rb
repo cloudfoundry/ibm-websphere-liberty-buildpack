@@ -86,8 +86,8 @@ module LibertyBuildpack
                           end
                         else
                             next unless (c.to_i <=> d.to_i) != 0
-                            puts "End result: #{a.to_i <=> b.to_i}"
-                            return c.to_i <=> d.to_i
+                            puts "End result: #{a.to_f <=> b.to_f}"
+                            return c.to_f <=> d.to_f
                         end
                       end }
 
