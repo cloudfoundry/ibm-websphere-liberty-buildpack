@@ -47,12 +47,11 @@ module LibertyBuildpack
               #print "After: #{tokenized_versions}"
           end
 
-
-
-          puts "This is the result: #{version = tokenized_versions
+          version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
                     .max { |a, b|
                       a.zip(b).each do |c, d|
+                        puts "Lo que ej: #{a}"
                         if !/\A\d+\z/.match(a)
                           #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
                           newNum = c.dup
@@ -84,7 +83,9 @@ module LibertyBuildpack
                             puts "End result: #{a.to_i <=> b.to_i}"
                             return first.to_i <=> second.to_i
                         end
-                      end }}"
+                      end }
+
+          puts "This is the result: #{version}"
 
           version
         end
