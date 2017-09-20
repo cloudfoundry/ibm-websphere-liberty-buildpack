@@ -54,11 +54,11 @@ module LibertyBuildpack
                         if !/\A\d+\z/.match(c)
                           #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
                           newNum = c.dup
-                          puts "TESTING: #{newNum}"
+
                           if newNum.include? "ifx"
-                              newNum = newNum.gsub!("ifx", ".5")
+                              newNum = newNum.to_s.gsub!("ifx", ".5")
                           end
-                          newNum = newNum.gsub!(/[a-zA-Z]/, " ")
+                          newNum = newNum.to_s.gsub!(/[a-zA-Z]/, " ")
                           newNum = newNum.gsub!("_", " ")
                           numArr = newNum.split(" ")
                           puts "IMPRIME: #{numArr} como estaba antes: #{c}"
