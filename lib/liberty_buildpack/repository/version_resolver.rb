@@ -54,7 +54,7 @@ module LibertyBuildpack
                         if !/\A\d+\z/.match(c)
                           #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
                           newNum = c.dup
-                          puts "TESTING: #{}"
+                          puts "TESTING: #{newNum}"
                           if newNum.include? "ifx"
                               newNum = newNum.gsub!("ifx", ".5")
                           end
@@ -67,6 +67,7 @@ module LibertyBuildpack
                           puts "IMPRIME: #{numArr} como estaba antes: #{c}"
                           #Eliminating the letters (except ifx) for the string in b in order to facilitate comparison
                           newNum2 = d.dup
+                          puts "TESTING: #{newNum2}"
                           if newNum2.include? "ifx"
                               newNum2 = newNum2.gsub!("ifx", ".5")
                           end
