@@ -85,6 +85,7 @@ module LibertyBuildpack
                               return first.to_f <=> second.to_f
                           end
                         else
+                            puts "HEREEEE"
                             if c[0] == "0"
                               c = "0."+c
                             end
