@@ -47,7 +47,9 @@ module LibertyBuildpack
               #print "After: #{tokenized_versions}"
           end
 
-          version = tokenized_versions
+
+
+          puts "This is the result: #{version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
                     .max { |a, b|
                       a.zip(b).each do |c, d|
@@ -82,9 +84,7 @@ module LibertyBuildpack
                             puts "End result: #{a.to_i <=> b.to_i}"
                             return first.to_i <=> second.to_i
                         end
-                      end }
-
-          puts "This is the result: #{version}"
+                      end }}"
 
           version
         end
