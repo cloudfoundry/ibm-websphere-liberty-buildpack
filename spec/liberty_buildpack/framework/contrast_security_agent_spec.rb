@@ -177,6 +177,7 @@ module LibertyBuildpack::Framework
                                     'sqldb' => [{ 'name' => 'test-sqldb', 'label' => 'sqldb',
                                                   'credentials' => {} }],
                                     'APIConnect' => [{ 'name' => 'API Connect-1', 'label' => 'APIConnect', 'plan' => 'Lite' }] } do
+                                      
 
           expect(detected).to eq(nil)
         end
