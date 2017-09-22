@@ -99,7 +99,7 @@ module LibertyBuildpack
                   newNum = newNum.gsub!("ifx", ".5")
               end
               newNum = newNum.gsub!(/[a-zA-Z]/, " ")
-              puts "TESTING: #{newNum}"
+              #puts "TESTING: #{newNum}"
 
               if newNum.include? "_"
                 newNum = newNum.gsub!("_", " ")
@@ -113,18 +113,18 @@ module LibertyBuildpack
                   newNum2 = newNum2.gsub!("ifx", ".5")
               end
               newNum2 = newNum2.gsub!(/[a-zA-Z]/, " ")
-              puts "TESTING: #{newNum2}"
+              #puts "TESTING: #{newNum2}"
               if newNum2.include? "_"
                 newNum2 = newNum2.gsub!("_", " ")
               end
 
               numArr2 = newNum2.split(" ")
-              puts "Going to compare #{numArr2} that was #{d} originally vs #{numArr} that was #{c} originally"
+              #puts "Going to compare #{numArr2} that was #{d} originally vs #{numArr} that was #{c} originally"
               #Compare each number now from left to right
 
               numArr.zip(numArr2).each do |first, second|
                   next unless (first.to_f <=> second.to_f) != 0
-                  puts "End result: #{first.to_f <=> second.to_f}"
+                  #puts "End result: #{first.to_f <=> second.to_f}"
                   return first.to_f <=> second.to_f
               end
             else
@@ -135,7 +135,7 @@ module LibertyBuildpack
                   d = "0."+d
                 end
                 next unless (c.to_f <=> d.to_f) != 0
-                puts "End result: #{c.to_f <=> d.to_f}"
+                #puts "End result: #{c.to_f <=> d.to_f}"
                 return c.to_f <=> d.to_f
             end
           end
