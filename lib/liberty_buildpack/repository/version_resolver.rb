@@ -41,19 +41,15 @@ module LibertyBuildpack
           tokenized_candidate_version = safe_candidate_version candidate_version
           tokenized_versions          = versions.map { |version| create_token(version) }.compact
 
-          if(tokenized_versions.last.to_s == "1.8.0_sr5")
-              #print "Before: #{tokenized_versions}"
-              #puts "HERE: #{tokenized_versions.pop}"
-              tokenized_versions.pop
-              #print "After: #{tokenized_versions}"
-          end
+           #this is to test out the script.
+          #if(tokenized_versions.last.to_s == "1.8.0_sr5")
+          #    tokenized_versions.pop
+          #end
+
 
           version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
-                    .max { |a, b| custom_compare(a,b)}
-
-          #puts "This is the result: #{version}"
-
+                    .max { |a, b| version_compare(a,b)}
           version
         end
 
@@ -91,23 +87,23 @@ module LibertyBuildpack
           end
         end
 
-        def custom_compare(a,b)
+        def version_compare(a,b)
           a.zip(b).each do |c, d|
             if !/\A\d+\z/.match(c)
               #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
               newNum = c.dup
               if newNum.include? "ifx"
-                  newNum = newNum.gsub!("ifx", ".5")
+                  newNum = newNum.gsub!("ifx", ".5") #converts ifx to .5 to be able to compare as a number
               end
-              newNum = newNum.gsub!(/[a-zA-Z]/, " ")
+              newNum = newNum.gsub!(/[a-zA-Z]/, " ") #replaces letters with blank spaces
               #puts "TESTING: #{newNum}"
 
               if newNum.include? "_"
-                newNum = newNum.gsub!("_", " ")
+                newNum = newNum.gsub!("_", " ") #in case there is an "_", replace with a blank space
               end
 
-              numArr = newNum.split(" ")
-              #puts "IMPRIME: #{numArr} como estaba antes: #{c}"
+              numArr = newNum.split(" ") #split the string into an array using the blank spaces as the splitting point
+
               #Eliminating the letters (except ifx) for the string in b in order to facilitate comparison
               newNum2 = d.dup
               if newNum2.include? "ifx"
@@ -120,23 +116,21 @@ module LibertyBuildpack
               end
 
               numArr2 = newNum2.split(" ")
-              #puts "Going to compare #{numArr2} that was #{d} originally vs #{numArr} that was #{c} originally"
+
               #Compare each number now from left to right
 
               numArr.zip(numArr2).each do |first, second|
                   next unless (first.to_f <=> second.to_f) != 0
-                  #puts "End result: #{first.to_f <=> second.to_f}"
                   return first.to_f <=> second.to_f
               end
             else
-                if c[0] == "0" and c.length > 1
+                if c[0] == "0" and c.length > 1 #verify leading 0s if the number is more than one digit.
                   c = "0."+c
                 end
                 if d[0] == "0" and d.length > 1
                   d = "0."+d
                 end
                 next unless (c.to_f <=> d.to_f) != 0
-                #puts "End result: #{c.to_f <=> d.to_f}"
                 return c.to_f <=> d.to_f
             end
           end
