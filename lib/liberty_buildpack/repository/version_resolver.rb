@@ -43,7 +43,8 @@ module LibertyBuildpack
 
           if(tokenized_versions.last.to_s == "1.8.0_sr5")
               #print "Before: #{tokenized_versions}"
-              puts "HERE: #{tokenized_versions.pop}"
+              #puts "HERE: #{tokenized_versions.pop}"
+              tokenized_versions.pop
               #print "After: #{tokenized_versions}"
           end
 
@@ -51,7 +52,7 @@ module LibertyBuildpack
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
                     .max { |a, b| custom_compare(a,b)}
 
-          puts "This is the result: #{version}"
+          #puts "This is the result: #{version}"
 
           version
         end
