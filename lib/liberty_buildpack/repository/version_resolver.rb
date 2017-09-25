@@ -52,6 +52,10 @@ module LibertyBuildpack
           version
         end
 
+        # Compares two distinct versions using only the numbers
+        # @param [String] a is one of the versions to compare
+        # @param [String] b is the other version to compare
+        # @return [Integer] 1, if a is greater than b; 0 if they are the same value; and -1 if a is less than b
         def version_compare(a, b)
           a.zip(b).each do |c, d|
             if !/\A\d+\z/.match(c)
@@ -74,10 +78,15 @@ module LibertyBuildpack
               next unless (c.to_f <=> d.to_f) != 0
               return c.to_f <=> d.to_f
             end
+
+            return 0 # if it reaches this point, it means that both versions are the same one
           end
         end
 
-        def clean_version_letters(ver) # eliminates non numerical characters from a version number and returns an array with all the numbers from left to right
+        # eliminates non numerical characters from a version number and returns an array with all the numbers from left to right
+        # @param [String] ver is the version number to clean up and replace the letters with spaces and numbers in order to have a number version format
+        # @return [Array<String>] the version number in an array where each element was separated by a '.'
+        def clean_version_letters(ver)
           # Eliminating the letters (except ifx) for the string num in order to facilitate comparison
           dup_ver = ver.dup
           if dup_ver.include? 'ifx'
