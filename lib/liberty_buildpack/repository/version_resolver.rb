@@ -41,58 +41,55 @@ module LibertyBuildpack
           tokenized_candidate_version = safe_candidate_version candidate_version
           tokenized_versions          = versions.map { |version| create_token(version) }.compact
 
-           #this is to test out the script.
-          #if(tokenized_versions.last.to_s == "1.8.0_sr5")
+          # this is to test out the script.
+          # if(tokenized_versions.last.to_s == "1.8.0_sr5")
           #    tokenized_versions.pop
-          #end
-
+          # end
 
           version = tokenized_versions
                     .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
-                    .max { |a, b| version_compare(a,b)}
+                    .max { |a, b| version_compare(a, b) }
           version
         end
 
-        def version_compare(a,b)
+        def version_compare(a, b)
           a.zip(b).each do |c, d|
             if !/\A\d+\z/.match(c)
 
-              numArr = clean_version_letters(c)
+              num_arr = clean_version_letters(c)
 
-              numArr2 = clean_version_letters(d)
+              num_arr2 = clean_version_letters(d)
 
-              #Compare each number now from left to right
+              # Compare each number now from left to right
 
-              numArr.zip(numArr2).each do |first, second|
-                  next unless (first.to_f <=> second.to_f) != 0
-                  return first.to_f <=> second.to_f
+              num_arr.zip(num_arr2).each do |first, second|
+                next unless (first.to_f <=> second.to_f) != 0
+                return first.to_f <=> second.to_f
               end
             else
-                if c[0] == "0" and c.length > 1 #verify leading 0s if the number is more than one digit.
-                  c = "0."+c
-                end
-                if d[0] == "0" and d.length > 1
-                  d = "0."+d
-                end
-                next unless (c.to_f <=> d.to_f) != 0
-                return c.to_f <=> d.to_f
+              c = '0.' + c if c[0] == '0' && c.length > 1 # verify leading 0s if the number is more than one digit.
+
+              d = '0.' + d if d[0] == '0' && d.length > 1
+
+              next unless (c.to_f <=> d.to_f) != 0
+              return c.to_f <=> d.to_f
             end
           end
         end
 
-        def clean_version_letters(ver) #eliminates non numerical characters from a version number and returns an array with all the numbers from left to right
-          #Eliminating the letters (except ifx) for the string num in order to facilitate comparison
-          dupVer = ver.dup
-          if dupVer.include? "ifx"
-              dupVer = dupVer.gsub!("ifx", ".5") #converts ifx to .5 to be able to compare as a number
+        def clean_version_letters(ver) # eliminates non numerical characters from a version number and returns an array with all the numbers from left to right
+          # Eliminating the letters (except ifx) for the string num in order to facilitate comparison
+          dup_ver = ver.dup
+          if dup_ver.include? 'ifx'
+            dup_ver = dup_ver.gsub!('ifx', '.5') # converts ifx to .5 to be able to compare as a number
           end
-          dupVer = dupVer.gsub!(/[a-zA-Z]/, " ") #replaces letters with blank spaces
+          dup_ver = dup_ver.gsub!(/[a-zA-Z]/, ' ') # replaces letters with blank spaces
 
-          if dupVer.include? "_"
-            dupVer = dupVer.gsub!("_", " ") #in case there is an "_", replace with a blank space
+          if dup_ver.include? '_'
+            dup_ver = dup_ver.tr!('_', ' ') # in case there is an "_", replace with a blank space
           end
 
-          return dupVer.split(" ") #split the string into an array using the blank spaces as the splitting point
+          dup_ver.split(' ') # split the string into an array using the blank spaces as the splitting point
         end
 
         private
@@ -128,8 +125,6 @@ module LibertyBuildpack
               tokenized_candidate_version[i] == tokenized_version[i]
           end
         end
-
-
 
       end
 
