@@ -68,7 +68,7 @@ describe LibertyBuildpack::Repository::VersionResolver do
   end
 
   it 'eliminates the letters in version numbers' do
-    expect(described_class.clean_version_letters('0_sr4fp11')).to eq(['0','4','11'])
+    expect(described_class.clean_version_letters('0_sr4fp11')).to eq(%w(0 4 11))
   end
 
   def tokenized_version(s)
