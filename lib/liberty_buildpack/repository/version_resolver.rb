@@ -71,7 +71,7 @@ module LibertyBuildpack
                 return first.to_f <=> second.to_f
               end
             else
-              c = '0.' + c if c[0] == '0' && c.length > 1 # verify leading 0s if the number is more than one digit.
+              c = '0.' + c if c[0] == '0' && c.length > 1 # verify if there are leading 0s in order to determine it's a decimal number and treat it as such
 
               d = '0.' + d if d[0] == '0' && d.length > 1
 
