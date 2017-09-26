@@ -121,6 +121,7 @@ module LibertyBuildpack::Framework
           candidate['label'] =~ FILTER ||
           (!candidate['tags'].nil? && candidate['tags'].any? { |tag| tag =~ FILTER })
         ) &&
+        !candidate[CREDENTIALS_KEY].nil? &&
         candidate[CREDENTIALS_KEY][ENVIRONMENTID] && candidate[CREDENTIALS_KEY][APITOKEN]
       end
 

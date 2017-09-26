@@ -51,6 +51,12 @@ module LibertyBuildpack::Framework
         def_tags = ['atag']
         def_credentials = { 'environmentid' => 'test-environmentid', 'apitoken' => 'test-apitoken' }
 
+        it 'should not fail if service has no credentials',
+           vcap_services_context: { def_type => [{ 'name' => 'dynatrace', 'label' => def_label }] } do
+
+          expect(detected).to eq(nil)
+        end
+
         it 'should be detected when the service name includes dynatrace substring and apitoken in credentials',
            vcap_services_context: { def_type => [{ 'name' => 'dynatrace', 'label' => def_label, 'tags' => def_tags,
                                                    'credentials' => def_credentials }] } do
@@ -92,6 +98,15 @@ module LibertyBuildpack::Framework
         it 'should be detected when an application has a valid service attribute that includes dynatrace with apitoken',
            vcap_services_context: { 'dynatrace' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace', 'tags' => [],
                                                       'credentials' => def_credentials }] } do
+
+          expect(detected).to eq(detect_string)
+        end
+
+        it 'should be detected when an application has exactly one service including environmentid and apitoken and a second one without',
+           vcap_services_context: { 'user-provided' => [{ 'name' => 'test-dynatrace', 'label' => 'dynatrace',
+                                                          'credentials' => def_credentials },
+                                                        { 'name' => 'test-dynatrace-tags', 'label' => 'dynatrace',
+                                                          'credentials' => { 'tag:sometag' => 'value' } }] } do
 
           expect(detected).to eq(detect_string)
         end
@@ -161,8 +176,8 @@ module LibertyBuildpack::Framework
         expect(File.exist?(File.join(app_dir, dynatrace_home))).to eq(true)
       end
 
-      describe 'download agent zip based on index.yml information' do
-        it 'should download the agent with a matching key and zip version' do
+      describe 'download agent zip based on service information' do
+        it 'should download the agent and unpack it' do
           expect { compiled }.to output(%r{Downloading Dynatrace OneAgent latest from}).to_stdout
           # zip file should not be there - just contents of it
           expect(File.exist?(File.join(app_dir, dynatrace_home, jar_name))).to eq(false)
