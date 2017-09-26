@@ -71,6 +71,14 @@ describe LibertyBuildpack::Repository::VersionResolver do
     expect(described_class.clean_version_letters('0_sr4fp11')).to eq(%w(0 4 11))
   end
 
+  it 'ignores leading 0s when comparing' do
+    expect(described_class.version_compare(tokenized_version('19.0.01'), tokenized_version('19.0.1'))).to eq(-1)
+  end
+
+  it 'replaces the suffix "ifx" with a ".5" for easier comparison' do
+    expect(described_class.clean_version_letters('0_sr4fp11ifx')).to eq(%w(0 4 11.5))
+  end
+
   def tokenized_version(s)
     LibertyBuildpack::Util::TokenizedVersion.new(s)
   end
