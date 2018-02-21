@@ -19,7 +19,7 @@
 class_name : LibertyBuildpack::Services::PostgreSQL
 class_file : postgresql.rb
 server_xml_stanza : dataSource
-service_filter : '(?<!compose-for-)postgresql|elephantsql'
+service_filter : '(?<!compose-for-)postgresql|elephantsql|aws-rds'
 
 # plugin specific attributes
 features: 

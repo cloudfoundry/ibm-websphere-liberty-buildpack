@@ -217,6 +217,25 @@ module LibertyBuildpack::Services
         run_test(vcap_services)
       end
 
+      it 'on cloud.gov' do
+        vcap_services = {}
+        awsrds = {}
+        awsrds['name'] = 'myDatabase'
+        awsrds['label'] = 'aws-rds'
+        awsrds['tags'] = %w(database RDS)
+        awsrds_credentials = {}
+        awsrds_credentials['db_name'] = 'myDb'
+        awsrds_credentials['hostname'] = 'myHost.com'
+        awsrds_credentials['password'] = 'myPassword'
+        awsrds_credentials['port'] = '5432'
+        awsrds_credentials['uri'] = 'postgres://myUser:myPassword@myHost.com:5432/myDb'
+        awsrds_credentials['username'] = 'myUser'
+        awsrds['credentials'] = awsrds_credentials
+        vcap_services['aws-rds'] = [awsrds]
+
+        run_test(vcap_services)
+      end
+
       it 'on Heroku' do
         env = {}
         env['HEROKU_POSTGRESQL_RED_URL'] = 'postgres://myUser:myPassword@myHost.com:5432/myDb'
