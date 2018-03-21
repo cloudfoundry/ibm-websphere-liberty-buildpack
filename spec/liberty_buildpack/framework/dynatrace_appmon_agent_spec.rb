@@ -97,6 +97,15 @@ module LibertyBuildpack::Framework
           expect { detected }.to raise_error(RuntimeError)
         end
 
+        it 'should be detected as there is only one valid service',
+           vcap_services_context: { def_type => [{ 'name' => 'dynatrace', 'label' => def_label, 'tags' => def_tags,
+                                                   'credentials' => def_credentials }],
+                                    'servicetype2' => [{ 'name' => 'dynatrace', 'label' => def_label, 'tags' => def_tags,
+                                                         'credentials' => { 'key' => 'value' } }] } do
+
+          expect(detected).to eq(detect_string)
+        end
+
         it 'should be detected when the tag includes dynatrace substring',
            vcap_services_context: { def_type => [{ 'name' => def_name, 'label' => def_label, 'tags' => ['dynatracetag'],
                                                    'credentials' => def_credentials }] } do

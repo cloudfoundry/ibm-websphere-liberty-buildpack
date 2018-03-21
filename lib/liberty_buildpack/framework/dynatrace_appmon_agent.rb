@@ -146,9 +146,21 @@ module LibertyBuildpack::Framework
     # @return [Boolean] true if the app is bound to a dynatrace service
     #------------------------------------------------------------------------------------------
     def dt_service_exist?
-      @services.one_service?(DT_SERVICE_NAME, SERVER_KEY) &&
-      !@services.one_service?(DT_SERVICE_NAME, 'tenant') &&
-      !@services.one_service?(DT_SERVICE_NAME, 'tenanttoken')
+      pattern = /#{DT_SERVICE_NAME}/
+      candidates = @services.select do |candidate|
+        (
+          (candidate['label'] == 'user-provided' && candidate['name'] =~ pattern) ||
+          candidate['label'] =~ pattern ||
+          (!candidate['tags'].nil? && candidate['tags'].any? { |tag| tag =~ pattern })
+        ) &&
+        !candidate[CREDENTIALS_KEY].nil? &&
+        candidate[CREDENTIALS_KEY][SERVER_KEY] &&
+        !candidate[CREDENTIALS_KEY]['environmentid']
+      end
+
+      raise 'Multiple valid dynatrace services exist.' if candidates.length > 1
+
+      candidates.one?
     end
 
     #------------------------------------------------------------------------------------------
