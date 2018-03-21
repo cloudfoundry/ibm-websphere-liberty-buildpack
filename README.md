@@ -73,7 +73,7 @@ All Documentation is available in the Docs folder of the buildpack.
 To run the tests, do the following:
 
 ```bash
-bundle install --with development
+bundle install
 bundle exec rake
 ```
 
