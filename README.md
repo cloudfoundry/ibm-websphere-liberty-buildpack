@@ -63,6 +63,7 @@ All Documentation is available in the Docs folder of the buildpack.
 * [Security](docs/security.md)
 * [Restrictions](docs/restrictions.md)
 * [Configuring Liberty with bootstrap.properties](docs/bootstrap-properties.md)
+* [Applying an iFix to the Liberty runtime](docs/applying-ifix.md)
 * Utilities
 	* [Utility: Caches](docs/util-caches.md)
 	* [Utility: Repositories](docs/util-repositories.md)
