@@ -123,7 +123,7 @@ module LibertyBuildpack::Framework
 
       describe 'download agent tar based on index.yml' do
         it 'should download the agent tar based on the version key' do
-          expect {compiled}.to output(%r{ Downloading CA APM Agent #{version} from https://ca.bintray.com/websphere/IntroscopeAgentFiles-NoInstaller#{version}websphere.unix.tar }).to_stdout
+          expect { compiled }.to output(%r{ Downloading CA APM Agent #{version} from https://ca.bintray.com/websphere/IntroscopeAgentFiles-NoInstaller#{version}websphere.unix.tar }).to_stdout
         end
       end
     end
