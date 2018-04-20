@@ -91,6 +91,19 @@ module LibertyBuildpack::Container
       end
     end
 
+    # Unpacks the given tar file to the specified directory.
+    #
+    # @param [String] file - the tar file to unpack.
+    # @param [String] dir - the directory to unpack the tar contents into.
+    # @return [void]
+    def self.untar(file, dir)
+      file = File.expand_path(file)
+      FileUtils.mkdir_p dir
+      Dir.chdir(dir) do
+        system "tar xf \"#{file}\""
+      end
+    end
+
     # Overlay JVM files. Move base_dir/resources/.java-overlay/.java files to app_dir/.
     #
     # @param [String] base_dir the base directory that contains Java files to overlay.

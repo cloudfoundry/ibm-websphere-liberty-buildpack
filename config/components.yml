@@ -34,3 +34,4 @@ frameworks:
   - "LibertyBuildpack::Framework::DynamicPULSEAgent"
   - "LibertyBuildpack::Framework::ContainerCertificateTrustStore"
   - "LibertyBuildpack::Framework::ContrastSecurityAgent"
+  - "LibertyBuildpack::Framework::CAAPMAgent"
