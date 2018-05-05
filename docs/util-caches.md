@@ -1,5 +1,5 @@
 # Caches
-The Libety Buildpack provides a cache abstraction to encapsulate the caching of large files by components.  The cache abstraction is comprised of three cache types each with the same signature.
+The Liberty Buildpack provides a cache abstraction to encapsulate the caching of large files by components.  The cache abstraction is comprised of three cache types each with the same signature.
 
 ```ruby
 # Retrieves an item from the cache.  Retrieval of the item uses the following algorithm:
