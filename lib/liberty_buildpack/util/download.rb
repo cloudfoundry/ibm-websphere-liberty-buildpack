@@ -56,4 +56,21 @@ module LibertyBuildpack::Util
     end
   end
 
+  # Downloads and expands a tar file.
+  #
+  # @param [LibertyBuildpack::Util::TokenizedVersion] version the version of the item
+  # @param [String] uri the URI of the item
+  # @param [String] description a description of the item
+  # @param [String] target_directory the path of the directory into which to download the item
+  def self.download_tar(version, uri, description, target_directory)
+    download_start_time = Time.now
+    print "-----> Downloading #{description} #{version} from #{uri} "
+    LibertyBuildpack::Util::Cache::ApplicationCache.new.get(uri) do |file|
+      puts "(#{(Time.now - download_start_time).duration})"
+      print '         Expanding archive ... '
+      install_start_time = Time.now
+      LibertyBuildpack::Container::ContainerUtils.untar(file, target_directory)
+      puts "(#{(Time.now - install_start_time).duration})\n"
+    end
+  end
 end
