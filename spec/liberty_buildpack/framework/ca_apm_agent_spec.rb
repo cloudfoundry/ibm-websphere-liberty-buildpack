@@ -55,7 +55,7 @@ module LibertyBuildpack::Framework
 
       # For a download request of a ca apm agent jar, return the fixture jar
       LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
-      application_cache.stub(:get).with(index_uri).and_yield(File.open('spec/fixtures/stub-ca-apm-agent.zip'))
+      application_cache.stub(:get).with(index_uri).and_yield(File.open('spec/fixtures/stub-ca-apm-agent.tar.gz'))
 
     end
 
