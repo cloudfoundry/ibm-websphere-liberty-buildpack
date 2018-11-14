@@ -152,7 +152,7 @@ class BuildpackCache
   #
   # @param [String] uri location of the remote resource
   def filename(uri)
-    "#{URI.escape(uri, ':/')}.cached"
+    "#{URI.escape(uri, ':/&')}.cached"
   end
 
   # Returns array of config maps containing references to the root index.yml
