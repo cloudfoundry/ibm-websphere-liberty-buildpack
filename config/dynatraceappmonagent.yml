@@ -15,5 +15,5 @@
 
 # Service configuration
 ---
-version: 6.+
-repository_root: "http://downloads.dynatracesaas.com/cloudfoundry/buildpack/java/"
+version: 7.1.0_+
+repository_root: "https://files.dynatrace.com/downloads/appmon/cloudfoundry/buildpack/java/"
