@@ -50,7 +50,7 @@ def java_opts_file
 end
 
 def set_ibmjdk_config
-  if File.readlines(java_opts_file).grep(/-Xmx/).size > 0
+  if File.readlines(java_opts_file).grep(/^-Xmx/).size > 0
     puts 'User already set max heap size (-Xmx)'
   else
     calculated_heap_size = heap_size
@@ -62,7 +62,7 @@ def set_ibmjdk_config
 end
 
 def set_openjdk_config
-  if File.readlines(java_opts_file).grep(/-Xmx/).size > 0
+  if File.readlines(java_opts_file).grep(/^-Xmx/).size > 0
     puts 'User already set max heap size (-Xmx)'
   else
     puts 'Setting openJDK memory configuration'
