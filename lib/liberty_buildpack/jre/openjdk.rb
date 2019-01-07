@@ -109,7 +109,7 @@ module LibertyBuildpack::Jre
 
       system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
 
-      if system("[ $(ls #{java_home} | wc -l) = 1 ]") && system("[ ! $(ls #{java_home} | grep 'jre') ]")
+      if system("[ $(ls #{java_home} | wc -l) = 1 ]") && system("[ ! $(ls #{java_home} | grep -w 'jre') ]")
         FileUtils.rm_rf(java_home)
         FileUtils.mkdir_p(java_home)
         system "tar xzf #{file.path} -C #{java_home} --strip 2 2>&1"
