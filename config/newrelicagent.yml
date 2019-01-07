@@ -15,5 +15,5 @@
 
 # Service configuration
 ---
-version: 3.+
+version: 4.+
 repository_root: ! '{default.repository.root}/new-relic'
