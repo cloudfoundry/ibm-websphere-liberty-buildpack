@@ -108,13 +108,13 @@ module LibertyBuildpack::Jre
       FileUtils.mkdir_p(java_home)
 
       system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
-      
+
       if system("[ $(ls #{java_home} | wc -l) = 1 ]")
         FileUtils.rm_rf(java_home)
         FileUtils.mkdir_p(java_home)
         system "tar xzf #{file.path} -C #{java_home} --strip 2 2>&1"
       end
-      
+
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
