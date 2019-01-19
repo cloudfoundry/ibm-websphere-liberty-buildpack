@@ -53,8 +53,10 @@ module LibertyBuildpack::Jre
     #
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
-      @version = OpenJdk.find_openjdk(@configuration)[0]
-      id @version if !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
+      if !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
+        @version = OpenJdk.find_openjdk(@configuration)[0]
+        id(@version)
+      end
     end
 
     # Downloads and unpacks a OpenJdk
