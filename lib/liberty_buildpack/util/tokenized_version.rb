@@ -23,7 +23,7 @@ module LibertyBuildpack::Util
     include Comparable
 
     # The wildcard component.
-    WILDCARD = '+'
+    WILDCARD = '+'.freeze
 
     # Create a tokenized version based on the input string.
     #
