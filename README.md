@@ -49,9 +49,10 @@ All Documentation is available in the Docs folder of the buildpack.
     * [JRebel Agent](docs/framework-jrebel-agent.md)
     * [New Relic Agent](docs/framework-new-relic-agent.md)
     * [Spring Auto Reconfiguration](docs/framework-spring-auto-reconfiguration.md)
-* JREs
-    * [IBM JRE](docs/ibm-jdk.md)
+* JVMs
+    * [IBM SDK](docs/ibm-jdk.md)
     * [OpenJDK](docs/open-jdk.md)
+    * [OpenJ9](docs/openj9.md)
 * [Server Behavior xml Options](docs/server-xml-options.md)
 * [Forking the buildpack](docs/forking.md)
 * [Overriding buildpack configuration](docs/configuration.md)

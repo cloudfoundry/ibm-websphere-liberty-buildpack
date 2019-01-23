@@ -22,6 +22,7 @@ containers:
 jres:
   - "LibertyBuildpack::Jre::IBMJdk"
   - "LibertyBuildpack::Jre::OpenJdk"
+  - "LibertyBuildpack::Jre::OpenJ9"
 frameworks:
   - "LibertyBuildpack::Framework::Env"
   - "LibertyBuildpack::Framework::JavaOpts"
