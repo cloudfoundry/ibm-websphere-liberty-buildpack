@@ -110,8 +110,12 @@ module LibertyBuildpack::Jre
       FileUtils.mkdir_p(java_home)
 
       system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
-
-      if system("[ $(ls #{java_home} | wc -l) = 1 ]") && system("[ ! $(ls #{java_home} | grep -w 'jre') ]")
+      system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
+      rc=system("[ $(ls #{java_home} | wc -l) = 1 ]")
+      rc2=system("[ $(ls #{java_home} | grep -w notices.txt | wc -l) = 0 ]")
+      puts "files=#{files}"
+      
+      if rc && rc2
         FileUtils.rm_rf(java_home)
         FileUtils.mkdir_p(java_home)
         system "tar xzf #{file.path} -C #{java_home} --strip 2 2>&1"
