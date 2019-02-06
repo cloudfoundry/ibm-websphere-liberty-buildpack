@@ -55,7 +55,7 @@ module LibertyBuildpack::Services
       conn_prefix = "cloud.services.#{@service_name}.connection."
 
       # uri/url is the only property portable between Pivotal, BlueMix, and Heroku
-      conn_uri = properties["#{conn_prefix}uri"] || properties["#{conn_prefix}url"]
+      conn_uri = properties["#{conn_prefix}uri"] || properties["#{conn_prefix}url"] || properties["#{conn_prefix}uri_cli"]
       if conn_uri.nil?
         raise "Resource #{@service_name} does not contain a #{conn_prefix}uri or #{conn_prefix}url property"
       end
