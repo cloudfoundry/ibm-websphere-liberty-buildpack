@@ -61,7 +61,7 @@ module LibertyBuildpack::Services
       new_element.add_attribute('value', parsed_uri['db'])
       @db_name = "${#{db_var_name}}"
 
-      @service_cert = credentials['ca_certificate_base64']
+      @service_cert = credentials['ca_certificate_base64'] || credentials['uri_cli']
       raise "Resource #{@service_name} does not contain a uri property" if @service_cert.nil?
     end
 
