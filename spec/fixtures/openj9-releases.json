@@ -1,0 +1,29 @@
+[
+  {
+    "release_name": "jdk-11+28",
+    "release_link": "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/tag/jdk-11%2B28",
+    "timestamp": "2018-10-03T05:11:19Z",
+    "release": true,
+    "binaries": [
+      {
+        "os": "linux",
+        "architecture": "x64",
+        "binary_type": "jre",
+        "openjdk_impl": "openj9",
+        "binary_name": "OpenJDK11-jre_x64_linux_openj9_11_28.tar.gz",
+        "binary_link": "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jre_x64_linux_openj9_11_28.tar.gz",
+        "binary_size": 40889035,
+        "checksum_link": "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jre_x64_linux_openj9_11_28.tar.gz.sha256.txt",
+        "version": "11",
+        "version_data": {
+          "openjdk_version": "11+28",
+          "semver": "11.0.0+28"
+        },
+        "heap_size": "normal",
+        "download_count": 281,
+        "updated_at": "2018-10-03T20:38:10Z"
+      }
+    ],
+    "download_count": 2060754
+  }
+]

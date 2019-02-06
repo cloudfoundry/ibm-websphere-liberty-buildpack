@@ -53,8 +53,10 @@ module LibertyBuildpack::Jre
     #
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
-      @version = OpenJdk.find_openjdk(@configuration)[0]
-      id @version if !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
+      if !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
+        @version = OpenJdk.find_openjdk(@configuration)[0]
+        id(@version)
+      end
     end
 
     # Downloads and unpacks a OpenJdk
@@ -108,6 +110,20 @@ module LibertyBuildpack::Jre
       FileUtils.mkdir_p(java_home)
 
       system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
+      rc1 = system("[ $(ls #{java_home} | wc -l) = 1 ]")
+      rc2 = system("[ $(ls #{java_home} | grep -w notices | wc -l) = 0 ]")
+      rc3 = system("[ $(ls #{java_home} | wc -l) = 1 ] && [ $(ls #{java_home} | grep -w notices.txt | wc -l) = 0 ]")
+      puts "rc1= #{rc1}"
+      puts "rc2= #{rc2}"
+      puts "rc3= #{rc3}"
+      files = Dir.entries(java_home.to_s)
+      puts "files=#{files}"
+      if rc3
+        FileUtils.rm_rf(java_home)
+        FileUtils.mkdir_p(java_home)
+        system "tar xzf #{file.path} -C #{java_home} --strip 2 2>&1"
+      end
+
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 

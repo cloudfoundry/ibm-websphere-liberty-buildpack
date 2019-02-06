@@ -143,7 +143,8 @@ module LibertyBuildpack::Jre
             java_home: '',
             java_opts: [],
             configuration: configuration,
-            license_ids: {}
+            license_ids: {},
+            jvm_type: 'openjdk'
           ).detect
         end.to raise_error(/OpenJdk\ error:\ test\ error/)
       end
