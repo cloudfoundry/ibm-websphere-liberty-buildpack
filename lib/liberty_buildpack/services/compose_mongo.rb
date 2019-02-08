@@ -79,7 +79,7 @@ module LibertyBuildpack::Services
 
       # add_certificate
       # add_key_store(doc)
-      add_custom_ssl(doc)
+      # add_custom_ssl(doc)
     end
 
     #------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ module LibertyBuildpack::Services
 
       # add_certificate
       # update_keystore_config(doc)
-      update_ssl_config(doc)
+      # update_ssl_config(doc)
     end
 
     protected
