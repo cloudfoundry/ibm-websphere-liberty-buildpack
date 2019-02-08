@@ -94,7 +94,6 @@ module LibertyBuildpack::Services
     #------------------------------------------------------------------------------------
     def update(doc, server_dir, driver_dir, available_jars, number_instances)
       super
-      
       unless @service_cert.nil?
         add_certificate
         update_keystore_config(doc)
