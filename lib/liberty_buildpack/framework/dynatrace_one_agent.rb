@@ -100,13 +100,15 @@ module LibertyBuildpack::Framework
     APITOKEN = 'apitoken'.freeze
     APIURL = 'apiurl'.freeze
     ENVIRONMENTID = 'environmentid'.freeze
+    LOCATION = 'location'.freeze
 
     # dynatrace's directory of artifacts in the droplet
     DYNATRACE_HOME_DIR = '.dynatrace_one_agent'.freeze
 
     # dynatrace ENV variables
     DT_APPLICATION_ID = 'DT_APPLICATIONID'.freeze
-    DT_HOST_ID = 'DT_HOST_ID'.freeze
+    DT_LOGSTREAM = 'DT_LOGSTREAM'.freeze
+    DT_LOCATION = 'DT_LOCATION'.freeze
 
     #------------------------------------------------------------------------------------------
     # Searches for a single service which name, label or tag contains 'dynatrace' and
@@ -165,7 +167,10 @@ module LibertyBuildpack::Framework
 
       variables = {}
       variables[DT_APPLICATION_ID] = application_id
-      variables[DT_HOST_ID] = host_id
+      variables[DT_LOGSTREAM] = 'stdout'
+
+      credentials = service[CREDENTIALS_KEY]
+      variables[DT_LOCATION] = credentials[LOCATION] if credentials.key?(LOCATION)
 
       env_file_name = File.join(profiled_dir, '0dynatrace-app-env.sh')
       env_file = File.new(env_file_name, 'w')
