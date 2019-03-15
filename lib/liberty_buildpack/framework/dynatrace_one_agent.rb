@@ -88,6 +88,7 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def release
       @java_opts << "-agentpath:#{agent_path}"
+      @java_opts << '-Xshare:off'
     end
 
     private

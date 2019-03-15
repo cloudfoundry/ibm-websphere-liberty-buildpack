@@ -208,6 +208,7 @@ module LibertyBuildpack::Framework
 
       it 'should return command line options for a valid service in a default container' do
         expect(released[0]).to eq("-agentpath:#{ENV['PWD']}/app/#{dynatrace_home}/agent/lib64/liboneagentloader.so")
+        expect(released[1]).to eq('-Xshare:off')
       end
     end # end of release
 

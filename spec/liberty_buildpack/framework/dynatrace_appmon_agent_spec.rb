@@ -247,6 +247,7 @@ module LibertyBuildpack::Framework
         pattern = "^(-agentpath:#{pwd}/app/#{dynatrace_home}/agent/.*/agent/.*/libdtagent.so=name=Monitoring,server=127.0.0.1.*)$"
 
         expect(released[0]).to match(/#{pattern}/)
+        expect(released[1]).to eq('-Xshare:off')
       end
 
       it 'should return command line options for a valid service with optional parameters' do
@@ -254,6 +255,7 @@ module LibertyBuildpack::Framework
         pattern = "^(-agentpath:#{pwd}/app/#{dynatrace_home}/agent/.*/agent/.*/libdtagent.so=name=Monitoring,server=127.0.0.1,exclude=starts:somepackage.someclass)$"
 
         expect(released[0]).to match(/#{pattern}/)
+        expect(released[1]).to eq('-Xshare:off')
       end
 
     end # end of release

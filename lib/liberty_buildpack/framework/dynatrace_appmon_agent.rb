@@ -93,6 +93,7 @@ module LibertyBuildpack::Framework
 
       # create the dynatrace agent command as java_opts
       @java_opts << "-agentpath:#{dt_agent}=#{get_service_options}"
+      @java_opts << '-Xshare:off'
     end
 
     private
