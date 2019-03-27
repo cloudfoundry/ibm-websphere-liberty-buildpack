@@ -2,6 +2,8 @@
 sudo: false
 language: ruby
 matrix:
+ allow_failures:
+  - dist: xenial
   include:
     - rvm: "2.2.5"
       env: COMMAND=rake
