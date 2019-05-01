@@ -1287,7 +1287,7 @@ module LibertyBuildpack::Container
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
-          expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false'/>")
+          expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false' trustedSensitiveHeaderOrigin='*'/>")
           expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<appstate2 appName='#{app_name}'/>")
@@ -1306,7 +1306,7 @@ module LibertyBuildpack::Container
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
-          expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false'/>")
+          expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false' trustedSensitiveHeaderOrigin='*'/>")
           expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
           expect(server_xml_contents).not_to match(/<appstate2.*\/>/)
