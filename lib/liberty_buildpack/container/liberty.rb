@@ -507,6 +507,7 @@ module LibertyBuildpack::Container
         dispatchers.drop(1).each { |element| element.parent.delete_element(element) }
       end
       dispatcher.add_attribute('enableWelcomePage', 'false')
+      dispatcher.add_attribute('trustedSensitiveHeaderOrigin', '*')
     end
 
     def appstate_enabled?
