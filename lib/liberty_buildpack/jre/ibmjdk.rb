@@ -79,9 +79,7 @@ module LibertyBuildpack::Jre
 
       # IBM Doesn't currently have a JRE of 11.*
       ibm_var = ' IBM'
-      if @version.include? '11'
-        ibm_var = '' unless @version.include? '.11'
-      end
+      ibm_var = '' if @version.starts_with? '11.'
 
       download_start_time = Time.now
       if @uri.include? '://'
