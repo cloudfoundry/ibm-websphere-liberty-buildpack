@@ -76,13 +76,21 @@ module LibertyBuildpack::Jre
         print "\nYou have not accepted the IBM JVM License.\n\nVisit the following uri:\n#{@license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
         raise
       end
+      
+            #IBM Doesn't currently have a JRE of 11.* 
+      ibmVar = " IBM"
+      if @version.include? '11'
+        unless @version.include? '.11'
+          ibmVar = ""
+        end
+      end
 
       download_start_time = Time.now
       if @uri.include? '://'
-        print "-----> Downloading IBM #{@version} JRE from #{@uri} ... "
+        print "-----> Downloading#{ibmVar} #{@version} JRE from #{@uri} ... "
       else
         filename = File.basename(@uri)
-        print "-----> Retrieving IBM #{@version} JRE (#{filename}) ... "
+        print "-----> Retrieving#{ibmVar} #{@version} JRE (#{filename}) ... "
       end
       LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file| # TODO: Use global cache
         puts "(#{(Time.now - download_start_time).duration})"
