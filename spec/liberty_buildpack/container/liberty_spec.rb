@@ -91,8 +91,8 @@ module LibertyBuildpack::Container
       http_dispatcher = server_xml_doc.elements['/server/httpDispatcher']
       expect(http_dispatcher).not_to be_nil
       expect(http_dispatcher.attributes['enableWelcomePage']).to eq('false')
-      expect(http_dispatcher.attributes['trustedSensitiveHeaderOrigin']).to eq('*')      
-
+      expect(http_dispatcher.attributes['trustedSensitiveHeaderOrigin']).to eq('*')
+  
       config = server_xml_doc.elements['/server/config']
       expect(config).not_to be_nil
       expect(config.attributes['updateTrigger']).to eq('mbean')
