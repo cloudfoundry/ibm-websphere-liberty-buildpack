@@ -77,18 +77,14 @@ module LibertyBuildpack::Jre
         raise
       end
 
-      # IBM Doesn't currently have a JRE of 11.*
-      if @version.=~(/^11./)
-        ibm_var = ''
-      else
-        ibm_var = ' IBM'
-      end
-
+      ibm_var = ' IBM'
       download_start_time = Time.now
       if @uri.include? '://'
         print "-----> Downloading#{ibm_var} #{@version} JRE from #{@uri} ... "
       else
         filename = File.basename(@uri)
+        # if open is in the name then the jre is not IBM's so let's not display IBM in the output
+        ibm_var = '' if filename.include? 'open'
         print "-----> Retrieving#{ibm_var} #{@version} JRE (#{filename}) ... "
       end
       LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file| # TODO: Use global cache
