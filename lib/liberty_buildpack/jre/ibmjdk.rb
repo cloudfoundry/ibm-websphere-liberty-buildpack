@@ -77,6 +77,7 @@ module LibertyBuildpack::Jre
         raise
       end
 
+      ibm_var = ' IBM'
       download_start_time = Time.now
       if @uri.include? '://'
         print "-----> Downloading#{ibm_var} #{@version} JRE from #{@uri} ... "
