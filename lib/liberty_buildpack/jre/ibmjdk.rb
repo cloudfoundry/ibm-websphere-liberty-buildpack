@@ -83,7 +83,7 @@ module LibertyBuildpack::Jre
       else
         filename = File.basename(@uri)
         # if open is in the name then the jre is not IBM's so let's not display IBM in the output
-        ibm_var = '' if @filename.include? 'open'
+        ibm_var = '' if filename.include? 'open'
         print "-----> Retrieving#{ibm_var} #{@version} JRE (#{filename}) ... "
       end
       LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file| # TODO: Use global cache
