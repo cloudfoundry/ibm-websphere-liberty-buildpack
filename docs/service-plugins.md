@@ -1,3 +1,18 @@
+[//]:# IBM WebSphere Application Server Liberty Buildpack
+[//]:# Copyright 2015 the original author or authors.
+[//]: #
+[//]: # Licensed under the Apache License, Version 2.0 (the "License");
+[//]: # you may not use this file except in compliance with the License.
+[//]: # You may obtain a copy of the License at
+[//]: #
+[//]: #      http://www.apache.org/licenses/LICENSE-2.0
+[//]: #
+[//]: # Unless required by applicable law or agreed to in writing, software
+[//]: # distributed under the License is distributed on an "AS IS" BASIS,
+[//]: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+[//]: # See the License for the specific language governing permissions and
+[//]: # limitations under the License.
+
 # Service Plug-ins
 
 Service plug-ins provide the means via which the Liberty buildpack can automatically configure the Liberty
@@ -65,11 +80,11 @@ More formally, the grammar of the String is:
 Opt_out_string :: <service_type_specification[<delimiter>service_type_specification]*
 <service_type_specification> :: <service_type>=<option>
 <service_type> :: service type (service label as it appears in VCAP_SERVICES)
-<option> :: all | config 
+<option> :: all | config
 <delimiter> :: one white space character
 ```
 
-Use the “all” option to opt out of all automatic configuration actions for a service. Use the “config” option to only opt out
+Use the ï¿½allï¿½ option to opt out of all automatic configuration actions for a service. Use the ï¿½configï¿½ option to only opt out
 of configuration update actions.
 
 ```
@@ -81,7 +96,7 @@ env:
 
 env:
   services_autoconfig_excludes: mysql=config mongodb-2.2=all
-``` 
+```
 
 [Accessing the Information of Bound Services]: server-xml-options.md#accessing-the-information-of-bound-services
 [Modifications]: server-xml-options.md#serverxml-modifications

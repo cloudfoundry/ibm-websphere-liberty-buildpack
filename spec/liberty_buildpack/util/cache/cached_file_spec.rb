@@ -1,5 +1,4 @@
 # Encoding: utf-8
-# Cloud Foundry Java Buildpack
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright 2015 the original author or authors.
 #

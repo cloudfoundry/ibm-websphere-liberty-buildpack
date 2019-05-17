@@ -1,9 +1,24 @@
-Heroku 
+[//]:# IBM WebSphere Application Server Liberty Buildpack
+[//]:# Copyright 2014 the original author or authors.
+[//]: #
+[//]: # Licensed under the Apache License, Version 2.0 (the "License");
+[//]: # you may not use this file except in compliance with the License.
+[//]: # You may obtain a copy of the License at
+[//]: #
+[//]: #      http://www.apache.org/licenses/LICENSE-2.0
+[//]: #
+[//]: # Unless required by applicable law or agreed to in writing, software
+[//]: # distributed under the License is distributed on an "AS IS" BASIS,
+[//]: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+[//]: # See the License for the specific language governing permissions and
+[//]: # limitations under the License.
+
+Heroku
 ========================================
 
-[Heroku][] is a Platform-as-a Service (PaaS) provider. It is Heroku that first introduced the concept of buildpacks. Cloud Foundry later adopted this concept for its platform. As a result, many of the buildpacks that are developed for Heroku continue to work on Cloud Foundry and vice versa. 
+[Heroku][] is a Platform-as-a Service (PaaS) provider. It is Heroku that first introduced the concept of buildpacks. Cloud Foundry later adopted this concept for its platform. As a result, many of the buildpacks that are developed for Heroku continue to work on Cloud Foundry and vice versa.
 
-You can use the Liberty Buildpack to deploy applications to Heroku. 
+You can use the Liberty Buildpack to deploy applications to Heroku.
 
 ## Configuration
 
@@ -25,7 +40,7 @@ To deploy a Liberty application to Heroku, you must configure the application to
 
 You must also accept the Liberty and IBM JRE license in order to deploy an application using the Liberty Buildpack. See the [usage](https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack#usage) section for details on how to obtain the license codes for Liberty and IBM JRE. When you have the license codes, you can set them in the following way on Heroku:
 ```
-$ heroku config:set IBM_JVM_LICENSE=<jvm license code> 
+$ heroku config:set IBM_JVM_LICENSE=<jvm license code>
 $ heroku config:set IBM_LIBERTY_LICENSE=<liberty license code>
 ```
 
@@ -35,16 +50,16 @@ $ heroku config:set IBM_LIBERTY_LICENSE=<liberty license code>
 
 You can use [Git](http://git-scm.com/) to deploy and manage applications to Heroku. See [Deploying with Git](https://devcenter.heroku.com/articles/git) for more information.
 
-The Liberty Buildpack is designed to deploy compiled Java code. On Heroku, you must first check in the compiled applications code into a Git repository and then push the code to get it deployed with the Liberty Buildpack. 
+The Liberty Buildpack is designed to deploy compiled Java code. On Heroku, you must first check in the compiled applications code into a Git repository and then push the code to get it deployed with the Liberty Buildpack.
 
 ### Deployment options
 
-* To deploy a **server directory**, check in the contents into a Git repository and push. 
+* To deploy a **server directory**, check in the contents into a Git repository and push.
 
     For example:
     ```
     $ cd ~/wlp/usr/servers/defaultServer
-    $ git init 
+    $ git init
     $ git add .
     $ git commit -m "server directory"
     $ git push heroku master
@@ -56,8 +71,8 @@ The Liberty Buildpack is designed to deploy compiled Java code. On Heroku, you m
     ```
     $ mkdir ~/myapp
     $ cd ~/myapp
-    $ jar xvf ~/myapp.war 
-    $ git init 
+    $ jar xvf ~/myapp.war
+    $ git init
     $ git add .
     $ git commit -m "war directory"
     $ git push heroku master
@@ -76,13 +91,13 @@ On Heroku, the buildpack looks for any environment variables that end with `_URL
 * **name**: The name of the service (see [below](#service-name)).
 * **connection.url**: The service URL.
 * **connection.uri**: An alias for **connection.url**.
-* *(optional)* **connection.name**: The path part of the service URL. 
-* *(optional)* **connection.hostname**: The hostname of the server that is running the service. 
+* *(optional)* **connection.name**: The path part of the service URL.
+* *(optional)* **connection.hostname**: The hostname of the server that is running the service.
 * *(optional)* **connection.host**: An alias for **connection.hostname**.
 * *(optional)* **connection.port**: The port on which the service is listening for incoming connections.
 * *(optional)* **connection.user**: The username that is used to authenticate this application to the service.
 * *(optional)* **connection.username**: An alias for **connection.user**.
-* *(optional)* **connection.password**: The password that is used to authenticate this application to the service. 
+* *(optional)* **connection.password**: The password that is used to authenticate this application to the service.
 
 The **connection.name**, **connection.hostname**, **connection.host**, **connection.port**, **connection.user**, **connection.username**, **connection.password** are optional and might not be set for some services. For example, the **connection.port** variable might not be set if the service URL does not specify one.
 
@@ -90,7 +105,7 @@ The **connection.name**, **connection.hostname**, **connection.host**, **connect
 
 Heroku does not provide a built-in way to associate a custom name with a service. However, the Liberty Buildpack uses the custom service names during [auto-configuration](#service-auto-configuration) to match a service to the right configuration elements in the server configuration or when generating service variables.
 
-In general, the service name is the name of the environment variable exposed by the service without the `_URL` or `_URI` suffix. For example, the [MongoHQ][] service sets an environment variable named `MONGOHQ_URL`. The default service name would then be `mongohq` and the service variables would start with the `cloud.services.mongohq.` prefix. 
+In general, the service name is the name of the environment variable exposed by the service without the `_URL` or `_URI` suffix. For example, the [MongoHQ][] service sets an environment variable named `MONGOHQ_URL`. The default service name would then be `mongohq` and the service variables would start with the `cloud.services.mongohq.` prefix.
 
 With the Liberty Buildpack you can associate a custom name with a service using the `SERVICE_NAME_MAP` environment variable. The `SERVICE_NAME_MAP` environment variable has the following syntax:
 ```
@@ -104,13 +119,13 @@ For example:
 $ heroku config:set SERVICE_NAME_MAP="MONGOHQ_URL=myMongo"
 ```
 
-In this example, the service name for the [MongoHQ][] service is `myMongo` and the service variables start with the `cloud.services.myMongo.` prefix. 
+In this example, the service name for the [MongoHQ][] service is `myMongo` and the service variables start with the `cloud.services.myMongo.` prefix.
 
 ### Service auto-configuration
 
-The Liberty Buildpack performs auto-configuration for a subset of services. The buildpack automatically downloads appropriate client drivers and updates the `server.xml` configuration file with the right information for a given service. For example, for the [Heroku Postgres][] service, the Liberty Buildpack downloads the JDBC client driver and updates the `server.xml` file with the appropriate `dataSource` element. 
+The Liberty Buildpack performs auto-configuration for a subset of services. The buildpack automatically downloads appropriate client drivers and updates the `server.xml` configuration file with the right information for a given service. For example, for the [Heroku Postgres][] service, the Liberty Buildpack downloads the JDBC client driver and updates the `server.xml` file with the appropriate `dataSource` element.
 
-Currently, on Heroku, auto-configuration will be done for the [Heroku Postgres][], [ClearDB MySQL Database](https://addons.heroku.com/cleardb), [MongoLab](https://addons.heroku.com/mongolab), [MongoHQ][], and [MongoSoup](https://addons.heroku.com/mongosoup) add-ons. 
+Currently, on Heroku, auto-configuration will be done for the [Heroku Postgres][], [ClearDB MySQL Database](https://addons.heroku.com/cleardb), [MongoLab](https://addons.heroku.com/mongolab), [MongoHQ][], and [MongoSoup](https://addons.heroku.com/mongosoup) add-ons.
 
 #### Opting out
 
@@ -138,5 +153,3 @@ The following is a list of features of the Liberty Buildpack that do not work on
 [Heroku]: https://heroku.com
 [Heroku Postgres]: https://addons.heroku.com/heroku-postgresql
 [MongoHQ]: https://addons.heroku.com/mongohq
-
-
