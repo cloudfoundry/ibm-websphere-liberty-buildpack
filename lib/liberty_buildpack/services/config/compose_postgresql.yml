@@ -1,5 +1,5 @@
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2014 the original author or authors.
+# Copyright IBM Corp. 2016
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ server_xml_stanza : dataSource
 service_filter : 'compose-for-postgresql'
 
 # plugin specific attributes
-features: 
+features:
  if: ['jdbc-4.0']
  then: []
  else: ['jdbc-4.1']

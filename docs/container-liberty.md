@@ -1,3 +1,15 @@
+IBM WebSphere Application Server Liberty Buildpack
+Copyright IBM Corp. 2013, 2015
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
 # Liberty Container
 The Liberty container runs Java EE 6 and 7 applications on [IBM's WebSphere Application Server Liberty Profile](http://www14.software.ibm.com/webapp/wsbroker/redirect?version=phil&product=was-nd-mp&topic=thread_twlp_devenv). It recognizes Web Archive (WAR) and Enterprise Archive (EAR) files as well applications deployed as a [Liberty server directory](http://www14.software.ibm.com/webapp/wsbroker/redirect?version=phil&product=was-nd-dist&topic=twlp_setup_new_server) or [packaged server](http://www14.software.ibm.com/webapp/wsbroker/redirect?version=phil&product=was-nd-mp&topic=twlp_setup_package_server).
 
@@ -28,10 +40,10 @@ The Liberty container can be configured by modifying the [`config/liberty.yml`][
 | ---- | -----------
 |`repository_root`| The URL of the Liberty repository index ([details][repositories]).
 |`version`| The version of the Liberty profile. You can find the candidate versions [here][index.yml].
-| `type` | The archive type of Liberty runtime to download. One of `webProfile6`, `webProfile7`, `javaee7`, or `kernel`. The default value is `webProfile7`. 
+| `type` | The archive type of Liberty runtime to download. One of `webProfile6`, `webProfile7`, `javaee7`, or `kernel`. The default value is `webProfile7`.
 |`minify`| Boolean indicating whether the Liberty server should be [minified](#minify). The default value is `false`.
-| `liberty_repository_properties` | [Liberty repository configuration](#liberty-repository-configuration). 
-| `app_archive` | [Default configuration](#default-configuration) for WAR and EAR files. 
+| `liberty_repository_properties` | [Liberty repository configuration](#liberty-repository-configuration).
+| `app_archive` | [Default configuration](#default-configuration) for WAR and EAR files.
 
 #### Minify
 
@@ -64,16 +76,16 @@ liberty_repository_properties:
   myRepo.userPassword: myPassword
 ```
 
-#### Default configuration 
+#### Default configuration
 
-The buildpack provides a default `server.xml` configuration when deploying WAR or EAR files. That default configuration is populated with a list of Liberty features based on the `["app_archive"]["features"]` setting. The `["app_archive"]["implicit_cdi"]` setting controls whether archives that do not contain the `beans.xml` file are scanned for CDI annotations. 
+The buildpack provides a default `server.xml` configuration when deploying WAR or EAR files. That default configuration is populated with a list of Liberty features based on the `["app_archive"]["features"]` setting. The `["app_archive"]["implicit_cdi"]` setting controls whether archives that do not contain the `beans.xml` file are scanned for CDI annotations.
 
 ```yaml
 app_archive:
  # Scan archives that do not contain beans.xml for bean-definition annotations (cdi 1.2)
  implicit_cdi: false
  # Default features
- features: 
+ features:
  - beanValidation-1.1
  - cdi-1.2
  - ejbLite-3.2
@@ -121,4 +133,3 @@ The environment variables can also be specified in the [manifest.yml](http://doc
 [version_syntax]: util-repositories.md#version-syntax-and-ordering
 [index.yml]: http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml
 [Liberty repository]: https://developer.ibm.com/wasdev/downloads/
-
