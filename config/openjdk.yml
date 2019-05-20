@@ -1,5 +1,5 @@
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013-2014 the original author or authors.
+# Copyright IBM Corp. 2013, 2015
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 # limitations under the License.
 
 # Configuration for OpenJdk repository
-# If Java 7 is selected, the 'permgen' option will be used. 
-# If Java 8 is selected, the 'metaspace' option will be used. 
+# If Java 7 is selected, the 'permgen' option will be used.
+# If Java 8 is selected, the 'metaspace' option will be used.
 # Please see the documentation for more detail.
 ---
 repository_root: ! '{default.repository.root}/openjdk/{platform}/{architecture}'
@@ -29,4 +29,3 @@ memory_heuristics:
   permgen: 10
   stack: 5
   native: 10
-  

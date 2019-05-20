@@ -1,3 +1,4 @@
+
 <server description="new server">
 
     <!-- Enable features -->
@@ -10,7 +11,7 @@
                   httpPort="${http.port}"
                    />
 
-     <application id="myappp" 
+     <application id="myappp"
 		name="myapp" location="tradelite.war"
 		context-root="/">
      </application>

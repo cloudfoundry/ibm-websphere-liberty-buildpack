@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright 2013-2014 the original author or authors.
+# Copyright IBM Corp. 2013, 2016
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
