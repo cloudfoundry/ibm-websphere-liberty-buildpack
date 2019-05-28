@@ -109,7 +109,7 @@ module LibertyBuildpack::Framework
     # dynatrace ENV variables
     DT_APPLICATION_ID = 'DT_APPLICATIONID'.freeze
     DT_LOGSTREAM = 'DT_LOGSTREAM'.freeze
-    DT_LOCATION = 'DT_LOCATION'.freeze
+    DT_NETWORK_ZONE = 'DT_NETWORK_ZONE'.freeze
 
     #------------------------------------------------------------------------------------------
     # Searches for a single service which name, label or tag contains 'dynatrace' and
@@ -171,7 +171,7 @@ module LibertyBuildpack::Framework
       variables[DT_LOGSTREAM] = 'stdout'
 
       credentials = service[CREDENTIALS_KEY]
-      variables[DT_LOCATION] = credentials[LOCATION] if credentials.key?(LOCATION)
+      variables[DT_NETWORK_ZONE] = credentials[LOCATION] if credentials.key?(LOCATION)
 
       env_file_name = File.join(profiled_dir, '0dynatrace-app-env.sh')
       env_file = File.new(env_file_name, 'w')
