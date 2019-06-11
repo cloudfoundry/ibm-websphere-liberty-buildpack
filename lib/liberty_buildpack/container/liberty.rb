@@ -420,8 +420,8 @@ module LibertyBuildpack::Container
       disable_welcome_page(server_xml_doc)
       # Disable application monitoring
       disable_application_monitoring(server_xml_doc)
-      # Disable configuration (server.xml) monitoring
-      disable_config_monitoring(server_xml_doc)
+      # Enable configuration (server.xml) monitoring
+      update_config_monitoring(server_xml_doc)
 
       # Check if appstate ICAP feature can be used
       check_appstate_feature(server_xml_doc) if appstate_enabled?
@@ -503,11 +503,12 @@ module LibertyBuildpack::Container
       logging.add_attribute('consoleLogLevel', 'INFO') if logging.attribute('consoleLogLevel').nil?
     end
 
-    def disable_config_monitoring(server_xml_doc)
+    def update_config_monitoring_polling_interval(server_xml_doc)
       configs = REXML::XPath.match(server_xml_doc, '/server/config')
       if configs.empty?
         config = REXML::Element.new('config', server_xml_doc.root)
-        config.add_attribute('updateTrigger', 'mbean')
+        config.add_attribute('updateTrigger', 'polled')
+        config.add_attribute('monitorInterval', '60000ms')
       end
     end
 
