@@ -421,7 +421,7 @@ module LibertyBuildpack::Container
       # Disable application monitoring
       disable_application_monitoring(server_xml_doc)
       # Enable configuration (server.xml) monitoring
-      update_config_monitoring(server_xml_doc)
+      update_config_monitoring_polling_interval(server_xml_doc)
 
       # Check if appstate ICAP feature can be used
       check_appstate_feature(server_xml_doc) if appstate_enabled?
