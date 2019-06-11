@@ -77,7 +77,7 @@ module LibertyBuildpack::Container
     #                  returns +nil+
     def detect
       liberty_version = Liberty.find_liberty_item(@app_dir, @configuration)[0]
-      if liberty_version
+      if liberty_version || use_liberty_springboot?
         # set the relative path from '.liberty/usr/servers/defaultserver'
         @common_paths.relative_location = File.join(LIBERTY_HOME, USR_PATH, SERVERS_PATH, DEFAULT_SERVER)
         [liberty_type, liberty_id(liberty_version)]
@@ -310,6 +310,8 @@ module LibertyBuildpack::Container
 
     META_INF = 'META-INF'.freeze
 
+    BOOT_INF = 'BOOT-INF'.freeze
+
     MEMORY_CONFIG_FOLDER = '.memory_config/'.freeze
 
     SERVER_NAME_FILE = 'server_name_information'.freeze
@@ -318,7 +320,7 @@ module LibertyBuildpack::Container
       server_xml = Liberty.server_xml(@app_dir)
       if server_xml
         update_provided_server_xml(server_xml)
-      elsif Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
+      elsif Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir) || Liberty.boot_inf(@app_dir)
         check_default_features
         create_default_server_xml
       else
@@ -424,8 +426,30 @@ module LibertyBuildpack::Container
       # Check if appstate ICAP feature can be used
       check_appstate_feature(server_xml_doc) if appstate_enabled?
 
+      # Use native liberty springboot feature if enabled
+      add_springboot(server_xml_doc) if use_liberty_springboot?
+
       # update config for services
       @services_manager.update_configuration(server_xml_doc, create, current_server_dir)
+    end
+
+    def use_liberty_springboot?
+      spring_version = @environment['native_springboot_support']
+      return true unless spring_version.nil?
+      false
+    end
+
+    def add_springboot(server_xml_doc)
+      feature_managers = REXML::XPath.match(server_xml_doc, '/server/featureManager')
+      if feature_managers.empty?
+        feature_manager = REXML::Element.new('featureManager', server_xml_doc.root)
+      else
+        feature_manager = feature_managers[0]
+      end
+      spring_version = @environment['LIBERTY_NATIVE_SPRINGBOOT']
+      springboot_feature = REXML::Element.new('feature', feature_manager)
+      springboot_feature.text = format('springBoot-%s', spring_version)
+      springboot_feature.text
     end
 
     def get_context_root
@@ -556,7 +580,7 @@ module LibertyBuildpack::Container
         candidates = Dir[File.join(@app_dir, WLP_PATH, USR_PATH, SERVERS_PATH, '*')]
         raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}" if candidates.size != 1
         File.basename(candidates[0])
-      elsif Liberty.server_directory(@app_dir) || Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir)
+      elsif Liberty.server_directory(@app_dir) || Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir) || Liberty.boot_inf(@app_dir)
         DEFAULT_SERVER
       else
         raise 'Could not find either a WEB-INF directory or a server.xml.'
@@ -786,7 +810,7 @@ module LibertyBuildpack::Container
     #
     # Returns the version, artifact uri, and license of the requested item in the index file
     def self.find_liberty_item(app_dir, configuration)
-      if server_xml(app_dir) || web_inf(app_dir) || meta_inf(app_dir)
+      if server_xml(app_dir) || web_inf(app_dir) || meta_inf(app_dir) || boot_inf(app_dir)
         version, entry = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
           raise "Malformed Liberty version #{candidate_version}: too many version components" if candidate_version[4]
         end
@@ -943,6 +967,11 @@ module LibertyBuildpack::Container
       end
     end
 
+    def self.boot_inf(app_dir)
+      boot_inf = File.join(app_dir, BOOT_INF)
+      File.directory?(File.join(app_dir, BOOT_INF)) ? boot_inf : nil
+    end
+
     def self.meta_inf(app_dir)
       # return nil if META-INF directory doesn't exist. This mimics behavior of previous implementation.
       meta_inf = File.join(app_dir, META_INF)
@@ -975,7 +1004,7 @@ module LibertyBuildpack::Container
         print "\nThe pushed packaged server contains runtime binaries. Use the command 'server package --include=usr' to package the server without the runtime binaries.\n"
         raise "The pushed packaged server contains runtime binaries. Use the command 'server package --include=usr' to package the server without the runtime binaries."
       end
-      if Liberty.server_directory(app_dir) && (Liberty.web_inf(app_dir) || Liberty.meta_inf(app_dir))
+      if Liberty.server_directory(app_dir) && (Liberty.web_inf(app_dir) || Liberty.meta_inf(app_dir) || Liberty.boot_inf(app_dir))
         print "\nWAR and EAR files cannot contain a server.xml file in the root directory.\n"
         raise 'WAR and EAR files cannot contain a server.xml file in the root directory.'
       end
