@@ -434,7 +434,7 @@ module LibertyBuildpack::Container
     end
 
     def use_liberty_springboot?
-      spring_version = @environment['native_springboot_support']
+      spring_version = @environment['LIBERTY_NATIVE_SPRINGBOOT']
       return true unless spring_version.nil?
       false
     end
