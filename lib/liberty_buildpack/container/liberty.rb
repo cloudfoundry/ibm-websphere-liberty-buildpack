@@ -901,7 +901,11 @@ module LibertyBuildpack::Container
     end
 
     def myapp_type
-      Liberty.web_inf(@app_dir) ? 'war' : 'ear'
+      if use_liberty_springboot?
+        'spring'
+      else
+        Liberty.web_inf(@app_dir) ? 'war' : 'ear'
+      end
     end
 
     def myapp_name
