@@ -1576,7 +1576,7 @@ module LibertyBuildpack::Container
             java_home: test_java_home,
             java_opts: '',
             configuration: {},
-            environment: {},  
+            environment: {},
             license_ids: {}
           ).release
 
