@@ -34,19 +34,21 @@ module LibertyBuildpack::Container
     # @option context [String] :java_home the directory that acts as +JAVA_HOME+
     # @option context [Array<String>] :java_opts an array that Java options can be added to
     # @option context [Hash] :configuration the properties provided by the user
+    # @option context [Hash] :environment the environment variables available to the application
     def initialize(context)
       @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
       @app_dir = context[:app_dir]
       @java_home = context[:java_home]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
+      @environment = context[:environment]
     end
 
     # Detects whether this application is a Java-Main application.
     #
     # @return [String] returns +Java-Main+ if the MANIFEST.MF of the application contains the Java-Main tag.
     def detect
-      main_class ? ['JAR', JavaMain.to_s.dash_case] : nil
+      springboot_version_exists? ? process_config : nil
     end
 
     # Prepares the application to run.
@@ -102,6 +104,19 @@ module LibertyBuildpack::Container
 
     def overlay_java
       ContainerUtils.overlay_java(@app_dir, @app_dir)
+    end
+
+    def springboot_version_exists?
+      if @environment.nil?
+        spring_version = nil
+      else
+        spring_version = @environment['LIBERTY_NATIVE_SPRINGBOOT']
+      end
+      spring_version.nil?
+    end
+
+    def process_config
+      main_class ? ['JAR', JavaMain.to_s.dash_case] : nil
     end
 
     def java_bin

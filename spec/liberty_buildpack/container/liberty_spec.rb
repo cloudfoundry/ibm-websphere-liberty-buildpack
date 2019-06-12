@@ -94,7 +94,7 @@ module LibertyBuildpack::Container
 
       config = server_xml_doc.elements['/server/config']
       expect(config).not_to be_nil
-      expect(config.attributes['updateTrigger']).to eq('mbean')
+      expect(config.attributes['updateTrigger']).to eq('polled')
 
       application_monitor = server_xml_doc.elements['/server/applicationMonitor']
       expect(application_monitor).not_to be_nil
@@ -171,6 +171,7 @@ module LibertyBuildpack::Container
           configuration: {},
           java_home: '',
           java_opts: [],
+          environment: {},
           license_ids: {}
         ).detect
 
@@ -237,6 +238,7 @@ module LibertyBuildpack::Container
           configuration: {},
           java_home: '',
           java_opts: [],
+          environment: {},
           license_ids: {}
         ).detect
 
@@ -251,6 +253,7 @@ module LibertyBuildpack::Container
           configuration: {},
           java_home: '',
           java_opts: [],
+          environment: {},
           license_ids: {}
         ).detect
 
@@ -1098,7 +1101,7 @@ module LibertyBuildpack::Container
 
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read server_xml_file
-          expect(server_xml_contents).to match(/<config updateTrigger='mbean'\/>/)
+          expect(server_xml_contents).to match(/<config updateTrigger='polled' monitorInterval='60000ms'\/>/)
           expect(server_xml_contents).to match(/<applicationMonitor dropinsEnabled='true' updateTrigger='mbean'\/>/)
         end
       end
@@ -1288,7 +1291,7 @@ module LibertyBuildpack::Container
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false' trustedSensitiveHeaderOrigin='*'/>")
-          expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
+          expect(server_xml_contents).to include("<config updateTrigger='polled' monitorInterval='60000ms'/>")
           expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<appstate2 appName='#{app_name}'/>")
           expect(server_xml_contents).to match(/httpEndpoint id="defaultHttpEndpoint" host="127.0.0.1"/)
@@ -1307,7 +1310,7 @@ module LibertyBuildpack::Container
           server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
           server_xml_contents = File.read(server_xml_file)
           expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false' trustedSensitiveHeaderOrigin='*'/>")
-          expect(server_xml_contents).to include("<config updateTrigger='mbean'/>")
+          expect(server_xml_contents).to include("<config updateTrigger='polled' monitorInterval='60000ms'/>")
           expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
           expect(server_xml_contents).not_to match(/<appstate2.*\/>/)
           expect(server_xml_contents).to match(/httpEndpoint id="defaultHttpEndpoint" host="\*"/)
@@ -1554,6 +1557,7 @@ module LibertyBuildpack::Container
             java_home: test_java_home,
             java_opts: '',
             configuration: {},
+            environment: {},
             license_ids: {}
           ).release
 
@@ -1572,6 +1576,7 @@ module LibertyBuildpack::Container
             java_home: test_java_home,
             java_opts: '',
             configuration: {},
+            environment: {},
             license_ids: {}
           ).release
 
