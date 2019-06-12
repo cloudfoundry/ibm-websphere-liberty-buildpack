@@ -107,7 +107,11 @@ module LibertyBuildpack::Container
     end
 
     def springboot_version_exists?
-      spring_version = @environment['LIBERTY_NATIVE_SPRINGBOOT']
+      if @environment.nil?
+        spring_version = nil
+      else
+        spring_version = @environment['LIBERTY_NATIVE_SPRINGBOOT']
+      end
       spring_version.nil?
     end
 
