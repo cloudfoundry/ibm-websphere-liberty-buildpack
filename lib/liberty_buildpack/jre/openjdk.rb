@@ -110,15 +110,9 @@ module LibertyBuildpack::Jre
       FileUtils.mkdir_p(java_home)
 
       system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
-      rc1 = system("[ $(ls #{java_home} | wc -l) = 1 ]")
-      rc2 = system("[ $(ls #{java_home} | grep -w notices | wc -l) = 0 ]")
-      rc3 = system("[ $(ls #{java_home} | wc -l) = 1 ] && [ $(ls #{java_home} | grep -w notices.txt | wc -l) = 0 ]")
-      puts "rc1= #{rc1}"
-      puts "rc2= #{rc2}"
-      puts "rc3= #{rc3}"
-      files = Dir.entries(java_home.to_s)
-      puts "files=#{files}"
-      if rc3
+      rc = system("[ $(ls #{java_home} | wc -l) = 1 ] && [ $(ls #{java_home} | grep -w notices.txt | wc -l) = 0 ]")
+
+      if rc
         FileUtils.rm_rf(java_home)
         FileUtils.mkdir_p(java_home)
         system "tar xzf #{file.path} -C #{java_home} --strip 2 2>&1"
