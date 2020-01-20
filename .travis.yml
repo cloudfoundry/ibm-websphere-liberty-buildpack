@@ -23,3 +23,6 @@ matrix:
       env: COMMAND=rake
 install: bundle install --deployment --without debug
 script: bundle exec $COMMAND
+before_install:
+    - gem uninstall -v '>= 2' -i $(rvm gemdir)@global -ax bundler || true
+    - gem install bundler -v '< 2'
