@@ -103,8 +103,8 @@ module LibertyBuildpack::Jre
       @java_opts.concat tls_opts
       @java_opts.concat default_dump_opts
       @java_opts << '-Xshareclasses:none'
+      print "-------> Currently #{@java_opts}"
       @java_opts << "-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
-      puts "-------> Currently #{@java_opts}"
       unless @java_opts.include? '-Xverbosegclog'
         @java_opts << '-Xverbosegclog:./logs/verbosegc.%pid.%seq.log,10,30000'
       end
