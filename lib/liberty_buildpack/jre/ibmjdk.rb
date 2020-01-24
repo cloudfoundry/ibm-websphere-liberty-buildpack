@@ -104,6 +104,7 @@ module LibertyBuildpack::Jre
       @java_opts.concat default_dump_opts
       @java_opts << '-Xshareclasses:none'
       @java_opts << "-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
+      @java_opts << "-Xverbosegclog:./logs/verbosegc.%pid.%seq.log,10,30000"
     end
 
     private
