@@ -76,7 +76,6 @@ module LibertyBuildpack::Jre
         print "\nYou have not accepted the IBM JVM License.\n\nVisit the following uri:\n#{@license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
         raise
       end
-	  print "-------> Currently #{@java_opts}"
       ibm_var = ' IBM'
       download_start_time = Time.now
       if @uri.include? '://'
