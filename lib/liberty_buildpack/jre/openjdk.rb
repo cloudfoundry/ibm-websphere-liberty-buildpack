@@ -81,7 +81,7 @@ module LibertyBuildpack::Jre
     def release
       @version = OpenJdk.find_openjdk(@configuration)[0]
       unless @java_opts.include? '-Xloggc'
-        @java_opts << '-Xloggc:/home/vcap/logs/verbosegc-%p.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=20M'
+        @java_opts << '-verbose:gc -Xloggc:/home/vcap/logs/verbosegc_%p.log -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5  -XX:GCLogFileSize=20M'
       end      
       @java_opts << "-XX:OnOutOfMemoryError=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
       memory
