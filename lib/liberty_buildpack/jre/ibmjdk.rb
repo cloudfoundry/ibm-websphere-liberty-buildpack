@@ -76,7 +76,6 @@ module LibertyBuildpack::Jre
         print "\nYou have not accepted the IBM JVM License.\n\nVisit the following uri:\n#{@license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
         raise
       end
-
       ibm_var = ' IBM'
       download_start_time = Time.now
       if @uri.include? '://'
@@ -105,6 +104,9 @@ module LibertyBuildpack::Jre
       @java_opts << '-Xshareclasses:none'
       @java_opts << '-XX:-TransparentHugePage'
       @java_opts << "-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
+      unless @java_opts.include? '-Xverbosegclog'
+        @java_opts << '-Xverbosegclog:/home/vcap/logs/verbosegc.%pid.%seq.log,5,10000'
+      end
     end
 
     private
