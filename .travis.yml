@@ -21,5 +21,7 @@ matrix:
       env: COMMAND=rake
     - rvm: "2.3.1"
       env: COMMAND=rake
-install: bundle install --deployment --without debug
+install:
+    - gem install bundler:1.17.3 
+    - bundle install --deployment --without debug
 script: bundle exec $COMMAND
