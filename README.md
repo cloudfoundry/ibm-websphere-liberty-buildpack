@@ -22,7 +22,7 @@ After you have set the license acceptance environment variables, use the followi
 cf push <APP-NAME> -p <ARCHIVE> -b https://github.com/cloudfoundry/ibm-websphere-liberty-buildpack.git
 ```
 
-* For further details on the options available for deploying your applications see [options][].
+*  For further details on the options available for deploying your applications see [options][].
 * For further details on tuning the applications JVM see [tuning options][].
 * For further details on pushing a Java Main application see [java main push][].
 
