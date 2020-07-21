@@ -47,7 +47,7 @@ module LibertyBuildpack::Jre
     # @return [void]
     def install_jdk
       release = find_openjdk(@configuration)
-      uri = release['binaries'][0]['binary_link']
+      uri = release['binaries'][0]['package']['link']
       @version = release['release_name']
       download_start_time = Time.now
 
@@ -90,8 +90,7 @@ module LibertyBuildpack::Jre
 
         candidates = {}
         releases.each do |release|
-          binary_entry = release['binaries'][0]
-          version_data = binary_entry['version_data']
+          version_data = release['version_data']
           next if version_data.nil?
 
           sanitized_version = version_data['semver'].gsub(/\+.*$/, '')
@@ -114,7 +113,7 @@ module LibertyBuildpack::Jre
     end
 
     def openjdk_uri(version, type, heap_size)
-      "https://api.adoptopenjdk.net/v2/info/releases/openjdk#{version[0]}?openjdk_impl=#{implementation}&type=#{type}&arch=x64&os=linux&heap_size=#{heap_size}"
+      "https://api.adoptopenjdk.net/v3/assets/feature_releases/#{version[0]}/ga?architecture=x64&heap_size=#{heap_size}&image_type=#{type}&jvm_impl=#{implementation}&os=linux&vendor=adoptopenjdk"
     end
 
   end
