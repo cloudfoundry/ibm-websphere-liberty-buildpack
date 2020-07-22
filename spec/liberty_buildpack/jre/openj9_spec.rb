@@ -34,8 +34,8 @@ module LibertyBuildpack::Jre
 
     def stubs
       LibertyBuildpack::Util::Cache::DownloadCache.stub(:new).and_return(application_cache)
-      application_cache.stub(:get).with('https://api.adoptopenjdk.net/v2/info/releases/openjdk11?openjdk_impl=openj9&type=jre&arch=x64&os=linux&heap_size=normal').and_yield(File.open('spec/fixtures/openj9-releases.json'))
-      application_cache.stub(:get).with('https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jre_x64_linux_openj9_11_28.tar.gz').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
+      application_cache.stub(:get).with('https://api.adoptopenjdk.net/v3/assets/feature_releases/11/ga?architecture=x64&heap_size=normal&image_type=jre&jvm_impl=openj9&os=linux&vendor=adoptopenjdk').and_yield(File.open('spec/fixtures/openj9-releases.json'))
+      application_cache.stub(:get).with('https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10_openj9-0.21.0/OpenJDK11U-jre_x64_linux_openj9_11.0.8_10_openj9-0.21.0.tar.gz').and_yield(File.open('spec/fixtures/stub-ibm-java.tar.gz'))
     end
 
     def openj9(root, configuration = default_configuration)
@@ -71,7 +71,7 @@ module LibertyBuildpack::Jre
         Dir.mktmpdir do |root|
           detected = openj9(root).detect
 
-          expect(detected).to eq('openj9-jdk-11+28')
+          expect(detected).to eq('openj9-jdk-11.0.8+10_openj9-0.21.0')
         end
       end
 

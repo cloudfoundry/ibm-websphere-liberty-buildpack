@@ -1,29 +1,41 @@
 [
-  {
-    "release_name": "jdk-11+28",
-    "release_link": "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/tag/jdk-11%2B28",
-    "timestamp": "2018-10-03T05:11:19Z",
-    "release": true,
-    "binaries": [
-      {
-        "os": "linux",
-        "architecture": "x64",
-        "binary_type": "jre",
-        "openjdk_impl": "openj9",
-        "binary_name": "OpenJDK11-jre_x64_linux_openj9_11_28.tar.gz",
-        "binary_link": "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jre_x64_linux_openj9_11_28.tar.gz",
-        "binary_size": 40889035,
-        "checksum_link": "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11%2B28/OpenJDK11-jre_x64_linux_openj9_11_28.tar.gz.sha256.txt",
-        "version": "11",
+    {
+        "binaries": [
+            {
+                "architecture": "x64",
+                "download_count": 161,
+                "heap_size": "normal",
+                "image_type": "jre",
+                "jvm_impl": "openj9",
+                "os": "linux",
+                "package": {
+                    "checksum": "7cc4b24e2ac0ed26bf3ec31241bde65b672952bf0df5e1606b263fadcb21b3b7",
+                    "checksum_link": "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10_openj9-0.21.0/OpenJDK11U-jre_x64_linux_openj9_11.0.8_10_openj9-0.21.0.tar.gz.sha256.txt",
+                    "download_count": 161,
+                    "link": "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10_openj9-0.21.0/OpenJDK11U-jre_x64_linux_openj9_11.0.8_10_openj9-0.21.0.tar.gz",
+                    "name": "OpenJDK11U-jre_x64_linux_openj9_11.0.8_10_openj9-0.21.0.tar.gz",
+                    "size": 41781638
+                },
+                "project": "jdk",
+                "scm_ref": "openj9-0.21.0",
+                "updated_at": "2020-07-16T08:51:57Z"
+            }
+        ],
+        "download_count": 3843,
+        "id": "MDc6UmVsZWFzZTI4NjIxODM2.pCNBA7G9E1o7pw==",
+        "release_link": "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/tag/jdk-11.0.8%2B10_openj9-0.21.0",
+        "release_name": "jdk-11.0.8+10_openj9-0.21.0",
+        "release_type": "ga",
+        "timestamp": "2020-07-16T08:47:22Z",
+        "updated_at": "2020-07-16T08:47:22Z",
+        "vendor": "adoptopenjdk",
         "version_data": {
-          "openjdk_version": "11+28",
-          "semver": "11.0.0+28"
-        },
-        "heap_size": "normal",
-        "download_count": 281,
-        "updated_at": "2018-10-03T20:38:10Z"
-      }
-    ],
-    "download_count": 2060754
-  }
+            "build": 10,
+            "major": 11,
+            "minor": 0,
+            "openjdk_version": "11.0.8+10",
+            "security": 8,
+            "semver": "11.0.8+10"
+        }
+    }
 ]
