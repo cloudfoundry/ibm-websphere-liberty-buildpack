@@ -1298,6 +1298,23 @@ module LibertyBuildpack::Container
         end
       end
 
+      def check_compression_feature(app_xml, app_name, configuration = default_configuration)
+        Dir.mktmpdir do |root|
+          root = File.join(root, 'app')
+          generate(root, app_xml, configuration)
+          liberty_directory = File.join root, '.liberty'
+          expect(Dir.exist?(liberty_directory)).to eq(true)
+          server_xml_file = File.join(root, 'wlp', 'usr', 'servers', 'myServer', 'server.xml')
+          server_xml_contents = File.read(server_xml_file)
+          expect(server_xml_contents).to include("<httpDispatcher enableWelcomePage='false' trustedSensitiveHeaderOrigin='*'/>")
+          expect(server_xml_contents).to include("<config updateTrigger='polled' monitorInterval='60000ms'/>")
+          expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
+          expect(server_xml_contents).to include("<appstate2 appName='#{app_name}'/>")
+          expect(server_xml_contents).to include('<compression/>')
+          expect(server_xml_contents).to match(/httpEndpoint id="defaultHttpEndpoint" host="127.0.0.1"/)
+        end
+      end
+
       def check_no_appstate(app_xml, configuration = default_configuration)
         Dir.mktmpdir do |root|
           root = File.join(root, 'app')
