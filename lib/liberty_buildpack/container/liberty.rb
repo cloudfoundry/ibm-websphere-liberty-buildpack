@@ -243,7 +243,7 @@ module LibertyBuildpack::Container
           ContainerUtils.unzip(minified_zip, root)
           if File.exist? icap_extension
             extensions_dir = File.join(root, WLP_PATH, 'etc', 'extensions')
-            system("mkdir -p #{extensions_dir} && cp #{icap_extension} #{extensions_dir}")
+            system("mkdir -p #{extensions_dir}", '&&', "cp #{icap_extension} #{extensions_dir}")
           end
           system("rm -rf #{liberty_home}/lib && mv #{root}/wlp/lib #{liberty_home}/lib")
           system("rm -rf #{root}/wlp")

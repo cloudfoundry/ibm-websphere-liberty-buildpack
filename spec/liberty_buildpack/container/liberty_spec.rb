@@ -1342,6 +1342,10 @@ module LibertyBuildpack::Container
         check_appstate('<application name="foo" />', 'foo')
       end
 
+      it 'should check the compression feature is working' do
+        check_compression_feature('<application name="myapp" />', 'myapp', '<compression/>')
+      end
+
       it 'should add appstate2 when server xml contains foo webApplication' do
         check_appstate('<webApplication name="fooWar" />', 'fooWar')
       end
