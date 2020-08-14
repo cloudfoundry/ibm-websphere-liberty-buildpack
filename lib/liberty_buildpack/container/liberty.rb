@@ -243,7 +243,7 @@ module LibertyBuildpack::Container
           ContainerUtils.unzip(minified_zip, root)
           if File.exist? icap_extension
             extensions_dir = File.join(root, WLP_PATH, 'etc', 'extensions')
-            system("mkdir -p #{extensions_dir} && cp #{icap_extension} #{extensions_dir}")
+            system("mkdir -p #{extensions_dir}", '&&', "cp #{icap_extension} #{extensions_dir}")
           end
           system("rm -rf #{liberty_home}/lib && mv #{root}/wlp/lib #{liberty_home}/lib")
           system("rm -rf #{root}/wlp")
@@ -762,7 +762,7 @@ module LibertyBuildpack::Container
       install_start_time = Time.now
       # setup the command and options
       cmd = File.join(root, WLP_PATH, 'bin', 'featureManager')
-      script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS="" #{cmd} install #{file.path} #{options} 2>&1"
+      script_string = system('"JAVA_HOME=\"#{@app_dir}/#{@java_home}\"', 'JVM_ARGS="" #{cmd}', 'install #{file.path} #{options} 2>&1"')
       output = `#{script_string}`
       if $CHILD_STATUS.to_i != 0
         puts 'FAILED'
