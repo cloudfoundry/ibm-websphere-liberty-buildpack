@@ -762,7 +762,7 @@ module LibertyBuildpack::Container
       install_start_time = Time.now
       # setup the command and options
       cmd = File.join(root, WLP_PATH, 'bin', 'featureManager')
-      script_string = system("'JAVA_HOME=\"#{@app_dir}/#{@java_home}\"', 'JVM_ARGS="" #{cmd}', 'install #{file.path} #{options} 2>&1'")
+      script_string = "JAVA_HOME=\"#{@app_dir}/#{@java_home}\" JVM_ARGS="" #{cmd} install #{file.path} #{options} 2>&1"
       output = `#{script_string}`
       if $CHILD_STATUS.to_i != 0
         puts 'FAILED'
