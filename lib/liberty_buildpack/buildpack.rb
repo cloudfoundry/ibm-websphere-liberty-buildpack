@@ -272,11 +272,11 @@ module LibertyBuildpack
     end
 
     def self.initialize_env(dir)
-      blacklist = %w(PATH GIT_DIR CPATH CPPATH LD_PRELOAD LIBRARY_PATH)
+      blocklist = %w(PATH GIT_DIR CPATH CPPATH LD_PRELOAD LIBRARY_PATH)
       if Dir.exist?(dir)
         Dir.foreach(dir) do |name|
           file = File.join(dir, name)
-          if File.file?(file) && !blacklist.include?(name)
+          if File.file?(file) && !blocklist.include?(name)
             value = File.read(file).strip
             ENV[name] = value
           end
