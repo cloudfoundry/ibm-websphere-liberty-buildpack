@@ -1310,7 +1310,7 @@ module LibertyBuildpack::Container
           expect(server_xml_contents).to include("<config updateTrigger='polled' monitorInterval='60000ms'/>")
           expect(server_xml_contents).to include("<applicationMonitor dropinsEnabled='false' updateTrigger='mbean'/>")
           expect(server_xml_contents).to include("<appstate2 appName='#{app_name}'/>")
-          #expect(server_xml_contents).to include('<compression/>')
+          expect(server_xml_contents).to include('</compression>')
           expect(server_xml_contents).to match(/httpEndpoint id="defaultHttpEndpoint" host="127.0.0.1"/)
         end
       end
