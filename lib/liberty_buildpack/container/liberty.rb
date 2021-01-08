@@ -473,7 +473,9 @@ module LibertyBuildpack::Container
         endpoint.add_attribute('host', '*')
       end
       endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
-      endpoint.add_element('compression')
+      if endpoint.exclude?('compression')
+        endpoint.add_element('compression')
+      end
       endpoint.delete_attribute('httpsPort')
     end
 
