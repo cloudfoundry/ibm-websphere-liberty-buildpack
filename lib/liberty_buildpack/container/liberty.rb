@@ -104,7 +104,7 @@ module LibertyBuildpack::Container
       overlay_java
       set_liberty_system_properties
       set_jdk_memory_configuration
-      populateClassCache
+      populate_class_cache
     end
 
     # Creates the command to run the Liberty application.
