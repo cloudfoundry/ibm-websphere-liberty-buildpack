@@ -104,6 +104,7 @@ module LibertyBuildpack::Container
       overlay_java
       set_liberty_system_properties
       set_jdk_memory_configuration
+      populateClassCache
     end
 
     # Creates the command to run the Liberty application.
@@ -646,6 +647,14 @@ module LibertyBuildpack::Container
         @services_manager.install_client_jars(@liberty_components_and_uris, current_server_dir)
       end
     end
+    
+    def populateClassCache
+      print "-----> Populating class cache \n"
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server start defaultServer >null"
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server stop defaultServer >null"
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server start defaultServer >null"
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server stop defaultServer >null"
+	  end
 
     # is the given liberty component required ? It may be non-optional, in which
     # case it is required, or it may be optional, in which case it is required
