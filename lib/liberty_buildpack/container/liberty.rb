@@ -649,11 +649,13 @@ module LibertyBuildpack::Container
     end
 
     def populate_class_cache
-      print "-----> Populating class cache \n"
-      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server start defaultServer >null"
-      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server stop defaultServer >null"
-      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server start defaultServer >null"
-      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server stop defaultServer >null"
+      print '-----> Populating class cache ... '
+      populating_start_time = Time.now
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server start #{server_name} >null"
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server stop #{server_name} >null"
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server start #{server_name} >null"
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server stop #{server_name} >null"
+      puts "(#{(Time.now - populating_start_time).duration})"
     end
 
     # is the given liberty component required ? It may be non-optional, in which
