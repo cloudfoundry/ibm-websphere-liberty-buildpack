@@ -460,7 +460,6 @@ module LibertyBuildpack::Container
 
     def update_http_endpoint(server_xml_doc)
       endpoints = REXML::XPath.match(server_xml_doc, '/server/httpEndpoint')
-
       if endpoints.empty?
         endpoint = REXML::Element.new('httpEndpoint', server_xml_doc.root)
         endpoint.add_attribute('id', 'defaultHttpEndpoint')
@@ -474,7 +473,11 @@ module LibertyBuildpack::Container
         endpoint.add_attribute('host', '*')
       end
       endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
-      endpoint.add_element('compression') if endpoint.elements['compression'].nil?
+
+      compression = REXML::XPath.match(server_xml_doc, '/server/compression')
+      if compression.empty?
+        endpoint.add_element('compression') if endpoint.elements['compression'].nil?
+      end
       endpoint.delete_attribute('httpsPort')
     end
 
