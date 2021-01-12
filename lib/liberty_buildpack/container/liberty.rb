@@ -649,7 +649,7 @@ module LibertyBuildpack::Container
     end
 
     def populate_class_cache
-      print "-----> Populating class cache ... "
+      print '-----> Populating class cache ... '
       populating_start_time = Time.now
       system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server start #{server_name} >null"
       system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server stop #{server_name} >null"
