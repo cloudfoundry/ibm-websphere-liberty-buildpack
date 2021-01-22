@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015, 2016
 #
@@ -61,11 +62,11 @@ module LibertyBuildpack::Util::Cache
 
       @@auth_config = nil
 
-      HTTP_Authorization = 'Authorization'.freeze
+      HTTP_Authorization = 'Authorization'
 
-      USER_KEY = 'username'.freeze
+      USER_KEY = 'username'
 
-      PASS_KEY = 'password'.freeze
+      PASS_KEY = 'password'
 
       # Loads authentication information from config/auth.yml as a map from
       # URL substring to the authorization object and returns the best match

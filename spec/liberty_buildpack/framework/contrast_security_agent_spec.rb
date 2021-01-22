@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2017
 #
@@ -192,7 +193,7 @@ module LibertyBuildpack::Framework
 
       end
 
-    end # end of detect tests
+    end
 
     describe 'compile',
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
@@ -228,7 +229,7 @@ module LibertyBuildpack::Framework
           expect { compiled }.to raise_error(/Unable to download the Contrast Security Agent jar..+underlying download error/)
         end
       end
-    end # end compile
+    end
 
     describe 'release',
              java_opts: [],
@@ -259,7 +260,7 @@ module LibertyBuildpack::Framework
         expect(released).to include('-Dcontrast.override.appname=TestApp')
 
       end
-    end # end of release
+    end
 
   end
-end # module
+end

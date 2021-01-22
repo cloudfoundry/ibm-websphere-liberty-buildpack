@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -77,9 +78,9 @@ module LibertyBuildpack::Container
 
     private
 
-    ARGUMENTS_PROPERTY = 'arguments'.freeze
+    ARGUMENTS_PROPERTY = 'arguments'
 
-    CLASS_PATH_PROPERTY = 'Class-Path'.freeze
+    CLASS_PATH_PROPERTY = 'Class-Path'
 
     def java_home
       File.join('$PWD', @java_home)

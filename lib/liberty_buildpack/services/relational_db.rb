@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -56,12 +57,11 @@ module LibertyBuildpack::Services
 
       # uri is the only property portable between Pivotal, BlueMix, and Heroku
       conn_uri = properties["#{conn_prefix}uri"]
-      if conn_uri.nil?
-        raise "Resource #{@service_name} does not contain a #{conn_prefix}uri property"
-      end
+      raise "Resource #{@service_name} does not contain a #{conn_prefix}uri property" if conn_uri.nil?
+
       uri = URI.parse(conn_uri)
 
-      @db_name = get_cloud_property(properties, element, "#{conn_prefix}name", uri.path[1..-1])
+      @db_name = get_cloud_property(properties, element, "#{conn_prefix}name", uri.path[1..])
       @host = get_cloud_property(properties, element, "#{conn_prefix}host", uri.host)
       @port = get_cloud_property(properties, element, "#{conn_prefix}port", uri.port)
       @user = get_cloud_property(properties, element, "#{conn_prefix}user", uri.user)
@@ -190,24 +190,21 @@ module LibertyBuildpack::Services
     #
     # @param datasources - an array containing all dataSource stanzas with a given id.
     #------------------------------------------------------------------------------------
-    def modify_datasource(datasources)
-    end
+    def modify_datasource(datasources); end
 
     #------------------------------------------------------------------------------------
     # Method to customize properties - called on create or update.
     #
     # @param properties_element - the properties element
     #------------------------------------------------------------------------------------
-    def modify_properties(properties_element)
-    end
+    def modify_properties(properties_element); end
 
     #------------------------------------------------------------------------------------
     # Method to customize jdbcDriver - called on create or update.
     #
     # @param jdbc_driver - an array containing all jdbcDriver elements with a given id.
     #------------------------------------------------------------------------------------
-    def modify_jdbc_driver(jdbcdrivers)
-    end
+    def modify_jdbc_driver(jdbcdrivers); end
 
     private
 
@@ -239,6 +236,7 @@ module LibertyBuildpack::Services
           # if name matches exactly, then we are done.
           return element if element.name == expected
           next unless element.name.start_with? 'properties'
+
           # found the properties element, but it's the wrong type. Update the name to expected type
           @logger.debug("found properties, but wrong type. Found #{element.name} expected #{expected}")
           element.name = expected
@@ -246,8 +244,7 @@ module LibertyBuildpack::Services
         end
       end
       # if we got here, then we didn't find any properties. Create a properties instance of the expected type.
-      props = REXML::Element.new(expected, datasources[0])
-      props
+      REXML::Element.new(expected, datasources[0])
     end
 
     #------------------------------------------------------------------------------------
@@ -292,8 +289,7 @@ module LibertyBuildpack::Services
     #
     # @param ds - the REXML element for the dataSource
     #------------------------------------------------------------------------------------
-    def create_connection_manager(ds)
-    end
+    def create_connection_manager(ds); end
 
     #------------------------------------------------------------------------------------
     # Method to create a jdbc driver.
@@ -345,6 +341,7 @@ module LibertyBuildpack::Services
       end
       return datasources if datasources.empty?
       raise "The datasource configuration for service #{@service_name} is inconsistent" unless Utils.logical_singleton?(datasources)
+
       datasources
     end
 
@@ -374,8 +371,10 @@ module LibertyBuildpack::Services
       # if jdbc drivers have been configured both by containment and by reference, liberty will fail without logging helpful messages.
       raise "Found JDBC driver by-reference and by-containment for #{@service_name}" unless by_reference.empty? || by_containment.empty?
       raise "There is no configured JDBC driver for #{@service_name}" if by_reference.empty? && by_containment.empty?
+
       jdbc_driver = by_reference.empty? ? by_containment : by_reference
       raise "JDBC Driver configuration for #{@service_name} is inconsistent" unless Utils.logical_singleton?(jdbc_driver)
+
       jdbc_driver
     end
 
@@ -403,8 +402,8 @@ module LibertyBuildpack::Services
       end
       raise "JDBC library for #{@service_name} is configured incorrectly. It is configured both by-reference and by-containment" unless by_reference.empty? || by_containment.empty?
       raise "There is no configured JDBC library for #{@service_name}" if by_reference.empty? && by_containment.empty?
-      library = by_reference.empty? ? by_containment : by_reference
-      library
+
+      by_reference.empty? ? by_containment : by_reference
     end
   end
 end

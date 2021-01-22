@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -23,7 +24,7 @@ module LibertyBuildpack::Container
 
   describe FeatureManager do
 
-    FEATURE_REPOSITORY_FIXTURE_DIR = 'spec/fixtures/liberty_feature_repository'.freeze
+    FEATURE_REPOSITORY_FIXTURE_DIR = 'spec/fixtures/liberty_feature_repository'
 
     # buildpack feature manager code will call liberty's featureManager script,
     # this code takes the given script and copies it to the expected location
@@ -174,7 +175,7 @@ module LibertyBuildpack::Container
 
     context 'when JVM_ARGS is set by the user' do
 
-      JVM_ARGS_KEY = 'JVM_ARGS'.freeze
+      JVM_ARGS_KEY = 'JVM_ARGS'
 
       let(:prev_jvm_args) { 'user_jvm_args' }
 
@@ -211,8 +212,8 @@ module LibertyBuildpack::Container
         end
       end
 
-    end # end of JVM_ARGS context
+    end
 
-  end # describe
+  end
 
-end # module
+end

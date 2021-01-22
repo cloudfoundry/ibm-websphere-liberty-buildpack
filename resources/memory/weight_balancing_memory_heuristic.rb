@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2017
 #
@@ -110,9 +111,7 @@ class WeightBalancingMemoryHeuristic
     remaining_buckets = buckets.clone
     remaining_memory  = @memory_limit
     deleted           = true
-    while !remaining_buckets.empty? && deleted
-      remaining_memory, deleted = balance_remainder(remaining_buckets, remaining_memory)
-    end
+    remaining_memory, deleted = balance_remainder(remaining_buckets, remaining_memory) while !remaining_buckets.empty? && deleted
   end
 
   def balance_remainder(remaining_buckets, remaining_memory)
@@ -132,6 +131,7 @@ class WeightBalancingMemoryHeuristic
     end
     remaining_memory -= allocated_memory
     raise "Total memory #{@memory_limit} exceeded by configured memory #{@sizes}" if remaining_memory < 0
+
     [remaining_memory, deleted]
   end
 
@@ -170,11 +170,7 @@ class WeightBalancingMemoryHeuristic
 
   def issue_memory_wastage_warning(buckets)
     native_bucket = buckets['native']
-    if native_bucket && native_bucket.range.floor == 0
-      if native_bucket.size > weighted_proportion(native_bucket, buckets) * NATIVE_MEMORY_WARNING_FACTOR
-        puts "There is more than #{NATIVE_MEMORY_WARNING_FACTOR} times more spare native memory than the default, so configured Java memory may be too small or available memory may be too large"
-      end
-    end
+    puts "There is more than #{NATIVE_MEMORY_WARNING_FACTOR} times more spare native memory than the default, so configured Java memory may be too small or available memory may be too large" if native_bucket && native_bucket.range.floor == 0 && (native_bucket.size > weighted_proportion(native_bucket, buckets) * NATIVE_MEMORY_WARNING_FACTOR)
 
     total_size = MemorySize::ZERO
     buckets.each_value { |bucket| total_size += bucket.size }

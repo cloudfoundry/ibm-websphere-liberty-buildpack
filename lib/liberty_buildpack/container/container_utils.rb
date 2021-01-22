@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -118,11 +119,11 @@ module LibertyBuildpack::Container
       end
     end
 
-    RESOURCES_DIR = 'resources'.freeze
+    RESOURCES_DIR = 'resources'
 
-    JAVA_OVERLAY_DIR = '.java-overlay'.freeze
+    JAVA_OVERLAY_DIR = '.java-overlay'
 
-    JAVA_DIR = '.java'.freeze
+    JAVA_DIR = '.java'
 
     private_constant :RESOURCES_DIR, :JAVA_OVERLAY_DIR, :JAVA_DIR
 

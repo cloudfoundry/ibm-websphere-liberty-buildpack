@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2016
 #
@@ -60,7 +61,7 @@ module LibertyBuildpack::Framework
         @logger.debug("url=#{@url}")
         @logger.debug("system_id=#{@system_id}")
 
-        return 'DynamicPULSE-3.+'
+        'DynamicPULSE-3.+'
       end
     end
 
@@ -68,9 +69,7 @@ module LibertyBuildpack::Framework
     #
     # @return [void]
     def compile
-      if @url.nil? || @system_id.nil?
-        raise "url #{@url}, or systemId #{@system_id} is not available, detect needs to be invoked"
-      end
+      raise "url #{@url}, or systemId #{@system_id} is not available, detect needs to be invoked" if @url.nil? || @system_id.nil?
 
       dp_home = File.join(@app_dir, '.dynamic_pulse_agent')
       FileUtils.mkdir_p(dp_home)
@@ -93,7 +92,7 @@ module LibertyBuildpack::Framework
     def download_and_unzip(base_url, system_id, filename, save_to_dir)
       download_url = File.join(base_url, system_id, filename)
       LibertyBuildpack::Util.download_zip('3.+', download_url, 'DynamicPULSE Agent', save_to_dir)
-    rescue => e
+    rescue StandardError => e
       raise "[DynamicPULSE] Can't download #{filename} from #{download_url}. Please check dynamicpulse-remote.xml. #{e.message}"
     end
 

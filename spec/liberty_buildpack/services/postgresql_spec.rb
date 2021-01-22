@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2018
 #
@@ -208,7 +209,7 @@ module LibertyBuildpack::Services
         elephantsql = {}
         elephantsql['name'] = 'myDatabase'
         elephantsql['label'] = 'elephantsql'
-        elephantsql['tags'] = %w(relational postgresql)
+        elephantsql['tags'] = %w[relational postgresql]
         elephantsql_credentials = {}
         elephantsql_credentials['uri'] = 'postgres://myUser:myPassword@myHost.com:5432/myDb'
         elephantsql['credentials'] = elephantsql_credentials

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -16,9 +18,9 @@
 source 'https://rubygems.org'
 
 group :development do
+  gem 'rainbow', '~> 2.1.0'
   gem 'rake'
   gem 'redcarpet'
-  gem 'rainbow', '~> 2.1.0'
   gem 'rubocop', '~> 0.42.0'
   gem 'yard'
 end
@@ -28,8 +30,8 @@ group :development, :test do
 end
 
 group :test do
-  gem 'webmock'
-  gem 'simplecov-rcov'
   gem 'ci_reporter'
+  gem 'simplecov-rcov'
   gem 'tee'
+  gem 'webmock'
 end

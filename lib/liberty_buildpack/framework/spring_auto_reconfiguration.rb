@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -63,13 +64,12 @@ module LibertyBuildpack::Framework
     # Does nothing
     #
     # @return [void]
-    def release
-    end
+    def release; end
 
     private
 
-    SPRING_JAR_PATTERN = 'spring-core*.jar'.freeze
-    SPRING_APPS_PATTERN = "#{@app_dir}/**/#{SPRING_JAR_PATTERN}".freeze
+    SPRING_JAR_PATTERN = 'spring-core*.jar'
+    SPRING_APPS_PATTERN = "#{@app_dir}/**/#{SPRING_JAR_PATTERN}"
 
     WEB_XML = File.join 'WEB-INF', 'web.xml'
 
@@ -80,7 +80,7 @@ module LibertyBuildpack::Framework
         version = nil
         uri = nil
       end
-      return version, uri # rubocop:disable RedundantReturn
+      return version, uri # rubocop:disable Style/RedundantReturn
     end
 
     def self.enabled?(configuration)

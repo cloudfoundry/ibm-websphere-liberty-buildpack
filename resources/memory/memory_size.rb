@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2017
 #
@@ -26,9 +27,11 @@ class MemorySize
       @bytes = 0
     else
       raise "Invalid memory size '#{size}'" if !size || size.length < 2
+
       unit = size[-1]
       v    = size[0..-2]
       raise "Invalid memory size '#{size}'" unless integer? v
+
       v = size.to_i
 
       # Store the number of bytes.
@@ -59,12 +62,12 @@ class MemorySize
       megabytes = kilobytes / KILO
       if megabytes % KILO == 0
         gigabytes = megabytes / KILO
-        gigabytes.to_s + 'G'
+        "#{gigabytes}G"
       else
-        megabytes.to_s + 'M'
+        "#{megabytes}M"
       end
     else
-      kilobytes.to_s + 'K'
+      "#{kilobytes}K"
     end
   end
 
@@ -73,9 +76,10 @@ class MemorySize
   # @param [MemorySize, 0] other
   # @return [Numeric] the result
   def <=>(other)
-    if other == 0
+    case other
+    when 0
       @bytes <=> 0
-    elsif other.is_a? MemorySize
+    when MemorySize
       @bytes <=> other.bytes
     end
   end
@@ -96,6 +100,7 @@ class MemorySize
   # @return [MemorySize] the result
   def *(other)
     raise "Cannot multiply a Memory size by an instance of #{other.class}" unless other.is_a? Numeric
+
     from_numeric((@bytes * other).round)
   end
 
@@ -117,6 +122,7 @@ class MemorySize
   def /(other)
     return @bytes / other.bytes.to_f if other.is_a? MemorySize
     return from_numeric((@bytes / other.to_f).round) if other.is_a? Numeric
+
     raise "Cannot divide a MemorySize by an instance of #{other.class}"
   end
 
@@ -132,13 +138,14 @@ class MemorySize
 
   def memory_size_operation(other)
     raise "Invalid parameter: instance of #{other.class} is not a MemorySize" unless other.is_a? MemorySize
+
     from_numeric(yield @bytes, other.bytes)
   end
 
   def integer?(v)
     f = Float(v)
     f && f.floor == f
-  rescue
+  rescue StandardError
     false
   end
 

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015
 #
@@ -54,7 +55,7 @@ describe LibertyBuildpack::Util::Cache::ApplicationCache do
 
     described_class.new.get('http://foo-uri/') {}
 
-    expect(Pathname.glob(app_dir + '*.cached').size).to eq(1)
+    expect(Pathname.glob("#{app_dir}*.cached").size).to eq(1)
   end
 
 end

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -47,13 +48,13 @@ module LibertyBuildpack::Container
       it 'should detect main class in manifest',
          java_main_manifest: 'Main-Class: detect.test' do
 
-        expect(detected).to eq(%w(JAR java-main))
+        expect(detected).to eq(%w[JAR java-main])
       end
 
       it 'should detect main class in configuration',
          configuration: { 'java_main_class' => 'java-main' } do
 
-        expect(detected).to eq(%w(JAR java-main))
+        expect(detected).to eq(%w[JAR java-main])
       end
 
       it 'should not detect without manifest' do
@@ -101,7 +102,7 @@ module LibertyBuildpack::Container
       end
 
       it 'should include command line argument JVM_ARGS after JAVA_OPTS values',
-         java_opts: %w(user_java_opts1 user_java_opts2),
+         java_opts: %w[user_java_opts1 user_java_opts2],
          configuration: { 'java_main_class' => 'com.ibm.rspec.test' } do
 
         expect(released).to include('java user_java_opts1 user_java_opts2 $JVM_ARGS com.ibm.rspec.test')
@@ -172,7 +173,7 @@ module LibertyBuildpack::Container
           expect(released).to include('$PWD/.java/jre/bin/java')
         end
 
-      end # end of default jre context
+      end
 
       context 'paths that do not have jre in it' do
 
@@ -188,7 +189,7 @@ module LibertyBuildpack::Container
           expect(released).to include('$PWD/.java/bin/java')
         end
       end
-    end # end of release describe
+    end
 
   end
 

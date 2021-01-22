@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015, 2016
 #
@@ -106,7 +107,7 @@ module LibertyBuildpack::Container
           app_dir: 'spec/fixtures/container_dist_zip',
           configuration: {},
           java_home: '.java',
-          java_opts: %w(foo bar),
+          java_opts: %w[foo bar],
           license_ids: {}
         ).release
 

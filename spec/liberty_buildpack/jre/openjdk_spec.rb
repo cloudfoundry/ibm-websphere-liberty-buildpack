@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2019
 #
@@ -31,11 +32,11 @@ module LibertyBuildpack::Jre
 
     let(:configuration) do
       { 'memory_sizes' => { 'metaspace' => '64m..',
-                            'permgen'   => '64m..' },
-        'memory_heuristics' => { 'heap'      => '75',
+                            'permgen' => '64m..' },
+        'memory_heuristics' => { 'heap' => '75',
                                  'metaspace' => '10',
-                                 'permgen'   => '10',
-                                 'stack'     => '5',
+                                 'permgen' => '10',
+                                 'stack' => '5',
                                  'native' => '10' } }
     end
 

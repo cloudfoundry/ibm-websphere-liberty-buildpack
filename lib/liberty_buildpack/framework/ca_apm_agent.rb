@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2018
 #
@@ -28,7 +29,7 @@ module LibertyBuildpack::Framework
   class CAAPMAgent
 
     # The name of the directory which contains the CA APM agent.
-    CA_APM_HOME_DIR = '.ca_apm'.freeze
+    CA_APM_HOME_DIR = '.ca_apm'
 
     # Creates an instance of the CAAPMAgent class and takes as an argument the context hash.
     # @param [Hash] context the context that is provided to the instance, defaults to empty.
@@ -112,7 +113,7 @@ module LibertyBuildpack::Framework
     def process_config
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
-      rescue => e
+      rescue StandardError => e
         @logger.error("Unable to process the configuration for the CA APM Agent framework. #{e.message}")
       end
 
@@ -145,10 +146,10 @@ module LibertyBuildpack::Framework
       socket_factory_base = 'com.wily.isengard.postofficehub.link.net.'
 
       protocol_socket_factory = {
-        ''      => socket_factory_base + 'DefaultSocketFactory',
-        'ssl'   => socket_factory_base + 'SSLSocketFactory',
-        'http'  => socket_factory_base + 'HttpTunnelingSocketFactory',
-        'https' => socket_factory_base + 'HttpsTunnelingSocketFactory'
+        '' => "#{socket_factory_base}DefaultSocketFactory",
+        'ssl' => "#{socket_factory_base}SSLSocketFactory",
+        'http' => "#{socket_factory_base}HttpTunnelingSocketFactory",
+        'https' => "#{socket_factory_base}HttpsTunnelingSocketFactory"
       }
 
       protocol_socket_factory[protocol] || protocol
@@ -174,8 +175,8 @@ module LibertyBuildpack::Framework
 
     def download_and_install_agent(home)
       LibertyBuildpack::Util.download_tar(@version, @uri, 'CA APM Agent', home)
-    rescue => error
-      raise "Unable to download the CA APM Agent artifact. Ensure that the agent artifact at #{@uri} is available and accessible. #{error.message}"
+    rescue StandardError => e
+      raise "Unable to download the CA APM Agent artifact. Ensure that the agent artifact at #{@uri} is available and accessible. #{e.message}"
     end
   end
 end

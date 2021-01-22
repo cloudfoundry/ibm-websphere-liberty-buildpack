@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # Cloud Foundry Java Buildpack
 # Copyright 2016 the original author or authors.
 #
@@ -60,9 +61,7 @@ module LibertyBuildpack::Framework
 
       resolved_certificates = certificates
       with_timing(caption(resolved_certificates)) do
-        unless use_jvm_trust_store?
-          FileUtils.mkdir_p File.join(@app_dir, NEW_TRUST_STORE_DIRECTORY)
-        end
+        FileUtils.mkdir_p File.join(@app_dir, NEW_TRUST_STORE_DIRECTORY) unless use_jvm_trust_store?
         resolved_certificates.each_with_index { |certificate, index| add_certificate certificate, index }
       end
     end
@@ -89,13 +88,13 @@ module LibertyBuildpack::Framework
 
     CA_CERTIFICATES = Pathname.new('/etc/ssl/certs/ca-certificates.crt').freeze
 
-    LOCAL_CERTS_ENABLED = 'enabled'.freeze
+    LOCAL_CERTS_ENABLED = 'enabled'
 
-    USE_JVM_TRUST_STORE = 'jvm_trust_store'.freeze
+    USE_JVM_TRUST_STORE = 'jvm_trust_store'
 
-    NEW_TRUST_STORE_DIRECTORY = '.container_certificate_trust_store/'.freeze
+    NEW_TRUST_STORE_DIRECTORY = '.container_certificate_trust_store/'
 
-    NEW_TRUST_STORE_FILE = 'truststore.jks'.freeze
+    NEW_TRUST_STORE_FILE = 'truststore.jks'
 
     private_constant :CA_CERTIFICATES
 

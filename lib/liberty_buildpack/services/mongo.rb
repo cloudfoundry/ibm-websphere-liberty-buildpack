@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2017
 #
@@ -56,9 +57,8 @@ module LibertyBuildpack::Services
 
       # uri/url is the only property portable between Pivotal, BlueMix, and Heroku
       conn_uri = properties["#{conn_prefix}uri"] || properties["#{conn_prefix}url"]
-      if conn_uri.nil?
-        raise "Resource #{@service_name} does not contain a #{conn_prefix}uri or #{conn_prefix}url property"
-      end
+      raise "Resource #{@service_name} does not contain a #{conn_prefix}uri or #{conn_prefix}url property" if conn_uri.nil?
+
       map = Mongo.parse_url(conn_uri)
 
       @db_name = get_cloud_property(properties, element, "#{conn_prefix}db", map['db'])
@@ -91,7 +91,7 @@ module LibertyBuildpack::Services
     # Parse mongodb URL.
     # URL syntax: mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
     #
-    def self.parse_url(mongo_url) # rubocop:disable MethodLength, PerceivedComplexity
+    def self.parse_url(mongo_url) # rubocop:disable Metrics/MethodLength, Metrics/PerceivedComplexity
       map = {}
       nodes = mongo_url.split(',')
 
@@ -104,10 +104,10 @@ module LibertyBuildpack::Services
 
       if nodes.size == 1
         # single node
-        map['db'] = first_node.path[1..-1] unless first_node.path[1..-1].nil?
+        map['db'] = first_node.path[1..] unless first_node.path[1..].nil?
       else
         # mutiple nodes
-        nodes[1..-1].each_with_index do |node, index|
+        nodes[1..].each_with_index do |node, index|
           if index + 2 == nodes.size
             # last node specifies db name
             slash = node.index('/')
@@ -119,7 +119,7 @@ module LibertyBuildpack::Services
               question_mark = node.index('?')
               if question_mark.nil? # rubocop:disable Metrics/BlockNesting
                 # no query in the uri
-                map['db'] = node[slash + 1..-1]
+                map['db'] = node[slash + 1..]
               else
                 map['db'] = node[slash + 1..question_mark - 1]
               end
@@ -220,10 +220,13 @@ module LibertyBuildpack::Services
       else
         # order dependency.
         raise "required mongoDB configuration for service #{@service_name} is missing" if mongo_dbs.empty?
+
         update_mongo_db(mongo_dbs)
         raise "required mongo configuration for service #{@service_name} is missing" if mongos.empty?
+
         lib_elements = update_mongo(doc, mongos)
         raise "The configuration for mongo #{@service_name} does not contain a library" if lib_elements.empty?
+
         ClientJarUtils.update_library(doc, @service_name, lib_elements, @fileset_id, @driver_dir, @client_jars_string)
         Utils.add_features(doc, @features)
       end
@@ -231,7 +234,7 @@ module LibertyBuildpack::Services
 
     private
 
-    DEFAULT_MONGODB_PORT = '27017'.freeze
+    DEFAULT_MONGODB_PORT = '27017'
 
     def set_connection_variables(map)
       @hosts = map['hosts'].join(',')
@@ -298,7 +301,8 @@ module LibertyBuildpack::Services
         mongo_dbs = doc.elements.to_a("//mongoDB[@id='#{@mongodb_id}']")
       end
       return true, nil, nil if mongos.empty? && mongo_dbs.empty?
-      return false, mongo_dbs, mongos # rubocop:disable RedundantReturn
+
+      return false, mongo_dbs, mongos # rubocop:disable Style/RedundantReturn
     end
 
     #------------------------------------------------------------------------------------
@@ -311,6 +315,7 @@ module LibertyBuildpack::Services
     def update_mongo_db(mongo_db)
       # ensure the mongoDB is logically a singleton. This means all mongoDB config stanzas have the same config id.
       raise "The mongoDB configuration for service #{@service_name} is inconsistent" unless Utils.logical_singleton?(mongo_db)
+
       # update the databaseName
       Utils.find_and_update_attribute(mongo_db, 'databaseName', @db_name)
     end
@@ -326,6 +331,7 @@ module LibertyBuildpack::Services
     #------------------------------------------------------------------------------------
     def update_mongo(doc, mongos)
       raise "The mongo configuration for service #{@service_name} is inconsistent" unless Utils.logical_singleton?(mongos)
+
       # Update the user and password attributes if they exist. Create them if they do not.
       Utils.find_and_update_attribute(mongos, 'user', @user)
       Utils.find_and_update_attribute(mongos, 'password', @password)
@@ -345,9 +351,9 @@ module LibertyBuildpack::Services
         mongo.get_elements('library').each { |entry| lib_element << entry }
       end
       if lib_element.length > 0
-        return lib_element
+        lib_element
       else
-        return doc.elements.to_a("//library[@id='#{lib_id}']")
+        doc.elements.to_a("//library[@id='#{lib_id}']")
       end
     end
 
@@ -387,16 +393,14 @@ module LibertyBuildpack::Services
     #
     # @param properties_element - the properties element
     #------------------------------------------------------------------------------------
-    def add_properties(properties_element)
-    end
+    def add_properties(properties_element); end
 
     #------------------------------------------------------------------------------------
     # Method to update properties - called on update.
     #
     # @param properties_element - the properties element
     #------------------------------------------------------------------------------------
-    def update_properties(properties_element)
-    end
+    def update_properties(properties_element); end
 
   end
 end

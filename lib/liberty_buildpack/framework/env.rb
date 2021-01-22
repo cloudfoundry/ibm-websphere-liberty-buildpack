@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -78,8 +79,7 @@ module LibertyBuildpack::Framework
     # No op.
     #
     # @return [void]
-    def release
-    end
+    def release; end
 
     private
 

@@ -42,11 +42,13 @@ Style/EmptyLinesAroundClassBody:
   Enabled: false
 Style/EmptyLinesAroundModuleBody:
   Enabled: false
-Style/MethodMissing:
+Style/MissingRespondToMissing:
   Enabled: false
 Style/MultilineOperationIndentation:
   Enabled: false
 
+Lint/MissingSuper:
+  Enabled: false
 Lint/UnusedMethodArgument:
   Enabled: false
 Lint/UnusedBlockArgument:

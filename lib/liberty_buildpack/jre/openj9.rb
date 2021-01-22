@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2019
 #
@@ -25,7 +26,7 @@ module LibertyBuildpack::Jre
     HEAP_SIZE_RATIO = 0.75
 
     # Filename of killjava script used to kill the JVM on OOM.
-    KILLJAVA_FILE_NAME = 'killjava.sh'.freeze
+    KILLJAVA_FILE_NAME = 'killjava.sh'
 
     # Creates an instance, passing in an arbitrary collection of options.
     #
@@ -37,9 +38,6 @@ module LibertyBuildpack::Jre
     # @option context [Hash] :license_ids the licenses accepted by the user
     # @option contect [String] :jvm_type the type of jvm the user wants to use e.g ibmjre or openjdk
     # @option context [Hash] :configuration the properties provided by the user
-    def initialize(context)
-      super(context)
-    end
 
     # Detects which version of Java this application should use.  *NOTE:* This method will only return a value
     # if the jvm_type is set to openjdk.
@@ -68,19 +66,17 @@ module LibertyBuildpack::Jre
       @java_opts.concat memory_opts
       @java_opts.concat default_dump_opts
       @java_opts << '-Xshareclasses:none'
-      unless @java_opts.include? '-Xverbosegclog'
-        @java_opts << '-Xverbosegclog:/home/vcap/logs/verbosegc.%pid.%seq.log,5,10000'
-      end
+      @java_opts << '-Xverbosegclog:/home/vcap/logs/verbosegc.%pid.%seq.log,5,10000' unless @java_opts.include? '-Xverbosegclog'
       @java_opts << "-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=#{@common_paths.diagnostics_directory}/#{KILLJAVA_FILE_NAME}"
     end
 
     private
 
-    RESOURCES = '../../../resources/ibmjdk/diagnostics'.freeze
+    RESOURCES = '../../../resources/ibmjdk/diagnostics'
 
-    MEMORY_CONFIG_FOLDER = '.memory_config/'.freeze
+    MEMORY_CONFIG_FOLDER = '.memory_config/'
 
-    HEAP_RATIO_FILE = 'heap_size_ratio_config'.freeze
+    HEAP_RATIO_FILE = 'heap_size_ratio_config'
 
     def implementation
       'openj9'

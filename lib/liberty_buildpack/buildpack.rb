@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -46,7 +47,7 @@ module LibertyBuildpack
       logger = LibertyBuildpack::Diagnostics::LoggerFactory.create_logger app_dir
       begin
         yield new(app_dir)
-      rescue => e
+      rescue StandardError => e
         logger.error(message % e.inspect)
         logger.debug("Exception #{e.inspect} backtrace:\n#{e.backtrace.join("\n")}")
         abort e.message
@@ -63,12 +64,12 @@ module LibertyBuildpack
       framework_detections = Buildpack.component_detections @frameworks
       container_detections = Buildpack.component_detections @containers
       raise "Application can not be run by more than one container: #{container_detections.join(', ')}" if container_detections.size > 1
+
       buildpack_version = @buildpack_version.version_string
       tags = container_detections.empty? ? [] : container_detections
       tags.concat([buildpack_version, @jre_version]) unless tags.empty?
       tags.concat(framework_detections) unless tags.empty?
-      tags = tags.flatten.compact
-      tags
+      tags.flatten.compact
     end
 
     # Transforms the application directory such that the JRE, container, and frameworks can run the application
@@ -116,14 +117,14 @@ module LibertyBuildpack
 
     private
 
-    LICENSE_CONFIG = '../../config/licenses.yml'.freeze
-    BUILDPACK_MESSAGE = '-----> Liberty Buildpack Version: %s'.freeze
+    LICENSE_CONFIG = '../../config/licenses.yml'
+    BUILDPACK_MESSAGE = '-----> Liberty Buildpack Version: %s'
 
-    JRE_TYPE = 'jres'.freeze
-    FRAMEWORK_TYPE = 'frameworks'.freeze
-    CONTAINER_TYPE = 'containers'.freeze
+    JRE_TYPE = 'jres'
+    FRAMEWORK_TYPE = 'frameworks'
+    CONTAINER_TYPE = 'containers'
 
-    LIB_DIRECTORY = '.lib'.freeze
+    LIB_DIRECTORY = '.lib'
 
     # Instances should only be constructed by this class.
     def initialize(app_dir)
@@ -148,9 +149,9 @@ module LibertyBuildpack
         java_opts: [],
         lib_directory: @lib_directory,
         common_paths: @common_paths,
-        vcap_application: vcap_application ? YAML.load(vcap_application) : {},
-        vcap_services: vcap_services ? YAML.load(vcap_services) : {},
-        license_ids: license_ids ? license_ids : {},
+        vcap_application: vcap_application ? YAML.safe_load(vcap_application) : {},
+        vcap_services: vcap_services ? YAML.safe_load(vcap_services) : {},
+        license_ids: license_ids || {},
         jvm_type: jvm_type
       }
       initialize_components(components, basic_context)
@@ -158,7 +159,7 @@ module LibertyBuildpack
 
     def self.component_detections(components)
       compacted_tags = components.map(&:detect).compact
-      compacted_tags.select { |tag| tag != '' }
+      compacted_tags.reject { |tag| tag == '' }
     end
 
     def self.configure_context(basic_context, type)
@@ -193,12 +194,8 @@ module LibertyBuildpack
     def self.log_debug_data(logger)
       logger.debug do
         safe_env = ENV.to_hash
-        if safe_env.key? 'VCAP_SERVICES'
-          safe_env['VCAP_SERVICES'] = LibertyBuildpack::Util.safe_vcap_services(safe_env['VCAP_SERVICES'])
-        end
-        if LibertyBuildpack::Util::Heroku.heroku?
-          LibertyBuildpack::Util.safe_heroku_env!(safe_env)
-        end
+        safe_env['VCAP_SERVICES'] = LibertyBuildpack::Util.safe_vcap_services(safe_env['VCAP_SERVICES']) if safe_env.key? 'VCAP_SERVICES'
+        LibertyBuildpack::Util.safe_heroku_env!(safe_env) if LibertyBuildpack::Util::Heroku.heroku?
         "Environment Variables: #{safe_env}"
       end
 
@@ -235,6 +232,7 @@ module LibertyBuildpack
     def container
       found_container = @containers.find(&:detect)
       raise 'No supported application type was detected' unless found_container
+
       found_container
     end
 
@@ -272,7 +270,7 @@ module LibertyBuildpack
     end
 
     def self.initialize_env(dir)
-      blocklist = %w(PATH GIT_DIR CPATH CPPATH LD_PRELOAD LIBRARY_PATH)
+      blocklist = %w[PATH GIT_DIR CPATH CPPATH LD_PRELOAD LIBRARY_PATH]
       if Dir.exist?(dir)
         Dir.foreach(dir) do |name|
           file = File.join(dir, name)

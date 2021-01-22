@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014
 #
@@ -25,7 +26,7 @@ shared_context 'buildpack_cache_helper' do
 
   let(:buildpack_cache_dir) { app_dir }
 
-  let(:java_buildpack_cache_dir) { buildpack_cache_dir + 'java-buildpack' }
+  let(:java_buildpack_cache_dir) { "#{buildpack_cache_dir}java-buildpack" }
 
   before do
     FileUtils.mkdir_p java_buildpack_cache_dir

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2019
 #
@@ -23,7 +24,7 @@ module LibertyBuildpack::Util
     include Comparable
 
     # The wildcard component.
-    WILDCARD = '+'.freeze
+    WILDCARD = '+'
 
     # Create a tokenized version based on the input string.
     #
@@ -87,11 +88,11 @@ module LibertyBuildpack::Util
         tail = nil
       else
         raise "Invalid version '#{s}': must not end in '.'" if s[-1] == '.'
-        raise "Invalid version '#{s}': missing component" if s =~ /\.[\._]/
+        raise "Invalid version '#{s}': missing component" if s =~ /\.[._]/
 
-        tokens = s.match(/^([^\.]+)(?:\.(.*))?/)
+        tokens = s.match(/^([^.]+)(?:\.(.*))?/)
 
-        major_or_minor, tail = tokens[1..-1]
+        major_or_minor, tail = tokens[1..]
 
         raise "Invalid major or minor version '#{major_or_minor}'" unless valid_major_minor_or_micro major_or_minor
       end
@@ -106,9 +107,9 @@ module LibertyBuildpack::Util
       else
         raise "Invalid version '#{s}': must not end in '_'" if s[-1] == '_'
 
-        tokens = s.match(/^([^\_]+)(?:_(.*))?/)
+        tokens = s.match(/^([^_]+)(?:_(.*))?/)
 
-        micro, qualifier = tokens[1..-1]
+        micro, qualifier = tokens[1..]
 
         raise "Invalid micro version '#{micro}'" unless valid_major_minor_or_micro micro
         raise "Invalid qualifier '#{qualifier}'" unless valid_qualifier qualifier
@@ -142,9 +143,7 @@ module LibertyBuildpack::Util
     def validate(allow_wildcards)
       wildcarded = false
       each do |value|
-        if !value.nil? && value.end_with?(WILDCARD) && !allow_wildcards
-          raise "Invalid version '#{@version}': wildcards are not allowed this context"
-        end
+        raise "Invalid version '#{@version}': wildcards are not allowed this context" if !value.nil? && value.end_with?(WILDCARD) && !allow_wildcards
 
         raise "Invalid version '#{@version}': no characters are allowed after a wildcard" if wildcarded && value
 
@@ -154,11 +153,11 @@ module LibertyBuildpack::Util
     end
 
     def valid_major_minor_or_micro(major_minor_or_micro)
-      major_minor_or_micro =~ /^[\d]*$/ || major_minor_or_micro =~ /^\+$/
+      major_minor_or_micro =~ /^\d*$/ || major_minor_or_micro =~ /^\+$/
     end
 
     def valid_qualifier(qualifier)
-      qualifier.nil? || qualifier.empty? || qualifier =~ /^[-\.a-zA-Z\d]*[\+]?$/
+      qualifier.nil? || qualifier.empty? || qualifier =~ /^[-.a-zA-Z\d]*\+?$/
     end
   end
 

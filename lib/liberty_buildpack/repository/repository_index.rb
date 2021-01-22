@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -50,13 +51,14 @@ module LibertyBuildpack
       def find_item(version)
         found_version = VersionResolver.resolve(version, @index.keys)
         raise "No version resolvable for '#{version}' in #{@index.keys.join(', ')}" if found_version.nil?
+
         uri = @index[found_version.to_s]
         [found_version, uri]
       end
 
       private
 
-      INDEX_PATH = '/index.yml'.freeze
+      INDEX_PATH = '/index.yml'
 
       private_constant :INDEX_PATH
 

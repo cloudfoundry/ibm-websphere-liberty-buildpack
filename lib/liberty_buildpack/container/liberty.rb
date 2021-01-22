@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2019
 #
@@ -115,7 +116,7 @@ module LibertyBuildpack::Container
 
       server_dir = ' wlp/usr/servers/' << server_name << '/'
       write_server_name
-      runtime_vars_file =  server_dir + 'runtime-vars.xml'
+      runtime_vars_file =  "#{server_dir}runtime-vars.xml"
       create_vars_string = File.join(LIBERTY_HOME, 'create_vars.rb') << runtime_vars_file << ' &&'
       create_jdk_memory_string = ContainerUtils.space(File.join(LIBERTY_HOME, 'calculate_memory.rb') << ' &&')
       skip_maxpermsize_string = ContainerUtils.space('WLP_SKIP_MAXPERMSIZE=true')
@@ -271,7 +272,7 @@ module LibertyBuildpack::Container
     def set_jdk_memory_configuration
       memory_resources_dir = File.expand_path(MEMORY_RESOURCES, File.dirname(__FILE__))
 
-      Dir.glob(File.join(memory_resources_dir, '/*')).select { |f| !File.directory?(f) }.each { |f| FileUtils.cp(f, File.join(liberty_home, File.basename(f))) }
+      Dir.glob(File.join(memory_resources_dir, '/*')).reject { |f| File.directory?(f) }.each { |f| FileUtils.cp(f, File.join(liberty_home, File.basename(f))) }
 
       File.chmod(0o755, File.join(liberty_home, 'calculate_memory.rb'))
       File.chmod(0o755, File.join(liberty_home, 'memory_size.rb'))
@@ -283,39 +284,39 @@ module LibertyBuildpack::Container
       File.chmod(0o755, File.join(liberty_home, 'weight_balancing_memory_heuristic.rb'))
     end
 
-    KEY_HTTP_PORT = 'port'.freeze
+    KEY_HTTP_PORT = 'port'
 
     RESOURCES = File.join('..', '..', '..', 'resources', 'liberty').freeze
 
     MEMORY_RESOURCES = File.join('..', '..', '..', 'resources', 'memory').freeze
 
-    KEY_SUPPORT = 'support'.freeze
+    KEY_SUPPORT = 'support'
 
-    LIBERTY_HOME = '.liberty'.freeze
+    LIBERTY_HOME = '.liberty'
 
-    DEFAULT_SERVER = 'defaultServer'.freeze
+    DEFAULT_SERVER = 'defaultServer'
 
-    WLP_PATH = 'wlp'.freeze
+    WLP_PATH = 'wlp'
 
-    USR_PATH = 'usr'.freeze
+    USR_PATH = 'usr'
 
-    SERVERS_PATH = 'servers'.freeze
+    SERVERS_PATH = 'servers'
 
-    SERVER_XML_GLOB = 'wlp/usr/servers/*/server.xml'.freeze
+    SERVER_XML_GLOB = 'wlp/usr/servers/*/server.xml'
 
-    SERVER_XML = 'server.xml'.freeze
+    SERVER_XML = 'server.xml'
 
-    JVM_OPTIONS = 'jvm.options'.freeze
+    JVM_OPTIONS = 'jvm.options'
 
-    WEB_INF = 'WEB-INF'.freeze
+    WEB_INF = 'WEB-INF'
 
-    META_INF = 'META-INF'.freeze
+    META_INF = 'META-INF'
 
-    BOOT_INF = 'BOOT-INF'.freeze
+    BOOT_INF = 'BOOT-INF'
 
-    MEMORY_CONFIG_FOLDER = '.memory_config/'.freeze
+    MEMORY_CONFIG_FOLDER = '.memory_config/'
 
-    SERVER_NAME_FILE = 'server_name_information'.freeze
+    SERVER_NAME_FILE = 'server_name_information'
 
     def update_server_xml
       server_xml = Liberty.server_xml(@app_dir)
@@ -340,7 +341,7 @@ module LibertyBuildpack::Container
       conf_env = @environment['JBP_CONFIG_LIBERTY']
       unless conf_env.nil?
         begin
-          value = YAML.load(conf_env)
+          value = YAML.safe_load(conf_env)
           if !config_features(value).nil?
             return true
           elsif value.is_a?(Array)
@@ -437,6 +438,7 @@ module LibertyBuildpack::Container
     def use_liberty_springboot?
       spring_version = @environment['LIBERTY_NATIVE_SPRINGBOOT']
       return true unless spring_version.nil?
+
       false
     end
 
@@ -455,7 +457,7 @@ module LibertyBuildpack::Container
 
     def get_context_root
       ibm_web_xml = WebXmlExt.read(File.join(@app_dir, WEB_INF, 'ibm-web-ext.xml'))
-      ibm_web_xml.get_context_root unless ibm_web_xml.nil?
+      ibm_web_xml&.get_context_root
     end
 
     def update_http_endpoint(server_xml_doc)
@@ -475,9 +477,7 @@ module LibertyBuildpack::Container
       endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
 
       compression = REXML::XPath.match(server_xml_doc, '/server/compression')
-      if compression.empty?
-        endpoint.add_element('compression') if endpoint.elements['compression'].nil?
-      end
+      endpoint.add_element('compression') if compression.empty? && endpoint.elements['compression'].nil?
       endpoint.delete_attribute('httpsPort')
     end
 
@@ -575,7 +575,7 @@ module LibertyBuildpack::Container
     end
 
     def make_server_script_runnable
-      %w(server featureManager productInfo installUtility).each do |name|
+      %w[server featureManager productInfo installUtility].each do |name|
         script = File.join(liberty_home, 'bin', name)
         File.chmod(0o755, script) if File.exist?(script)
       end
@@ -585,6 +585,7 @@ module LibertyBuildpack::Container
       if Liberty.liberty_directory @app_dir
         candidates = Dir[File.join(@app_dir, WLP_PATH, USR_PATH, SERVERS_PATH, '*')]
         raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}" if candidates.size != 1
+
         File.basename(candidates[0])
       elsif Liberty.server_directory(@app_dir) || Liberty.web_inf(@app_dir) || Liberty.meta_inf(@app_dir) || Liberty.boot_inf(@app_dir)
         DEFAULT_SERVER
@@ -605,8 +606,8 @@ module LibertyBuildpack::Container
     # Liberty download component names, as used in the component_index.yml file
     # pointed to by the index.yml file The index.yml file is
     # pointed to by the buildpack liberty.yml file.
-    COMPONENT_LIBERTY_CORE   = 'liberty_core'.freeze
-    COMPONENT_LIBERTY_EXT    = 'liberty_ext'.freeze
+    COMPONENT_LIBERTY_CORE   = 'liberty_core'
+    COMPONENT_LIBERTY_EXT    = 'liberty_ext'
 
     def download_and_install_liberty
       # create a temporary directory where the downloaded files will be extracted to.
@@ -617,6 +618,7 @@ module LibertyBuildpack::Container
         # download and extract the server to a temporary location.
         uri = @liberty_components_and_uris[COMPONENT_LIBERTY_CORE]
         raise 'No Liberty download defined in buildpack.' if uri.nil?
+
         download_and_unpack_archive(uri, root)
 
         # read opt-out of service bindings information from env (manifest.yml), and initialise
@@ -629,8 +631,8 @@ module LibertyBuildpack::Container
         # repository is being used it will install features later (after server.xml is updated).
         unless FeatureManager.enabled?(@configuration)
           # download and extract the extended server files to the same location, if required.
-          if @services_manager.requires_liberty_extensions? || configured_feature_requires_component?(COMPONENT_LIBERTY_EXT)
-            download_and_unpack_archive(uri, root) if (uri = @liberty_components_and_uris.delete(COMPONENT_LIBERTY_EXT))
+          if (@services_manager.requires_liberty_extensions? || configured_feature_requires_component?(COMPONENT_LIBERTY_EXT)) && (uri = @liberty_components_and_uris.delete(COMPONENT_LIBERTY_EXT))
+            download_and_unpack_archive(uri, root)
           end
           # services may provide zips or esas or both. Query services to see what's needed
           # and download and install.
@@ -818,6 +820,7 @@ module LibertyBuildpack::Container
         components_and_uris = LibertyBuildpack::Repository::ComponentIndex.new(config_uri).components
       end
       raise "Failed to locate a repository containing a component_index and installable components using uri #{config_uri}." if components_and_uris.nil?
+
       [components_and_uris, license]
     end
 
@@ -833,14 +836,15 @@ module LibertyBuildpack::Container
         if entry.is_a?(Hash)
           type = runtime_type(configuration)
           raise "Runtime type not supported: #{type}" if entry[type].nil?
-          return version, entry[type], entry['license']
+
+          [version, entry[type], entry['license']]
         else
-          return version, entry, nil
+          [version, entry, nil]
         end
       else
-        return nil, nil, nil
+        [nil, nil, nil]
       end
-    rescue => e
+    rescue StandardError => e
       raise RuntimeError, "Liberty container error: #{e.message}", e.backtrace
     end
 
@@ -898,6 +902,7 @@ module LibertyBuildpack::Container
 
     def copy_user_features
       return unless Dir.exist?(features_dir)
+
       FileUtils.mkdir_p(File.join(@app_dir, WLP_PATH, USR_PATH, 'extension', 'lib', 'features'))
       output = `cp #{features_dir}/*.mf #{@app_dir}/wlp/usr/extension/lib/features`
       @logger.warn("copy_user_features copy manifests returned #{output}") if $CHILD_STATUS.to_i != 0
@@ -996,9 +1001,11 @@ module LibertyBuildpack::Container
       # return nil if META-INF directory doesn't exist. This mimics behavior of previous implementation.
       meta_inf = File.join(app_dir, META_INF)
       return nil if File.directory?(meta_inf) == false
+
       # To mimic the behavior of the previous (flawed) implementatation, from here on out we only return nil if we can determine it's a jar
       manifest_file = File.join(app_dir, META_INF, 'MANIFEST.MF')
       return meta_inf if File.exist?(manifest_file) == false
+
       props = LibertyBuildpack::Util::Properties.new(manifest_file)
       main_class = props['Main-Class']
       main_class.nil? ? meta_inf : nil
@@ -1006,14 +1013,13 @@ module LibertyBuildpack::Container
 
     def self.server_directory(server_dir)
       server_xml = File.join(server_dir, SERVER_XML)
-      File.file? server_xml ? server_xml : nil
+      File.file? server_xml || nil
     end
 
     def self.liberty_directory(app_dir)
       candidates = Dir[File.join(app_dir, SERVER_XML_GLOB)]
-      if candidates.size > 1
-        raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}"
-      end
+      raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}" if candidates.size > 1
+
       candidates.any? ? candidates[0] : nil
     end
 
@@ -1034,9 +1040,8 @@ module LibertyBuildpack::Container
       deep_candidates = Dir[File.join(app_dir, SERVER_XML_GLOB)]
       shallow_candidates = Dir[File.join(app_dir, SERVER_XML)]
       candidates = deep_candidates.concat shallow_candidates
-      if candidates.size > 1
-        raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}"
-      end
+      raise "Incorrect number of servers to deploy (expecting exactly one): #{candidates}" if candidates.size > 1
+
       candidates.any? ? candidates[0] : nil
     end
 
@@ -1069,6 +1074,7 @@ module LibertyBuildpack::Container
     def self.expand_apps(apps)
       apps.each do |app|
         next unless File.file? app
+
         temp_directory = "#{app}.tmp"
         ContainerUtils.unzip(app, temp_directory)
         File.delete(app)

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2016
 #
@@ -44,14 +45,14 @@ module LibertyBuildpack
           user_provided = ENV[var_name]
 
           logger.debug { "loading service config for #{key} from #{file}" } if should_log
-          config[key] = File.open(file, 'r:utf-8') { |yf| YAML.load(yf) }
+          config[key] = File.open(file, 'r:utf-8') { |yf| YAML.safe_load(yf) }
 
           if user_provided
             begin
-              user_provided_value = YAML.load(user_provided)
+              user_provided_value = YAML.safe_load(user_provided)
               config[key] = merge_configuration(config[key], user_provided_value, var_name, should_log)
-            rescue Psych::SyntaxError => ex
-              raise "User service configuration value in environment variable #{var_name} has invalid syntax: #{ex}"
+            rescue Psych::SyntaxError => e
+              raise "User service configuration value in environment variable #{var_name} has invalid syntax: #{e}"
             end
             logger.debug { "Service configuration from #{file} modified with: #{user_provided}" } if should_log
           end
@@ -61,7 +62,7 @@ module LibertyBuildpack
 
         private
 
-        ENVIRONMENT_VARIABLE_PATTERN = 'LBP_SERVICE_CONFIG_'.freeze
+        ENVIRONMENT_VARIABLE_PATTERN = 'LBP_SERVICE_CONFIG_'
 
         def clean_nil_values(configuration)
           configuration.each do |key, value|
@@ -75,9 +76,10 @@ module LibertyBuildpack
         end
 
         def merge_configuration(configuration, user_provided_value, var_name, should_log)
-          if user_provided_value.is_a?(Hash)
+          case user_provided_value
+          when Hash
             configuration = do_merge(configuration, user_provided_value, should_log)
-          elsif user_provided_value.is_a?(Array)
+          when Array
             user_provided_value.each { |new_prop| configuration = do_merge(configuration, new_prop, should_log) }
           else
             raise "User configuration value in environment variable #{var_name} is not valid: #{user_provided_value}"
@@ -99,6 +101,7 @@ module LibertyBuildpack
         def do_resolve_value(key, v1, v2, should_log)
           return do_merge(v1, v2, should_log) if v1.is_a?(Hash) && v2.is_a?(Hash)
           return v2 if !v1.is_a?(Hash) && !v2.is_a?(Hash)
+
           logger.warn { "User config value for '#{key}' is not valid, must be of a similar type" } if should_log
           v1
         end

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -30,9 +31,9 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
 
   let(:ca_certs_directory) { double exist?: false, to_s: 'test-path' }
 
-  let(:mutable_cache_root) { app_dir + 'mutable' }
+  let(:mutable_cache_root) { "#{app_dir}mutable" }
 
-  let(:immutable_cache_root) { app_dir + 'immutable' }
+  let(:immutable_cache_root) { "#{app_dir}immutable" }
 
   let(:uri) { 'http://foo-uri/' }
 
@@ -163,8 +164,8 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
 
   it 'discards content with incorrect size' do
     stub_request(:get, uri)
-      .to_return(status: 200, body: 'foo-cac', headers: { Etag:            'foo-etag',
-                                                          'Last-Modified'  => 'foo-last-modified',
+      .to_return(status: 200, body: 'foo-cac', headers: { Etag: 'foo-etag',
+                                                          'Last-Modified' => 'foo-last-modified',
                                                           'Content-Length' => 10 })
 
     touch immutable_cache_root, 'cached', 'old-foo-cached'
@@ -245,7 +246,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
 
     it 'does not use proxy if host in NO_PROXY' do
       stub_request(:get, uri_secure)
-        .to_return(status: 200, body: 'foo-cached', headers: { Etag:           'foo-etag',
+        .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag',
                                                                'Last-Modified' => 'foo-last-modified' })
 
       allow(Net::HTTP).to receive(:Proxy).and_call_original
@@ -262,7 +263,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
 
     it 'does not use proxy if host in no_proxy' do
       stub_request(:get, uri_secure)
-        .to_return(status: 200, body: 'foo-cached', headers: { Etag:           'foo-etag',
+        .to_return(status: 200, body: 'foo-cached', headers: { Etag: 'foo-etag',
                                                                'Last-Modified' => 'foo-last-modified' })
 
       allow(Net::HTTP).to receive(:Proxy).and_call_original
@@ -386,7 +387,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
       ENV.delete('USER_AGENT')
 
       a_request(:get, 'http://foo-uri/')
-        .with('headers' => { 'Accept' => '*/*', 'User-Agent' => default_user_agent_base + '-test' })
+        .with('headers' => { 'Accept' => '*/*', 'User-Agent' => "#{default_user_agent_base}-test" })
         .should have_been_made
     end
 
@@ -400,7 +401,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
       # Value dGVzdDp0ZXN0 is 'test:test' in base64
       allow(LibertyBuildpack::Util::Cache::AuthenticationUtils)
         .to receive(:authorization_value).with('http://foo-uri/')
-        .and_return('Basic dGVzdDp0ZXN0')
+                                         .and_return('Basic dGVzdDp0ZXN0')
 
       stub_request(:get, 'http://foo-uri/')
         .to_return(status: 200, body: 'foo-cached', headers: {})
@@ -411,7 +412,7 @@ describe LibertyBuildpack::Util::Cache::DownloadCache do
     it 'should use auth config if authorization required' do
       allow(LibertyBuildpack::Util::Cache::AuthenticationUtils)
         .to receive(:authorization_value).with('http://foo-uri/')
-        .and_return('username' => 'foo', 'password' => 'bar')
+                                         .and_return('username' => 'foo', 'password' => 'bar')
 
       stub_request(:get, 'http://foo-uri/')
         .to_return(status: 200, body: 'foo-cached', headers: {})

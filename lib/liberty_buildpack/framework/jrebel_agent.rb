@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015, 2016
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,11 +108,11 @@ module LibertyBuildpack::Framework
     private
 
     # JRebel home directory
-    JR_HOME_DIR = '.jrebel'.freeze
+    JR_HOME_DIR = '.jrebel'
     # Name of the main jar file
-    JREBEL_JAR = 'jrebel.jar'.freeze
+    JREBEL_JAR = 'jrebel.jar'
     # Directory name
-    JREBEL = 'jrebel'.freeze
+    JREBEL = 'jrebel'
     # Path tho the native agent within the nosetup.zip
     LIBJREBEL_SO = File.join(JREBEL, 'lib', 'libjrebel64.so')
 
@@ -120,7 +121,7 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def download_and_install_agent(jr_home)
       LibertyBuildpack::Util.download_zip(@version, @uri, 'JRebel Agent', jr_home)
-    rescue => e
+    rescue StandardError => e
       raise "Unable to download the JRebel zip. Ensure that the zip at #{@uri} is available and accessible. #{e.message}"
     end
 

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2014
 #
@@ -19,7 +20,7 @@ require 'open3'
 
 describe 'detect script', :integration do
 
-  LIBERTY_FOR_JAVA = 'Liberty for Java(TM) ('.freeze
+  LIBERTY_FOR_JAVA = 'Liberty for Java(TM) ('
 
   it 'should return zero if success on the liberty WEB-INF case' do
     Dir.mktmpdir do |root|
@@ -27,7 +28,7 @@ describe 'detect script', :integration do
 
       with_memory_limit('1G') do
         Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
-          expect(stdout.read).to include(LIBERTY_FOR_JAVA + 'WAR')
+          expect(stdout.read).to include("#{LIBERTY_FOR_JAVA}WAR")
           expect(wait_thr.value).to be_success
         end
       end
@@ -41,7 +42,7 @@ describe 'detect script', :integration do
 
       with_memory_limit('1G') do
         Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
-          expect(stdout.read).to include(LIBERTY_FOR_JAVA + 'SVR-PKG')
+          expect(stdout.read).to include("#{LIBERTY_FOR_JAVA}SVR-PKG")
           expect(wait_thr.value).to be_success
         end
       end
@@ -55,7 +56,7 @@ describe 'detect script', :integration do
         FileUtils.cp_r 'spec/fixtures/framework_auto_reconfiguration_servlet_2/.', root
         with_memory_limit('1G') do
           Open3.popen3("bin/detect #{root}") do |stdin, stdout, stderr, wait_thr|
-            expect(stdout.read).to include(LIBERTY_FOR_JAVA + 'WAR')
+            expect(stdout.read).to include("#{LIBERTY_FOR_JAVA}WAR")
             expect(wait_thr.value).to be_success
             expect(stderr.read).not_to include('undefined method')
           end

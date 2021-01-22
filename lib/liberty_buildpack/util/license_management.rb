@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -30,7 +31,7 @@ module LibertyBuildpack::Util
 
     # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
     LibertyBuildpack::Util::Cache::ApplicationCache.new.get(license_uri) do |file|
-      scanned_license = file.read.force_encoding('ISO-8859-1').scan(/D\/N:\s*(.*?)\s*\</m)
+      scanned_license = file.read.force_encoding('ISO-8859-1').scan(/D\/N:\s*(.*?)\s*</m)
       if scanned_license.empty?
         raise 'No D/N code found in the license file'
       else

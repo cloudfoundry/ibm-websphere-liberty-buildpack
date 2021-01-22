@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014
 #
@@ -19,8 +20,8 @@ require 'tee'
 
 shared_context 'console_helper' do
 
-  STDOUT.sync
-  STDERR.sync
+  $stdout.sync
+  $stderr.sync
 
   let(:stdout) { StringIO.new }
   let(:stderr) { StringIO.new }
@@ -30,8 +31,8 @@ shared_context 'console_helper' do
     $stderr = Tee.open(stderr, stdout: nil)
 
     if example.metadata[:show_output]
-      $stdout.add STDOUT
-      $stderr.add STDERR
+      $stdout.add $stdout
+      $stderr.add $stderr
     end
   end
 

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2019
 #
@@ -29,7 +30,7 @@ module LibertyBuildpack::Jre
   class OpenJdk
 
     # Filename of killjava script used to kill the JVM on OOM.
-    KILLJAVA_FILE_NAME = 'killjava.sh'.freeze
+    KILLJAVA_FILE_NAME = 'killjava.sh'
 
     # Creates an instance, passing in an arbitrary collection of options.
     #
@@ -86,21 +87,21 @@ module LibertyBuildpack::Jre
 
     private
 
-    RESOURCES = '../../../resources/openjdk/diagnostics'.freeze
+    RESOURCES = '../../../resources/openjdk/diagnostics'
 
-    JAVA_HOME = '.java'.freeze
+    JAVA_HOME = '.java'
 
-    KEY_MEMORY_HEURISTICS = 'memory_heuristics'.freeze
+    KEY_MEMORY_HEURISTICS = 'memory_heuristics'
 
-    KEY_MEMORY_SIZES = 'memory_sizes'.freeze
+    KEY_MEMORY_SIZES = 'memory_sizes'
 
     VERSION_8 = LibertyBuildpack::Util::TokenizedVersion.new('1.8.0').freeze
 
-    MEMORY_CONFIG_FOLDER = '.memory_config/'.freeze
+    MEMORY_CONFIG_FOLDER = '.memory_config/'
 
-    MEMORY_HEURISTICS_FILE = 'heuristics'.freeze
+    MEMORY_HEURISTICS_FILE = 'heuristics'
 
-    MEMORY_SIZES_FILE = 'sizes'.freeze
+    MEMORY_SIZES_FILE = 'sizes'
 
     def expand(file)
       expand_start_time = Time.now
@@ -123,7 +124,7 @@ module LibertyBuildpack::Jre
 
     def self.find_openjdk(configuration)
       LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
-    rescue => e
+    rescue StandardError => e
       raise RuntimeError, "OpenJdk error: #{e.message}", e.backtrace
     end
 

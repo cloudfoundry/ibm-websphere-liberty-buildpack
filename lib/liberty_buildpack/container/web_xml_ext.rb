@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015
 #
@@ -29,7 +30,7 @@ module LibertyBuildpack::Container
       if File.exist?(ibm_web_ext)
         begin
           return WebXmlExt.new(LibertyBuildpack::Util::XmlUtils.read_xml_file(ibm_web_ext))
-        rescue => e
+        rescue StandardError => e
           logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
           logger.debug("Error reading ibm-web-ext.xml file: Exception #{e.message}")
         end

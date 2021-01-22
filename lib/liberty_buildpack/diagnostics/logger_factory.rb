@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -69,21 +70,21 @@ module LibertyBuildpack::Diagnostics
 
     private
 
-    DEBUG_SEVERITY_STRING = 'DEBUG'.freeze
+    DEBUG_SEVERITY_STRING = 'DEBUG'
 
-    INFO_SEVERITY_STRING = 'INFO'.freeze
+    INFO_SEVERITY_STRING = 'INFO'
 
-    WARN_SEVERITY_STRING = 'WARN'.freeze
+    WARN_SEVERITY_STRING = 'WARN'
 
-    ERROR_SEVERITY_STRING = 'ERROR'.freeze
+    ERROR_SEVERITY_STRING = 'ERROR'
 
-    FATAL_SEVERITY_STRING = 'FATAL'.freeze
+    FATAL_SEVERITY_STRING = 'FATAL'
 
-    LOGGING_CONFIG = '../../../config/logging.yml'.freeze
+    LOGGING_CONFIG = '../../../config/logging.yml'
 
-    LOG_LEVEL_ENVIRONMENT_VARIABLE = 'JBP_LOG_LEVEL'.freeze
+    LOG_LEVEL_ENVIRONMENT_VARIABLE = 'JBP_LOG_LEVEL'
 
-    DEFAULT_LOG_LEVEL_CONFIGURATION_KEY = 'default_log_level'.freeze
+    DEFAULT_LOG_LEVEL_CONFIGURATION_KEY = 'default_log_level'
 
     @@monitor = Monitor.new
 
@@ -91,15 +92,16 @@ module LibertyBuildpack::Diagnostics
       switched_log_level = $VERBOSE || $DEBUG ? DEBUG_SEVERITY_STRING : nil
       log_level = (ENV[LOG_LEVEL_ENVIRONMENT_VARIABLE] || switched_log_level || logging_configuration[DEFAULT_LOG_LEVEL_CONFIGURATION_KEY]).upcase
 
-      @@logger.sev_threshold = if log_level == DEBUG_SEVERITY_STRING
+      @@logger.sev_threshold = case log_level
+                               when DEBUG_SEVERITY_STRING
                                  ::Logger::DEBUG
-                               elsif log_level == INFO_SEVERITY_STRING
+                               when INFO_SEVERITY_STRING
                                  ::Logger::INFO
-                               elsif log_level == WARN_SEVERITY_STRING
+                               when WARN_SEVERITY_STRING
                                  ::Logger::WARN
-                               elsif log_level == ERROR_SEVERITY_STRING
+                               when ERROR_SEVERITY_STRING
                                  ::Logger::ERROR
-                               elsif log_level == FATAL_SEVERITY_STRING
+                               when FATAL_SEVERITY_STRING
                                  ::Logger::FATAL
                                else
                                  ::Logger::DEBUG
@@ -109,8 +111,7 @@ module LibertyBuildpack::Diagnostics
     def self.log_file(app_dir)
       diagnostics_directory = LibertyBuildpack::Diagnostics.get_diagnostic_directory app_dir
       FileUtils.mkdir_p diagnostics_directory
-      log_file = File.join(diagnostics_directory, LibertyBuildpack::Diagnostics::LOG_FILE_NAME)
-      log_file
+      File.join(diagnostics_directory, LibertyBuildpack::Diagnostics::LOG_FILE_NAME)
     end
 
     def self.close
@@ -148,9 +149,6 @@ module LibertyBuildpack::Diagnostics
     class Logger < ::Logger
       # Initializes a Logger.
       # @param [Object] log_dev the destination 'device' to log to
-      def initialize(log_dev)
-        super
-      end
 
       # Logs a message with a given severity.
       #
@@ -169,7 +167,7 @@ module LibertyBuildpack::Diagnostics
         # Skip stack frames in file 'logger.rb'.
         # Note: there is no way to detect the class ::Logger since caller does not include the class name and
         # the class may be reopened in arbitrary files.
-        program_name ||= caller.find { |stack_frame| !(stack_frame =~ /logger\.rb/) }
+        program_name ||= caller.find { |stack_frame| stack_frame !~ /logger\.rb/ }
         super(severity, message_text, program_name, &block)
       end
 

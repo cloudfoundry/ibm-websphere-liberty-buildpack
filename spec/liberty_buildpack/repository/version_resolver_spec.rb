@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -22,7 +23,7 @@ require 'liberty_buildpack/util/tokenized_version'
 describe LibertyBuildpack::Repository::VersionResolver do
   include_context 'logging_helper'
 
-  let(:versions) { %w(1.6.0_26 1.6.0_27 1.6.1_14 1.7.0_19 1.7.0_21 1.8.0_M-7 1.8.0_05 2.0.0 2.0.0a) }
+  let(:versions) { %w[1.6.0_26 1.6.0_27 1.6.1_14 1.7.0_19 1.7.0_21 1.8.0_M-7 1.8.0_05 2.0.0 2.0.0a] }
 
   it 'resolves the default version if no candidate is supplied' do
     expect(described_class.resolve(nil, versions)).to eq(tokenized_version('2.0.0'))

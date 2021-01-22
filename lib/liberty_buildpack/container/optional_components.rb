@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2015
 #
@@ -28,49 +29,49 @@ module LibertyBuildpack::Container
 
     private
 
-      CONFIG_FILE = '../../../config/liberty.yml'.freeze
+    CONFIG_FILE = '../../../config/liberty.yml'
 
-      def self.initialize
-        config = YAML.load_file(File.expand_path(CONFIG_FILE, File.dirname(__FILE__)))
-        @@configuration = config['component_feature_map'] || {}
+    def self.initialize
+      config = YAML.load_file(File.expand_path(CONFIG_FILE, File.dirname(__FILE__)))
+      @@configuration = config['component_feature_map'] || {}
+    end
+
+    # Return an xpath string of the form,
+    # "/server/featureManager/feature[. = 'x' or . = 'y']/node()"
+    def self.feature_names_to_feature_xpath(feature_names)
+      if feature_names.nil? || feature_names.empty?
+        nil
+      else
+        "/server/featureManager/feature[. = '" << feature_names.join("' or . = '") << "']/node()"
       end
+    end
 
-      # Return an xpath string of the form,
-      # "/server/featureManager/feature[. = 'x' or . = 'y']/node()"
-      def self.feature_names_to_feature_xpath(feature_names)
-        if feature_names.nil? || feature_names.empty?
-          nil
-        else
-          "/server/featureManager/feature[. = '" << feature_names.join("' or . = '") << "']/node()"
-        end
-      end
-
-      initialize
+    initialize
 
     public
 
-      # ---------------------------------------------------------------
-      # Get a list of Liberty features that given component provides.
-      #
-      # @param component_name - The component name.
-      # @return An array of feature names.
-      #----------------------------------------------------------------
-      def self.feature_names(component_name)
-        @@configuration[component_name]
-      end
+    # ---------------------------------------------------------------
+    # Get a list of Liberty features that given component provides.
+    #
+    # @param component_name - The component name.
+    # @return An array of feature names.
+    #----------------------------------------------------------------
+    def self.feature_names(component_name)
+      @@configuration[component_name]
+    end
 
-      # ---------------------------------------------------------------
-      # Get an XPath expression string that may be used query against
-      # the contents of a server.xml file to select any of the features
-      # that a given component provides.
-      # A non-empty result indicates that the server requires one or
-      # more features that the component provides.
-      #
-      # @param component_name - The component name.
-      # @return An XPath expression string.
-      def self.feature_xpath(component_name)
-        feature_names_to_feature_xpath(feature_names(component_name))
-      end
+    # ---------------------------------------------------------------
+    # Get an XPath expression string that may be used query against
+    # the contents of a server.xml file to select any of the features
+    # that a given component provides.
+    # A non-empty result indicates that the server requires one or
+    # more features that the component provides.
+    #
+    # @param component_name - The component name.
+    # @return An XPath expression string.
+    def self.feature_xpath(component_name)
+      feature_names_to_feature_xpath(feature_names(component_name))
+    end
 
   end
 

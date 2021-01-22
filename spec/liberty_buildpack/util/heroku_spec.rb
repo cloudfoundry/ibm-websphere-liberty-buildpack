@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -106,9 +107,7 @@ module LibertyBuildpack::Util
     def check_debug_output(env)
       log_content = File.read LibertyBuildpack::Diagnostics.get_buildpack_log app_dir
       env.each do |key, value|
-        if key.end_with?(Heroku::URL_SUFFIX, Heroku::URI_SUFFIX)
-          expect(log_content).not_to match(value)
-        end
+        expect(log_content).not_to match(value) if key.end_with?(Heroku::URL_SUFFIX, Heroku::URI_SUFFIX)
       end
     end
 
@@ -162,7 +161,7 @@ module LibertyBuildpack::Util
 
       m1 = 'HEROKU_POSTGRESQL_RED_URL=myDatabase, CLEARDB_DATABASE_URL = mysqlDb, BAD_URL = myBad'
       m2 = 'MONGOHQ_URL=hq, MONGOLAB_URI=lab, MONGOSOUP_URL=soup'
-      env['SERVICE_NAME_MAP'] = m1 + ',' + m2
+      env['SERVICE_NAME_MAP'] = "#{m1},#{m2}"
 
       vcap_services = Heroku.new.generate_vcap_services(env)
 
@@ -191,6 +190,6 @@ module LibertyBuildpack::Util
       check_debug_output(env)
     end
 
-  end # describe
+  end
 
-end # module
+end

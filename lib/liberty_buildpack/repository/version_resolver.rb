@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -41,11 +42,9 @@ module LibertyBuildpack
           tokenized_candidate_version = safe_candidate_version candidate_version
           tokenized_versions          = versions.map { |version| create_token(version) }.compact
 
-          version = tokenized_versions
-                    .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
-                    .max { |a, b| a <=> b }
-
-          version
+          tokenized_versions
+            .select { |tokenized_version| matches? tokenized_candidate_version, tokenized_version }
+            .max { |a, b| a <=> b }
         end
 
         private
@@ -66,9 +65,7 @@ module LibertyBuildpack
           if candidate_version.nil?
             TOKENIZED_WILDCARD
           else
-            unless candidate_version.is_a?(LibertyBuildpack::Util::TokenizedVersion)
-              raise "Invalid TokenizedVersion '#{candidate_version}'"
-            end
+            raise "Invalid TokenizedVersion '#{candidate_version}'" unless candidate_version.is_a?(LibertyBuildpack::Util::TokenizedVersion)
 
             candidate_version
           end

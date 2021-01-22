@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2017
 #
@@ -218,4 +219,4 @@ module LibertyBuildpack::Services
 
     end
   end
-end # module
+end

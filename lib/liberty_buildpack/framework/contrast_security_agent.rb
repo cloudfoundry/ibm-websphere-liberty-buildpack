@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'liberty_buildpack/diagnostics/logger_factory'
 require 'liberty_buildpack/framework'
 require 'liberty_buildpack/repository/configured_item'
@@ -76,7 +78,7 @@ module LibertyBuildpack::Framework
     def process_config
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
-      rescue => e
+      rescue StandardError => e
         @logger.error("Unable to process the configuration for the Contrast Security Agent framework. #{e.message}")
       end
 
@@ -101,16 +103,16 @@ module LibertyBuildpack::Framework
 
     private
 
-    API_KEY = 'api_key'.freeze
-    CONTRAST_CONFIG_NAME = 'contrast.config'.freeze
-    CONTRAST_DIR = '.contrast'.freeze
-    CONTRAST_FILTER = 'contrast-security'.freeze
+    API_KEY = 'api_key'
+    CONTRAST_CONFIG_NAME = 'contrast.config'
+    CONTRAST_DIR = '.contrast'
+    CONTRAST_FILTER = 'contrast-security'
     JAVA_AGENT_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('3.4.3').freeze
-    PLUGIN_PACKAGE = 'com.aspectsecurity.contrast.runtime.agent.plugins'.freeze
-    REFERRAL_TILE = 'contrast_referral_tile'.freeze
-    SERVICE_KEY = 'service_key'.freeze
-    TEAMSERVER_URL = 'teamserver_url'.freeze
-    USERNAME = 'username'.freeze
+    PLUGIN_PACKAGE = 'com.aspectsecurity.contrast.runtime.agent.plugins'
+    REFERRAL_TILE = 'contrast_referral_tile'
+    SERVICE_KEY = 'service_key'
+    TEAMSERVER_URL = 'teamserver_url'
+    USERNAME = 'username'
 
     def jar_name
       "#{version_identifier}.jar"
@@ -178,7 +180,7 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def download_agent(version_desc, uri_source, target_jar_name, target_dir)
       LibertyBuildpack::Util.download(version_desc, uri_source, 'Contrast Security Agent', target_jar_name, target_dir)
-    rescue => e
+    rescue StandardError => e
       raise "Unable to download the Contrast Security Agent jar. Ensure that the agent jar at #{uri_source} is available and accessible. #{e.message}"
     end
 
@@ -193,9 +195,7 @@ module LibertyBuildpack::Framework
 
     def referral_tile
       @services.find do |service|
-        unless service['credentials'].nil?
-          service['credentials'].key?(REFERRAL_TILE)
-        end
+        service['credentials']&.key?(REFERRAL_TILE)
       end
     end
 

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -231,7 +232,7 @@ module LibertyBuildpack::Services
         mongolab = {}
         mongolab['name'] = 'myNoSql'
         mongolab['label'] = 'mongolab'
-        mongolab['tags'] = %w(document mongodb)
+        mongolab['tags'] = %w[document mongodb]
         mongolab_credentials = {}
         mongolab_credentials['uri'] = 'mongodb://myUser:myPassword@myHost.com:5432/myDb'
         mongolab['credentials'] = mongolab_credentials
@@ -261,7 +262,7 @@ module LibertyBuildpack::Services
 
         @test_hosts = 'myHost.com,myHost2.com,myHost3.net'
         @test_ports = '5432,27017,1234'
-        run_test(vcap_services, %w(myHost.com myHost2.com myHost3.net), %w(5432 27017 1234), env['MONGOHQ_URL'])
+        run_test(vcap_services, %w[myHost.com myHost2.com myHost3.net], %w[5432 27017 1234], env['MONGOHQ_URL'])
       end
 
       it 'on Heroku (MongoLab)' do
@@ -345,31 +346,31 @@ module LibertyBuildpack::Services
       it 'Two nodes' do
         # with ports
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myUser:myPassword@myHost.com:5432,myHost2.com:1234/myDb')
-        check_map(map, 'myDb', 'myUser', 'myPassword', %w(5432 1234), %w(myHost myHost2))
+        check_map(map, 'myDb', 'myUser', 'myPassword', %w[5432 1234], %w[myHost myHost2])
         # without ports
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myUser:myPassword@myHost.com:5432,myHost2.com/myDb')
-        check_map(map, 'myDb', 'myUser', 'myPassword', %w(5432 27017), %w(myHost myHost2))
+        check_map(map, 'myDb', 'myUser', 'myPassword', %w[5432 27017], %w[myHost myHost2])
         # without username/password
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myHost.com:5432,myHost2.com/myDb')
-        check_map(map, 'myDb', nil, nil, %w(5432 27017), %w(myHost myHost2))
+        check_map(map, 'myDb', nil, nil, %w[5432 27017], %w[myHost myHost2])
         # no db
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myHost.com:5432,myHost2.com')
-        check_map(map, nil, nil, nil, %w(5432 27017), %w(myHost myHost2))
+        check_map(map, nil, nil, nil, %w[5432 27017], %w[myHost myHost2])
       end
 
       it 'Multiple nodes' do
         # with ports
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myUser:myPassword@myHost.com:5432,myHost2.com:1234,myHost3.com:4567/myDb')
-        check_map(map, 'myDb', 'myUser', 'myPassword', %w(5432 1234 4567), %w(myHost myHost2 myHost3))
+        check_map(map, 'myDb', 'myUser', 'myPassword', %w[5432 1234 4567], %w[myHost myHost2 myHost3])
         # without ports
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myUser:myPassword@myHost.com:5432,myHost2.com,myHost3.com:4567/myDb')
-        check_map(map, 'myDb', 'myUser', 'myPassword', %w(5432 27017 4567), %w(myHost myHost2 myHost3))
+        check_map(map, 'myDb', 'myUser', 'myPassword', %w[5432 27017 4567], %w[myHost myHost2 myHost3])
         # without username/password
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myHost.com:5432,myHost2.com,myHost3.com:4567/myDb')
-        check_map(map, 'myDb', nil, nil, %w(5432 27017 4567), %w(myHost myHost2 myHost3))
+        check_map(map, 'myDb', nil, nil, %w[5432 27017 4567], %w[myHost myHost2 myHost3])
         # no db
         map = LibertyBuildpack::Services::Mongo.parse_url('mongodb://myHost.com:5432,myHost2.com,myHost3.com:4567')
-        check_map(map, nil, nil, nil, %w(5432 27017 4567), %w(myHost myHost2 myHost3))
+        check_map(map, nil, nil, nil, %w[5432 27017 4567], %w[myHost myHost2 myHost3])
       end
 
     end
@@ -381,7 +382,7 @@ module LibertyBuildpack::Services
         @vcap = {}
         @vcap['name'] = 'myMongo'
         @vcap['label'] = 'mongodb-2.2'
-        @vcap['tags'] = %w(nosql document)
+        @vcap['tags'] = %w[nosql document]
         @vcap['plan'] = 'free'
         creds = {}
         creds['hostname'] = '192.168.10.23'
@@ -555,8 +556,8 @@ module LibertyBuildpack::Services
             obj.get_required_features(features)
             expect(features.to_a).to match_array(['mongodb-2.0'])
           end
-        end # it
-      end # describe component_dependencies
+        end
+      end
 
       describe 'create_mongo' do
         it 'should create a single Mongo configuration' do
@@ -582,7 +583,7 @@ module LibertyBuildpack::Services
             expected = [s1, s2, s3, s4, s5, s6, s7]
             validate_xml(server_xml, expected)
           end
-        end # it
+        end
 
         it 'should create a two Mongo configuration' do
           Dir.mktmpdir do |root|
@@ -615,8 +616,8 @@ module LibertyBuildpack::Services
             expected = [s1, s2, s3, s4, s5, s6, s7, s8, s9]
             validate_xml(server_xml, expected)
           end
-        end # it
-      end # describe create_mongo
+        end
+      end
 
       describe 'update_single_mongo' do
         it 'should update a local Mongo configuration to cloud' do
@@ -646,7 +647,7 @@ module LibertyBuildpack::Services
             expected = [s1, s2, s3, s4, s5, s6, s7]
             validate_xml(server_xml, expected)
           end
-        end # it
+        end
 
         it 'should update an unsecure local Mongo configuration to a secure cloud configuration' do
           Dir.mktmpdir do |root|
@@ -675,7 +676,7 @@ module LibertyBuildpack::Services
             expected = [s1, s2, s3, s4, s5, s6, s7]
             validate_xml(server_xml, expected)
           end
-        end # it
+        end
 
         it 'should ignore config ids when updating a single mongo configuration' do
           Dir.mktmpdir do |root|
@@ -704,7 +705,7 @@ module LibertyBuildpack::Services
             expected = [s1, s2, s3, s4, s5, s6, s7]
             validate_xml(server_xml, expected)
           end
-        end # it
+        end
 
         it 'should create the configuration if missing from provided server.xml' do
           Dir.mktmpdir do |root|
@@ -730,7 +731,7 @@ module LibertyBuildpack::Services
             expected = [s1, s2, s3, s4, s5, s6, s7]
             validate_xml(server_xml, expected)
           end
-        end # it
+        end
 
         it 'should create the shared lib with api visibility when configuration if missing from provided server.xml' do
           Dir.mktmpdir do |root|
@@ -756,7 +757,7 @@ module LibertyBuildpack::Services
             expected = [s1, s2, s3, s4, s5, s6, s7]
             validate_xml(server_xml, expected)
           end
-        end # it
+        end
 
         it 'should detect missing library when updating a Mongo configuration' do
           Dir.mktmpdir do |root|
@@ -768,8 +769,8 @@ module LibertyBuildpack::Services
             add_mongo_db(server_xml_doc.root, get_mongodb_id, 'somedb', 'otherjndi', get_mongo_id)
             expect { obj.update(server_xml_doc.root, root, '${server.config.dir}/lib', @driver_jars, 1) }.to raise_error(RuntimeError, 'The configuration for mongo myMongo does not contain a library')
           end
-        end # it
-      end # describe update_single_mongo
+        end
+      end
 
       describe 'update two mongo configuration' do
         it 'should update a two Mongo configuration' do
@@ -805,7 +806,7 @@ module LibertyBuildpack::Services
             expected = [s1, s2, s3, s4, s5, s6, s7, s8, s9]
             validate_xml(server_xml, expected)
           end
-        end # it
+        end
 
         it 'should detect wrong mongo config id when updating a two Mongo configuration' do
           Dir.mktmpdir do |root|
@@ -821,7 +822,7 @@ module LibertyBuildpack::Services
             add_fileset(server_xml_doc.root, get_lib_id, get_fileset_id, '${server.config.dir}/lib', 'mongo-2.10.1.jar')
             expect { obj.update(server_xml_doc.root, root, '${server.config.dir}/lib', @driver_jars, 2) }.to raise_error(RuntimeError, 'required mongo configuration for service myMongo is missing')
           end
-        end # it
+        end
 
         it 'should detect wrong mongoDB config id when updating a two Mongo configuration' do
           Dir.mktmpdir do |root|
@@ -837,9 +838,9 @@ module LibertyBuildpack::Services
             add_fileset(server_xml_doc.root, get_lib_id, get_fileset_id, '${server.config.dir}/lib', 'mongo-2.10.1.jar')
             expect { obj.update(server_xml_doc.root, root, '${server.config.dir}/lib', @driver_jars, 2) }.to raise_error(RuntimeError, 'required mongoDB configuration for service myMongo is missing')
           end
-        end # it
-      end # describe update_two_mongo_configuration
+        end
+      end
 
     end
   end
-end # module
+end

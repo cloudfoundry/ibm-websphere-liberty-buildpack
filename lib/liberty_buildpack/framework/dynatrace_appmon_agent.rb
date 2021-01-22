@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2016
 #
@@ -99,19 +100,19 @@ module LibertyBuildpack::Framework
     private
 
     # Name of the dynatrace service
-    DT_SERVICE_NAME = 'dynatrace'.freeze
+    DT_SERVICE_NAME = 'dynatrace'
 
     # Name of the default dynatrace profile
-    DT_DEFAULT_PROFILE_NAME = 'Monitoring'.freeze
+    DT_DEFAULT_PROFILE_NAME = 'Monitoring'
 
     # VCAP_SERVICES keys
-    CREDENTIALS_KEY = 'credentials'.freeze
-    OPTIONS_KEY = 'options'.freeze
-    PROFILE_KEY = 'profile'.freeze
-    SERVER_KEY = 'server'.freeze
+    CREDENTIALS_KEY = 'credentials'
+    OPTIONS_KEY = 'options'
+    PROFILE_KEY = 'profile'
+    SERVER_KEY = 'server'
 
     # dynatrace's directory of artifacts in the droplet
-    DT_HOME_DIR = '.dynatrace_appmon_agent'.freeze
+    DT_HOME_DIR = '.dynatrace_appmon_agent'
 
     #------------------------------------------------------------------------------------------
     # Determines the system architecture.
@@ -136,7 +137,7 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def download_and_install_agent(dt_home)
       LibertyBuildpack::Util.download_zip(@version, @uri, 'Dynatrace Appmon Agent', dt_home)
-    rescue => e
+    rescue StandardError => e
       raise "Unable to download the Dynatrace Appmon Agent jar. Ensure that the agent jar at #{@uri} is available and accessible. #{e.message}"
     end
 
@@ -172,10 +173,9 @@ module LibertyBuildpack::Framework
     def get_service_options
       begin
         @dt_service = @services.find_service(DT_SERVICE_NAME)
-        dt_profile_name = vcap_dt_profile ? vcap_dt_profile : DT_DEFAULT_PROFILE_NAME
-        if vcap_dt_server.nil?
-          raise 'Dynatrace Appmon server is not set, server must be set in service credentials.'
-        end
+        dt_profile_name = vcap_dt_profile || DT_DEFAULT_PROFILE_NAME
+        raise 'Dynatrace Appmon server is not set, server must be set in service credentials.' if vcap_dt_server.nil?
+
         @dt_options = "name=#{dt_profile_name},server=#{vcap_dt_server}"
 
         if @dt_service.key?(OPTIONS_KEY) && @dt_service[OPTIONS_KEY].any?
@@ -183,7 +183,7 @@ module LibertyBuildpack::Framework
             @dt_options << ",#{k}=#{v}"
           end
         end
-      rescue => e
+      rescue StandardError => e
         @logger.error("Unable to process the service options for the Dynatrace Appmon Agent framework. #{e.message}")
       end
 
@@ -210,7 +210,7 @@ module LibertyBuildpack::Framework
     def process_config
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
-      rescue => e
+      rescue StandardError => e
         @logger.error("Unable to process the configuration for the Dynatrace Appmon Agent framework. #{e.message}")
       end
 
