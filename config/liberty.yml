@@ -16,7 +16,7 @@
 # Configuration for the Liberty container
 ---
 repository_root: "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/"
-version: 20.+
+version: 21.+
 type: webProfile7
 minify: false
 app_state: true

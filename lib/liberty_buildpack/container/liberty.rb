@@ -104,6 +104,7 @@ module LibertyBuildpack::Container
       overlay_java
       set_liberty_system_properties
       set_jdk_memory_configuration
+      populate_class_cache
     end
 
     # Creates the command to run the Liberty application.
@@ -459,7 +460,6 @@ module LibertyBuildpack::Container
 
     def update_http_endpoint(server_xml_doc)
       endpoints = REXML::XPath.match(server_xml_doc, '/server/httpEndpoint')
-
       if endpoints.empty?
         endpoint = REXML::Element.new('httpEndpoint', server_xml_doc.root)
         endpoint.add_attribute('id', 'defaultHttpEndpoint')
@@ -473,7 +473,11 @@ module LibertyBuildpack::Container
         endpoint.add_attribute('host', '*')
       end
       endpoint.add_attribute('httpPort', "${#{KEY_HTTP_PORT}}")
-      endpoint.add_element('compression')
+
+      compression = REXML::XPath.match(server_xml_doc, '/server/compression')
+      if compression.empty?
+        endpoint.add_element('compression') if endpoint.elements['compression'].nil?
+      end
       endpoint.delete_attribute('httpsPort')
     end
 
@@ -645,6 +649,16 @@ module LibertyBuildpack::Container
         # install any services client jars required.
         @services_manager.install_client_jars(@liberty_components_and_uris, current_server_dir)
       end
+    end
+
+    def populate_class_cache
+      print '-----> Populating class cache ... '
+      populating_start_time = Time.now
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server start #{server_name} >null"
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server stop #{server_name} >null"
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server start #{server_name} >null"
+      system "export PATH=$PATH:#{liberty_home}/../.java/jre/bin && #{liberty_home}/bin/server stop #{server_name} >null"
+      puts "(#{(Time.now - populating_start_time).duration})"
     end
 
     # is the given liberty component required ? It may be non-optional, in which
