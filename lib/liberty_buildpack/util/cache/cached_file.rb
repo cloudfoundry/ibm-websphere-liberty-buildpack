@@ -26,6 +26,7 @@ module LibertyBuildpack
       #
       # Note: this class is thread-safe, however access to the cached files is not
       class CachedFile
+        include LibertyBuildpack::Util
 
         # Creates an instance of the cached file.  Files created and expected by this class will all be rooted at
         # +cache_root+.
