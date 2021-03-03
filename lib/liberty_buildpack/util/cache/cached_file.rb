@@ -35,7 +35,7 @@ module LibertyBuildpack
         # @param [String] uri a uri which uniquely identifies the file in the cache
         # @param [Boolean] mutable whether the cached file should be mutable
         def initialize(cache_root, uri, mutable)
-          if @uri.include? '.bin'
+          if uri.include? '.bin'
             puts "Yeah IBM, it's a binary"
             bin_var = '.bin'
           else
