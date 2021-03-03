@@ -88,7 +88,6 @@ module LibertyBuildpack::Jre
       end
       LibertyBuildpack::Util::Cache::ApplicationCache.new.get(@uri) do |file| # TODO: Use global cache
         puts "(#{(Time.now - download_start_time).duration})"
-        puts "File Path: #{file.path}"
         expand file
       end
       copy_killjava_script
