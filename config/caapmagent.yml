@@ -16,5 +16,5 @@
 # Service configuration
 ---
 version: +
-repository_root: https://ca.bintray.com/websphere
+repository_root: https://packages.broadcom.com/artifactory/websphere
 default_agent_name: $(ruby -e "require 'json' ; puts JSON.parse(ENV['VCAP_APPLICATION'])['application_name']")
