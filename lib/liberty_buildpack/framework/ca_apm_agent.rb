@@ -87,6 +87,7 @@ module LibertyBuildpack::Framework
       agent_name @java_opts, credentials
       add_url @java_opts, credentials
       agent_manager_credential @java_opts, credentials
+      agent_startup_delay_credential @java_opts, credentials
 
       @java_opts
     end
@@ -170,6 +171,12 @@ module LibertyBuildpack::Framework
     def agent_manager_credential(java_opts, credentials)
       credential = credentials['agent_manager_credential']
       java_opts << "-DagentManager.credential=#{credential}" if credential
+    end
+
+    def agent_startup_delay_credential(java_opts, credentials)
+      java_opts << "-Dcom.wily.introscope.agent.startup.mode=neo"
+      credential = credentials['com_wily_introscope_agent_startup_delay']
+      java_opts << "-Dcom.wily.introscope.agent.startup.delay=#{credential}" if credential
     end
 
     def download_and_install_agent(home)
