@@ -174,7 +174,7 @@ module LibertyBuildpack::Framework
     end
 
     def agent_startup_delay_credential(java_opts, credentials)
-      java_opts << "-Dcom.wily.introscope.agent.startup.mode=neo"
+      java_opts << '-Dcom.wily.introscope.agent.startup.mode=neo'
       credential = credentials['com_wily_introscope_agent_startup_delay']
       java_opts << "-Dcom.wily.introscope.agent.startup.delay=#{credential}" if credential
     end
