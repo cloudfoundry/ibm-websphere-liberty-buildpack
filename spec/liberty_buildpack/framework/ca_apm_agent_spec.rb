@@ -145,7 +145,7 @@ module LibertyBuildpack::Framework
                                         'credentials' => { 'agent_manager_url' => 'localhost:5001' } }] } do
         java_opts = released
         expect(java_opts).not_to eq(nil)
-        expect(java_opts.size).to eq(9)
+        expect(java_opts.size).to eq(10)
       end
 
       it 'should return java command line options for the introscope service',
