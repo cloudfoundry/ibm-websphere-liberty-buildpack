@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'digest'
 require 'fileutils'
 require 'liberty_buildpack/util/cache'
 
@@ -26,7 +25,6 @@ module LibertyBuildpack
       #
       # Note: this class is thread-safe, however access to the cached files is not
       class CachedFile
-        include LibertyBuildpack::Util
 
         # Creates an instance of the cached file.  Files created and expected by this class will all be rooted at
         # +cache_root+.
@@ -35,14 +33,8 @@ module LibertyBuildpack
         # @param [String] uri a uri which uniquely identifies the file in the cache
         # @param [Boolean] mutable whether the cached file should be mutable
         def initialize(cache_root, uri, mutable)
-          if uri.include? '.bin'
-            bin_var = '.bin'
-          else
-            bin_var = ''
-          end
-
-          key            = Digest::SHA256.hexdigest uri.sanitize_uri
-          @cached        = cache_root + "#{key}#{bin_var}.cached"
+          key            = URI.escape(uri.sanitize_uri, ':/&')
+          @cached        = cache_root + "#{key}.cached"
           @etag          = cache_root + "#{key}.etag"
           @last_modified = cache_root + "#{key}.last_modified"
           @mutable       = mutable
