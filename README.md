@@ -2,7 +2,7 @@
 
 The `liberty-buildpack` is a [Cloud Foundry][] Buildpack for running applications on IBM's WebSphere Application Server [Liberty Profile][].
 
-## Usage
+## Usage 
 To deploy applications using the IBM WebSphere Application Server Liberty Buildpack, you are required to accept the IBM Liberty license and IBM JRE license by following the instructions below:
 
 1. Read the current IBM [Liberty-License][] and the current IBM [JVM-License][].
