@@ -90,7 +90,7 @@ describe MemorySize do
   end
 
   it 'should fail when a numeric is subtracted from a memory size' do
-    expect { one_meg - 1 }.to raise_error(/Invalid parameter: instance of Fixnum is not a MemorySize/)
+    expect { one_meg - 1 }.to raise_error(/Invalid parameter: instance of Integer is not a MemorySize/)
   end
 
   it 'should add memory values correctly' do
@@ -98,7 +98,7 @@ describe MemorySize do
   end
 
   it 'should fail when a numeric is added to a memory size' do
-    expect { one_meg + 1 }.to raise_error(/Invalid parameter: instance of Fixnum is not a MemorySize/)
+    expect { one_meg + 1 }.to raise_error(/Invalid parameter: instance of Integer is not a MemorySize/)
   end
 
   it 'should divide a memory size by a numeric correctly' do
