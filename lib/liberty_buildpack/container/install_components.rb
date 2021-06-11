@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -41,6 +42,7 @@ module LibertyBuildpack::Container
       return if url.nil? == true
       # if another service has already added the url to the list, ignore.
       return if @pending.key?(url)
+
       @zips.push([url, directory])
       @pending[url] = 1
     end
@@ -57,8 +59,9 @@ module LibertyBuildpack::Container
       return if url.nil? == true
       # if another service has already added the url to the list, ignore.
       return if @pending.key?(url)
+
       @esas.push [url, options_string]
       @pending[url] = 1
     end
-  end # class
+  end
 end

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -43,9 +44,9 @@ end
 
 def log_directory
   if ENV['DYNO'].nil?
-    return '../../../../../logs'
+    '../../../../../logs'
   else
-    return '../../../../logs'
+    '../../../../logs'
   end
 end
 

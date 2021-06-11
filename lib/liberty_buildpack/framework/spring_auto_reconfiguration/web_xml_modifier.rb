@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -65,24 +66,24 @@ module LibertyBuildpack::Framework
 
     private
 
-    CONTEXT_INITIALIZER_ADDITIONAL = %w(
+    CONTEXT_INITIALIZER_ADDITIONAL = %w[
       org.cloudfoundry.reconfiguration.spring.CloudProfileApplicationContextInitializer
       org.cloudfoundry.reconfiguration.spring.CloudPropertySourceApplicationContextInitializer
       org.cloudfoundry.reconfiguration.spring.CloudAutoReconfigurationApplicationContextInitializer
-    ).freeze
+    ].freeze
 
-    CONTEXT_INITIALIZER_CLASSES = 'contextInitializerClasses'.freeze
+    CONTEXT_INITIALIZER_CLASSES = 'contextInitializerClasses'
 
-    CONTEXT_LOADER_LISTENER = 'ContextLoaderListener'.freeze
+    CONTEXT_LOADER_LISTENER = 'ContextLoaderListener'
 
-    DISPATCHER_SERVLET = 'DispatcherServlet'.freeze
+    DISPATCHER_SERVLET = 'DispatcherServlet'
 
     def augment(root, param_type)
       classes_string = xpath(root, "#{param_type}[param-name[contains(text(), '#{CONTEXT_INITIALIZER_CLASSES}')]]/param-value/text()").first
-      classes_string = create_param(root, param_type, CONTEXT_INITIALIZER_CLASSES, '') unless classes_string
+      classes_string ||= create_param(root, param_type, CONTEXT_INITIALIZER_CLASSES, '')
 
       classes = classes_string.value.strip.split(/[,;\s]+/)
-      classes = classes.concat CONTEXT_INITIALIZER_ADDITIONAL
+      classes.concat CONTEXT_INITIALIZER_ADDITIONAL
 
       classes_string.value = classes.join(',')
     end

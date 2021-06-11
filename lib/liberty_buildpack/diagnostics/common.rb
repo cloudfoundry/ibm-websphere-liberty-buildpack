@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -19,10 +20,10 @@ require 'liberty_buildpack/diagnostics'
 # Common constants and methods for the Diagnostics module.
 module LibertyBuildpack::Diagnostics
   # The directory that diagnostics are written into
-  DIAGNOSTICS_DIRECTORY = '.buildpack-diagnostics'.freeze
+  DIAGNOSTICS_DIRECTORY = '.buildpack-diagnostics'
 
   # The name of the buildpack diagnostic log file.
-  LOG_FILE_NAME = 'buildpack.log'.freeze
+  LOG_FILE_NAME = 'buildpack.log'
 
   # Returns the full path of the buildpack diagnostics directory.
   #

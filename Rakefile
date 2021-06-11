@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -39,10 +41,10 @@ task :check_api_doc do
 end
 
 require 'rake/clean'
-CLEAN.include %w(.yardoc coverage)
-CLOBBER.include %w(doc pkg)
+CLEAN.include %w[.yardoc coverage]
+CLOBBER.include %w[doc pkg]
 
-task default: [:rubocop, :check_api_doc, :yard, :spec]
+task default: %i[rubocop check_api_doc yard spec]
 
 desc 'Package buildpack together with admin cache'
 task :package, [:zipfile, :hosts, :version] do |_t, args|
@@ -60,10 +62,11 @@ task :package, [:zipfile, :hosts, :version] do |_t, args|
     puts 'The output file already exists. Change the output location.'
     exit 1
   end
-  if args.hosts == '*'
+  case args.hosts
+  when '*'
     cache_hosts = nil
     puts 'Caching all resources'
-  elsif args.hosts == '-'
+  when '-'
     cache_hosts = []
     puts 'Caching disabled'
   else
@@ -83,11 +86,13 @@ task :package, [:zipfile, :hosts, :version] do |_t, args|
     dest = File.join(root, basename)
 
     # Create version.yml when :version is specified
-    File.open(File.join(dest, 'config', 'version.yml'), 'w') do |file|
-      file.puts "version: #{args.version}"
-      file.puts "remote: ''"
-      file.puts "hash: ''"
-    end unless args.version.nil?
+    unless args.version.nil?
+      File.open(File.join(dest, 'config', 'version.yml'), 'w') do |file|
+        file.puts "version: #{args.version}"
+        file.puts "remote: ''"
+        file.puts "hash: ''"
+      end
+    end
 
     ENV['JBP_LOG_LEVEL'] = 'DEBUG' if ENV['JBP_LOG_LEVEL'].nil?
 

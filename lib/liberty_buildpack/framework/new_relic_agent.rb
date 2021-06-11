@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -102,17 +103,17 @@ module LibertyBuildpack::Framework
     private
 
     # Name of the new relic service
-    NR_SERVICE_NAME = 'newrelic'.freeze
+    NR_SERVICE_NAME = 'newrelic'
 
     # VCAP_SERVICES keys
-    LICENSE_KEY = 'licenseKey'.freeze
-    CREDENTIALS_KEY = 'credentials'.freeze
+    LICENSE_KEY = 'licenseKey'
+    CREDENTIALS_KEY = 'credentials'
 
     # VCAP_APPLICATION keys
-    APPLICATION_NAME_KEY = 'application_name'.freeze
+    APPLICATION_NAME_KEY = 'application_name'
 
     # new relic's directory of artifacts in the droplet
-    NR_HOME_DIR = '.new_relic_agent'.freeze
+    NR_HOME_DIR = '.new_relic_agent'
 
     def jar_name
       "new-relic-#{@version}.jar"
@@ -166,7 +167,7 @@ module LibertyBuildpack::Framework
     def process_config
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
-      rescue => e
+      rescue StandardError => e
         @logger.error("Unable to process the configuration for the New Relic Agent framework. #{e.message}")
       end
 
@@ -180,7 +181,7 @@ module LibertyBuildpack::Framework
       agent_resource = File.join('..', '..', '..', 'resources', 'new_relic_agent').freeze
       agent_resource_path = File.expand_path(agent_resource, File.dirname(__FILE__))
       # only grab the files in the New Relic Agent template
-      FileUtils.cp_r(agent_resource_path + '/.', target_dir)
+      FileUtils.cp_r("#{agent_resource_path}/.", target_dir)
     end
 
     #-----------------------------------------------------------------------------------------
@@ -188,7 +189,7 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def download_agent(version_desc, uri_source, target_jar_name, target_dir)
       LibertyBuildpack::Util.download(version_desc, uri_source, 'New Relic Agent', target_jar_name, target_dir)
-    rescue => e
+    rescue StandardError => e
       raise "Unable to download the New Relic Agent jar. Ensure that the agent jar at #{uri_source} is available and accessible. #{e.message}"
     end
   end

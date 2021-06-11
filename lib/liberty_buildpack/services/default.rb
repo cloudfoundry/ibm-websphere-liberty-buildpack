@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014
 #
@@ -62,8 +63,7 @@ module LibertyBuildpack::Services
     #
     # @param [Set] features - the Set to add the required features to
     #---------------------------------------------
-    def get_required_features(features)
-    end
+    def get_required_features(features); end
 
     #----------------------------------------------------------------------------------------
     # Use the configured client_jars regular expression to determine which client jars need to be downloaded for this service to function properly
@@ -95,8 +95,7 @@ module LibertyBuildpack::Services
     # @param available_jars - an array containing the names of all installed client driver jars.
     # @raise if a problem was discovered (incoherent or inconsistent existing configuration, for example)
     #------------------------------------------------------------------------------------
-    def create(doc, server_dir, driver_dir, available_jars)
-    end
+    def create(doc, server_dir, driver_dir, available_jars); end
 
     #------------------------------------------------------------------------------------
     # Method to create/update a datasource stanza (and all related sub-artifacts such as the JDBCDriver) in server.xml.
@@ -108,7 +107,6 @@ module LibertyBuildpack::Services
     # @param number_instances - the number of service instances that update the same service-specific server.xml stanzas
     # @raise if a problem was discovered (incoherent or inconsistent existing configuration, for example)
     #------------------------------------------------------------------------------------
-    def update(doc, server_dir, driver_dir, available_jars, number_instances)
-    end
+    def update(doc, server_dir, driver_dir, available_jars, number_instances); end
   end
 end

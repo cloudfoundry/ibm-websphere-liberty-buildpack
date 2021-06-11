@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2015
 #
@@ -16,7 +17,7 @@
 
 module Constants
 
-  DEFAULT_USER_AGENT_BASE = 'UA-IBM-WebSphere-Liberty-Buildpack'.freeze
-  DEFAULT_USER_AGENT = "#{DEFAULT_USER_AGENT_BASE}-Default".freeze
+  DEFAULT_USER_AGENT_BASE = 'UA-IBM-WebSphere-Liberty-Buildpack'
+  DEFAULT_USER_AGENT = "#{DEFAULT_USER_AGENT_BASE}-Default"
 
 end

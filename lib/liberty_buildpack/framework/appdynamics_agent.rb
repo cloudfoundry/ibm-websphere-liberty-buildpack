@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2016
 #
@@ -106,10 +107,10 @@ module LibertyBuildpack::Framework
     private
 
     # Name of the Appdynamics service
-    FILTER = /app[-]?dynamics/
+    FILTER = /app-?dynamics/
 
     # Appdynamics's directory of artifacts in the droplet
-    APPDYNAMICS_HOME_DIR = '.appdynamics_agent'.freeze
+    APPDYNAMICS_HOME_DIR = '.appdynamics_agent'
 
     #-----------------------------------------------------------------------------------------
     # Determines if the Appdynamics service is included in VCAP_SERVICES based on whether the
@@ -158,6 +159,7 @@ module LibertyBuildpack::Framework
     def host_name(java_opts, credentials)
       host_name = credentials['host-name']
       raise "'host-name' credential must be set" unless host_name
+
       java_opts << "-Dappdynamics.controller.hostName=#{host_name}"
     end
 
@@ -194,7 +196,7 @@ module LibertyBuildpack::Framework
     def process_config
       begin
         @version, @uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(@configuration)
-      rescue => e
+      rescue StandardError => e
         @logger.error("Unable to process the configuration for the AppDynamics Agent framework. #{e.message}")
       end
 
@@ -209,7 +211,7 @@ module LibertyBuildpack::Framework
       agent_resource_path = File.expand_path(agent_resource, File.dirname(__FILE__))
 
       # only grab the files in the Appdynamics Agent template
-      FileUtils.cp_r(agent_resource_path + '/.', target_dir)
+      FileUtils.cp_r("#{agent_resource_path}/.", target_dir)
     end
 
     #-----------------------------------------------------------------------------------------
@@ -217,7 +219,7 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def download_and_install_agent(home)
       LibertyBuildpack::Util.download_zip(@version, @uri, 'AppDynamics Agent', home)
-    rescue => e
+    rescue StandardError => e
       raise "Unable to download the AppDynamics Agent zip. Ensure that the agent zip at #{@uri} is available and accessible. #{e.message}"
     end
   end

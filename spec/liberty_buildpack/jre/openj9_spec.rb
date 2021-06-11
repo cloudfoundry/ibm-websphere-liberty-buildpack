@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2019
 #
@@ -40,14 +41,13 @@ module LibertyBuildpack::Jre
 
     def openj9(root, configuration = default_configuration)
       stubs
-      component = OpenJ9.new(
+      OpenJ9.new(
         app_dir: root,
         java_home: '',
         java_opts: [],
         configuration: configuration,
         jvm_type: 'openj9'
       )
-      component
     end
 
     it 'adds the JAVA_HOME to java_home' do
@@ -116,7 +116,7 @@ module LibertyBuildpack::Jre
         end
       end
 
-    end # end of compile shared tests
+    end
 
     describe 'release' do
 

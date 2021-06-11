@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2017, 2019
 #
@@ -125,11 +126,11 @@ module LibertyBuildpack::Services
 
     private
 
-    CRT_DIRECTORY = '.compose_mongo'.freeze
+    CRT_DIRECTORY = '.compose_mongo'
 
-    CRT_FILE = 'cacert.pem'.freeze
+    CRT_FILE = 'cacert.pem'
 
-    KEYSTORE_FILE = 'compose_keystore.jks'.freeze
+    KEYSTORE_FILE = 'compose_keystore.jks'
 
     def keystore_password
       'liberty-buildpack-keystore-password'

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -46,7 +47,7 @@ module LibertyBuildpack
 
           index = index(repository_root)
           index.find_item version
-        rescue => e
+        rescue StandardError => e
           if component_name.nil?
             raise e
           else
@@ -56,9 +57,9 @@ module LibertyBuildpack
 
         private
 
-        KEY_REPOSITORY_ROOT = 'repository_root'.freeze
+        KEY_REPOSITORY_ROOT = 'repository_root'
 
-        KEY_VERSION = 'version'.freeze
+        KEY_VERSION = 'version'
 
         private_constant :KEY_REPOSITORY_ROOT, :KEY_VERSION
 
@@ -67,9 +68,7 @@ module LibertyBuildpack
         end
 
         def repository_root(configuration)
-          unless configuration.key? KEY_REPOSITORY_ROOT
-            raise "A repository root must be specified as a key-value pair of '#{KEY_REPOSITORY_ROOT}'' to the URI of the repository."
-          end
+          raise "A repository root must be specified as a key-value pair of '#{KEY_REPOSITORY_ROOT}'' to the URI of the repository." unless configuration.key? KEY_REPOSITORY_ROOT
 
           configuration[KEY_REPOSITORY_ROOT]
         end

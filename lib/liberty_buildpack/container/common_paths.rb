@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015, 2016
 #
@@ -49,7 +50,7 @@ module LibertyBuildpack::Container
       # set the default app's root directory according to the environment unless an application root is provided
       unless app_dir
         if !Heroku.heroku?
-          app_dir = 'app'.freeze
+          app_dir = 'app'
         else
           app_dir = CURRENT_DIR
         end
@@ -113,21 +114,19 @@ module LibertyBuildpack::Container
     # Validates if a pathname is valid and considred relative.  When valid, the pathname will be converted to its
     # symbolic representation of a relative path. Ex: a relative_pathname of ./something/dir will return ../..
     def valid_relative_string(relative_pathname)
-      if relative_pathname.nil? || relative_pathname.empty? || (relative_pathname.include? ' ')
-        raise 'relative_location provided to common_paths must be nonempty and without spaces'
-      end
+      raise 'relative_location provided to common_paths must be nonempty and without spaces' if relative_pathname.nil? || relative_pathname.empty? || (relative_pathname.include? ' ')
 
       begin
         Pathname.new(CURRENT_DIR).relative_path_from(Pathname.new(relative_pathname)).to_s unless relative_pathname.eql? CURRENT_DIR
-      rescue
+      rescue StandardError
         raise 'paths provided to CommonPaths must be a relative, subdirectory, and a valid Pathname'
       end
     end
 
-    CURRENT_DIR = '.'.freeze
+    CURRENT_DIR = '.'
     DIAGNOSTICS_DIRECTORY_NAME = LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY.freeze
-    LOG_DIRECTORY_NAME = 'logs'.freeze
-    DUMP_DIRECTORY_NAME = 'dumps'.freeze
+    LOG_DIRECTORY_NAME = 'logs'
+    DUMP_DIRECTORY_NAME = 'dumps'
 
   end
 

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015, 2016
 #
@@ -31,6 +32,7 @@ module LibertyBuildpack
         def initialize
           application_cache_directory = ARGV[1]
           raise 'Application cache directory is undefined' if application_cache_directory.nil?
+
           super(Pathname.new(application_cache_directory), CACHED_RESOURCES_DIRECTORY)
         end
 

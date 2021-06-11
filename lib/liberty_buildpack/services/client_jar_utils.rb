@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -30,6 +31,7 @@ module LibertyBuildpack::Services
     #--------------------------------------------------
     def self.jar_installed?(files, reg_ex)
       return false if files.length == 0
+
       # operate on the base names
       files.each do |file|
         base_name = File.basename(file)
@@ -74,8 +76,10 @@ module LibertyBuildpack::Services
       # verify that the library and fileset don't already exist
       libs = doc.elements.to_a("//library[@id='#{lib_id}']")
       raise "create_global_library: Library with id #{lib_id} already exists" if libs.size != 0
+
       filesets = doc.elements.to_a("//fileset[@id='#{fileset_id}']")
       raise "create_global_library: fileset with id #{fileset_id} already exists" if filesets.size != 0
+
       # puts "create_lib with lib id of #{lib_id} and fileset_id of #{fileset_id} and includes of #{@client_jars_string}"
       # create the library and fileset. Library gets created at global scope and fileset is nested within it.
       library = REXML::Element.new('library', doc.root)
@@ -109,6 +113,7 @@ module LibertyBuildpack::Services
       # Tolerate unexpected fileset ids. We could also add code here to tolerate files.
       filesets = ClientJarUtils.find_all_filests(doc, library)
       raise "no filesets found for service #{name}" if filesets.empty?
+
       updated = ClientJarUtils.update_fileset(filesets, lib_dir, client_jars_string)
       # If no fileset was found, we could throw an exception or we can insert a new fileset. DB2 is a degenerate condition. For DB2, the user should specify both the db2jcc4.jar
       # and the license jar, but in the BlueMix environment they can get away without specifying the license jar. In that case the update method will not find the fileset
@@ -127,6 +132,7 @@ module LibertyBuildpack::Services
     #------------------------------------------
     def self.client_jars_string(jars)
       return nil if jars.nil?
+
       # need to generate a single white-space separated string containing the driver jar names. Construct in sorted order
       # so we can do a simple "string compare" later on when looking to see if we need to update.
       sorted = jars.sort
@@ -197,6 +203,7 @@ module LibertyBuildpack::Services
         jar_string = fileset.attribute('includes').value unless fileset.attribute('includes').nil?
         # We need to find out if this fileset's include contains the same entries as the client_jar_string. client_jar_string is sorted, but the entry may not be.
         next if jar_string.nil?
+
         # the includes can either be comma-separated or whitespace-separated.
         if jar_string.include?(',')
           jars = jar_string.split(',')
@@ -204,8 +211,10 @@ module LibertyBuildpack::Services
           jars = jar_string.split
         end
         next if jars.empty?
+
         sorted_jar_string = ClientJarUtils.client_jars_string(jars)
         next unless sorted_jar_string == client_jar_string
+
         # update the dir attribute, overwrite if it already exists.
         fileset.add_attribute('dir', lib_dir)
         updated = true

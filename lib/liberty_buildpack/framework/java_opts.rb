@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -62,15 +63,17 @@ module LibertyBuildpack::Framework
 
     private
 
-    CONFIGURATION_PROPERTY = 'java_opts'.freeze
+    CONFIGURATION_PROPERTY = 'java_opts'
 
-    ENVIRONMENT_PROPERTY = 'from_environment'.freeze
+    ENVIRONMENT_PROPERTY = 'from_environment'
 
-    ENVIRONMENT_VARIABLE = 'JAVA_OPTS'.freeze
+    ENVIRONMENT_VARIABLE = 'JAVA_OPTS'
 
     def memory_option?(option)
-      option =~ /-Xms/ || option =~ /-Xmx/ || option =~ /-XX:MaxMetaspaceSize/ || option =~ /-XX:MaxPermSize/ ||
-        option =~ /-Xss/ || option =~ /-XX:MetaspaceSize/ || option =~ /-XX:PermSize/ if !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
+      if !@jvm_type.nil? && 'openjdk'.casecmp(@jvm_type) == 0
+        option =~ /-Xms/ || option =~ /-Xmx/ || option =~ /-XX:MaxMetaspaceSize/ || option =~ /-XX:MaxPermSize/ ||
+          option =~ /-Xss/ || option =~ /-XX:MetaspaceSize/ || option =~ /-XX:PermSize/
+      end
     end
 
     def parsed_java_opts
@@ -79,7 +82,7 @@ module LibertyBuildpack::Framework
       parsed_java_opts.concat @configuration[CONFIGURATION_PROPERTY].shellsplit if supports_configuration?
       parsed_java_opts.concat @environment[ENVIRONMENT_VARIABLE].shellsplit if supports_environment?
 
-      parsed_java_opts.map { |java_opt| java_opt.gsub(/([\s])/, '\\\\\1') }
+      parsed_java_opts.map { |java_opt| java_opt.gsub(/(\s)/, '\\\\\1') }
     end
 
     def supports_configuration?

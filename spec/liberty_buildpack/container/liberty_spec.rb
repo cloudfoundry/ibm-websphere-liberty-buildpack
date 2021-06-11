@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2019
 #
@@ -26,10 +27,10 @@ module LibertyBuildpack::Container
     include_context 'logging_helper'
 
     LIBERTY_VERSION = LibertyBuildpack::Util::TokenizedVersion.new('8.5.5')
-    LIBERTY_SINGLE_DOWNLOAD_URI = 'test-liberty-uri.tar.gz'.freeze # end of URI (here ".tar.gz") is significant in liberty container code
-    LIBERTY_WEBPROFILE7_DOWNLOAD_URI = 'test-liberty-webProfile7.tar.gz'.freeze
+    LIBERTY_SINGLE_DOWNLOAD_URI = 'test-liberty-uri.tar.gz' # end of URI (here ".tar.gz") is significant in liberty container code
+    LIBERTY_WEBPROFILE7_DOWNLOAD_URI = 'test-liberty-webProfile7.tar.gz'
     LIBERTY_DETAILS = [LIBERTY_VERSION, { 'uri' => LIBERTY_SINGLE_DOWNLOAD_URI, 'license' => 'spec/fixtures/license.html', 'webProfile7' => LIBERTY_WEBPROFILE7_DOWNLOAD_URI }].freeze
-    DISABLE_2PC_JAVA_OPT_REGEX = '-Dcom.ibm.tx.jta.disable2PC=true'.freeze
+    DISABLE_2PC_JAVA_OPT_REGEX = '-Dcom.ibm.tx.jta.disable2PC=true'
 
     let(:application_cache) { double('ApplicationCache') }
     let(:component_index) { double('ComponentIndex') }
@@ -62,7 +63,7 @@ module LibertyBuildpack::Container
     end
 
     def set_liberty_fixture(fixture)
-      LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+      LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                   .and_return(LIBERTY_DETAILS)
 
       LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
@@ -72,7 +73,7 @@ module LibertyBuildpack::Container
       application_cache.stub(:get).with(LIBERTY_SINGLE_DOWNLOAD_URI).and_yield(File.open(fixture))
     end
 
-    def check_default_config(server_xml_file, expected_type, expected_context_root, expected_features, expected_implicit_cdi = 'false') # rubocop:disable MethodLength
+    def check_default_config(server_xml_file, expected_type, expected_context_root, expected_features, expected_implicit_cdi = 'false') # rubocop:disable Metrics/MethodLength
       expect(File.exist?(server_xml_file)).to eq(true)
 
       server_xml_doc = LibertyBuildpack::Util::XmlUtils.read_xml_file(server_xml_file)
@@ -136,7 +137,7 @@ module LibertyBuildpack::Container
 
     describe 'detect' do
       it 'should detect WEB-INF' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
           app_dir: 'spec/fixtures/container_liberty',
@@ -146,11 +147,11 @@ module LibertyBuildpack::Container
           license_ids: {}
         ).detect
 
-        expect(detected).to eq(%w(WAR liberty-8.5.5))
+        expect(detected).to eq(%w[WAR liberty-8.5.5])
       end
 
       it 'should detect META-INF' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
           app_dir: 'spec/fixtures/container_liberty_ear',
@@ -160,11 +161,11 @@ module LibertyBuildpack::Container
           license_ids: {}
         ).detect
 
-        expect(detected).to eq(%w(EAR liberty-8.5.5))
+        expect(detected).to eq(%w[EAR liberty-8.5.5])
       end
 
       it 'should not detect when WEB-INF is present in a Java main application' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
           app_dir: 'spec/fixtures/container_main_with_web_inf',
@@ -179,7 +180,7 @@ module LibertyBuildpack::Container
       end
 
       it 'should detect server.xml for a zipped up server configuration' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
           app_dir: 'spec/fixtures/container_liberty_server',
@@ -189,11 +190,11 @@ module LibertyBuildpack::Container
           license_ids: {}
         ).detect
 
-        expect(detected).to eq(%w(SVR-PKG liberty-8.5.5))
+        expect(detected).to eq(%w[SVR-PKG liberty-8.5.5])
       end
 
       it 'should detect server.xml for a single server push' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
           app_dir: 'spec/fixtures/container_liberty_single_server',
@@ -203,7 +204,7 @@ module LibertyBuildpack::Container
           license_ids: {}
         ).detect
 
-        expect(detected).to eq(%w(SVR-DIR liberty-8.5.5))
+        expect(detected).to eq(%w[SVR-DIR liberty-8.5.5])
       end
 
       it 'should throw an error when there are multiple server.xmls' do
@@ -229,8 +230,8 @@ module LibertyBuildpack::Container
               license_ids: {}
             ).detect
           end.to raise_error(/Incorrect\ number\ of\ servers\ to\ deploy/)
-        end # mktmpdir
-      end # it
+        end
+      end
 
       it 'should not detect when WEB-INF and META-INF and server.xml are absent' do
         detected = Liberty.new(
@@ -246,7 +247,7 @@ module LibertyBuildpack::Container
       end
 
       it 'should not detect when a jar file is pushed' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_DETAILS)
         detected = Liberty.new(
           app_dir: 'spec/fixtures/jar_file',
@@ -261,7 +262,7 @@ module LibertyBuildpack::Container
       end
 
       it 'should update the common_paths for Heroku provided by the buildpack to include the Liberty container' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_DETAILS)
 
         liberty = Liberty.new(
@@ -280,7 +281,7 @@ module LibertyBuildpack::Container
       end
 
       it 'should update the common_paths for CF default to Liberty path when common_paths is not provided in the context' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_DETAILS)
 
         liberty = Liberty.new(
@@ -301,7 +302,7 @@ module LibertyBuildpack::Container
 
     describe 'compile' do
       it 'should throw an error when a server including binaries was pushed' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_VERSION)
 
         expect do
@@ -396,7 +397,7 @@ module LibertyBuildpack::Container
           set_liberty_fixture('spec/fixtures/wlp-stub.tar.gz')
 
           test_details = [LIBERTY_VERSION, { 'uri' => LIBERTY_SINGLE_DOWNLOAD_URI, 'webProfile7' => LIBERTY_WEBPROFILE7_DOWNLOAD_URI }]
-          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                       .and_return(test_details)
 
           Liberty.new(
@@ -523,7 +524,7 @@ module LibertyBuildpack::Container
 
           LIBERTY_OS_DETAILS = [LIBERTY_VERSION, { 'uri' => 'wlp-developers.jar', 'license' => 'spec/fixtures/license.html' }].freeze
 
-          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                       .and_return(LIBERTY_OS_DETAILS)
 
           LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
@@ -567,7 +568,7 @@ module LibertyBuildpack::Container
 
           LIBERTY_OS_DETAILS = [LIBERTY_VERSION, { 'uri' => 'wlp-developers.jar', 'license' => 'spec/fixtures/license.html' }].freeze
 
-          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                       .and_return(LIBERTY_OS_DETAILS)
 
           LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
@@ -603,7 +604,7 @@ module LibertyBuildpack::Container
 
           LIBERTY_OS_DETAILS = [LIBERTY_VERSION, { 'uri' => 'wlp-developers.jar', 'license' => 'spec/fixtures/license.html' }].freeze
 
-          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                       .and_return(LIBERTY_OS_DETAILS)
 
           LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
@@ -1111,7 +1112,7 @@ module LibertyBuildpack::Container
           root = File.join(root, 'app')
           FileUtils.mkdir_p File.join(root, 'WEB-INF')
 
-          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+          LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                       .and_return(LIBERTY_DETAILS)
 
           LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
@@ -1154,7 +1155,7 @@ module LibertyBuildpack::Container
           expect(server_xml_contents).not_to match(/<include location="variables.xml"\/>/)
           expect(server_xml_contents).to match(/<variable name="port" value="62147"\/>/)
           expect(server_xml_contents).not_to match(/<include location="moreVariables.xml"\/>/)
-          expect(server_xml_contents).to match(%r{<variable name="home" value="\/home\/vcap\/app"\/>})
+          expect(server_xml_contents).to match(%r{<variable name="home" value="/home/vcap/app"/>})
           expect(server_xml_contents).not_to match(/<include location="blogDS.xml"\/>/)
           expect(server_xml_contents).to match(/<jdbcDriver id="derbyEmbedded">/)
           expect(server_xml_contents).to match(/<dataSource id="blogDS" jndiName="jdbc\/blogDS" jdbcDriverRef="derbyEmbedded">/)
@@ -1436,7 +1437,7 @@ module LibertyBuildpack::Container
             context[:license_ids] = { 'IBM_LIBERTY_LICENSE' => '1234-ABCD' }
 
             # create repository stubs
-            LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+            LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                         .and_return(LIBERTY_DETAILS)
 
             LibertyBuildpack::Util::Cache::ApplicationCache.stub(:new).and_return(application_cache)
@@ -1462,7 +1463,7 @@ module LibertyBuildpack::Container
             FileUtils.ln_sf(Pathname.new(File.join(root, 'wlp', 'usr')).relative_path_from(Pathname.new(liberty_home)), liberty_home)
             create_server_xml(File.join(root, 'wlp', 'usr', 'servers', 'anyServer'))
 
-            context[:java_opts] = %w(test-opt-2 test-opt-1)
+            context[:java_opts] = %w[test-opt-2 test-opt-1]
           end
 
           expect(jvm_opts).to match(/test-opt-1/)
@@ -1475,7 +1476,7 @@ module LibertyBuildpack::Container
             FileUtils.mkdir_p File.join(root, '.liberty', 'usr', 'servers', 'defaultServer')
             create_server_xml(root)
             create_staging_log(root)
-            context[:java_opts] = %w(test-opt-2 test-opt-1)
+            context[:java_opts] = %w[test-opt-2 test-opt-1]
           end
 
           expect(server_jvm_opts).to match(/test-opt-1/)
@@ -1494,7 +1495,7 @@ module LibertyBuildpack::Container
             create_jvm_options(File.join(root, 'wlp', 'usr', 'servers', 'defaultServer'), 'provided-opt-1')
             create_staging_log(root)
 
-            context[:java_opts] = %w(test-opt-2 test-opt-1) # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
+            context[:java_opts] = %w[test-opt-2 test-opt-1] # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
           end
 
           expect(jvm_opts).to match(/provided-opt-1/)
@@ -1516,7 +1517,7 @@ module LibertyBuildpack::Container
             create_jvm_options(root, 'provided-opt-1')
             create_staging_log(root)
 
-            context[:java_opts] = %w(test-opt-2 test-opt-1) # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
+            context[:java_opts] = %w[test-opt-2 test-opt-1] # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
           end
 
           expect(server_jvm_opts).to match(/provided-opt-1/)
@@ -1538,7 +1539,7 @@ module LibertyBuildpack::Container
             create_jvm_options(root, 'provided-opt-1')
             create_staging_log(root)
 
-            context[:java_opts] = %w(provided-opt-1) # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
+            context[:java_opts] = %w[provided-opt-1] # default options, normally set by jre (ibmjdk.rb) before container (liberty.rb) code
           end
 
           expect(server_jvm_opts).to match(/provided-opt-1/)
@@ -1565,10 +1566,10 @@ module LibertyBuildpack::Container
           expect(jvm_opts).not_to match(/bad-opt-1/)
         end
 
-      end # end of JVM Options Context
+      end
 
       it 'should return correct execution command for the WEB-INF case' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_VERSION)
 
         Dir.mktmpdir do |root|
@@ -1587,7 +1588,7 @@ module LibertyBuildpack::Container
       end
 
       it 'should return correct execution command for the META-INF case' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_VERSION)
 
         Dir.mktmpdir do |root|
@@ -1606,7 +1607,7 @@ module LibertyBuildpack::Container
       end
 
       it 'should return correct execution command for the zipped-up server case' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_VERSION)
 
         Dir.mktmpdir do |root|
@@ -1624,7 +1625,7 @@ module LibertyBuildpack::Container
       end
 
       it 'should return correct execution command for single-server case' do
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_VERSION)
 
         Dir.mktmpdir do |root|
@@ -1659,7 +1660,7 @@ module LibertyBuildpack::Container
             Liberty.new(
               app_dir: root,
               java_home: test_java_home,
-              java_opts: %w(test-opt-2 test-opt-1),
+              java_opts: %w[test-opt-2 test-opt-1],
               configuration: {},
               license_ids: {}
             ).release
@@ -1787,7 +1788,7 @@ module LibertyBuildpack::Container
 
     describe 'extended features' do
       def run(root, configuration = default_configuration)
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(LIBERTY_DETAILS)
 
         LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)
@@ -1945,7 +1946,7 @@ module LibertyBuildpack::Container
       def run(root, configuration = default_configuration)
         details = [LIBERTY_VERSION, { 'uri' => LIBERTY_SINGLE_DOWNLOAD_URI, 'license' => 'spec/fixtures/license.html', 'javaee7' => 'javaee7.zip' }]
 
-        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(LIBERTY_VERSION) if block }
+        LibertyBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block&.call(LIBERTY_VERSION) }
                                                     .and_return(details)
 
         LibertyBuildpack::Repository::ComponentIndex.stub(:new).and_return(component_index)

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2017, 2019
 #
@@ -16,7 +17,7 @@
 # limitations under the License.
 $stdout.sync = true
 $stderr.sync = true
-$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 
 require 'liberty_buildpack/buildpack'
 build_dir = ARGV[0]

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2018
 #
@@ -32,12 +33,9 @@ def heap_size
 
   if mem_limit < MemorySize.new('512M')
     low_mem_heap_size_ratio = Float(0.5)
-    unless heap_size_ratio != Float(0.75)
-      heap_size_ratio = low_mem_heap_size_ratio
-    end
+    heap_size_ratio = low_mem_heap_size_ratio unless heap_size_ratio != Float(0.75)
   end
-  new_heap_size = mem_limit * heap_size_ratio
-  new_heap_size
+  mem_limit * heap_size_ratio
 end
 
 def valid_float?(str)

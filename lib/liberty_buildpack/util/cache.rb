@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2015
 #
@@ -20,6 +21,6 @@ require 'liberty_buildpack/util'
 module LibertyBuildpack::Util::Cache
 
   # The location to find cached resources in the buildpack
-  CACHED_RESOURCES_DIRECTORY = Pathname.new(File.expand_path('../../../../resources/cache', __FILE__))
+  CACHED_RESOURCES_DIRECTORY = Pathname.new(File.expand_path('../../../resources/cache', __dir__))
 
 end

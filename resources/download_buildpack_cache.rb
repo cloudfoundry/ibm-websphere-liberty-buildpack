@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015, 2018
 #
@@ -29,14 +30,14 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 
 # Utility class to download remote resources into local cache directory
 class BuildpackCache
-  COMP_INDEX_PATH = '/component_index.yml'.freeze
-  INDEX_PATH = '/index.yml'.freeze
-  REPOSITORY_ROOT = 'repository_root'.freeze
-  VERSION = 'version'.freeze
-  DRIVER = 'driver'.freeze
-  URI_KEY = 'uri'.freeze
-  LICENSE_KEY = 'license'.freeze
-  TYPE_KEY = 'type'.freeze
+  COMP_INDEX_PATH = '/component_index.yml'
+  INDEX_PATH = '/index.yml'
+  REPOSITORY_ROOT = 'repository_root'
+  VERSION = 'version'
+  DRIVER = 'driver'
+  URI_KEY = 'uri'
+  LICENSE_KEY = 'license'
+  TYPE_KEY = 'type'
 
   # Creates an instance with the specified logger and locale cache destination
   #
@@ -67,7 +68,7 @@ class BuildpackCache
       # Parse index.yml to see what files it references
       begin
         index = YAML.load_file(index_file)
-      rescue => e
+      rescue StandardError => e
         abort "ERROR: Failed loading #{index_uri}: #{e}"
       end
       candidate = LibertyBuildpack::Util::TokenizedVersion.new(config[VERSION])
@@ -86,11 +87,10 @@ class BuildpackCache
 
   def repository_root(config)
     uri = config[REPOSITORY_ROOT]
-    uri = uri.gsub(/\{default.repository.root\}/, @default_repository_root)
-             .gsub(/\{platform\}/, 'trusty')
-             .gsub(/\{architecture\}/, 'x86_64')
-             .chomp('/')
-    uri
+    uri.gsub(/\{default.repository.root\}/, @default_repository_root)
+       .gsub(/\{platform\}/, 'trusty')
+       .gsub(/\{architecture\}/, 'x86_64')
+       .chomp('/')
   end
 
   def index_path(config)
@@ -112,10 +112,10 @@ class BuildpackCache
   def download_components(file_uri, file)
     begin
       comp_index = YAML.load_file(file)
-    rescue => e
+    rescue StandardError => e
       abort "ERROR: Failed loading #{file_uri}: #{e}"
     end
-    comp_index.values.each do |comp_uri|
+    comp_index.each_value do |comp_uri|
       comp_file = File.join(@cache_dir, filename(comp_uri))
       download(comp_uri, comp_file)
     end
@@ -157,7 +157,7 @@ class BuildpackCache
         end
       end
     end
-  rescue => e
+  rescue StandardError => e
     @logger.error "Unable to download from #{uri}"
     puts e.backtrace
   end
@@ -186,14 +186,13 @@ class BuildpackCache
       @logger.debug "Checking #{file}"
       begin
         config = YAML.load_file(file)
-      rescue => e
+      rescue StandardError => e
         abort "ERROR: Failed loading config #{file}: #{e}"
       end
       next if config.nil?
+
       config = config[DRIVER] || config
-      if repository_configuration?(config) && (File.exist?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(repository_root(config)).host))
-        configs.push(config)
-      end
+      configs.push(config) if repository_configuration?(config) && (File.exist?(index_path(config)) || cached_hosts.nil? || cached_hosts.include?(URI(repository_root(config)).host))
     end
     configs
   end

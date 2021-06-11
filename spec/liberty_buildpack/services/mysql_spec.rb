@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -213,7 +214,7 @@ module LibertyBuildpack::Services
         cleardb = {}
         cleardb['name'] = 'myDatabase'
         cleardb['label'] = 'cleardb'
-        cleardb['tags'] = %w(relational mysql)
+        cleardb['tags'] = %w[relational mysql]
         cleardb_credentials = {}
         cleardb_credentials['name'] = 'myDb'
         cleardb_credentials['hostname'] = 'myHost.com'

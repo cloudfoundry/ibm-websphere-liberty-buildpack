@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2017
 #
@@ -75,6 +76,7 @@ module LibertyBuildpack
           end
 
           raise "Unable to find cached file for #{uri.sanitize_uri}" unless cached_file
+
           cached_file.cached(File::RDONLY | File::BINARY, downloaded, &block)
         end
 
@@ -88,7 +90,7 @@ module LibertyBuildpack
 
         private
 
-        CA_FILE = (Pathname.new(__FILE__).dirname + '../../../../resources/ca_certs.pem').freeze
+        CA_FILE = "#{Pathname.new(__FILE__).dirname}../../../../resources/ca_certs.pem"
 
         FAILURE_LIMIT = 5
 
@@ -201,7 +203,7 @@ module LibertyBuildpack
           cached_file = CachedFile.new @mutable_cache_root, uri, true
           cached      = update URI(uri), cached_file
           [cached_file, cached]
-        rescue => e
+        rescue StandardError => e
           @logger.warn { "Unable to download #{uri.sanitize_uri} into cache #{@mutable_cache_root}: #{e.message}" }
           nil
         end
@@ -261,13 +263,9 @@ module LibertyBuildpack
         def request(uri, cached_file)
           request = Net::HTTP::Get.new(uri.request_uri)
 
-          if cached_file.etag?
-            cached_file.etag(File::RDONLY | File::BINARY) { |f| request['If-None-Match'] = File.read(f) }
-          end
+          cached_file.etag(File::RDONLY | File::BINARY) { |f| request['If-None-Match'] = File.read(f) } if cached_file.etag?
 
-          if cached_file.last_modified?
-            cached_file.last_modified(File::RDONLY | File::BINARY) { |f| request['If-Modified-Since'] = File.read(f) }
-          end
+          cached_file.last_modified(File::RDONLY | File::BINARY) { |f| request['If-Modified-Since'] = File.read(f) } if cached_file.last_modified?
 
           add_user_agent_header(request)
 

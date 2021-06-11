@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -35,15 +36,17 @@ module LibertyBuildpack::Framework
       matches.each do |path|
         ['.ear', '.war', "\/WEB-INF", 'lib'].each do |app_type|
           next unless path.include? app_type
-          if app_type == '.ear' || app_type == '.war'
+
+          case app_type
+          when '.ear', '.war'
             match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
             apps.concat(match)
-          elsif app_type == "\/WEB-INF"
+          when "\/WEB-INF"
             match = path.scan(/.*\w+#{Regexp.quote(app_type)}/)
             match = match.length > 0 ? [match[0].gsub('/WEB-INF', '')] : [app_dir]
             apps.concat(match)
           else
-            match = path.scan(%r{^(.*)\/.*\w+\/})
+            match = path.scan(%r{^(.*)/.*\w+/})
             # capturing group value is array itself
             apps.concat(match[0])
           end
@@ -84,6 +87,7 @@ module LibertyBuildpack::Framework
       apps.each do |app_dir|
         libs = LibertyBuildpack::Container::ContainerUtils.libs(app_dir, lib_dir)
         next unless libs
+
         if LibertyBuildpack::Container::Liberty.web_inf(app_dir)
           app_web_inf_lib = web_inf_lib(app_dir)
           FileUtils.mkdir_p(app_web_inf_lib) unless File.exist?(app_web_inf_lib)

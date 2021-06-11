@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -31,13 +32,13 @@ module LibertyBuildpack::Util
       @app_dir = app_dir
       @properties = {
         'wlp.install.dir' => wlp_install_dir,
-        'wlp.user.dir' => wlp_install_dir + '/usr',
-        'usr.extension.dir' => wlp_install_dir + '/usr/extension',
-        'shared.app.dir' => wlp_install_dir + '/usr/shared/apps',
-        'shared.config.dir' => wlp_install_dir + '/usr/shared/config',
-        'shared.resource.dir' => wlp_install_dir + '/usr/shared/resources',
-        'server.config.dir' => wlp_install_dir + '/usr/servers/' + server_name,
-        'server.output.dir' => wlp_install_dir + '/usr/servers/' + server_name
+        'wlp.user.dir' => "#{wlp_install_dir}/usr",
+        'usr.extension.dir' => "#{wlp_install_dir}/usr/extension",
+        'shared.app.dir' => "#{wlp_install_dir}/usr/shared/apps",
+        'shared.config.dir' => "#{wlp_install_dir}/usr/shared/config",
+        'shared.resource.dir' => "#{wlp_install_dir}/usr/shared/resources",
+        'server.config.dir' => "#{wlp_install_dir}/usr/servers/#{server_name}",
+        'server.output.dir' => "#{wlp_install_dir}/usr/servers/#{server_name}"
       }
       @env = ENV.to_hash
       server_env = File.join(wlp_install_dir, 'usr', 'servers', server_name, 'server.env')
@@ -57,9 +58,8 @@ module LibertyBuildpack::Util
         match
       end
       result = File.expand_path(result, server_xml_dir)
-      unless result.start_with?(@app_dir)
-        raise "Absolute path must start with #{@app_dir} directory: #{result}"
-      end
+      raise "Absolute path must start with #{@app_dir} directory: #{result}" unless result.start_with?(@app_dir)
+
       result
     end
 
@@ -70,10 +70,12 @@ module LibertyBuildpack::Util
         file.each_line do |line|
           line.chomp!
           next if line.empty? || line.start_with?('#')
+
           index = line.index('=')
           next if index.nil?
+
           key = line[0..index - 1]
-          value = line[index + 1..-1]
+          value = line[index + 1..]
           @env[key] = value
         end
       end

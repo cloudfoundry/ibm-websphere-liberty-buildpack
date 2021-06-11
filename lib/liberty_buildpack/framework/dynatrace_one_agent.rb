@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2016, 2017
 #
@@ -97,19 +98,19 @@ module LibertyBuildpack::Framework
     FILTER = /dynatrace/
 
     # VCAP_SERVICES keys
-    CREDENTIALS_KEY = 'credentials'.freeze
-    APITOKEN = 'apitoken'.freeze
-    APIURL = 'apiurl'.freeze
-    ENVIRONMENTID = 'environmentid'.freeze
-    NETWORKZONE = 'networkzone'.freeze
+    CREDENTIALS_KEY = 'credentials'
+    APITOKEN = 'apitoken'
+    APIURL = 'apiurl'
+    ENVIRONMENTID = 'environmentid'
+    NETWORKZONE = 'networkzone'
 
     # dynatrace's directory of artifacts in the droplet
-    DYNATRACE_HOME_DIR = '.dynatrace_one_agent'.freeze
+    DYNATRACE_HOME_DIR = '.dynatrace_one_agent'
 
     # dynatrace ENV variables
-    DT_APPLICATION_ID = 'DT_APPLICATIONID'.freeze
-    DT_LOGSTREAM = 'DT_LOGSTREAM'.freeze
-    DT_NETWORK_ZONE = 'DT_NETWORK_ZONE'.freeze
+    DT_APPLICATION_ID = 'DT_APPLICATIONID'
+    DT_LOGSTREAM = 'DT_LOGSTREAM'
+    DT_NETWORK_ZONE = 'DT_NETWORK_ZONE'
 
     #------------------------------------------------------------------------------------------
     # Searches for a single service which name, label or tag contains 'dynatrace' and
@@ -136,7 +137,7 @@ module LibertyBuildpack::Framework
     #------------------------------------------------------------------------------------------
     def download_and_install_agent(dynatrace_home)
       LibertyBuildpack::Util.download_zip(@version, @uri, 'Dynatrace OneAgent', dynatrace_home)
-    rescue => e
+    rescue StandardError => e
       raise "Unable to download the Dynatrace OneAgent. Ensure that the agent at #{@uri} is available and accessible. #{e.message}"
     end
 
@@ -152,7 +153,7 @@ module LibertyBuildpack::Framework
     def process_config
       begin
         @version, @uri = agent_download_url
-      rescue => e
+      rescue StandardError => e
         @logger.error("Unable to process the configuration for the Dynatrace OneAgent framework. #{e.message}")
       end
 

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -66,13 +67,13 @@ module LibertyBuildpack::Jre
         subject(:detected) { IBMJdk.new(context).detect }
 
         it 'should detect with id of ibmjdk-<version>' do
-          expect(detected).to eq('ibmjdk-' + service_release)
+          expect(detected).to eq("ibmjdk-#{service_release}")
         end
 
         it 'should fail when ConfiguredItem.find_item fails', return_find_item: false, raise_error_message: 'test error' do
           expect { detected }.to raise_error(/IBM\ JRE\ error:\ test\ error/)
         end
-      end # end of detect shared tests
+      end
 
       describe 'compile',
                java_home: '',
@@ -146,7 +147,7 @@ module LibertyBuildpack::Jre
           expect(memory_config).to include('0.75')
         end
 
-      end # end of compile shared tests
+      end
 
       describe 'release',
                java_home: '',
@@ -175,9 +176,9 @@ module LibertyBuildpack::Jre
         it 'should provide troubleshooting info for JVM shutdowns' do
           expect(released).to include("-Xdump:tool:events=systhrow,filter=java/lang/OutOfMemoryError,request=serial+exclusive,exec=./#{LibertyBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY}/#{IBMJdk::KILLJAVA_FILE_NAME}")
         end
-      end # end of release shared tests
+      end
 
-    end # end of shared tests for IBMJDK v7 release
+    end
 
     context 'IBMJDK Service Release 1.7.1' do
       it_behaves_like 'IBMJDK v7', '1.7.1'

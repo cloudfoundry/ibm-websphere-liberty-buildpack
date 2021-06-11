@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2015
 #
@@ -32,10 +33,10 @@ require 'liberty_buildpack/util/cache/yield_file_with_content'
 RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.expect_with :rspec do |c|
-    c.syntax = [:should, :expect]
+    c.syntax = %i[should expect]
   end
   config.mock_with :rspec do |c|
-    c.syntax = [:should, :expect]
+    c.syntax = %i[should expect]
   end
   config.filter_run :focus
   # Ensure a logger exists for any class under test that needs one.

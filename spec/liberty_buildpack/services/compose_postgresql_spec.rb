@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2016
 #
@@ -130,7 +131,7 @@ module LibertyBuildpack::Services
         validate_xml(server_xml, expected_config)
       end
 
-      def check_server_xml_update(root, sm) # rubocop:disable MethodLength
+      def check_server_xml_update(root, sm) # rubocop:disable Metrics/MethodLength
         driver_info = "javax.sql.ConnectionPoolDataSource='org.postgresql.ds.PGConnectionPoolDataSource' javax.sql.XADataSource='org.postgresql.xa.PGXADataSource'"
 
         contents = []

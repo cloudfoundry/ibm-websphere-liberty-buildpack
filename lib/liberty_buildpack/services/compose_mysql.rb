@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2016
 #
@@ -56,7 +57,7 @@ module LibertyBuildpack::Services
       db_var_name = "cloud.services.#{@service_name}.connection.db"
       new_element = REXML::Element.new('variable', element)
       new_element.add_attribute('name', db_var_name)
-      new_element.add_attribute('value', uri.path[1..-1])
+      new_element.add_attribute('value', uri.path[1..])
       @db_name = "${#{db_var_name}}"
 
       @mysql_url = 'jdbc:' + URI::Generic.build(
@@ -86,9 +87,9 @@ module LibertyBuildpack::Services
 
     private
 
-    CRT_DIRECTORY = '.compose_mysql'.freeze
+    CRT_DIRECTORY = '.compose_mysql'
 
-    CRT_FILE = 'cacert.pem'.freeze
+    CRT_FILE = 'cacert.pem'
 
     def save_cert
       cert_dir = File.join(@app_dir, CRT_DIRECTORY)

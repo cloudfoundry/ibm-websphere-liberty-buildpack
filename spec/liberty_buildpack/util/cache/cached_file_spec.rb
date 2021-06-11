@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015
 #
@@ -23,12 +24,12 @@ require 'liberty_buildpack/util/cache/cached_file'
 describe LibertyBuildpack::Util::Cache::CachedFile do
   include_context 'application_helper'
 
-  let(:cache_root) { app_dir + 'cache/root' }
+  let(:cache_root) { "#{app_dir}cache/root" }
 
   let(:file_cache) { described_class.new(app_dir, 'http://foo-uri/', true) }
 
   it 'does not create any files on initialization' do
-    %w(cached etag last_modified).each { |extension| expect(cache_file(extension)).not_to exist }
+    %w[cached etag last_modified].each { |extension| expect(cache_file(extension)).not_to exist }
   end
 
   it 'creates cache_root if mutable' do
@@ -78,13 +79,13 @@ describe LibertyBuildpack::Util::Cache::CachedFile do
     it 'destroys all files' do
       file_cache.destroy
 
-      %w(cached etag last_modified).each { |extension| expect(cache_file(extension)).not_to exist }
+      %w[cached etag last_modified].each { |extension| expect(cache_file(extension)).not_to exist }
     end
 
     it 'does not destroy all files if immutable' do
       described_class.new(app_dir, 'http://foo-uri/', false).destroy
 
-      %w(cached etag last_modified).each { |extension| expect(cache_file(extension)).to exist }
+      %w[cached etag last_modified].each { |extension| expect(cache_file(extension)).to exist }
     end
 
     it 'calls the block with the content of the etag file' do

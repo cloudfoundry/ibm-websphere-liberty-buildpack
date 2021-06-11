@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -127,31 +128,29 @@ module LibertyBuildpack::Container
       driver_jars = Dir[File.join(lib_dir, '*.jar')]
       driver_dir = '${server.config.dir}/lib'
       @services_full_autoconfig.each do |service|
-        begin
-          configured_service_type = (service[INSTANCE].instance_variable_get(:@type) if service[INSTANCE].instance_variable_defined?(:@type)) || 'unknown'
-          configured_service_name = (service[INSTANCE].instance_variable_get(:@service_name) if service[INSTANCE].instance_variable_defined?(:@service_name)) || 'unknown'
-          original_server_xml = document.to_s
-          if create
-            puts "-----> Auto-configuration is creating config for service instance '#{configured_service_name}' of type '#{configured_service_type}'" unless configured_service_type == 'default'
-            service[INSTANCE].create(document.root, server_dir, driver_dir, driver_jars)
-          else
-            puts "-----> Auto-configuration is updating config for service instance '#{configured_service_name}' of type '#{configured_service_type}'" unless configured_service_type == 'default'
-            service[INSTANCE].update(document.root, server_dir, driver_dir, driver_jars, get_number_instances(service[CONFIG]))
-          end
-          modified_server_xml = document.to_s
-          log_diff(original_server_xml, modified_server_xml, configured_service_type, configured_service_name)
-        rescue => e
-          @logger.warn("Failed to update the configuration for a service. Details are  #{e.message}")
+        configured_service_type = (service[INSTANCE].instance_variable_get(:@type) if service[INSTANCE].instance_variable_defined?(:@type)) || 'unknown'
+        configured_service_name = (service[INSTANCE].instance_variable_get(:@service_name) if service[INSTANCE].instance_variable_defined?(:@service_name)) || 'unknown'
+        original_server_xml = document.to_s
+        if create
+          puts "-----> Auto-configuration is creating config for service instance '#{configured_service_name}' of type '#{configured_service_type}'" unless configured_service_type == 'default'
+          service[INSTANCE].create(document.root, server_dir, driver_dir, driver_jars)
+        else
+          puts "-----> Auto-configuration is updating config for service instance '#{configured_service_name}' of type '#{configured_service_type}'" unless configured_service_type == 'default'
+          service[INSTANCE].update(document.root, server_dir, driver_dir, driver_jars, get_number_instances(service[CONFIG]))
         end
+        modified_server_xml = document.to_s
+        log_diff(original_server_xml, modified_server_xml, configured_service_type, configured_service_name)
+      rescue StandardError => e
+        @logger.warn("Failed to update the configuration for a service. Details are  #{e.message}")
       end
     end
 
     private
 
-    SERVICES_CONFIG_DIR = '../services/config/'.freeze
-    CONFIG = 'config'.freeze
-    INSTANCE = 'instance'.freeze
-    XML_STANZA_TYPE = 'server_xml_stanza'.freeze
+    SERVICES_CONFIG_DIR = '../services/config/'
+    CONFIG = 'config'
+    INSTANCE = 'instance'
+    XML_STANZA_TYPE = 'server_xml_stanza'
 
     #-----------------------------------------------
     # Parse the opt-out string and return a hash of <service,opt_out_level>
@@ -163,6 +162,7 @@ module LibertyBuildpack::Container
       @logger.debug("Opt-out string is #{string}")
       retval = {}
       return retval if string.nil?
+
       # The opt-out string may contain multiple entries of form service-level with entries separated by white space.
       parts = string.split
       @logger.debug("opt-out string after split is #{parts}")
@@ -180,6 +180,7 @@ module LibertyBuildpack::Container
     #----------------------------------------------
     def log_diff(original, modified, service_type, service_name)
       return unless @logger.debug?
+
       original_s = ''
       modified_s = ''
       begin
@@ -195,7 +196,7 @@ module LibertyBuildpack::Container
         end
         @logger.debug("Auto-Configuration for instance '#{service_name}' of type '#{service_type}' added/modified the following lines in server.xml:")
         modified_s.each { |ele| @logger.debug(ele) }
-      rescue => e
+      rescue StandardError => e
         @logger.warn("Failed to log auto-config diff. Details are  #{e.message}")
       end
     end
@@ -209,6 +210,7 @@ module LibertyBuildpack::Container
     def process_opt_out(string, hash)
       # we expect the string to have form of service_name=option. Extract the service name and option. Service name may contain any chars, including an =.
       return if string.nil?
+
       parts = string.split('=')
       if parts.length < 2
         @logger.warn("Service autoconfig opt out specification #{string} is not a legal opt-out specification. Either the specification does not contain an = or it contains disallowed white space. The opt-out request will be ignored.")
@@ -258,14 +260,12 @@ module LibertyBuildpack::Container
     def parse_vcap_services(vcap_services, server_dir)
       # runtime_vars will not exist, we must ensure it's created in this method
       runtime_vars_doc = REXML::Document.new('<server></server>')
-      unless vcap_services.nil?
-        vcap_services.each do |service_type, service_data|
-          if 'user-provided'.eql?(service_type)
-            process_user_provided_services(runtime_vars_doc, service_data)
-          else
-            @logger.debug("processing service type #{service_type} and data #{LibertyBuildpack::Util.safe_service_data(service_data)}")
-            process_service_type(runtime_vars_doc.root, service_type, service_data)
-          end
+      vcap_services&.each do |service_type, service_data|
+        if 'user-provided'.eql?(service_type)
+          process_user_provided_services(runtime_vars_doc, service_data)
+        else
+          @logger.debug("processing service type #{service_type} and data #{LibertyBuildpack::Util.safe_service_data(service_data)}")
+          process_service_type(runtime_vars_doc.root, service_type, service_data)
         end
       end
       runtime_vars = File.join(server_dir, 'runtime-vars.xml')
@@ -297,6 +297,7 @@ module LibertyBuildpack::Container
       service_data.each do |instance|
         service_instance = create_instance(element, type, config, instance)
         next if service_instance.nil?
+
         instance_hash = { INSTANCE => service_instance, CONFIG => config }
         target_array.push(instance_hash)
         if @service_type_instances[xml_element].nil?
@@ -317,6 +318,7 @@ module LibertyBuildpack::Container
     def process_user_provided_services(runtime_vars_doc, service_data)
       service_data.each do |service|
         next if service['name'].nil?
+
         usrp_service_type = service['name']
         usrp_service_data = []
         usrp_service_data << service
@@ -333,11 +335,10 @@ module LibertyBuildpack::Container
       @config.each do |key, value|
         filter = value['service_filter']
         next if filter.nil?
+
         filter = Regexp.new(filter) unless filter.is_a?(Regexp)
         service_data.each do |service|
-          if !service['tags'].nil? && service['tags'].any? { |tag| tag =~ filter }
-            candidates.add(key)
-          end
+          candidates.add(key) if !service['tags'].nil? && service['tags'].any? { |tag| tag =~ filter }
         end
       end
       candidates.to_a
@@ -355,6 +356,7 @@ module LibertyBuildpack::Container
       candidates = find_service_plugin_by_tags(service_data) if candidates.empty?
       return 'default' if candidates.empty?
       return candidates[0] if candidates.length == 1
+
       # If we reach this point, then the plugin name or filter is ambiguous and a plugin issue exists. There is no way to resolve the plugin satisfactorily. No matter the
       # algorithm we use, we can find a counter-example that we do not handle. Fail fast. This type of issue should be found in development.
       @logger.error("Unable to resolve a single service plugin for service #{name}. Found potential matches of #{candidates}.")
@@ -386,6 +388,7 @@ module LibertyBuildpack::Container
       option = @opt_out[service_type]
       return @services_full_autoconfig if option.nil?
       return @services_no_xml_updates if option == 'config'
+
       @services_no_autoconfig
     end
 
@@ -481,9 +484,9 @@ module LibertyBuildpack::Container
           name = n_one.split('%2F')[-1]
           @logger.debug("jar copy command is cp #{file.path} #{File.join(lib_dir, name)}")
           FileUtils.copy_file(file.path, File.join(lib_dir, name))
-        end # end if
-      end # end do |file|
+        end
+      end
       puts "(#{(Time.now - download_start_time).duration})"
     end
-  end # class
+  end
 end

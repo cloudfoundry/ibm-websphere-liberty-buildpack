@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -65,7 +66,7 @@ module LibertyBuildpack::Framework
         env_contents = File.readlines(env_file)
         expect(env_contents.size).to eq(4)
         expect(env_contents).to include(/export foo="bar"/)
-        expect(env_contents).to include(%r{export rmu=\"http://doesnotexist.com\"})
+        expect(env_contents).to include(%r{export rmu="http://doesnotexist.com"})
         expect(env_contents).to include(/export bar="a b c"/)
         expect(env_contents).to include(/export b=" "/)
       end
@@ -83,7 +84,7 @@ module LibertyBuildpack::Framework
         Env.new(
           app_dir: root,
           environment: { 'IBM_ENV_PROFILE' => 'profile_1' },
-          configuration: YAML.load(yml)
+          configuration: YAML.safe_load(yml)
         ).compile
 
         env_file = File.join(root, '.profile.d', 'env.sh')
@@ -92,7 +93,7 @@ module LibertyBuildpack::Framework
         env_contents = File.readlines(env_file)
         expect(env_contents.size).to eq(3)
         expect(env_contents).to include(/export foo="car"/)
-        expect(env_contents).to include(%r{export rmu=\"http://doesnotexist.com\"})
+        expect(env_contents).to include(%r{export rmu="http://doesnotexist.com"})
         expect(env_contents).to include(/export bart="simpson"/)
       end
     end
@@ -114,7 +115,7 @@ module LibertyBuildpack::Framework
         Env.new(
           app_dir: root,
           environment: { 'IBM_ENV_PROFILE' => 'profile_1, bad_profile, my_profile' },
-          configuration: YAML.load(yml)
+          configuration: YAML.safe_load(yml)
         ).compile
 
         env_file = File.join(root, '.profile.d', 'env.sh')
@@ -123,7 +124,7 @@ module LibertyBuildpack::Framework
         env_contents = File.readlines(env_file)
         expect(env_contents.size).to eq(4)
         expect(env_contents).to include(/export foo="car"/)
-        expect(env_contents).to include(%r{export rmu=\"http://doesnotexist.com\"})
+        expect(env_contents).to include(%r{export rmu="http://doesnotexist.com"})
         expect(env_contents).to include(/export bart="man"/)
         expect(env_contents).to include(/export disco="stu"/)
       end
@@ -141,7 +142,7 @@ module LibertyBuildpack::Framework
         Env.new(
           app_dir: root,
           environment: { 'BLUEMIX_REGION' => 'ibm:profile:1' },
-          configuration: YAML.load(yml)
+          configuration: YAML.safe_load(yml)
         ).compile
 
         env_file = File.join(root, '.profile.d', 'env.sh')
@@ -150,7 +151,7 @@ module LibertyBuildpack::Framework
         env_contents = File.readlines(env_file)
         expect(env_contents.size).to eq(3)
         expect(env_contents).to include(/export foo="car"/)
-        expect(env_contents).to include(%r{export rmu=\"http://doesnotexist.com\"})
+        expect(env_contents).to include(%r{export rmu="http://doesnotexist.com"})
         expect(env_contents).to include(/export bart="simpson"/)
       end
     end

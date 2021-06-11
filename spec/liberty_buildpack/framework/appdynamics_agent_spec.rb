@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2016
 #
@@ -131,7 +132,7 @@ module LibertyBuildpack::Framework
         end
 
       end
-    end # end of detect tests
+    end
 
     describe 'compile',
              vcap_application_context: { 'application_version' => '12345678-a123-4b567-89c0-87654321abcde',
@@ -163,7 +164,7 @@ module LibertyBuildpack::Framework
           expect { compiled }.to raise_error(/Unable to download the AppDynamics Agent zip..+underlying download error/)
         end
       end
-    end # end compile
+    end
 
     describe 'release',
              configuration: {},
@@ -216,6 +217,6 @@ module LibertyBuildpack::Framework
         expect(java_opts).to include('-Dappdynamics.agent.accountName=test-account-name')
         expect(java_opts).to include('-Dappdynamics.agent.accountAccessKey=test-account-access-key')
       end
-    end # end of release
+    end
   end
-end # module
+end

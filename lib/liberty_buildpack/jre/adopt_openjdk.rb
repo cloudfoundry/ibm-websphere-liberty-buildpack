@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2019
 #
@@ -65,7 +66,7 @@ module LibertyBuildpack::Jre
       File.join @app_dir, JAVA_HOME
     end
 
-    JAVA_HOME = '.java'.freeze
+    JAVA_HOME = '.java'
 
     def expand(file)
       expand_start_time = Time.now
@@ -100,10 +101,11 @@ module LibertyBuildpack::Jre
 
         found_version = LibertyBuildpack::Repository::VersionResolver.resolve(requested_version, candidates.keys)
         raise "No version resolvable for '#{requested_version}' in #{candidates.keys.join(', ')}" if found_version.nil?
+
         found_release = candidates[found_version.to_s]
         return found_release
       end
-    rescue => e
+    rescue StandardError => e
       raise RuntimeError, "OpenJDK error: #{e.message}", e.backtrace
     end
 

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2017
 #
@@ -22,7 +23,7 @@ class MemoryBucket
   # @!attribute [r] size
   # @return [Numeric, nil] the size of the memory bucket in KB or nil if this has not been specified by the user or
   #                        defaulted
-  attr_reader :size
+  attr_accessor :size
 
   # @!attribute [r] range
   # @return [MemoryRange] the permissible range of the memory bucket
@@ -45,18 +46,18 @@ class MemoryBucket
     @range     = range ? validate_memory_range(range) : nil
   end
 
-  attr_writer :size
-
   private
 
   def validate_name(name)
     raise "Invalid MemoryBucket name '#{name}'" if name.nil? || name.to_s.size == 0
+
     name
   end
 
   def validate_weighting(weighting)
     raise diagnose_weighting(weighting, 'not numeric') unless numeric? weighting
     raise diagnose_weighting(weighting, 'negative') if weighting < 0
+
     weighting
   end
 
@@ -66,7 +67,7 @@ class MemoryBucket
 
   def numeric?(w)
     Float(w)
-  rescue
+  rescue StandardError
     false
   end
 
@@ -76,6 +77,7 @@ class MemoryBucket
 
   def validate_memory_range(range)
     raise "Invalid 'range' parameter of class '#{range.class}' for #{identify} : not a MemoryRange" unless range.is_a? MemoryRange
+
     range
   end
 

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2017
 #
@@ -40,16 +41,16 @@ describe OpenJDKMemoryHeuristicFactory do
 
   let(:expected_java_memory_options) do
     {
-      'heap'      => ->(v) { %W(-Xmx#{v} -Xms#{v}) },
-      'metaspace' => ->(v) { %W(-XX:MaxMetaspaceSize=#{v} -XX:MetaspaceSize=#{v}) },
-      'permgen'   => ->(v) { %W(-XX:MaxPermSize=#{v} -XX:PermSize=#{v}) },
-      'stack'     => ->(v) { %W(-Xss#{v}) }
+      'heap' => ->(v) { %W[-Xmx#{v} -Xms#{v}] },
+      'metaspace' => ->(v) { %W[-XX:MaxMetaspaceSize=#{v} -XX:MetaspaceSize=#{v}] },
+      'permgen' => ->(v) { %W[-XX:MaxPermSize=#{v} -XX:PermSize=#{v}] },
+      'stack' => ->(v) { %W[-Xss#{v}] }
     }
   end
 
   it 'should pass the appropriate constructor parameters for versions prior to 1.8' do
     allow(WeightBalancingMemoryHeuristic).to receive(:new)
-      .with(sizes, heuristics, %w(heap stack native permgen),
+      .with(sizes, heuristics, %w[heap stack native permgen],
             be_a_hash_like(expected_java_memory_options))
 
     described_class.create_memory_heuristic(sizes, heuristics, pre_8)
@@ -57,7 +58,7 @@ describe OpenJDKMemoryHeuristicFactory do
 
   it 'should pass the appropriate constructor parameters for versions 1.8 and higher' do
     allow(WeightBalancingMemoryHeuristic).to receive(:new)
-      .with(sizes, heuristics, %w(heap stack native metaspace),
+      .with(sizes, heuristics, %w[heap stack native metaspace],
             be_a_hash_like(expected_java_memory_options))
 
     described_class.create_memory_heuristic(sizes, heuristics, post_8)

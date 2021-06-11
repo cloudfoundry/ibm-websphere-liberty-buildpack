@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -27,15 +28,15 @@ shared_context 'component_helper' do
   let(:component) { described_class.new context }
 
   let(:context) do |example|
-    { app_dir:        app_dir,
-      java_home:      example.metadata[:java_home],
-      java_opts:      example.metadata[:java_opts],
-      common_paths:   example.metadata[:common_paths],
-      license_ids:    example.metadata[:license_ids],
-      configuration:  example.metadata[:configuration],
-      jvm_type:       example.metadata[:jvm_type],
+    { app_dir: app_dir,
+      java_home: example.metadata[:java_home],
+      java_opts: example.metadata[:java_opts],
+      common_paths: example.metadata[:common_paths],
+      license_ids: example.metadata[:license_ids],
+      configuration: example.metadata[:configuration],
+      jvm_type: example.metadata[:jvm_type],
       vcap_application: example.metadata[:vcap_application_context],
-      vcap_services:  example.metadata[:vcap_services_context] }
+      vcap_services: example.metadata[:vcap_services_context] }
   end
 
   let(:uri) { 'test-uri' }

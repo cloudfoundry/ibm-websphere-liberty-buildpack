@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -23,7 +24,7 @@ module LibertyBuildpack::Diagnostics
 
     previous_environment = ENV.to_hash
 
-    LOG_MESSAGE = 'a log message'.freeze
+    LOG_MESSAGE = 'a log message'
 
     before do
       $stderr = StringIO.new

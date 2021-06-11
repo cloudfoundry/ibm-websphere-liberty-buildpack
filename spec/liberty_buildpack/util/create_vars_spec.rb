@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -81,4 +82,4 @@ describe 'create vars script', :integration do
     end
   end
 
-end # describe
+end

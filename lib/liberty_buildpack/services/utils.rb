@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -46,17 +47,17 @@ module LibertyBuildpack::Services
     #-----------------------------------------------------------------------
     def self.parse_compliant_vcap_service(element, properties)
       hash_to_return = {}
-      properties.keys.each do |property|
-        if properties[property].class == String
+      properties.each_key do |property|
+        if properties[property].instance_of?(String)
           # base attribute. Create cloud form of variable and add to runtime_vars and hash.
           # To make life easier for the user, add a special key into the return hash to make it easier to find the name of the service.
           hash_to_return['service_name'] = properties[property] if property == 'name'
           name = "cloud.services.#{properties['name']}.#{property}"
           value = block_given? ? yield(property, properties[property]) : properties[property]
           add_runtime_var(element, hash_to_return, name, value)
-        elsif properties[property].class == Hash && property == 'credentials'
+        elsif properties[property].instance_of?(Hash) && property == 'credentials'
           # credentials. Create cloud form of variable and add to runtime_vars and hash
-          properties[property].keys.each do |subproperty|
+          properties[property].each_key do |subproperty|
             name = "cloud.services.#{properties['name']}.connection.#{subproperty}"
             value = properties[property][subproperty]
             if block_given?
@@ -65,7 +66,7 @@ module LibertyBuildpack::Services
               value = value.join(', ')
             end
             add_runtime_var(element, hash_to_return, name, value)
-          end # each subproperty
+          end
         end
       end
       hash_to_return
@@ -84,6 +85,7 @@ module LibertyBuildpack::Services
     def self.get_cloud_property(properties, service_name, prop_name, prop_name_alias = nil)
       return "${#{prop_name}}" if properties.key?(prop_name)
       return "${#{prop_name_alias}}" if prop_name_alias.nil? == false && properties.key?(prop_name_alias)
+
       raise "Resource #{service_name} does not contain a #{prop_name} property"
     end
 
@@ -103,7 +105,8 @@ module LibertyBuildpack::Services
       raise 'invalid parameters' if doc.nil? || features.nil?
 
       current_features = get_features(doc)
-      if features.is_a?(Hash)
+      case features
+      when Hash
         condition_features = features['if']
         condition_true_features = features['then']
         condition_false_features = features['else']
@@ -114,7 +117,7 @@ module LibertyBuildpack::Services
         else
           add_features_sub(doc, current_features, condition_false_features)
         end
-      elsif features.is_a?(Array)
+      when Array
         add_features_sub(doc, current_features, features)
       else
         raise 'Invalid feature expression type'
@@ -130,6 +133,7 @@ module LibertyBuildpack::Services
     #---------------------------------------------------------------------------------------
     def self.update_bootstrap_properties(server_dir, property, reg_ex)
       raise 'invalid parameters' if server_dir.nil? || property.nil? || reg_ex.nil?
+
       bootstrap = File.join(server_dir, 'bootstrap.properties')
       if File.exist?(bootstrap) == false
         File.open(bootstrap, 'w')  { |file| file.write(property) }
@@ -151,6 +155,7 @@ module LibertyBuildpack::Services
     #-------------------------------------------------
     def self.logical_singleton?(elements_array)
       return true if elements_array.length == 1
+
       id = elements_array[0].attribute('id')
       elements_array[1..(elements_array.length - 1)].each do |element|
         my_id = element.attribute('id')
@@ -193,9 +198,7 @@ module LibertyBuildpack::Services
     def self.find_attribute(element_array, name)
       retval = nil
       element_array.each do |element|
-        if element.attribute(name).nil? == false
-          retval = element.attribute(name).value
-        end
+        retval = element.attribute(name).value if element.attribute(name).nil? == false
       end
       retval
     end
@@ -228,6 +231,7 @@ module LibertyBuildpack::Services
       end
       classloaders = apps[0].get_elements('classloader')
       return nil if classloaders.empty?
+
       # At present, Liberty only supports one classloader per app, but that may change. Visibility may only be specified on one classloader, if multiples exist.
       classloaders.each do |classloader|
         return classloader.attribute('apiTypeVisibility').value if classloader.attribute('apiTypeVisibility').nil? == false
@@ -259,9 +263,11 @@ module LibertyBuildpack::Services
       end
       classloaders.each do |classloader|
         next if classloader.attribute('commonLibraryRef').nil?
+
         # commonLibraryRef contain a comma-separated string of library ids.
         cur_value = classloader.attribute('commonLibraryRef').value
         return if cur_value.include?(lib_id)
+
         classloader.add_attribute('commonLibraryRef', "#{cur_value},#{lib_id}")
         return
       end
@@ -305,23 +311,23 @@ module LibertyBuildpack::Services
           if repository.nil?
             # driver not found
             logger.debug('No client_jar_key, client_jar_url, or driver defined.')
-            return []
+            []
           else
             # driver found
             version, driver_uri = LibertyBuildpack::Repository::ConfiguredItem.find_item(repository)
             logger.debug("Found driver: version: #{version}, url: #{driver_uri}")
-            return [driver_uri]
+            [driver_uri]
           end
         else
           # client_jar_url found
           logger.debug("Found client_jar_url: #{client_jar_url}")
           utils = LibertyBuildpack::Repository::RepositoryUtils.new
-          return [utils.resolve_uri(client_jar_url)]
+          [utils.resolve_uri(client_jar_url)]
         end
       else
         # client_jar_key found
         logger.debug("Found client_jar_key: #{urls[client_jar_key]}")
-        return [urls[client_jar_key]]
+        [urls[client_jar_key]]
       end
     end
 

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -47,9 +48,9 @@ module LibertyBuildpack::Util
         LibertyBuildpack::Util::Properties.new(manifest_file)
       end
 
-      MAIN_CLASS_PROPERTY = 'java_main_class'.freeze
+      MAIN_CLASS_PROPERTY = 'java_main_class'
 
-      MANIFEST_PROPERTY = 'Main-Class'.freeze
+      MANIFEST_PROPERTY = 'Main-Class'
 
       private_constant :MAIN_CLASS_PROPERTY, :MANIFEST_PROPERTY
 

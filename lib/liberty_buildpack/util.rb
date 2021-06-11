@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -26,19 +27,19 @@ module LibertyBuildpack::Util
   #
   # @return [Object] returns object with credentials info masked out
   def self.safe_vcap_services(vcap_services)
-    if vcap_services.class == String && !vcap_services.strip.empty?
+    if vcap_services.instance_of?(String) && !vcap_services.strip.empty?
       begin
         safe_hash = JSON.load(vcap_services)
       rescue JSON::ParserError
         return vcap_services
       end
-    elsif vcap_services.class == Hash
+    elsif vcap_services.instance_of?(Hash)
       safe_hash = vcap_services.clone
     else
       return vcap_services
     end
     safe_hash.each { |type, data| safe_hash[type] = safe_service_data(data) }
-    if vcap_services.class == String
+    if vcap_services.instance_of?(String)
       safe_hash.to_json
     else
       safe_hash
@@ -51,12 +52,11 @@ module LibertyBuildpack::Util
   # @return [Array] returns array of masked out instances
   def self.safe_service_data(vcap_service_data)
     return vcap_service_data if vcap_service_data.class != Array
+
     safe_array = []
     vcap_service_data.each do |instance|
       safe_instance = instance.clone
-      if safe_instance.class == Hash && safe_instance.key?('credentials')
-        safe_instance['credentials'] = ['PRIVATE DATA HIDDEN']
-      end
+      safe_instance['credentials'] = ['PRIVATE DATA HIDDEN'] if safe_instance.instance_of?(Hash) && safe_instance.key?('credentials')
       safe_array << safe_instance
     end
     safe_array
@@ -76,9 +76,7 @@ module LibertyBuildpack::Util
   # @return [Hash] return env back with the data
   def self.safe_heroku_env!(env)
     env.each do |key, value|
-      if key.end_with?(Heroku::URL_SUFFIX, Heroku::URI_SUFFIX)
-        env[key] = '[PRIVATE DATA HIDDEN]'
-      end
+      env[key] = '[PRIVATE DATA HIDDEN]' if key.end_with?(Heroku::URL_SUFFIX, Heroku::URI_SUFFIX)
     end
   end
 end

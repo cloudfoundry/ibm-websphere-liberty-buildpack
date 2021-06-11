@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -46,6 +47,7 @@ module LibertyBuildpack::Services
       # add nothing if connection_pool_size attribute is not set in the config.
       cp_size = @config['connection_pool_size']
       return if cp_size.nil? || cp_size == -1
+
       cm = REXML::Element.new('connectionManager', ds)
       cm.add_attribute('id', @connection_manager_id)
       cm.add_attribute('maxPoolSize', cp_size)

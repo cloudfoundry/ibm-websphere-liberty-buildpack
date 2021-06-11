@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -111,7 +112,7 @@ module LibertyBuildpack
 
     private
 
-    GIT_DIR = (Pathname.new(__FILE__).dirname + '../../.git').freeze
+    GIT_DIR = "#{Pathname.new(__FILE__).dirname}../../.git"
 
     def remote_string
       "#{@remote}##{@hash}" if @remote && !@remote.empty? && @hash && !@hash.empty?

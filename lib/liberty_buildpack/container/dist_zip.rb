@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015, 2017
 #
@@ -122,6 +123,7 @@ module LibertyBuildpack::Container
     # @return [Pathname, nil] the start script or +nil+ if one does not exist
     def start_script(root)
       return nil unless root
+
       candidates = Dir.glob(File.join(root, 'bin/*'))
       if candidates.size == 1
         candidates.first
@@ -133,14 +135,14 @@ module LibertyBuildpack::Container
 
     private
 
-    PATTERN_APP_CLASSPATH = /^declare -r app_classpath=\"(.*)\"$/
+    PATTERN_APP_CLASSPATH = /^declare -r app_classpath="(.*)"$/
 
     PATTERN_CLASSPATH = /^CLASSPATH=(.*)$/
 
     # private_constant :PATTERN_APP_CLASSPATH, :PATTERN_CLASSPATH
 
     def augment_app_classpath(content)
-      additional_classpath = Dir.glob(@lib_directory + '/*').sort.map do |additional_library|
+      additional_classpath = Dir.glob("#{@lib_directory}/*").sort.map do |additional_library|
         "$app_home/#{Pathname.new(additional_library).relative_path_from(Pathname.new(root))}"
       end
 
@@ -148,7 +150,7 @@ module LibertyBuildpack::Container
     end
 
     def augment_classpath(content)
-      additional_classpath = Dir.glob(@lib_directory + '/*').sort.map do |additional_library|
+      additional_classpath = Dir.glob("#{@lib_directory}/*").sort.map do |additional_library|
         "$APP_HOME/#{Pathname.new(additional_library).relative_path_from(Pathname.new(root))}"
       end
 

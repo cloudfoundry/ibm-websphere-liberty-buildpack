@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015, 2016
 #
@@ -26,9 +27,9 @@ describe LibertyBuildpack::Util::ConfigurationUtils do
   include_context 'logging_helper'
 
   let(:test_data) do
-    { 'foo'      => { 'one' => '1', 'two' => 2 },
-      'bar'      => { 'alpha' => { 'one' => 'cat', 'two' => 'dog' } },
-      'version'  => '1.7.1',
+    { 'foo' => { 'one' => '1', 'two' => 2 },
+      'bar' => { 'alpha' => { 'one' => 'cat', 'two' => 'dog' } },
+      'version' => '1.7.1',
       'not_here' => nil }
   end
 
@@ -55,8 +56,8 @@ describe LibertyBuildpack::Util::ConfigurationUtils do
     end
 
     it 'load configuration file and clean nil values' do
-      expect(described_class.load('test', true)).to eq('foo'     => { 'one' => '1', 'two' => 2 },
-                                                       'bar'     => { 'alpha' => { 'one' => 'cat', 'two' => 'dog' } },
+      expect(described_class.load('test', true)).to eq('foo' => { 'one' => '1', 'two' => 2 },
+                                                       'bar' => { 'alpha' => { 'one' => 'cat', 'two' => 'dog' } },
                                                        'version' => '1.7.1')
     end
 
@@ -68,8 +69,8 @@ describe LibertyBuildpack::Util::ConfigurationUtils do
 
       it 'overlays matching environment variables' do
 
-        expect(described_class.load('test')).to eq('foo'     => { 'one' => '1', 'two' => 2 },
-                                                   'bar'     => { 'alpha' => { 'one' => 3, 'two' => 'dog' } },
+        expect(described_class.load('test')).to eq('foo' => { 'one' => '1', 'two' => 2 },
+                                                   'bar' => { 'alpha' => { 'one' => 3, 'two' => 'dog' } },
                                                    'version' => '1.7.1')
       end
 
@@ -82,8 +83,8 @@ describe LibertyBuildpack::Util::ConfigurationUtils do
       end
 
       it 'overlays simple matching environment variable' do
-        expect(described_class.load('test')).to eq('foo'     => { 'one' => '1', 'two' => 2 },
-                                                   'bar'     => { 'alpha' => { 'one' => 'cat', 'two' => 'dog' } },
+        expect(described_class.load('test')).to eq('foo' => { 'one' => '1', 'two' => 2 },
+                                                   'bar' => { 'alpha' => { 'one' => 'cat', 'two' => 'dog' } },
                                                    'version' => '1.8.+')
       end
 
@@ -124,6 +125,7 @@ describe LibertyBuildpack::Util::ConfigurationUtils do
     File.open(file, 'r') do |f|
       f.each do |line|
         break if line =~ /^---/
+
         header << line
       end
     end

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2017
 #
@@ -36,13 +37,13 @@ class OpenJDKMemoryHeuristicFactory
 
     private
 
-    VALID_TYPES = %w(heap stack native).freeze
+    VALID_TYPES = %w[heap stack native].freeze
 
     JAVA_OPTS = {
-      'heap'      => ->(v) { %W(-Xmx#{v} -Xms#{v}) },
-      'metaspace' => ->(v) { %W(-XX:MaxMetaspaceSize=#{v} -XX:MetaspaceSize=#{v}) },
-      'permgen'   => ->(v) { %W(-XX:MaxPermSize=#{v} -XX:PermSize=#{v}) },
-      'stack'     => ->(v) { ["-Xss#{v}"] }
+      'heap' => ->(v) { %W[-Xmx#{v} -Xms#{v}] },
+      'metaspace' => ->(v) { %W[-XX:MaxMetaspaceSize=#{v} -XX:MetaspaceSize=#{v}] },
+      'permgen' => ->(v) { %W[-XX:MaxPermSize=#{v} -XX:PermSize=#{v}] },
+      'stack' => ->(v) { ["-Xss#{v}"] }
     }.freeze
 
     def permgen_or_metaspace(version)

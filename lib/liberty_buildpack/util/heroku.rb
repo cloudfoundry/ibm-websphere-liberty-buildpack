@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -45,6 +46,7 @@ module LibertyBuildpack::Util
       service_name_map = parse_service_name_map(env)
       env.each do |key, value|
         next unless key.end_with?(URL_SUFFIX, URI_SUFFIX)
+
         if key.start_with?(POSTGRESQL_PREFIX)
           type, service = handle_postgresql(key, value, service_name_map)
         elsif key.start_with?(CLEARDB_PREFIX)
@@ -69,18 +71,18 @@ module LibertyBuildpack::Util
 
     private
 
-    URL_SUFFIX = '_URL'.freeze
-    URI_SUFFIX = '_URI'.freeze
-    POSTGRESQL_PREFIX = 'HEROKU_POSTGRESQL_'.freeze
-    CLEARDB_PREFIX = 'CLEARDB_DATABASE_'.freeze
-    MONGOHQ_PREFIX = 'MONGOHQ_'.freeze
-    MONGOLAB_PREFIX = 'MONGOLAB_'.freeze
-    MONGOSOUP_PREFIX = 'MONGOSOUP_'.freeze
+    URL_SUFFIX = '_URL'
+    URI_SUFFIX = '_URI'
+    POSTGRESQL_PREFIX = 'HEROKU_POSTGRESQL_'
+    CLEARDB_PREFIX = 'CLEARDB_DATABASE_'
+    MONGOHQ_PREFIX = 'MONGOHQ_'
+    MONGOLAB_PREFIX = 'MONGOLAB_'
+    MONGOSOUP_PREFIX = 'MONGOSOUP_'
 
     def handle_postgresql(key, value, service_name_map)
       type = 'postgresql'
       service = {}
-      service['name'] = service_name_map[key] || type + '.' + key[POSTGRESQL_PREFIX.size..-URL_SUFFIX.size - 1].downcase
+      service['name'] = service_name_map[key] || "#{type}.#{key[POSTGRESQL_PREFIX.size..-URL_SUFFIX.size - 1].downcase}"
       service['tags'] = ['postgresql']
       credentials = {}
       credentials['uri'] = value
@@ -117,7 +119,7 @@ module LibertyBuildpack::Util
         credentials['port'] = uri.port unless uri.port.nil?
         credentials['user'] = credentials['username'] = uri.user unless uri.user.nil?
         credentials['password'] = uri.password unless uri.password.nil?
-        credentials['name'] = uri.path[1..-1]  unless uri.path[1..-1].nil?
+        credentials['name'] = uri.path[1..] unless uri.path[1..].nil?
       rescue URI::InvalidURIError
         @logger.debug("unable to parse #{key}")
       end
@@ -127,18 +129,15 @@ module LibertyBuildpack::Util
 
     def generate_name(url)
       # remove _URL at the end & downcase it
-      name = url[0..-URL_SUFFIX.size - 1].downcase
-      name
+      url[0..-URL_SUFFIX.size - 1].downcase
     end
 
     def parse_service_name_map(env)
       name_map = env['SERVICE_NAME_MAP']
       map = {}
-      unless name_map.nil?
-        name_map.split(',').each do |value|
-          key_value = value.split('=')
-          map[key_value[0].strip] = key_value[1].strip if key_value.size == 2
-        end
+      name_map&.split(',')&.each do |value|
+        key_value = value.split('=')
+        map[key_value[0].strip] = key_value[1].strip if key_value.size == 2
       end
       map
     end

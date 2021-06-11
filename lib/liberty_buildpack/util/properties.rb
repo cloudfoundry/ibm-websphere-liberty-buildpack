@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -31,7 +32,7 @@ module LibertyBuildpack::Util
 
         contents.each_line do |line|
           unless blank_line?(line) || comment_line?(line)
-            match_data = /^[\s]*([^:=\s]+)[\s]*[=:]?[\s]*(.*?)\s*$/.match(line)
+            match_data = /^\s*([^:=\s]+)\s*[=:]?\s*(.*?)\s*$/.match(line)
             self[match_data[1]] = match_data[2] if match_data
           end
         end
@@ -41,11 +42,11 @@ module LibertyBuildpack::Util
     private
 
     def blank_line?(line)
-      line =~ /^[\s]*$/
+      line =~ /^\s*$/
     end
 
     def comment_line?(line)
-      line =~ /^[\s]*[#!].*$/
+      line =~ /^\s*[#!].*$/
     end
 
   end

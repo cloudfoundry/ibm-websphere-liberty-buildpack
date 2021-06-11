@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2015, 2016
 #
@@ -136,7 +137,7 @@ module LibertyBuildpack::Framework
         expect(detected).to be_nil
       end
 
-    end # end of detect tests
+    end
 
     describe 'compile', configuration: {} do
 
@@ -168,7 +169,7 @@ module LibertyBuildpack::Framework
           expect { compiled }.to raise_error(/Unable to download the JRebel zip\. Ensure that the zip at..+underlying download error/)
         end
       end
-    end # end compile
+    end
 
     describe 'release', java_opts: [], configuration: {} do
 
@@ -216,6 +217,6 @@ module LibertyBuildpack::Framework
         expect(java_opts).to include('-Drebel.log.file=../../../../logs/jrebel.log')
         expect(java_opts).to include('-Drebel.cloud.platform=cloudfoundry/ibm-websphere-liberty-buildpack')
       end
-    end # end of release
+    end
   end
 end

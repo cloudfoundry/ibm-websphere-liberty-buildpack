@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -21,7 +22,7 @@ module LibertyBuildpack::Container
 
   describe CommonPaths do
 
-    HEROKU_ENV_VAR = 'DYNO'.freeze
+    HEROKU_ENV_VAR = 'DYNO'
 
     before do
       $stdout = StringIO.new
@@ -85,8 +86,8 @@ module LibertyBuildpack::Container
             expect(common_paths.dump_directory).to eq('../../../../dumps')
           end
         end
-      end # end of each test_app_root test
-    end # end of Heroku
+      end
+    end
 
     # CFv2 - Do not stub Heroku.heroku? method to ensure the default behavior is tested
     context 'For a PaaS that provides an app root separate from the container user root' do
@@ -133,12 +134,12 @@ module LibertyBuildpack::Container
             expect(common_paths.dump_directory).to eq('../../../../../dumps')
           end
         end
-      end # end of each test_app_root test
-    end # end of CFv2 Context
+      end
+    end
 
     describe 'invalid paths' do
-      INVALID_PATH_ERROR = 'relative_location provided to common_paths must be nonempty and without spaces'.freeze
-      INVALID_RELATIVE_PATH_ERROR = 'paths provided to CommonPaths must be a relative, subdirectory, and a valid Pathname'.freeze
+      INVALID_PATH_ERROR = 'relative_location provided to common_paths must be nonempty and without spaces'
+      INVALID_RELATIVE_PATH_ERROR = 'paths provided to CommonPaths must be a relative, subdirectory, and a valid Pathname'
 
       ['', ' ', 'includes space'].each do |test_app_root|
         it 'should raise an error for invalid relative_location' do
@@ -158,7 +159,7 @@ module LibertyBuildpack::Container
           expect { common_paths.relative_location = test_relative_location }.to raise_error(INVALID_PATH_ERROR)
         end
       end
-    end # end of invalid paths tests
+    end
 
   end
 

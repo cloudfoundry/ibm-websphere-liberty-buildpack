@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2017
 #
@@ -32,6 +33,7 @@ class MemoryRange
   def initialize(value, ceiling = nil)
     if value.is_a? String
       raise "Invalid combination of parameter types #{value.class} and #{ceiling.class}" if ceiling
+
       lower_bound, upper_bound = get_bounds(value)
       @floor                   = create_memory_size lower_bound
       @ceiling                 = upper_bound ? create_memory_size(upper_bound) : nil
@@ -85,6 +87,7 @@ class MemoryRange
   def *(other)
     raise "Cannot multiply a MemoryRange by an instance of #{other.class}" unless other.is_a? Numeric
     raise 'Cannot multiply an unbounded MemoryRange by 0' if !bounded? && other == 0
+
     MemoryRange.new(@floor * other, bounded? ? @ceiling * other : nil)
   end
 
@@ -105,15 +108,15 @@ class MemoryRange
 
   private
 
-  RANGE_SEPARATOR = '..'.freeze
+  RANGE_SEPARATOR = '..'
 
   def get_bounds(range)
     if range.index(RANGE_SEPARATOR)
       lower_bound, upper_bound = range.split(RANGE_SEPARATOR)
       lower_bound              = '0' if lower_bound.nil? || lower_bound == ''
-      return lower_bound, upper_bound
+      [lower_bound, upper_bound]
     else
-      return range, range
+      [range, range]
     end
   end
 

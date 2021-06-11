@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -45,7 +46,7 @@ module LibertyBuildpack::Repository
 
     private
 
-    COMP_INDEX_PATH = '/component_index.yml'.freeze
+    COMP_INDEX_PATH = '/component_index.yml'
 
     def cache
       LibertyBuildpack::Util::Cache::DownloadCache.new(Pathname.new(Dir.tmpdir),

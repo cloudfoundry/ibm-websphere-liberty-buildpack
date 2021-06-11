@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2016
 #
@@ -22,7 +23,7 @@ require 'liberty_buildpack/diagnostics/logger_factory'
 
 module LibertyBuildpack
 
-  APP_DIR = 'test-app-dir'.freeze
+  APP_DIR = 'test-app-dir'
 
   describe Buildpack do
     include_context 'application_helper'
@@ -49,7 +50,7 @@ module LibertyBuildpack
         .to receive(:load).with('components').and_return(
           'containers' => ['Test::StubContainer1', 'Test::StubContainer2'],
           'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
-          'jres'       => ['Test::StubJre1', 'Test::StubJre2']
+          'jres' => ['Test::StubJre1', 'Test::StubJre2']
         )
 
       allow_any_instance_of(LibertyBuildpack::BuildpackVersion).to receive(:version_string)
@@ -101,7 +102,7 @@ module LibertyBuildpack
       stub_jre1.should_receive(:detect)
 
       detected = with_buildpack(&:detect)
-      expect(detected).to match_array(%w(stub-jre-1 stub-buildpack-version stub-framework-1 stub-framework-2 stub-container-1))
+      expect(detected).to match_array(%w[stub-jre-1 stub-buildpack-version stub-framework-1 stub-framework-2 stub-container-1])
     end
 
     it 'should raise an error if more than one container can run an application' do
@@ -131,7 +132,7 @@ module LibertyBuildpack
       stub_buildpack_version.stub(:detect).and_return('stub-buildpack-version')
 
       detected = with_buildpack(&:detect)
-      expect(detected).to match_array(%w(stub-jre-1 stub-buildpack-version stub-container-1))
+      expect(detected).to match_array(%w[stub-jre-1 stub-buildpack-version stub-container-1])
     end
 
     it 'should detect first JRE with non-null detect when more than one JRE can run an application' do
@@ -141,7 +142,7 @@ module LibertyBuildpack
       stub_buildpack_version.stub(:detect).and_return('stub-buildpack-version')
 
       detected = with_buildpack(&:detect)
-      expect(detected).to match_array(%w(stub-jre-2 stub-buildpack-version stub-container-1))
+      expect(detected).to match_array(%w[stub-jre-2 stub-buildpack-version stub-container-1])
     end
 
     it 'should omit buildpack version when version is unknown' do
@@ -150,7 +151,7 @@ module LibertyBuildpack
       allow_any_instance_of(LibertyBuildpack::BuildpackVersion).to receive(:version_string).and_return(nil)
 
       detected = with_buildpack(&:detect)
-      expect(detected).to match_array(%w(stub-jre-1 stub-container-1))
+      expect(detected).to match_array(%w[stub-jre-1 stub-container-1])
     end
 
     #    it 'should raise an error when none of the JREs return a non-null version for detect' do
@@ -201,7 +202,7 @@ module LibertyBuildpack
         Dir.mktmpdir do |root|
           File.stub(:exists?).with(anything).and_return(true)
           allow(LibertyBuildpack::Util::ConfigurationUtils).to receive(:load).with('version', true, true)
-            .and_return('version' => '1234', 'remote' => '', 'hash' => '')
+                                                                             .and_return('version' => '1234', 'remote' => '', 'hash' => '')
 
           stub_container1.stub(:detect).and_return('stub-container-1')
           stub_container1.stub(:apps).and_return(['root/app1'])
@@ -227,7 +228,7 @@ module LibertyBuildpack
         end
       end
 
-    end # end of Version Info describe
+    end
 
     it 'should call release on matched components' do
       stub_container1.stub(:detect).and_return('stub-container-1')
@@ -268,7 +269,7 @@ module LibertyBuildpack
       allow(LibertyBuildpack::Util::ConfigurationUtils)
         .to receive(:load).with('components').and_return(
           'frameworks' => ['Test::StubFramework1', 'Test::StubFramework2'],
-          'jres'       => ['Test::StubJre1', 'Test::StubJre2']
+          'jres' => ['Test::StubJre1', 'Test::StubJre2']
         )
 
       expect { with_buildpack(&:detect) }.to raise_error SystemExit
@@ -312,9 +313,7 @@ module LibertyBuildpack
     def with_buildpack(&block)
       LibertyBuildpack::Diagnostics::LoggerFactory.send :close # suppress warnings
       Dir.mktmpdir do |root|
-        Buildpack.drive_buildpack_with_logger(File.join(root, APP_DIR), 'Error %s') do |buildpack|
-          yield buildpack
-        end
+        Buildpack.drive_buildpack_with_logger(File.join(root, APP_DIR), 'Error %s', &block)
       end
     end
 

@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2019
 #
@@ -48,7 +49,7 @@ describe 'compile script', :integration do
 
   it 'should work with the liberty WEB-INF case' do
     Dir.mktmpdir do |root|
-      FileUtils.cp_r'spec/fixtures/container_liberty/.', root
+      FileUtils.cp_r 'spec/fixtures/container_liberty/.', root
       with_memory_limit('1G') do
         Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
           result = wait_thr.value
@@ -57,14 +58,14 @@ describe 'compile script', :integration do
             puts "stderr: #{stderr.read}"
           end
           expect(result).to be_success
-        end # popen3
-      end # with
-    end # dir
-  end # it
+        end
+      end
+    end
+  end
 
   it 'should generate a staging_task.log file with the liberty WEB-INF case' do
     Dir.mktmpdir do |root|
-      FileUtils.cp_r'spec/fixtures/container_liberty_no_log/.', root
+      FileUtils.cp_r 'spec/fixtures/container_liberty_no_log/.', root
       with_memory_limit('1G') do
         Open3.popen3("bin/compile #{root} #{@cache}") do |stdin, stdout, stderr, wait_thr|
           result = wait_thr.value
@@ -74,10 +75,10 @@ describe 'compile script', :integration do
           end
           expect(result).to be_success
           expect(File.exist?(File.join(root, 'logs', 'staging_task.log'))).to be_truthy
-        end # popen3
-      end # with
-    end # dir
-  end # it
+        end
+      end
+    end
+  end
 
   it 'should also work with the zipped up server case' do
     Dir.mktmpdir do |root|
@@ -91,10 +92,10 @@ describe 'compile script', :integration do
             puts "stderr: #{stderr.read}"
           end
           expect(result).to be_success
-        end # popen3
-      end # with
-    end # dir
-  end # it
+        end
+      end
+    end
+  end
 
   it 'should generate a staging_task.log file with the zipped up server case' do
     Dir.mktmpdir do |root|
@@ -109,10 +110,10 @@ describe 'compile script', :integration do
           end
           expect(result).to be_success
           expect(File.exist?(File.join(root, 'logs', 'staging_task.log'))).to be_truthy
-        end # popen3
-      end # with
-    end # dir
-  end # it
+        end
+      end
+    end
+  end
 
   it 'pass environment variable directory' do
     Dir.mktmpdir do |root|
@@ -130,10 +131,10 @@ describe 'compile script', :integration do
             puts "stderr: #{stderr.read}"
           end
           expect(result).to be_success
-        end # popen3
-      end # with
-    end # dir
-  end # it
+        end
+      end
+    end
+  end
 
   it 'should also work with standalone spring-boot jar' do
     Dir.mktmpdir do |root|
@@ -147,10 +148,10 @@ describe 'compile script', :integration do
             puts "stderr: #{stderr.read}"
           end
           expect(result).to be_success
-        end # popen3
-      end # with
-    end # dir
-  end # it
+        end
+      end
+    end
+  end
 
   def with_memory_limit(memory_limit)
     previous_value = ENV['MEMORY_LIMIT']
@@ -161,4 +162,4 @@ describe 'compile script', :integration do
       ENV['MEMORY_LIMIT'] = previous_value
     end
   end
-end # describe
+end

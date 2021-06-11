@@ -1,4 +1,5 @@
-# Encoding: utf-8
+# frozen_string_literal: true
+
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2014, 2016
 #
@@ -63,6 +64,6 @@ describe LibertyBuildpack::Util do
         expected = [s1, s2, s3, s4, s5]
         validate_xml(server_xml_file, expected)
       end
-    end # it
-  end # write_formatted_xml_file
+    end
+  end
 end
