@@ -1,5 +1,5 @@
 # IBM WebSphere Application Server Liberty Buildpack
-# Copyright IBM Corp. 2013, 2016
+# Copyright IBM Corp. 2013, 2021
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,13 +17,16 @@ require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new
 
 require 'yard'
+puts 'debug yard'
 YARD::Rake::YardocTask.new do |t|
   t.options = ['--no-stats']
 end
 
 require 'rubocop/rake_task'
-RuboCop::RakeTask.new do |_t|
+puts 'debugging'
+RuboCop::RakeTask.new do |t|
   Sickill::Rainbow.enabled = true if ENV.key? 'RAKE_FORCE_COLOR'
+  puts 'rubocop end'
 end
 
 require 'open3'
@@ -45,12 +48,11 @@ CLOBBER.include %w(doc pkg)
 task default: [:rubocop, :check_api_doc, :yard, :spec]
 
 desc 'Package buildpack together with admin cache'
-task :package, [:zipfile, :hosts, :version] do |_t, args|
+task :package, [:zipfile, :hosts, :version] do |t, args|
   source = File.dirname(__FILE__)
   basename = File.basename(source)
   if args.zipfile.nil?
-    hash = `git describe --tags`.chomp
-    zipfile = File.expand_path(File.join('..', "#{basename}-#{hash}.zip"), source)
+    zipfile = File.expand_path(File.join('..', "#{basename}.zip"), source)
   else
     zipfile = File.expand_path(args.zipfile)
     zipfile << '.zip' unless zipfile.end_with? '.zip'
@@ -60,18 +62,11 @@ task :package, [:zipfile, :hosts, :version] do |_t, args|
     puts 'The output file already exists. Change the output location.'
     exit 1
   end
-  if args.hosts == '*'
+  if args.hosts.nil?
     cache_hosts = nil
     puts 'Caching all resources'
-  elsif args.hosts == '-'
-    cache_hosts = []
-    puts 'Caching disabled'
   else
-    cache_hosts = if args.hosts.nil?
-                    ['public.dhe.ibm.com']
-                  else
-                    args.hosts.split
-                  end
+    cache_hosts = args.hosts.split
     puts "Caching files hosted on #{cache_hosts.join(', ')}"
   end
   require 'tmpdir'
@@ -79,27 +74,44 @@ task :package, [:zipfile, :hosts, :version] do |_t, args|
     $LOAD_PATH.unshift File.expand_path(File.join('..', 'resources'), __FILE__)
     require 'download_buildpack_cache'
 
-    FileUtils.cp_r(source, root)
-    dest = File.join(root, basename)
+    # Copy only the set of source files needed by the buildpack at runtime
+    ['bin', 'config', 'doc', 'lib', 'resources', 'LICENSE', 'NOTICE', '.gitignore'].each do |entry|
+      file = File.join(source, entry)
+      FileUtils.cp_r(file, root) if File.exist? file
+    end
 
-    # Create version.yml when :version is specified
-    File.open(File.join(dest, 'config', 'version.yml'), 'w') do |file|
+    # Copy git files allowing easy retrieval of repository from the remote.
+    # These files will allow to run 'git fetch' in the unzipped directory to
+    # retrieve the latest version of the repository from the 'origin' remote.
+    # After such fetch the files which were not copied will be shown as
+    # 'deleted'. They can be retrieved using 'git checkout -- <file/dir name>'.
+    git_dst = File.join(root, '.git')
+    # git requires '.git/objects' directory to exist
+    FileUtils.mkdir_p File.join(git_dst, 'objects')
+    %w(config HEAD index).each do |entry|
+      file = File.join(source, '.git', entry)
+      FileUtils.cp_r(file, git_dst)
+    end
+    # .git/refs/heads directory contains local branch references
+    refs_dst = File.join(git_dst, 'refs')
+    FileUtils.mkdir_p refs_dst
+    FileUtils.cp_r(File.join(source, '.git', 'refs', 'heads'), refs_dst)
+
+    # Create version.txt if :version was specified
+    File.open(File.join(root, 'config', 'version.yml'), 'w') do |file|
       file.puts "version: #{args.version}"
       file.puts "remote: ''"
       file.puts "hash: ''"
     end unless args.version.nil?
 
-    ENV['JBP_LOG_LEVEL'] = 'DEBUG' if ENV['JBP_LOG_LEVEL'].nil?
-
-    bc = BuildpackCache.new(File.join(dest, 'admin_cache'))
+    bc = BuildpackCache.new(File.join(root, 'admin_cache'))
     # Collect all remote content using all config files
     configs = bc.collect_configs nil, cache_hosts
     bc.download_cache(configs)
     # Fix file permissions
-    system("find #{dest} -type f -exec chmod a+r {} \\;")
-    system("find #{dest} -type d -exec chmod a+rx {} \\;")
-    system("find #{dest} -type f -name '*.bin.cached' -exec chmod a+x {} \\;")
-    system("chmod a+rx #{dest}/bin/*")
-    system("cd #{dest} && zip -r #{zipfile} -x@.package-exclude .")
+    system("find #{root} -type f -exec chmod a+r {} \\;")
+    system("find #{root} -type d -exec chmod a+rx {} \\;")
+    system("chmod a+rx #{root}/bin/*")
+    system("cd #{root} && zip -r #{zipfile} .")
   end
 end
