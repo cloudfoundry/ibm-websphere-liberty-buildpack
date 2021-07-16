@@ -19,7 +19,7 @@ group :development do
   gem 'rake'
   gem 'redcarpet'
   gem 'rainbow', '~> 2.1.0'
-  gem 'rubocop', '~> 0.48.1'
+  gem 'rubocop', '~> 0.42.0'
   gem 'yard'
   gem 'e2mmap'
   gem 'thwait'
