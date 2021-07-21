@@ -113,7 +113,7 @@ module LibertyBuildpack::Util
         tokens = s.match(/^([^\_]+)(?:_(.*))?/)
 
         micro, qualifier = tokens[1..-1]
-
+      print "-----> micro is #{micro} ... "
         raise "Invalid micro version '#{micro}'" unless valid_major_minor_or_micro micro
         raise "Invalid qualifier '#{qualifier}'" unless valid_qualifier qualifier
       end
