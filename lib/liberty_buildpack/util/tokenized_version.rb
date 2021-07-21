@@ -33,13 +33,13 @@ module LibertyBuildpack::Util
       @version = version
       @version = WILDCARD if !@version && allow_wildcards
       print "-----> version is #{version} ... "
-      print "-----> major is #{major} ... "
-      print "-----> minor is #{minor} ... "
-      print "-----> micro is #{micro} ... "
             
       major, tail      = major_or_minor_and_tail @version
       minor, tail      = major_or_minor_and_tail tail
       micro, qualifier = micro_and_qualifier tail
+      print "-----> major is #{major} ... "
+      print "-----> minor is #{minor} ... "
+      print "-----> micro is #{micro} ... "
 
       concat [major, minor, micro, qualifier]
       validate allow_wildcards
@@ -111,7 +111,7 @@ module LibertyBuildpack::Util
         raise "Invalid version '#{s}': must not end in '_'" if s[-1] == '_'
 
         tokens = s.match(/^([^\_]+)(?:_(.*))?/)
-
+      print "-----> s is #{s} ... "
         micro, qualifier = tokens[1..-1]
       print "-----> micro is #{micro} ... "
         raise "Invalid micro version '#{micro}'" unless valid_major_minor_or_micro micro
