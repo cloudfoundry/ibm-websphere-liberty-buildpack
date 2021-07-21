@@ -1,4 +1,4 @@
-# Encoding: utf-8
+ # Encoding: utf-8
 # IBM WebSphere Application Server Liberty Buildpack
 # Copyright IBM Corp. 2013, 2019
 #
@@ -32,7 +32,11 @@ module LibertyBuildpack::Util
     def initialize(version, allow_wildcards = true)
       @version = version
       @version = WILDCARD if !@version && allow_wildcards
-
+      print "-----> version is #{version} ... "
+      print "-----> major is #{major} ... "
+      print "-----> minor is #{minor} ... "
+      print "-----> micro is #{micro} ... "
+            
       major, tail      = major_or_minor_and_tail @version
       minor, tail      = major_or_minor_and_tail tail
       micro, qualifier = micro_and_qualifier tail
