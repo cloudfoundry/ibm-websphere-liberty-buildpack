@@ -22,7 +22,7 @@ module LibertyBuildpack::Util
   class TokenizedVersion < Array
     include Comparable
 
-    # The wildcard component.
+    # The wildcard component.op A021
     WILDCARD = '+'.freeze
 
     # Create a tokenized version based on the input string.
@@ -32,14 +32,18 @@ module LibertyBuildpack::Util
     def initialize(version, allow_wildcards = true)
       @version = version
       @version = WILDCARD if !@version && allow_wildcards
-      print "-----> version is #{version} ... "
+      print "\n -----> version is #{version} ... "
             
       major, tail      = major_or_minor_and_tail @version
+      print "\n -----> major is #{major} ... "
+      print " -----> tail is #{tail} ... "            
       minor, tail      = major_or_minor_and_tail tail
+      print "\n -----> minor is #{minor} ... "
+      print " -----> tail is #{tail} ... "            
+      
       micro, qualifier = micro_and_qualifier tail
-      print "-----> major is #{major} ... "
-      print "-----> minor is #{minor} ... "
-      print "-----> micro is #{micro} ... "
+      print "\n -----> micro is #{micro} ... "
+      print " -----> qualifier is #{qualifier} ... "        
 
       concat [major, minor, micro, qualifier]
       validate allow_wildcards
@@ -111,9 +115,9 @@ module LibertyBuildpack::Util
         raise "Invalid version '#{s}': must not end in '_'" if s[-1] == '_'
 
         tokens = s.match(/^([^\_]+)(?:_(.*))?/)
-      print "-----> s is #{s} ... "
+      print "\n -----> s is #{s} ... "
         micro, qualifier = tokens[1..-1]
-      print "-----> micro is #{micro} ... "
+      print "\n -----> micro is #{micro} ... "
         raise "Invalid micro version '#{micro}'" unless valid_major_minor_or_micro micro
         raise "Invalid qualifier '#{qualifier}'" unless valid_qualifier qualifier
       end
