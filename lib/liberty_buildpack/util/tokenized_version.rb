@@ -41,7 +41,12 @@ module LibertyBuildpack::Util
       print "\n -----> minor is #{minor} ... "
       print " -----> tail is #{tail} ... "            
       
-      micro, qualifier = micro_and_qualifier tail
+      if tail.include? '-'
+      	micro, qualifier = micro_and_qualifier tail
+      else
+      	micro, qualifier = major_or_minor_and_tail tail
+      end
+      
       print "\n -----> micro is #{micro} ... "
       print " -----> qualifier is #{qualifier} ... "        
 
