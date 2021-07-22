@@ -15,7 +15,7 @@
 
 # Configuration for JRE repository
 ---
-repository_root: "https://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/meta/sfj/linux/x86_64/"
-version: 1.8.+
+repository_root: "https://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/meta/8.0/sfj/linux/x86_64/"
+version: 8.0.+
 
 heap_size_ratio: 0.75

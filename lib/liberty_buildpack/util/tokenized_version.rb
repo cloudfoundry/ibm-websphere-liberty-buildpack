@@ -106,7 +106,11 @@ module LibertyBuildpack::Util
       else
         raise "Invalid version '#{s}': must not end in '_'" if s[-1] == '_'
 
-        tokens = s.match(/^([^\_]+)(?:_(.*))?/)
+        if s.include? '_'
+          tokens = s.match(/^([^\_]+)(?:_(.*))?/)
+        else
+          tokens = s.match(/^([^\.]+)(?:.(.*))?/)
+        end
 
         micro, qualifier = tokens[1..-1]
 
