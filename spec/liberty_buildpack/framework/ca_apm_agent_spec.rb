@@ -156,7 +156,7 @@ module LibertyBuildpack::Framework
                                         'credentials' => { 'agent_manager_url' => 'localhost:5001' } }] } do
 
         java_opts = released
-        expect(java_opts).to include("-javaagent:./#{ca_apm_home}/wily/AgentNoRedefNoRetrans.jar")
+        expect(java_opts).to include("-javaagent:./#{ca_apm_home}/wily/Agent.jar")
         expect(java_opts).to include('-Dorg.osgi.framework.bootdelegation=com.wily.*')
         expect(java_opts).to include(/-Dcom.wily.introscope.agentProfile=.*\/wily\/core\/config\/IntroscopeAgent.profile/)
         expect(java_opts).to include('-Dintroscope.agent.hostName=liberty_app.example.com')
@@ -175,7 +175,7 @@ module LibertyBuildpack::Framework
                                          'credentials' => { 'agent_manager_url' => 'localhost:5001', 'agent_manager_credential' => 'test1234abcdf' } }] } do
 
         java_opts = released
-        expect(java_opts).to include("-javaagent:./#{ca_apm_home}/wily/AgentNoRedefNoRetrans.jar")
+        expect(java_opts).to include("-javaagent:./#{ca_apm_home}/wily/Agent.jar")
         expect(java_opts).to include('-Dorg.osgi.framework.bootdelegation=com.wily.*')
         expect(java_opts).to include(/-Dcom.wily.introscope.agentProfile=.*\/wily\/core\/config\/IntroscopeAgent.profile/)
         expect(java_opts).to include('-Dintroscope.agent.hostName=liberty_app.example.com')
