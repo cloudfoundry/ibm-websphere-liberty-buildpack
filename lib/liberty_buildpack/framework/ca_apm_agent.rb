@@ -76,11 +76,11 @@ module LibertyBuildpack::Framework
     def release
       app_dir = @common_paths.relative_location
       ca_apm_home_dir = File.join(app_dir, CA_APM_HOME_DIR)
-      ca_apm_agent = File.join(ca_apm_home_dir, 'wily/Agent.jar')
+      ca_apm_agent = File.join(ca_apm_home_dir, 'wily/AgentNoRedefNoRetrans.jar')
 
       @java_opts << "-javaagent:#{ca_apm_agent}"
       @java_opts << '-Dorg.osgi.framework.bootdelegation=com.wily.*'
-      @java_opts << "-Dcom.wily.introscope.agentProfile=#{ca_apm_home_dir}/wily/core/config/IntroscopeAgent.profile"
+      @java_opts << "-Dcom.wily.introscope.agentProfile=#{ca_apm_home_dir}/wily/core/config/IntroscopeAgent.NoRedef.profile"
       credentials = @services.find_service(FILTER)['credentials']
 
       agent_host_name @java_opts

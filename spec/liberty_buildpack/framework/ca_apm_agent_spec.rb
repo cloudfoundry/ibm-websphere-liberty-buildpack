@@ -39,7 +39,7 @@ module LibertyBuildpack::Framework
       # defaults
       else
         index_version = version
-        index_uri = "https://ca.bintray.com/websphere/IntroscopeAgentFiles-NoInstaller#{version}websphere.unix.tar"
+        index_uri = "https://packages.broadcom.com/artifactory/websphere/IntroscopeAgentFiles-NoInstaller#{version}websphere.unix.tar"
       end
 
       # By default, always stub the return of a valid index.yml entry
@@ -123,7 +123,7 @@ module LibertyBuildpack::Framework
 
       describe 'download agent tar based on index.yml' do
         it 'should download the agent tar based on the version key' do
-          expect { compiled }.to output(%r{ Downloading CA APM Agent #{version} from https://ca.bintray.com/websphere/IntroscopeAgentFiles-NoInstaller#{version}websphere.unix.tar }).to_stdout
+          expect { compiled }.to output(%r{ Downloading CA APM Agent #{version} from https://packages.broadcom.com/artifactory/websphere/IntroscopeAgentFiles-NoInstaller#{version}websphere.unix.tar }).to_stdout
         end
       end
     end
@@ -156,9 +156,9 @@ module LibertyBuildpack::Framework
                                         'credentials' => { 'agent_manager_url' => 'localhost:5001' } }] } do
 
         java_opts = released
-        expect(java_opts).to include("-javaagent:./#{ca_apm_home}/wily/Agent.jar")
+        expect(java_opts).to include("-javaagent:./#{ca_apm_home}/wily/AgentNoRedefNoRetrans.jar")
         expect(java_opts).to include('-Dorg.osgi.framework.bootdelegation=com.wily.*')
-        expect(java_opts).to include(/-Dcom.wily.introscope.agentProfile=.*\/wily\/core\/config\/IntroscopeAgent.profile/)
+        expect(java_opts).to include(/-Dcom.wily.introscope.agentProfile=.*\/wily\/core\/config\/IntroscopeAgent.NoRedef.profile/)
         expect(java_opts).to include('-Dintroscope.agent.hostName=liberty_app.example.com')
         expect(java_opts).to include('-Dintroscope.agent.agentName=liberty_app')
         expect(java_opts).to include('-DagentManager.url.1=localhost:5001')
@@ -175,9 +175,9 @@ module LibertyBuildpack::Framework
                                          'credentials' => { 'agent_manager_url' => 'localhost:5001', 'agent_manager_credential' => 'test1234abcdf' } }] } do
 
         java_opts = released
-        expect(java_opts).to include("-javaagent:./#{ca_apm_home}/wily/Agent.jar")
+        expect(java_opts).to include("-javaagent:./#{ca_apm_home}/wily/AgentNoRedefNoRetrans.jar")
         expect(java_opts).to include('-Dorg.osgi.framework.bootdelegation=com.wily.*')
-        expect(java_opts).to include(/-Dcom.wily.introscope.agentProfile=.*\/wily\/core\/config\/IntroscopeAgent.profile/)
+        expect(java_opts).to include(/-Dcom.wily.introscope.agentProfile=.*\/wily\/core\/config\/IntroscopeAgent.NoRedef.profile/)
         expect(java_opts).to include('-Dintroscope.agent.hostName=liberty_app.example.com')
         expect(java_opts).to include('-Dintroscope.agent.agentName=liberty_app')
         expect(java_opts).to include('-DagentManager.url.1=localhost:5001')
