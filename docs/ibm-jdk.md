@@ -36,5 +36,5 @@ The IBM SDK [configuration can be overridden](configuration.md) with the `JBP_CO
    ```
 
 [`config/ibmjdk.yml`]: ../config/ibmjdk.yml
-[index.yml]: http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/meta/jre/linux/x86_64/index.yml
+[index.yml]: https://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/meta/8.0/sfj/linux/x86_64/index.yml
 [repositories]: util-repositories.md
