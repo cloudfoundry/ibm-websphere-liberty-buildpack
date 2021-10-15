@@ -29,12 +29,12 @@ The IBM SDK [configuration can be overridden](configuration.md) with the `JBP_CO
    $ cf set-env myApplication JBP_CONFIG_IBMJDK 'heap_size_ratio: 0.90'
    ```
 
-1. Use IBM SDK version 7:
+1. Use a specific candidate version:
 
    ```bash
-   $ cf set-env myApplication JBP_CONFIG_IBMJDK 'version: 1.7.+'
+   $ cf set-env myApplication JBP_CONFIG_IBMJDK 'version: 8.0.6.31'
    ```
 
 [`config/ibmjdk.yml`]: ../config/ibmjdk.yml
-[index.yml]: http://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/meta/jre/linux/x86_64/index.yml
+[index.yml]: https://public.dhe.ibm.com/ibmdl/export/pub/systems/cloud/runtimes/java/meta/8.0/sfj/linux/x86_64/index.yml
 [repositories]: util-repositories.md
