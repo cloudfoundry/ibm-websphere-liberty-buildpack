@@ -135,7 +135,7 @@ module LibertyBuildpack::Jre
         response_file.puts("USER_INSTALL_DIR=#{java_home}")
         response_file.close
 
-        File.chmod(0755, file.path) unless File.executable?(file.path)
+        #File.chmod(0755, file.path) unless File.executable?(file.path)
         system "#{file.path} -i silent -f #{response_file.path} 2>&1"
       else
         system "tar xzf #{file.path} -C #{java_home} --strip 1 2>&1"
