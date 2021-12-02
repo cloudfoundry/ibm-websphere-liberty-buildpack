@@ -15,4 +15,4 @@
 
 # Download cache configuration
 ---
-remote_downloads: enabled
+remote_downloads: disabled
