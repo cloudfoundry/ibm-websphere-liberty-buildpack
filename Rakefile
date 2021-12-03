@@ -112,6 +112,7 @@ task :package, [:zipfile, :hosts, :version] do |t, args|
     system("find #{root} -type f -exec chmod a+r {} \\;")
     system("find #{root} -type d -exec chmod a+rx {} \\;")
     system("chmod a+rx #{root}/bin/*")
+    system("chmod a+rx #{root}/admin_cache/*bin.cached")
     system("cd #{root} && zip -r #{zipfile} .")
   end
 end
