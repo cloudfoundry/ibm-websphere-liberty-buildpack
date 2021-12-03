@@ -87,7 +87,7 @@ class BuildpackCache
   def repository_root(config)
     uri = config[REPOSITORY_ROOT]
     uri = uri.gsub(/\{default.repository.root\}/, @default_repository_root)
-             .gsub(/\{platform\}/, 'trusty')
+             .gsub(/\{platform\}/, 'bionic')
              .gsub(/\{architecture\}/, 'x86_64')
              .chomp('/')
     uri
