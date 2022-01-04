@@ -439,7 +439,7 @@ module LibertyBuildpack::Container
       return true unless spring_version.nil?
       false
     end
-    
+
     def populate_class_cache_staging?
       populate_class_cache_value = @environment['LIBERTY_SKIP_POPULATE_CLASSCACHE']
       return false unless populate_class_cache_value.nil?
