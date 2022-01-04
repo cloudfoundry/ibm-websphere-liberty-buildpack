@@ -104,7 +104,7 @@ module LibertyBuildpack::Container
       overlay_java
       set_liberty_system_properties
       set_jdk_memory_configuration
-      populate_class_cache
+      populate_class_cache if populate_class_cache_staging?
     end
 
     # Creates the command to run the Liberty application.
@@ -438,6 +438,12 @@ module LibertyBuildpack::Container
       spring_version = @environment['LIBERTY_NATIVE_SPRINGBOOT']
       return true unless spring_version.nil?
       false
+    end
+    
+    def populate_class_cache_staging?
+      populate_class_cache_value = @environment['LIBERTY_SKIP_POPULATE_CLASSCACHE']
+      return false unless populate_class_cache_value.nil?
+      true
     end
 
     def add_springboot(server_xml_doc)
