@@ -60,7 +60,7 @@ All Documentation is available in the Docs folder of the buildpack.
 * [Installation (admin buildpack into CF)](docs/installation.md)
 * [Tuning](docs/tuning.md)
 * [Logging](docs/logging.md)
-* [Debugging the buildpack](https://github.com/cloudfoundry/java-buildpack/blob/master/docs/debugging-the-buildpack.md)
+* [Debugging the buildpack](https://github.com/cloudfoundry/java-buildpack/blob/main/docs/debugging-the-buildpack.md)
 * [Troubleshooting](docs/troubleshooting.md)
 * [Security](docs/security.md)
 * [Restrictions](docs/restrictions.md)
