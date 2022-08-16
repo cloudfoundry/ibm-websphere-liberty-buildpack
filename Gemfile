@@ -35,7 +35,7 @@ group :development, :test do
 end
 
 group :test do
-  gem 'webmock', '~>3.15.0'
+  gem 'webmock', '~>3.15.2'
   gem 'simplecov-rcov'
   gem 'ci_reporter'
   gem 'tee'
