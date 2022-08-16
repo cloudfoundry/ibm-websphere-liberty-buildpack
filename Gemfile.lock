@@ -80,7 +80,7 @@ GEM
       e2mmap
     tilt (2.0.11)
     unicode-display_width (1.8.0)
-    webmock (3.15.0)
+    webmock (3.15.2)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
@@ -106,7 +106,7 @@ DEPENDENCIES
   solargraph
   tee
   thwait
-  webmock (~> 3.15.0)
+  webmock (~> 3.15.2)
   yard
 
 BUNDLED WITH
