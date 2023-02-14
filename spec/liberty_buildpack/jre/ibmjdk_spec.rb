@@ -179,9 +179,9 @@ module LibertyBuildpack::Jre
 
     end # end of shared tests for IBMJDK v7 release
 
-    #context 'IBMJDK Service Release 1.7.1' do
+    # context 'IBMJDK Service Release 1.7.1' do
     #  it_behaves_like 'IBMJDK v7', '1.7.1'
-    #end
+    # end
 
     describe 'TLS options',
              java_home: '',
