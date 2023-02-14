@@ -285,8 +285,6 @@ module LibertyBuildpack
         end
 
         def update(uri, cached_file)
-          uri.port = '443' if uri.host.include?('www14.software.ibm.com')
-          uri.scheme = 'https' if uri.host.include?('www14.software.ibm.com')
           proxy(uri).start(uri.host, uri.port, http_options(uri)) do |http|
             @logger.debug { "HTTP: #{http.address}, #{http.port}, #{http_options(uri)}" }
             debug_ssl(http) if secure?(uri)
