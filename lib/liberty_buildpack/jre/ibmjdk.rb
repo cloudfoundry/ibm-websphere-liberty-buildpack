@@ -72,7 +72,6 @@ module LibertyBuildpack::Jre
     # @return [void]
     def compile
       @version, @uri, @license = IBMJdk.find_ibmjdk(@configuration)
-      @license = @license.sub('http', 'https')
       unless LibertyBuildpack::Util.check_license(@license, @license_id)
         print "\nYou have not accepted the IBM JVM License.\n\nVisit the following uri:\n#{@license}\n\nExtract the license number (D/N:) and place it inside your manifest file as a ENV property e.g. \nENV: \n  IBM_JVM_LICENSE: {License Number}.\n"
         raise
@@ -148,6 +147,7 @@ module LibertyBuildpack::Jre
     def self.find_ibmjdk(configuration)
       version, entry = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
       if entry.is_a?(Hash)
+        entry['license'] = entry['license'].sub('http', 'https') unless entry['license'].include? 'https'
         return version, entry['uri'], entry['license']
       else
         return version, entry, nil
