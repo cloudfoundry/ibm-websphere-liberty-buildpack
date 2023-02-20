@@ -147,7 +147,7 @@ module LibertyBuildpack::Jre
     def self.find_ibmjdk(configuration)
       version, entry = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
       if entry.is_a?(Hash)
-        entry['license'] = entry['license'].sub('http', 'https') unless entry['license'].include? 'https'
+        entry['license'] = entry['license'].sub('http', 'https') unless (entry['license'].include? 'https') && !entry['license'].nil?
         return version, entry['uri'], entry['license']
       else
         return version, entry, nil
