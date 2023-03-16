@@ -27,6 +27,7 @@ module LibertyBuildpack::Util
   # @return [boolean] return true if the license id's match, false otherwise
   def self.check_license(license_uri, license_id)
     return true if license_uri.nil?
+    return false if license_id.nil?
     return true if license_uri.include?license_id
 
     # The below regex ignores white space and grabs anything between the first occurrence of "D/N:" and "<".
@@ -37,7 +38,7 @@ module LibertyBuildpack::Util
       else
         license = scanned_license.first.last
       end
-
+      puts "license:  #{license}"
       return license_id == license
     end
   end
