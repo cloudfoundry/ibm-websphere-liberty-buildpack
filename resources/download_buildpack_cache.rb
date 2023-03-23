@@ -166,7 +166,7 @@ class BuildpackCache
   #
   # @param [String] uri location of the remote resource
   def filename(uri)
-    "#{URI.escape(uri, ':/&')}.cached"
+    "#{URI.encode_www_form_component(uri)}.cached"
   end
 
   # Returns array of config maps containing references to the root index.yml
