@@ -31,7 +31,7 @@ function util::config::lookup() {
 }
 
 function util::cache::present() {
-  if [[ -e "${BUILDPACK_DIR}/resources/cache" ]]; then
+  if [[ -e "${BUILDPACK_DIR}/admin_cache" ]]; then
     return 0
   else
     return 1
@@ -46,9 +46,8 @@ function util::index::lookup() {
   uri="${repository_root}/index.yml"
 
   if util::cache::present; then
-    local sha
-    sha="$(printf "%s" "${uri}" | shasum -a 256 | cut -d' ' -f1)"
-    cat "${BUILDPACK_DIR}/resources/cache/${sha}.cached"
+    cached_file="$(ls ${BUILDPACK_DIR}/admin_cache | grep "ruby-buildpack")"
+ 	cat "${BUILDPACK_DIR}/admin_cache/$cached_file"
   else
     curl -ssL "${uri}"
   fi
@@ -64,14 +63,38 @@ function util::semver::parse() {
   printf "%s" "${major/+/*}\\.${minor/+/*}\\.${patch/+/*}"
 }
 
+function util::dep::isCached () {
+  local uri
+  uri="${1}"
+
+  local isCached
+  isCached=1
+
+  if util::cache::present; then
+    file="$(echo "$uri" | cut -d'_' -f6)"
+
+    cached_file="$(ls ${BUILDPACK_DIR}/admin_cache | grep $file)"
+ 
+    if [ -n "$cached_file" ]; then
+	  isCached=0
+    else
+      isCached=1
+    fi
+  else
+    isCached=1
+  fi
+  echo "isCached=$isCached"
+  return $isCached
+}
+
 function util::ruby::stream() {
   local uri
   uri="${1}"
 
   if util::cache::present; then
-    local sha
-    sha="$(printf "%s" "${uri}" | shasum -a 256 | cut -d' ' -f1)"
-    cat "${BUILDPACK_DIR}/resources/cache/${sha}.cached"
+    file="$(echo "$uri" | cut -d'_' -f6)"
+    cached_file="$(ls ${BUILDPACK_DIR}/admin_cache | grep $file)"
+    echo "${BUILDPACK_DIR}/admin_cache/$cached_file"
   else
     curl -ssL "${uri}"
   fi
@@ -79,14 +102,20 @@ function util::ruby::stream() {
 
 function util::install() {
   echo "Installing ruby...."
+  
   local index semver
   index="$(util::index::lookup)"
   semver="$(util::semver::parse)"
 
   local uri
   uri="$(grep "${semver}" <<< "${index}" | head -n 1 | awk '{print $2}')"
-
-  util::ruby::stream "${uri}" | tar xz -C "${RUBY_DIR}"
+  
+  if util::dep::isCached "${uri}"; then
+    file=`util::ruby::stream "${uri}"`
+    tar xzf $file -C "${RUBY_DIR}"
+  else
+    util::ruby::stream "${uri}" | tar xz -C "${RUBY_DIR}"
+  fi
 }
 
 function util::print::error() {
