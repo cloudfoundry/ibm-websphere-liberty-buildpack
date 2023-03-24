@@ -38,7 +38,7 @@ module LibertyBuildpack::Util
       else
         license = scanned_license.first.last
       end
-     return license_id == license
+      return license_id == license
     end
   end
 
