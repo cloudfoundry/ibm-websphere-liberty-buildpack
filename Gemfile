@@ -24,7 +24,6 @@ group :development do
   gem 'e2mmap'
   gem 'thwait'
   gem 'rubocop-rake'
-  gem 'core'
   gem 'rspec'
   gem 'solargraph'
   gem 'irb'
