@@ -80,11 +80,6 @@ module LibertyBuildpack::Framework
       ].flatten.compact.join(' ')
 		
     end
-    
-      export PATH="${RUBY_DIR}/bin:${PATH:-}"
-  export LIBRARY_PATH="${RUBY_DIR}/lib:${LIBRARY_PATH:-}"
-  export LD_LIBRARY_PATH="${RUBY_DIR}/lib:${LIBRARY_PATH:-}"
-  export CPATH="${RUBY_DIR}/include:${CPATH:-}"
 
     private
 
