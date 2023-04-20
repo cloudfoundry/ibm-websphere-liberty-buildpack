@@ -57,8 +57,7 @@ module LibertyBuildpack::Framework
     # @return [void]
     def compile
       @version, @uri = Ruby.find_ruby(@configuration)
-	  @logger.debug("version #{@version}")
-	  @logger.debug("uri #{@uri}")
+      print "-----> compile #{@version} from #{@uri} "
 
       download_start_time = Time.now
       if @uri.include? '://'
@@ -98,8 +97,7 @@ module LibertyBuildpack::Framework
 
     def self.find_ruby(configuration)
       version, entry = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
-      @logger.debug("version #{version}")
-	  @logger.debug("entry #{entry}")
+      print "-----> finding ruby #{version} from #{entry} "
       if entry.is_a?(Hash)
         return version, entry
       end
