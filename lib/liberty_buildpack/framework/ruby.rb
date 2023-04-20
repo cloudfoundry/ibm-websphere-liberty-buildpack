@@ -98,9 +98,7 @@ module LibertyBuildpack::Framework
     def self.find_ruby(configuration)
       version, entry = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
       print "-----> finding ruby #{version} from #{entry} "
-      if entry.is_a?(Hash)
-        return version, entry
-      end
+      return version, entry
     rescue => e
       raise RuntimeError, "Ruby error: #{e.message}", e.backtrace
     end
