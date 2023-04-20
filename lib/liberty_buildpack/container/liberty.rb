@@ -123,7 +123,8 @@ module LibertyBuildpack::Container
       wlp_user_dir_string = ContainerUtils.space('WLP_USER_DIR="$PWD/wlp/usr"')
       server_script_string = ContainerUtils.space("exec #{File.join(LIBERTY_HOME, 'bin', 'server')}")
 
-      start_command = "#{create_vars_string}#{create_jdk_memory_string}#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
+      start_command = "#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
+      # start_command = "#{create_vars_string}#{create_jdk_memory_string}#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
       move_app
 
       start_command
