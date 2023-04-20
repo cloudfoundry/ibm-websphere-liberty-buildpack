@@ -105,5 +105,5 @@ module LibertyBuildpack::Framework
     def ruby_home
       File.join @app_dir, RUBY_HOME
     end
-
+  end
 end
