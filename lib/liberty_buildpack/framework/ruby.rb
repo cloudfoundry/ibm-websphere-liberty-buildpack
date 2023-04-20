@@ -76,9 +76,9 @@ module LibertyBuildpack::Framework
     # @return [void]
     def release  
       [
-        "PATH=ruby_home:${PATH:}"
+        "PATH=/home/vcap/app/.ruby/bin:${PATH}",
+      	"LIBRARY_PATH=/home/vcap/app/.ruby/lib:${LIBRARY_PATH}"  
       ].flatten.compact.join(' ')
-		
     end
 
     private
