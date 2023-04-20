@@ -99,7 +99,7 @@ module LibertyBuildpack::Framework
         return version, entry
       end
     rescue => e
-      raise RuntimeError, Ruby error: #{e.message}", e.backtrace
+      raise RuntimeError, "Ruby error: #{e.message}", e.backtrace
     end
 
     def ruby_home
