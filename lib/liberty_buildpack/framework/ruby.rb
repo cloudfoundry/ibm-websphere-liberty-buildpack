@@ -18,6 +18,7 @@ require 'fileutils'
 require 'liberty_buildpack/framework'
 require 'liberty_buildpack/repository/configured_item'
 require 'liberty_buildpack/util/cache/application_cache'
+require 'liberty_buildpack/diagnostics/logger_factory'
 require 'pathname'
 require 'tempfile'
 
@@ -37,10 +38,10 @@ module LibertyBuildpack::Framework
     # @option contect [String] :jvm_type the type of jvm the user wants to use e.g ibmjre or openjdk
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context)
-      @logger = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
-      @app_dir = context[:app_dir]
+      @logger        = LibertyBuildpack::Diagnostics::LoggerFactory.get_logger
+      @app_dir       = context[:app_dir]
       @configuration = context[:configuration]
-      @environment = context[:environment]
+      @environment   = context[:environment]
     end
 
     # Detects which version of Java this application should use.  *NOTE:* This method will always return _some_ value,
