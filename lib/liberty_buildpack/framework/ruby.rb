@@ -74,8 +74,7 @@ module LibertyBuildpack::Framework
     # Build Java memory options and places then in +context[:java_opts]+
     #
     # @return [void]
-    def release
- 	  RUBY_DIR=   
+    def release  
       [
         "PATH=ruby_home:${PATH:}"
       ].flatten.compact.join(' ')
