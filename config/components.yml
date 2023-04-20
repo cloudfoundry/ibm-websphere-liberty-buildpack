@@ -36,3 +36,4 @@ frameworks:
   - "LibertyBuildpack::Framework::ContainerCertificateTrustStore"
   - "LibertyBuildpack::Framework::ContrastSecurityAgent"
   - "LibertyBuildpack::Framework::CAAPMAgent"
+  - "LibertyBuildpack::Framework::Ruby"
