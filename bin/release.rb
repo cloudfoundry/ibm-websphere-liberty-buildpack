@@ -14,15 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-if [[ "${CF_STACK:-}" == "cflinuxfs4" ]]; then
-  `dirname $0`/install_ruby.sh
-  RUBY_DIR="/tmp/ruby"
-  export PATH="${RUBY_DIR}/bin:${PATH:-}"
-  export LIBRARY_PATH="${RUBY_DIR}/lib:${LIBRARY_PATH:-}"
-  export LD_LIBRARY_PATH="${RUBY_DIR}/lib:${LIBRARY_PATH:-}"
-  export CPATH="${RUBY_DIR}/include:${CPATH:-}"
-fi
-
 $stdout.sync = true
 $stderr.sync = true
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
