@@ -57,7 +57,6 @@ module LibertyBuildpack::Framework
     # @return [void]
     def compile
       @version, @uri = Ruby.find_ruby(@configuration)
-      print "-----> compile #{@version} from #{@uri} "
 
       download_start_time = Time.now
       if @uri.include? '://'
@@ -76,8 +75,17 @@ module LibertyBuildpack::Framework
     #
     # @return [void]
     def release
-	# need to set path
+ 	  RUBY_DIR=   
+      [
+        "PATH=ruby_home:${PATH:}"
+      ].flatten.compact.join(' ')
+		
     end
+    
+      export PATH="${RUBY_DIR}/bin:${PATH:-}"
+  export LIBRARY_PATH="${RUBY_DIR}/lib:${LIBRARY_PATH:-}"
+  export LD_LIBRARY_PATH="${RUBY_DIR}/lib:${LIBRARY_PATH:-}"
+  export CPATH="${RUBY_DIR}/include:${CPATH:-}"
 
     private
 
@@ -97,7 +105,6 @@ module LibertyBuildpack::Framework
 
     def self.find_ruby(configuration)
       version, entry = LibertyBuildpack::Repository::ConfiguredItem.find_item(configuration)
-      print "-----> finding ruby #{version} from #{entry} "
       return version, entry
     rescue => e
       raise RuntimeError, "Ruby error: #{e.message}", e.backtrace
