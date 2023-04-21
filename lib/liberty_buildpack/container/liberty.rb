@@ -123,12 +123,12 @@ module LibertyBuildpack::Container
       wlp_user_dir_string = ContainerUtils.space('WLP_USER_DIR="$PWD/wlp/usr"')
       server_script_string = ContainerUtils.space("exec #{File.join(LIBERTY_HOME, 'bin', 'server')}")
       
-      path_string = ContainerUtils.space("PATH=~/app/.ruby/bin:$PATH")
-      library_path_string = ContainerUtils.space("LIBRARY_PATH=~/app/.ruby/lib:$LIBRARY_PATH")
-      ld_library_path_string = ContainerUtils.space("LD_LIBRARY_PATH=~/app/.ruby/lib:$LD_LIBRARY_PATH")
+      path_string = ContainerUtils.space('PATH=~/app/.ruby/bin:$PATH') << ' &&'
+      # library_path_string = ContainerUtils.space("LIBRARY_PATH=~/app/.ruby/lib:$LIBRARY_PATH")
+      # ld_library_path_string = ContainerUtils.space("LD_LIBRARY_PATH=~/app/.ruby/lib:$LD_LIBRARY_PATH")
 
       # start_command = "#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
-      start_command = "#{path_string}#{library_path_string}#{ld_library_path_string}#{create_vars_string}#{create_jdk_memory_string}#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
+      start_command = "#{path_string}#{create_vars_string}#{create_jdk_memory_string}#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
       move_app
 
       start_command
