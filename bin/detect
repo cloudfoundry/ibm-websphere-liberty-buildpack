@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [[ "${CF_STACK:-}" == "cflinuxfs4" ]]; then
+if ! [ -x "$(command -v ruby)" ]; then
   `dirname $0`/install_ruby.sh
   RUBY_DIR="/tmp/ruby"
   export PATH="${RUBY_DIR}/bin:${PATH:-}"
