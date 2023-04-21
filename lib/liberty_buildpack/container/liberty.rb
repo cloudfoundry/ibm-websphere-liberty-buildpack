@@ -128,7 +128,7 @@ module LibertyBuildpack::Container
       ld_library_path_string = ContainerUtils.space("LD_LIBRARY_PATH=~/app/.ruby/lib:$LD_LIBRARY_PATH") << ' &&'
 
       # start_command = "#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
-      start_command = "#{path_string}#{library_path_string}#{ld_library_path_stringpath_string}#{create_vars_string}#{create_jdk_memory_string}#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
+      start_command = "#{path_string}#{library_path_string}#{ld_library_path_string}#{create_vars_string}#{create_jdk_memory_string}#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
       move_app
 
       start_command
