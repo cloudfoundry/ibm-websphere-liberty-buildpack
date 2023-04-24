@@ -122,7 +122,7 @@ module LibertyBuildpack::Container
       java_home_string = ContainerUtils.space("JAVA_HOME=\"$PWD/#{@java_home}\"")
       wlp_user_dir_string = ContainerUtils.space('WLP_USER_DIR="$PWD/wlp/usr"')
       server_script_string = ContainerUtils.space("exec #{File.join(LIBERTY_HOME, 'bin', 'server')}")
-      path_string = ContainerUtils.space('PATH=\"$PWD/.ruby/bin:$PATH\"') << ' &&'
+      path_string = ContainerUtils.space('PATH=$PWD/.ruby/bin:$PATH') << ' &&'
 
       if File.exist?('/tmp/ruby')
         start_command = "#{path_string}#{create_vars_string}#{create_jdk_memory_string}#{skip_maxpermsize_string}#{java_home_string}#{wlp_user_dir_string}#{server_script_string} run #{server_name}"
