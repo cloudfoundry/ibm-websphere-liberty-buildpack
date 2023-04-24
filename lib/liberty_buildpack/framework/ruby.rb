@@ -49,7 +49,7 @@ module LibertyBuildpack::Framework
     #
     # @return [String, nil] returns +ibmjdk-<version>+.
     def detect
-	  File.exist?("/tmp/ruby")
+      File.exist?('/tmp/ruby')
     end
 
     # Downloads and unpacks a JRE
@@ -74,8 +74,7 @@ module LibertyBuildpack::Framework
     # Build Java memory options and places then in +context[:java_opts]+
     #
     # @return [void]
-    def release  
-
+    def release
     end
 
     private
