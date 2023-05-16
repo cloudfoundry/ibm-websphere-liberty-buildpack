@@ -101,7 +101,6 @@ function util::ruby::stream() {
 }
 
 function util::install() {
-  echo "Installing ruby...."
   
   local index semver
   index="$(util::index::lookup)"
