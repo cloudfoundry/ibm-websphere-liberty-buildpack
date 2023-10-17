@@ -102,6 +102,6 @@ bundle install --gemfile Gemfile.rubymine-debug
 [tuning options]: docs/tuning.md
 [java main push]: docs/java-main.md
 
-[Liberty-License]: https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.9/lafiles/runtime/en.html
+[Liberty-License]: https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.10/lafiles/runtime/en.html
 [JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-SMKR-AVSEUH&title=IBM%AE+SDK%2C+Java%99+Technology+Edition%2C+Version+8.0&l=en
 [manifest documentation]: http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html
