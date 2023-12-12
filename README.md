@@ -1,8 +1,8 @@
-# IBM WebSphere Application Server Liberty Buildpack [![Build Status](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack.svg?branch=main)](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack) 
+# IBM WebSphere Application Server Liberty Buildpack [![Build Status](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack.svg?branch=main)](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack)
 
 The `liberty-buildpack` is a [Cloud Foundry][] Buildpack for running applications on IBM's WebSphere Application Server [Liberty Profile][].
 
-## Usage 
+## Usage
 To deploy applications using the IBM WebSphere Application Server Liberty Buildpack, you are required to accept the IBM Liberty license and IBM JRE license by following the instructions below:
 
 1. Read the current IBM [Liberty-License][] and the current IBM [JVM-License][].
@@ -102,6 +102,6 @@ bundle install --gemfile Gemfile.rubymine-debug
 [tuning options]: docs/tuning.md
 [java main push]: docs/java-main.md
 
-[Liberty-License]: https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.11/lafiles/runtime/en.html
+[Liberty-License]: https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.12/lafiles/runtime/en.html
 [JVM-License]: http://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-SMKR-AVSEUH&title=IBM%AE+SDK%2C+Java%99+Technology+Edition%2C+Version+8.0&l=en
 [manifest documentation]: http://docs.cloudfoundry.org/devguide/deploy-apps/manifest.html
