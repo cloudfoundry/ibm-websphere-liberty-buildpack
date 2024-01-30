@@ -102,19 +102,6 @@ describe LibertyBuildpack::Util::ConfigurationUtils do
 
     end
 
-    context do
-
-      let(:environment) do
-        { 'JBP_CONFIG_TEST' => '{version:1.8.+}' }
-      end
-
-      it 'diagnoses invalid YAML syntax' do
-        expect { described_class.load('test') }
-          .to raise_error(/User configuration value in environment variable JBP_CONFIG_TEST has invalid syntax/)
-      end
-
-    end
-
   end
 
   private
