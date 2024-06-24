@@ -1,3 +1,5 @@
+# IBM ends support for this buildpack on August 13, 2024.  No further updates from IBM will occur after this date.  
+
 # IBM WebSphere Application Server Liberty Buildpack [![Build Status](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack.svg?branch=main)](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack)
 
 The `liberty-buildpack` is a [Cloud Foundry][] Buildpack for running applications on IBM's WebSphere Application Server [Liberty Profile][].
