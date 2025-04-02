@@ -1,4 +1,4 @@
-# IBM ends support for this buildpack on August 13, 2024.  No further updates from IBM will occur after this date.  
+# IBM ends support for this buildpack on August 13, 2024.  No further updates from IBM will occur after this date.  The strategic alternative is the [Paketo Buildpack for Liberty](https://github.com/paketo-buildpacks/liberty).
 
 # IBM WebSphere Application Server Liberty Buildpack [![Build Status](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack.svg?branch=main)](https://travis-ci.org/cloudfoundry/ibm-websphere-liberty-buildpack)
 
